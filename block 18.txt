@@ -1,0 +1,380 @@
+
+
+//---------------------------------------------------------------------------------------------------------------Block 18 - Market Making Operations
+
+extension ExchangeWebSocket {
+    static func monitorHFTScalpingOpportunities() {
+        let localKucoinOrderBooks = kucoinOrderBooks
+        let localBybitOrderBooks = bybitOrderBooks
+        let localTradingPairs = tradingPairs
+
+        print("DEBUG: Compiling monitorHFTScalpingOpportunities at \(ISO8601DateFormatter().string(from: Date()))")
+
+        // Helper function to fetch market data
+        func fetchMarketData(pair: String) async -> (
+            kucoinSpotPrice: Double, bybitSpotPrice: Double,
+            kucoinSpotPrices: [Double], bybitSpotPrices: [Double],
+            kucoinVolumes: [Double], bybitVolumes: [Double],
+            kucoinEvents: [(timestamp: Date, level: Int, volume: Double)],
+            bybitEvents: [(timestamp: Date, level: Int, volume: Double)],
+            sentiment: Double, activeTrades: Int
+        ) {
+            let kucoinCurrentPriceValue = await MainActor.run { kucoinCurrentPrice }
+            let bybitCurrentPriceValue = await MainActor.run { bybitCurrentPrice }
+            let kucoinPricesValue = await MainActor.run { kucoinPrices }
+            let bybitPricesValue = await MainActor.run { bybitPrices }
+            let kucoinSpotVolumeValue = await MainActor.run { kucoinSpotVolume }
+            let bybitSpotVolumeValue = await MainActor.run { bybitSpotVolume }
+            let kucoinOrderBookEventsValue = await MainActor.run { kucoinOrderBookEvents }
+            let orderCancellationEventsValue = await MainActor.run { orderCancellationEvents }
+            let sentimentScoresValue = await MainActor.run { sentimentScores }
+            let activeSpotTradesValue = await MainActor.run { activeSpotTrades }
+
+            print("DEBUG: fetchMarketData for \(pair): kucoinCurrentPrice[\(pair)]=\(kucoinCurrentPriceValue[pair] ?? 0.0), bybitCurrentPrice[\(pair)]=\(bybitCurrentPriceValue[pair] ?? 0.0), kucoinIsConnected=\(kucoinIsConnected), bybitIsConnected=\(bybitIsConnected)")
+
+            return (
+                kucoinSpotPrice: kucoinCurrentPriceValue[pair] ?? 0.0,
+                bybitSpotPrice: bybitCurrentPriceValue[pair] ?? 0.0,
+                kucoinSpotPrices: kucoinPricesValue[pair] ?? [],
+                bybitSpotPrices: bybitPricesValue[pair] ?? [],
+                kucoinVolumes: kucoinSpotVolumeValue[pair] ?? [],
+                bybitVolumes: bybitSpotVolumeValue[pair] ?? [],
+                kucoinEvents: kucoinOrderBookEventsValue[pair] ?? [],
+                bybitEvents: orderCancellationEventsValue[pair] ?? [],
+                sentiment: sentimentScoresValue[pair] ?? 0.0,
+                activeTrades: activeSpotTradesValue[pair] ?? 0
+            )
+        }
+
+        // Helper function to check trade conditions
+        func checkTradeConditions(
+            pair: String,
+            kucoinSpotPrice: Double,
+            bybitSpotPrice: Double,
+            kucoinSpotPrices: [Double],
+            bybitSpotPrices: [Double],
+            kucoinVolumes: [Double],
+            bybitVolumes: [Double],
+            kucoinEvents: [(timestamp: Date, level: Int, volume: Double)],
+            bybitEvents: [(timestamp: Date, level: Int, volume: Double)],
+            activeTrades: Int
+        ) async -> Bool {
+            let volatilityPauseActiveValue = await MainActor.run { volatilityPauseActive }
+            let isTradingPausedValue = await MainActor.run { isTradingPaused }
+            guard !volatilityPauseActiveValue else {
+                print("DEBUG: HFT Scalping paused due to volatility for \(pair)")
+                return false
+            }
+            guard !(isTradingPausedValue[pair] ?? false) else {
+                print("DEBUG: HFT Scalping paused for \(pair) due to manual pause")
+                return false
+            }
+            guard !(await MainActor.run { kucoinInSpotTrade[pair] ?? false }) else {
+                print("DEBUG: HFT Scalping skipped for \(pair) due to active KuCoin trade")
+                return false
+            }
+            guard kucoinSpotPrice > 0, bybitSpotPrice > 0 else {
+                print("DEBUG: Invalid prices for HFT Scalping - KuCoin: \(kucoinSpotPrice), Bybit: \(bybitSpotPrice)")
+                await MainActor.run {
+                    logAlert(event: "Invalid prices for HFT Scalping - KuCoin: \(kucoinSpotPrice), Bybit: \(bybitSpotPrice)")
+                }
+                return false
+            }
+
+            let spotTradeAmountValue = await MainActor.run { spotTradeAmount }
+            let minLiquidityThresholdValue = await MainActor.run { minLiquidityThreshold }
+            let _ = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "spot", tradeAmount: spotTradeAmountValue, price: kucoinSpotPrice) ?? 0.0
+            let _ = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "futures", tradeAmount: spotTradeAmountValue, price: kucoinSpotPrice) ?? 0.0
+            let _ = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "spot", tradeAmount: spotTradeAmountValue, price: bybitSpotPrice) ?? 0.0
+            let _ = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "futures", tradeAmount: spotTradeAmountValue, price: bybitSpotPrice) ?? 0.0
+            print("DEBUG: Min liquidity threshold for \(pair): \(minLiquidityThresholdValue)")
+
+            let calculateImbalances: (String) async -> (Double, Double) = { pair in
+                let kucoinBookRaw = await MainActor.run { localKucoinOrderBooks[pair] } ?? BevaixOrderBook(bids: [], asks: [])
+                let bybitBookRaw = await MainActor.run { localBybitOrderBooks[pair] } ?? BevaixOrderBook(bids: [], asks: [])
+                let kucoinBook = kucoinBookRaw
+                let bybitBook = bybitBookRaw
+                
+                let kucoinTotalBidVolume: Double = kucoinBook.bids.reduce(0.0) { $0 + $1.quantity }
+                let kucoinTotalAskVolume: Double = kucoinBook.asks.reduce(0.0) { $0 + $1.quantity }
+                let kucoinImbalance: Double = kucoinTotalBidVolume > 0 ? kucoinTotalAskVolume / kucoinTotalBidVolume : 1.0
+                
+                let bybitTotalBidVolume: Double = bybitBook.bids.reduce(0.0) { $0 + $1.quantity }
+                let bybitTotalAskVolume: Double = bybitBook.asks.reduce(0.0) { $0 + $1.quantity }
+                let bybitImbalance: Double = bybitTotalBidVolume > 0 ? bybitTotalAskVolume / bybitTotalBidVolume : 1.0
+                
+                return (kucoinImbalance, bybitImbalance)
+            }
+            let (kucoinImbalance, bybitImbalance) = await calculateImbalances(pair)
+            let orderBookImbalanceThresholdValue = getDouble("ORDER_BOOK_IMBALANCE_THRESHOLD", defaultValue: 2.0)
+            guard kucoinImbalance < orderBookImbalanceThresholdValue, bybitImbalance < orderBookImbalanceThresholdValue else {
+                print("DEBUG: Order book imbalance too high for \(pair): KuCoin=\(kucoinImbalance), Bybit=\(bybitImbalance), Threshold=\(orderBookImbalanceThresholdValue)")
+                await MainActor.run {
+                    logAlert(event: "Order book imbalance too high for \(pair): KuCoin=\(kucoinImbalance), Bybit=\(bybitImbalance)")
+                }
+                return false
+            }
+
+            let maxActiveSpotTradesValue = await MainActor.run { maxActiveSpotTrades }
+            guard activeTrades < maxActiveSpotTradesValue else {
+                print("DEBUG: Max active spot trades reached for \(pair): \(activeTrades)")
+                return false
+            }
+
+            let spoofingThreshold = await MainActor.run { spoofingVolumeThreshold * 2.0 }
+            let spoofingDetected = kucoinEvents.filter { Date().timeIntervalSince($0.timestamp) < 60 }.count > 2 && kucoinEvents.contains(where: { $0.volume > spoofingThreshold }) ||
+                                   bybitEvents.filter { Date().timeIntervalSince($0.timestamp) < 60 }.count > 2 && bybitEvents.contains(where: { $0.volume > spoofingThreshold })
+            guard !spoofingDetected else {
+                print("DEBUG: Order book spoofing detected for \(pair), Threshold=\(spoofingThreshold)")
+                await MainActor.run {
+                    logAlert(event: "Order book spoofing detected for \(pair)")
+                }
+                return false
+            }
+
+            let volumeSpikeThreshold = getDouble("VOLUME_SPIKE_THRESHOLD", defaultValue: 1.5)
+            let volumeSpike = (kucoinVolumes.last ?? 0.0) / (kucoinVolumes.isEmpty ? 1.0 : kucoinVolumes.reduce(0.0, +) / Double(kucoinVolumes.count)) > volumeSpikeThreshold ||
+                              (bybitVolumes.last ?? 0.0) / (bybitVolumes.isEmpty ? 1.0 : bybitVolumes.reduce(0.0, +) / Double(kucoinVolumes.count)) > volumeSpikeThreshold
+            guard !volumeSpike else {
+                print("DEBUG: Volume spike detected for \(pair)")
+                await MainActor.run {
+                    logAlert(event: "Volume spike detected for \(pair)")
+                }
+                return false
+            }
+
+            return true
+        }
+
+        // Helper function to calculate indicators
+        func calculateIndicators(
+            kucoinSpotPrices: [Double],
+            bybitSpotPrices: [Double]
+        ) async -> (
+            kucoinSpotEmaShort: Double, kucoinSpotEmaLong: Double,
+            bybitSpotEmaShort: Double, bybitSpotEmaLong: Double,
+            kucoinSpotRsi: Double, bybitSpotRsi: Double,
+            kucoinMacd: (macd: Double, signal: Double, histogram: Double),
+            bybitMacd: (macd: Double, signal: Double, histogram: Double)
+        ) {
+            let spotEmaShortPeriodValue = await MainActor.run { spotEmaShortPeriod }
+            let spotEmaLongPeriodValue = await MainActor.run { spotEmaLongPeriod }
+            let spotRsiPeriodValue = await MainActor.run { spotRsiPeriod }
+            let macdShortPeriodValue = await MainActor.run { macdShortPeriod }
+            let macdLongPeriodValue = await MainActor.run { macdLongPeriod }
+            let macdSignalPeriodValue = await MainActor.run { macdSignalPeriod }
+
+            return (
+                kucoinSpotEmaShort: calculateEMA(prices: kucoinSpotPrices, period: spotEmaShortPeriodValue) ?? 0.0,
+                kucoinSpotEmaLong: calculateEMA(prices: kucoinSpotPrices, period: spotEmaLongPeriodValue) ?? 0.0,
+                bybitSpotEmaShort: calculateEMA(prices: bybitSpotPrices, period: spotEmaShortPeriodValue) ?? 0.0,
+                bybitSpotEmaLong: calculateEMA(prices: bybitSpotPrices, period: spotEmaLongPeriodValue) ?? 0.0,
+                kucoinSpotRsi: calculateRSI(prices: kucoinSpotPrices, period: spotRsiPeriodValue) ?? 50.0,
+                bybitSpotRsi: calculateRSI(prices: bybitSpotPrices, period: spotRsiPeriodValue) ?? 50.0,
+                kucoinMacd: calculateMACD(prices: kucoinSpotPrices, shortPeriod: macdShortPeriodValue, longPeriod: macdLongPeriodValue, signalPeriod: macdSignalPeriodValue) ?? (macd: 0.0, signal: 0.0, histogram: 0.0),
+                bybitMacd: calculateMACD(prices: bybitSpotPrices, shortPeriod: macdShortPeriodValue, longPeriod: macdLongPeriodValue, signalPeriod: macdSignalPeriodValue) ?? (macd: 0.0, signal: 0.0, histogram: 0.0)
+            )
+        }
+
+        // Helper function to execute trade
+        func executeTrade(
+            exchange: String,
+            pair: String,
+            spotPrice: Double,
+            tradeAmount: Double,
+            buySignal: Bool,
+            sellSignal: Bool,
+            sentiment: Double,
+            isBalanceSufficient: Bool,
+            isWithinLossLimit: Bool,
+            maxActiveSpotTradesValue: Int
+        ) async {
+            let scalpEntryThresholdValue = await MainActor.run { scalpEntryThreshold }
+            let scalpProfitTargetValue = await MainActor.run { scalpProfitTarget }
+            let scalpStopLossValue = await MainActor.run { scalpStopLoss }
+
+            if buySignal && isBalanceSufficient && sentiment > 0.0 && isWithinLossLimit {
+                let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: spotPrice) ?? 0.0
+                await MainActor.run {
+                    print("DEBUG: Predicted spread for \(exchange.capitalized) \(pair): \(predictedSpread)")
+                    logHistoricalTradeToCSV(pair: pair, strategy: "HFT-Scalping", profit: 0.0, fees: 0.0)
+                }
+                let success = await executeScalpingTrade(
+                    pair: pair,
+                    exchange: exchange,
+                    entryPrice: spotPrice * (1 + scalpEntryThresholdValue),
+                    targetPrice: spotPrice * (1 + scalpProfitTargetValue),
+                    stopPrice: spotPrice * (1 - scalpStopLossValue),
+                    tradeAmount: tradeAmount,
+                    maxActiveTrades: maxActiveSpotTradesValue
+                )
+                if success {
+                    await MainActor.run {
+                        activeSpotTrades[pair] = (activeSpotTrades[pair] ?? 0) + 1
+                        if exchange == "kucoin" {
+                            kucoinInSpotTrade[pair] = true
+                            kucoinSpotEntryPrice[pair] = spotPrice
+                        } else {
+                            bybitInSpotTrade[pair] = true
+                            bybitSpotEntryPrice[pair] = spotPrice
+                        }
+                    }
+                    print("DEBUG: Executed HFT scalping buy on \(exchange.capitalized) for \(pair) at \(spotPrice)")
+                    await MainActor.run {
+                        logAlert(event: "Executed HFT scalping buy on \(exchange.capitalized) for \(pair) at \(spotPrice)")
+                    }
+                }
+            } else if sellSignal && isBalanceSufficient && sentiment < 0.0 {
+                let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: spotPrice) ?? 0.0
+                await MainActor.run {
+                    print("DEBUG: Predicted spread for \(exchange.capitalized) \(pair): \(predictedSpread)")
+                    logHistoricalTradeToCSV(pair: pair, strategy: "HFT-Scalping", profit: 0.0, fees: 0.0)
+                }
+                let success = await executeScalpingTrade(
+                    pair: pair,
+                    exchange: exchange,
+                    entryPrice: spotPrice * (1 - scalpEntryThresholdValue),
+                    targetPrice: spotPrice * (1 - scalpProfitTargetValue),
+                    stopPrice: spotPrice * (1 + scalpStopLossValue),
+                    tradeAmount: tradeAmount,
+                    maxActiveTrades: maxActiveSpotTradesValue
+                )
+                if success {
+                    await MainActor.run {
+                        activeSpotTrades[pair] = (activeSpotTrades[pair] ?? 0) + 1
+                        if exchange == "kucoin" {
+                            kucoinInSpotTrade[pair] = true
+                            kucoinSpotEntryPrice[pair] = spotPrice
+                        } else {
+                            bybitInSpotTrade[pair] = true
+                            bybitSpotEntryPrice[pair] = spotPrice
+                        }
+                    }
+                    print("DEBUG: Executed HFT scalping sell on \(exchange.capitalized) for \(pair) at \(spotPrice)")
+                    await MainActor.run {
+                        logAlert(event: "Executed HFT scalping sell on \(exchange.capitalized) for \(pair) at \(spotPrice)")
+                    }
+                }
+            }
+        }
+
+        Task {
+            while true {
+                await withTaskGroup(of: Void.self) { group in
+                    let tradingPairsValue = await MainActor.run { localTradingPairs }
+                    for pair in tradingPairsValue {
+                        group.addTask {
+                            let marketData = await fetchMarketData(pair: pair)
+                            guard await checkTradeConditions(
+                                pair: pair,
+                                kucoinSpotPrice: marketData.kucoinSpotPrice,
+                                bybitSpotPrice: marketData.bybitSpotPrice,
+                                kucoinSpotPrices: marketData.kucoinSpotPrices,
+                                bybitSpotPrices: marketData.bybitSpotPrices,
+                                kucoinVolumes: marketData.kucoinVolumes,
+                                bybitVolumes: marketData.bybitVolumes,
+                                kucoinEvents: marketData.kucoinEvents,
+                                bybitEvents: marketData.bybitEvents,
+                                activeTrades: marketData.activeTrades
+                            ) else {
+                                return
+                            }
+
+                            let indicators = await calculateIndicators(
+                                kucoinSpotPrices: marketData.kucoinSpotPrices,
+                                bybitSpotPrices: marketData.bybitSpotPrices
+                            )
+
+                            if marketData.kucoinSpotPrice > 0 && marketData.bybitSpotPrice > 0 {
+                                let spread = abs(marketData.kucoinSpotPrice - marketData.bybitSpotPrice) / min(marketData.kucoinSpotPrice, marketData.bybitSpotPrice)
+                                let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: "kucoin", spotPrice: marketData.kucoinSpotPrice, futuresPrice: marketData.bybitSpotPrice) ?? 0.0
+                                await MainActor.run {
+                                    saveHistoricalSpreadsToCSV(pair: pair, spread: spread, predictedSpreadChange: predictedSpread)
+                                }
+                            } else {
+                                print("DEBUG: Skipping spread logging for \(pair) due to invalid prices: KuCoin=\(marketData.kucoinSpotPrice), Bybit=\(marketData.bybitSpotPrice)")
+                                await MainActor.run {
+                                    logAlert(event: "Skipping spread logging for \(pair) due to invalid prices: KuCoin=\(marketData.kucoinSpotPrice), Bybit=\(marketData.bybitSpotPrice)")
+                                }
+                            }
+
+                            let spotRsiLowerThresholdValue = await MainActor.run { spotRsiLowerThreshold }
+                            let spotRsiUpperThresholdValue = await MainActor.run { spotRsiUpperThreshold }
+                            let macdConfirmationThresholdValue = await MainActor.run { macdConfirmationThreshold }
+
+                            let kucoinBuySignal = indicators.kucoinSpotEmaShort > indicators.kucoinSpotEmaLong &&
+                                                  indicators.kucoinSpotRsi < spotRsiLowerThresholdValue &&
+                                                  indicators.kucoinMacd.histogram > macdConfirmationThresholdValue
+                            let kucoinSellSignal = indicators.kucoinSpotEmaShort < indicators.kucoinSpotEmaLong &&
+                                                   indicators.kucoinSpotRsi > spotRsiUpperThresholdValue &&
+                                                   indicators.kucoinMacd.histogram < -macdConfirmationThresholdValue
+                            let bybitBuySignal = indicators.bybitSpotEmaShort > indicators.bybitSpotEmaLong &&
+                                                 indicators.bybitSpotRsi < spotRsiLowerThresholdValue &&
+                                                 indicators.bybitMacd.histogram > macdConfirmationThresholdValue
+                            let bybitSellSignal = indicators.bybitSpotEmaShort < indicators.bybitSpotEmaLong &&
+                                                  indicators.bybitSpotRsi > spotRsiUpperThresholdValue &&
+                                                  indicators.bybitMacd.histogram < -macdConfirmationThresholdValue
+
+                            let kucoinBalanceLocal = await MainActor.run { kucoinBalance }
+                            let bybitBalanceLocal = await MainActor.run { bybitBalance }
+
+                            let kucoinVolatility: Double
+                            if marketData.kucoinSpotPrices.count >= 2 {
+                                let returns = zip(marketData.kucoinSpotPrices.dropFirst(), marketData.kucoinSpotPrices).map { log($0 / $1) }
+                                let mean = returns.reduce(0.0, +) / Double(returns.count)
+                                let variance = returns.reduce(0.0) { $0 + pow($1 - mean, 2) } / Double(returns.count)
+                                kucoinVolatility = sqrt(variance)
+                            } else {
+                                kucoinVolatility = 0.01
+                            }
+                            let kucoinTradeAmount = await dynamicTradeAmount(balance: kucoinBalanceLocal, riskPercent: tradeAmountPercentage, volatility: kucoinVolatility)
+
+                            let bybitVolatility: Double
+                            if marketData.bybitSpotPrices.count >= 2 {
+                                let returns = zip(marketData.bybitSpotPrices.dropFirst(), marketData.bybitSpotPrices).map { log($0 / $1) }
+                                let mean = returns.reduce(0.0, +) / Double(returns.count)
+                                let variance = returns.reduce(0.0) { $0 + pow($1 - mean, 2) } / Double(returns.count)
+                                bybitVolatility = sqrt(variance)
+                            } else {
+                                bybitVolatility = 0.01
+                            }
+                            let bybitTradeAmount = await dynamicTradeAmount(balance: bybitBalanceLocal, riskPercent: tradeAmountPercentage, volatility: bybitVolatility)
+
+                            let isBalanceSufficientKucoin = kucoinBalanceLocal >= kucoinTradeAmount * marketData.kucoinSpotPrice
+                            let isWithinLossLimitKucoin = await checkDailyLossLimit(exchange: "kucoin", pair: pair, potentialLoss: kucoinTradeAmount * marketData.kucoinSpotPrice * spotStopLossPercentage)
+                            await executeTrade(
+                                exchange: "kucoin",
+                                pair: pair,
+                                spotPrice: marketData.kucoinSpotPrice,
+                                tradeAmount: kucoinTradeAmount,
+                                buySignal: kucoinBuySignal,
+                                sellSignal: kucoinSellSignal,
+                                sentiment: marketData.sentiment,
+                                isBalanceSufficient: isBalanceSufficientKucoin,
+                                isWithinLossLimit: isWithinLossLimitKucoin,
+                                maxActiveSpotTradesValue: await MainActor.run { maxActiveSpotTrades }
+                            )
+
+                            let isBalanceSufficientBybit = bybitBalanceLocal >= bybitTradeAmount * marketData.bybitSpotPrice
+                            let isWithinLossLimitBybit = await checkDailyLossLimit(exchange: "bybit", pair: pair, potentialLoss: bybitTradeAmount * marketData.bybitSpotPrice * spotStopLossPercentage)
+                            await executeTrade(
+                                exchange: "bybit",
+                                pair: pair,
+                                spotPrice: marketData.bybitSpotPrice,
+                                tradeAmount: bybitTradeAmount,
+                                buySignal: bybitBuySignal,
+                                sellSignal: bybitSellSignal,
+                                sentiment: marketData.sentiment,
+                                isBalanceSufficient: isBalanceSufficientBybit,
+                                isWithinLossLimit: isWithinLossLimitBybit,
+                                maxActiveSpotTradesValue: await MainActor.run { maxActiveSpotTrades }
+                            )
+                        }
+                    }
+                }
+                try? await Task.sleep(nanoseconds: UInt64(getDouble("HFT_CHECK_INTERVAL_SECONDS", defaultValue: 0.5) * 1_000_000_000))
+            }
+        }
+    }
+}
+

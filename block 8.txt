@@ -1,0 +1,647 @@
+
+//---------------------------------------------------------------------------------------------------------------------Block 8 - WebSocket Delegate Operations
+
+
+import Foundation
+import CryptoKit // Added for HMAC-SHA256
+
+extension ExchangeWebSocket {
+    static func fetchBybitFundingRate(pair: String, retryCount: Int = 0, completion: @escaping @Sendable (Double?) -> Void) {
+        let maxRetries = getInt("API_MAX_RETRIES", defaultValue: 3)
+        let localRetryCountCopy = retryCount // Local copy to avoid mutation
+        guard localRetryCountCopy < maxRetries else {
+            print("Max retries reached for Bybit funding rate fetch: \(pair)")
+            Task { @MainActor in
+                logAlert(event: "Max retries reached for Bybit funding rate fetch: \(pair)")
+            }
+            Task { @MainActor in
+                completion(bybitFundingRates[pair])
+            }
+            return
+        }
+
+        let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+        let url = URL(string: "https://api.bybit.com/v5/market/tickers?category=linear&symbol=\(symbol)")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 15.0)
+
+        let startTime = Date()
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let latency = Date().timeIntervalSince(startTime) * 1000
+            Task { @MainActor in
+                lastLatency[pair] = latency
+                if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 200.0) {
+                    print("High latency detected for Bybit funding rate fetch: \(pair) - \(latency)ms")
+                    logAlert(event: "High latency detected for Bybit funding rate fetch: \(pair) - \(latency)ms")
+                }
+            }
+
+            if let error = error {
+                print("Failed to fetch Bybit funding rate for \(pair): \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to fetch Bybit funding rate for \(pair): \(error.localizedDescription)")
+                }
+                let attemptFetch: @Sendable (_: Int) -> Void = { _ in
+                    let newRetryCount = localRetryCountCopy + 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        fetchBybitFundingRate(pair: pair, retryCount: newRetryCount, completion: completion)
+                    }
+                }
+                attemptFetch(localRetryCountCopy)
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                print("Invalid Bybit funding rate response for \(pair)")
+                Task { @MainActor in
+                    logAlert(event: "Invalid Bybit funding rate response for \(pair)")
+                }
+                let attemptFetch: @Sendable (_: Int) -> Void = { _ in
+                    let newRetryCount = localRetryCountCopy + 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        fetchBybitFundingRate(pair: pair, retryCount: newRetryCount, completion: completion)
+                    }
+                }
+                attemptFetch(localRetryCountCopy)
+                return
+            }
+
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let result = json["result"] as? [String: Any],
+                      let list = result["list"] as? [[String: Any]],
+                      let fundingRateStr = list.first?["fundingRate"] as? String,
+                      let fundingRate = Double(fundingRateStr) else {
+                    print("Failed to parse Bybit funding rate for \(pair)")
+                    Task { @MainActor in
+                        logAlert(event: "Failed to parse Bybit funding rate for \(pair)")
+                    }
+                    let attemptFetch: @Sendable (_: Int) -> Void = { _ in
+                        let newRetryCount = localRetryCountCopy + 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            fetchBybitFundingRate(pair: pair, retryCount: newRetryCount, completion: completion)
+                        }
+                    }
+                    attemptFetch(localRetryCountCopy)
+                    return
+                }
+
+                Task { @MainActor in
+                    bybitFundingRates[pair] = fundingRate
+                    bybitFundingRateHistory[pair, default: []].append(fundingRate)
+                    if bybitFundingRateHistory[pair]!.count > priceHistoryRetention {
+                        bybitFundingRateHistory[pair]!.removeFirst()
+                    }
+                    print("DEBUG: Fetched Bybit funding rate for \(pair): \(fundingRate)")
+                    completion(fundingRate)
+                }
+            } catch {
+                print("DEBUG: JSON parsing error for Bybit funding rate \(pair): \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "JSON parsing error for Bybit funding rate \(pair): \(error.localizedDescription)")
+                }
+                let attemptFetch: @Sendable (_: Int) -> Void = { _ in
+                    let newRetryCount = localRetryCountCopy + 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        fetchBybitFundingRate(pair: pair, retryCount: newRetryCount, completion: completion)
+                    }
+                }
+                attemptFetch(localRetryCountCopy)
+            }
+        }.resume()
+    }
+
+    static func fetchKucoinOrderBookDepth(pair: String, marketType: String, retryCount: Int = 0, completion: @escaping @Sendable (Double?) -> Void) {
+        let maxRetries = getInt("API_MAX_RETRIES", defaultValue: 3)
+        let localRetryCountCopy = retryCount // Local copy to avoid mutation
+        guard localRetryCountCopy < maxRetries else {
+            print("Max retries reached for KuCoin order book fetch: \(pair)-\(marketType)")
+            Task { @MainActor in
+                logAlert(event: "Max retries reached for KuCoin order book fetch: \(pair)-\(marketType)")
+                let book = kucoinOrderBooks[pair]
+                let cachedDepth = book.map { book in
+                    let bidDepth = book.bids.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity }
+                    let askDepth = book.asks.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity }
+                    return bidDepth + askDepth
+                } ?? getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 20000.0)
+                print("DEBUG: Using cached depth for KuCoin \(pair)-\(marketType): \(cachedDepth)")
+                if cachedDepth < getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 20000.0) {
+                    logAlert(event: "Insufficient cached depth for KuCoin \(pair)-\(marketType): Depth \(cachedDepth), Required \(getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 20000.0))")
+                }
+                completion(cachedDepth)
+            }
+            return
+        }
+
+        // Rate limit check
+        let refreshRate = getDouble("MIN_ORDERBOOK_REFRESH_RATE", defaultValue: marketType == "spot" ? 3.0 : 1.0)
+        let lastFetchTime = ExchangeWebSocket.lastKucoinFetchTime[pair, default: .distantPast]
+        let timeSinceLastFetch = Date().timeIntervalSince(lastFetchTime)
+        guard timeSinceLastFetch >= refreshRate else {
+            print("Rate limit: Skipping KuCoin order book fetch for \(pair)-\(marketType), time since last fetch: \(timeSinceLastFetch)s, required: \(refreshRate)s")
+            Task { @MainActor in
+                logAlert(event: "Rate limit: Skipping KuCoin order book fetch for \(pair)-\(marketType), time since last fetch: \(timeSinceLastFetch)s, required: \(refreshRate)s")
+            }
+            completion(nil)
+            return
+        }
+
+        let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+        let endpoint = marketType == "spot" ? "/api/v1/market/orderbook/level2_50?symbol=\(symbol)" : "/api/v1/contractMarket/level2?symbol=\(symbol)M"
+        guard let url = URL(string: "https://api\(marketType == "spot" ? "" : "-futures").kucoin.com\(endpoint)") else {
+            print("Invalid KuCoin order book URL for \(pair)-\(marketType)")
+            Task { @MainActor in
+                logAlert(event: "Invalid KuCoin order book URL for \(pair)-\(marketType)")
+            }
+            let attemptFetch: @Sendable () -> Void = {
+                let newRetryCount = localRetryCountCopy + 1
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                }
+            }
+            attemptFetch()
+            return
+        }
+
+        // Load and validate API credentials with detailed logging
+        let env = ProcessInfo.processInfo.environment
+        let apiKey = env["KUCOIN_API_KEY"]
+        let apiSecret = env["KUCOIN_API_SECRET"]
+        let passphrase = env["KUCOIN_API_PASSPHRASE"]
+        print("DEBUG: Loaded env variables - KUCOIN_API_KEY=\(apiKey != nil ? "present" : "missing"), KUCOIN_API_SECRET=\(apiSecret != nil ? "present" : "missing"), KUCOIN_API_PASSPHRASE=\(passphrase != nil ? "present" : "missing")")
+        guard let apiKey = apiKey, !apiKey.isEmpty,
+              let apiSecret = apiSecret, !apiSecret.isEmpty else {
+            print("Missing or empty KuCoin API credentials for \(pair)-\(marketType): API_KEY=\(apiKey != nil ? "present" : "missing"), API_SECRET=\(apiSecret != nil ? "present" : "missing")")
+            Task { @MainActor in
+                logAlert(event: "Missing or empty KuCoin API credentials for \(pair)-\(marketType): API_KEY=\(apiKey != nil ? "present" : "missing"), API_SECRET=\(apiSecret != nil ? "present" : "missing")")
+            }
+            let attemptFetch: @Sendable () -> Void = {
+                let newRetryCount = localRetryCountCopy + 1
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                }
+            }
+            attemptFetch()
+            return
+        }
+
+        // HMAC-SHA256 function for KuCoin API signature
+        @Sendable func hmacSHA256(_ data: String, key: String) -> String {
+            let keyData = key.data(using: .utf8)!
+            let dataToSign = data.data(using: .utf8)!
+            let hmac = HMAC<SHA256>.authenticationCode(for: dataToSign, using: SymmetricKey(data: keyData))
+            return Data(hmac).base64EncodedString()
+        }
+
+        // Compute passphrase if provided
+        let computedPassphrase = passphrase.map { hmacSHA256($0, key: apiSecret) }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 15.0)
+        let timestamp = String(Int(Date().timeIntervalSince1970 * 1000)) // Initial timestamp
+
+        // Sync timestamp with KuCoin server
+        let serverTimeUrl = URL(string: "https://api.kucoin.com/api/v1/timestamp")!
+        var serverTimeRequest = URLRequest(url: serverTimeUrl)
+        serverTimeRequest.httpMethod = "GET"
+        serverTimeRequest.timeoutInterval = 15.0
+        URLSession.shared.dataTask(with: serverTimeRequest) { data, response, error in
+            if let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let serverTime = json["data"] as? Int {
+                let adjustedTimestamp = String(serverTime)
+                var syncedRequest = URLRequest(url: url)
+                syncedRequest.httpMethod = "GET"
+                syncedRequest.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 15.0)
+                let signature = hmacSHA256(adjustedTimestamp + "GET" + endpoint, key: apiSecret)
+                syncedRequest.addValue(apiKey, forHTTPHeaderField: "KC-API-KEY")
+                syncedRequest.addValue(adjustedTimestamp, forHTTPHeaderField: "KC-API-TIMESTAMP")
+                syncedRequest.addValue(signature, forHTTPHeaderField: "KC-API-SIGN")
+                syncedRequest.addValue("2", forHTTPHeaderField: "KC-API-KEY-VERSION")
+                syncedRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                if let passphrase = computedPassphrase {
+                    syncedRequest.addValue(passphrase, forHTTPHeaderField: "KC-API-PASSPHRASE")
+                }
+                print("DEBUG: Synced KuCoin request for \(pair)-\(marketType): Timestamp \(adjustedTimestamp), Signature \(signature), Passphrase \(passphrase != nil ? "present" : "missing")")
+                Task { @MainActor in
+                    logAlert(event: "DEBUG: Synced KuCoin request for \(pair)-\(marketType): Timestamp \(adjustedTimestamp), Signature \(signature), Passphrase \(passphrase != nil ? "present" : "missing")")
+                }
+                let startTime = Date()
+                URLSession.shared.dataTask(with: syncedRequest) { data, response, error in
+                    let latency = Date().timeIntervalSince(startTime) * 1000
+                    Task { @MainActor in
+                        lastLatency[pair] = latency
+                        ExchangeWebSocket.lastKucoinFetchTime[pair] = Date()
+                        if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 200.0) {
+                            print("High latency detected for KuCoin order book fetch: \(pair)-\(marketType) - \(latency)ms")
+                            logAlert(event: "High latency detected for KuCoin order book fetch: \(pair)-\(marketType) - \(latency)ms")
+                        }
+                    }
+                    if let error = error {
+                        print("Failed to fetch KuCoin order book for \(pair)-\(marketType): \(error.localizedDescription)")
+                        Task { @MainActor in
+                            logAlert(event: "Failed to fetch KuCoin order book for \(pair)-\(marketType): \(error.localizedDescription)")
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                        return
+                    }
+                    guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+                        print("Invalid KuCoin order book response for \(pair)-\(marketType): No HTTP response or data")
+                        Task { @MainActor in
+                            logAlert(event: "Invalid KuCoin order book response for \(pair)-\(marketType): No HTTP response or data")
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                        return
+                    }
+                    guard httpResponse.statusCode == 200 else {
+                        let statusCode = httpResponse.statusCode
+                        let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                        let errorMessage: String
+                        let delay: Double
+                        switch statusCode {
+                        case 401, 403:
+                            errorMessage = "Authentication failed (\(statusCode)) for \(pair)-\(marketType): Invalid API key, signature, or timestamp, Body: \(responseBody)"
+                            delay = pow(2.0, Double(localRetryCountCopy + 1))
+                        case 429:
+                            errorMessage = "Rate limit exceeded (429) for \(pair)-\(marketType): Body: \(responseBody)"
+                            delay = 60.0
+                        default:
+                            errorMessage = "Invalid KuCoin order book response for \(pair)-\(marketType): Status code \(statusCode), Body: \(responseBody)"
+                            delay = 2.0
+                        }
+                        print(errorMessage)
+                        Task { @MainActor in
+                            logAlert(event: errorMessage)
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                                fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                        return
+                    }
+                    do {
+                        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                            print("Failed to parse KuCoin order book JSON for \(pair)-\(marketType): \(responseBody)")
+                            Task { @MainActor in
+                                logAlert(event: "Failed to parse KuCoin order book JSON for \(pair)-\(marketType): \(responseBody)")
+                            }
+                            let attemptFetch: @Sendable () -> Void = {
+                                let newRetryCount = localRetryCountCopy + 1
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                    fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                                }
+                            }
+                            attemptFetch()
+                            return
+                        }
+                        guard let dataDict = json["data"] as? [String: Any],
+                              let bids = dataDict["bids"] as? [[String]] ?? (dataDict["bids"] as? String == "null" ? [] : nil),
+                              let asks = dataDict["asks"] as? [[String]] ?? (dataDict["asks"] as? String == "null" ? [] : nil) else {
+                            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                            print("Failed to parse KuCoin order book data for \(pair)-\(marketType): Body: \(responseBody)")
+                            Task { @MainActor in
+                                logAlert(event: "Failed to parse KuCoin order book data for \(pair)-\(marketType): Body: \(responseBody)")
+                            }
+                            let attemptFetch: @Sendable () -> Void = {
+                                let newRetryCount = localRetryCountCopy + 1
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                    fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                                }
+                            }
+                            attemptFetch()
+                            return
+                        }
+                        var bidDepth: Double = 0.0
+                        var askDepth: Double = 0.0
+                        var bestBidPrice: Double = 0.0
+                        var bestAskPrice: Double = 0.0
+                        for bidEntry in bids.prefix(10) {
+                            guard bidEntry.count >= 2,
+                                  let priceStr = bidEntry.first,
+                                  let qtyStr = bidEntry.last,
+                                  let price = Double(priceStr),
+                                  let qty = Double(qtyStr) else {
+                                print("DEBUG: Skipping invalid bid entry for \(pair)-\(marketType): \(bidEntry)")
+                                continue
+                            }
+                            bidDepth += price * qty
+                            if price > bestBidPrice { bestBidPrice = price }
+                        }
+                        for ask in asks.prefix(10) {
+                            guard ask.count >= 2,
+                                  let priceStr = ask.first,
+                                  let qtyStr = ask.last,
+                                  let price = Double(priceStr),
+                                  let qty = Double(qtyStr) else {
+                                print("DEBUG: Skipping invalid ask entry for \(pair)-\(marketType): \(ask)")
+                                continue
+                            }
+                            askDepth += price * qty
+                            if bestAskPrice == 0.0 || price < bestAskPrice { bestAskPrice = price }
+                        }
+                        guard bidDepth > 0 || askDepth > 0 else {
+                            print("Failed to parse KuCoin order book data for \(pair)-\(marketType): Empty depth")
+                            Task { @MainActor in
+                                logAlert(event: "Failed to parse KuCoin order book data for \(pair)-\(marketType): Empty depth")
+                            }
+                            let attemptFetch: @Sendable () -> Void = {
+                                let newRetryCount = localRetryCountCopy + 1
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                    fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                                }
+                            }
+                            attemptFetch()
+                            return
+                        }
+                        let totalDepth = bidDepth + askDepth
+                        let spread = bestAskPrice > 0 && bestBidPrice > 0 ? bestAskPrice - bestBidPrice : nil
+                        Task { @MainActor in
+                            if let spread = spread {
+                                let timestamp = ISO8601DateFormatter().string(from: Date())
+                                let spreadEntry = "\(timestamp),\(pair),\(marketType),\(bestBidPrice),\(bestAskPrice),\(spread)\n"
+                                do {
+                                    let fileURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/historical_spreads.csv")
+                                    if !FileManager.default.fileExists(atPath: fileURL.path) {
+                                        FileManager.default.createFile(atPath: fileURL.path, contents: "timestamp,pair,market_type,bid_price,ask_price,spread\n".data(using: .utf8))
+                                    }
+                                    let fileHandle = try FileHandle(forWritingTo: fileURL)
+                                    fileHandle.seekToEndOfFile()
+                                    if let data = spreadEntry.data(using: .utf8) {
+                                        fileHandle.write(data)
+                                    }
+                                    fileHandle.closeFile()
+                                } catch {
+                                    print("DEBUG: Failed to write to historical_spreads.csv for \(pair)-\(marketType): \(error.localizedDescription)")
+                                    logAlert(event: "Failed to write to historical_spreads.csv for \(pair)-\(marketType): \(error.localizedDescription)")
+                                }
+                            }
+                            let orderBook = BevaixOrderBook(bids: bids.compactMap { entry in
+                                guard entry.count >= 2, let price = Double(entry[0]), let quantity = Double(entry[1]) else { return nil }
+                                return (price: price, quantity: quantity)
+                            }, asks: asks.compactMap { entry in
+                                guard entry.count >= 2, let price = Double(entry[0]), let quantity = Double(entry[1]) else { return nil }
+                                return (price: price, quantity: quantity)
+                            })
+                            kucoinOrderBooks[pair] = orderBook
+                            kucoinCurrentPrice[pair] = bestBidPrice > 0 ? bestBidPrice : kucoinCurrentPrice[pair] ?? 0.0
+                            print("DEBUG: KuCoin order book depth for \(pair)-\(marketType): \(totalDepth), Spread: \(spread ?? 0)")
+                            if totalDepth < getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 20000.0) {
+                                logAlert(event: "Insufficient depth for KuCoin \(pair)-\(marketType): Depth \(totalDepth), Required \(getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 20000.0))")
+                            }
+                            completion(totalDepth)
+                        }
+                    } catch {
+                        let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                        print("DEBUG: JSON parsing error for KuCoin order book \(pair)-\(marketType): \(error.localizedDescription), Body: \(responseBody)")
+                        Task { @MainActor in
+                            logAlert(event: "JSON parsing error for KuCoin order book \(pair)-\(marketType): \(error.localizedDescription), Body: \(responseBody)")
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                    }
+                }.resume()
+            } else {
+                // Fallback to local timestamp if server sync fails
+                var fallbackRequest = URLRequest(url: url)
+                fallbackRequest.httpMethod = "GET"
+                fallbackRequest.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 15.0)
+                let signature = hmacSHA256(timestamp + "GET" + endpoint, key: apiSecret)
+                fallbackRequest.addValue(apiKey, forHTTPHeaderField: "KC-API-KEY")
+                fallbackRequest.addValue(timestamp, forHTTPHeaderField: "KC-API-TIMESTAMP")
+                fallbackRequest.addValue(signature, forHTTPHeaderField: "KC-API-SIGN")
+                fallbackRequest.addValue("2", forHTTPHeaderField: "KC-API-KEY-VERSION")
+                fallbackRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+                if let passphrase = computedPassphrase {
+                    fallbackRequest.addValue(passphrase, forHTTPHeaderField: "KC-API-PASSPHRASE")
+                }
+                print("DEBUG: Fallback KuCoin request for \(pair)-\(marketType): Timestamp \(timestamp), Signature \(signature), Passphrase \(passphrase != nil ? "present" : "missing")")
+                Task { @MainActor in
+                    logAlert(event: "DEBUG: Fallback KuCoin request for \(pair)-\(marketType): Timestamp \(timestamp), Signature \(signature), Passphrase \(passphrase != nil ? "present" : "missing")")
+                }
+                let startTime = Date()
+                URLSession.shared.dataTask(with: fallbackRequest) { data, response, error in
+                    let latency = Date().timeIntervalSince(startTime) * 1000
+                    Task { @MainActor in
+                        lastLatency[pair] = latency
+                        ExchangeWebSocket.lastKucoinFetchTime[pair] = Date()
+                        if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 200.0) {
+                            print("High latency detected for KuCoin order book fetch: \(pair)-\(marketType) - \(latency)ms")
+                            logAlert(event: "High latency detected for KuCoin order book fetch: \(pair)-\(marketType) - \(latency)ms")
+                        }
+                    }
+                    if let error = error {
+                        print("Failed to fetch KuCoin order book for \(pair)-\(marketType): \(error.localizedDescription)")
+                        Task { @MainActor in
+                            logAlert(event: "Failed to fetch KuCoin order book for \(pair)-\(marketType): \(error.localizedDescription)")
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                        return
+                    }
+                    guard let httpResponse = response as? HTTPURLResponse, let data = data else {
+                        print("Invalid KuCoin order book response for \(pair)-\(marketType): No HTTP response or data")
+                        Task { @MainActor in
+                            logAlert(event: "Invalid KuCoin order book response for \(pair)-\(marketType): No HTTP response or data")
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                        return
+                    }
+                    guard httpResponse.statusCode == 200 else {
+                        let statusCode = httpResponse.statusCode
+                        let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                        let errorMessage: String
+                        let delay: Double
+                        switch statusCode {
+                        case 401, 403:
+                            errorMessage = "Authentication failed (\(statusCode)) for \(pair)-\(marketType): Invalid API key, signature, or timestamp, Body: \(responseBody)"
+                            delay = pow(2.0, Double(localRetryCountCopy + 1))
+                        case 429:
+                            errorMessage = "Rate limit exceeded (429) for \(pair)-\(marketType): Body: \(responseBody)"
+                            delay = 60.0
+                        default:
+                            errorMessage = "Invalid KuCoin order book response for \(pair)-\(marketType): Status code \(statusCode), Body: \(responseBody)"
+                            delay = 2.0
+                        }
+                        print(errorMessage)
+                        Task { @MainActor in
+                            logAlert(event: errorMessage)
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                                fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                        return
+                    }
+                    do {
+                        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                            print("Failed to parse KuCoin order book JSON for \(pair)-\(marketType): \(responseBody)")
+                            Task { @MainActor in
+                                logAlert(event: "Failed to parse KuCoin order book JSON for \(pair)-\(marketType): \(responseBody)")
+                            }
+                            let attemptFetch: @Sendable () -> Void = {
+                                let newRetryCount = localRetryCountCopy + 1
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                    fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                                }
+                            }
+                            attemptFetch()
+                            return
+                        }
+                        guard let dataDict = json["data"] as? [String: Any],
+                              let bids = dataDict["bids"] as? [[String]] ?? (dataDict["bids"] as? String == "null" ? [] : nil),
+                              let asks = dataDict["asks"] as? [[String]] ?? (dataDict["asks"] as? String == "null" ? [] : nil) else {
+                            let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                            print("Failed to parse KuCoin order book data for \(pair)-\(marketType): Body: \(responseBody)")
+                            Task { @MainActor in
+                                logAlert(event: "Failed to parse KuCoin order book data for \(pair)-\(marketType): Body: \(responseBody)")
+                            }
+                            let attemptFetch: @Sendable () -> Void = {
+                                let newRetryCount = localRetryCountCopy + 1
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                    fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                                }
+                            }
+                            attemptFetch()
+                            return
+                        }
+                        var bidDepth: Double = 0.0
+                        var askDepth: Double = 0.0
+                        var bestBidPrice: Double = 0.0
+                        var bestAskPrice: Double = 0.0
+                        for bidEntry in bids.prefix(10) {
+                            guard bidEntry.count >= 2,
+                                  let priceStr = bidEntry.first,
+                                  let qtyStr = bidEntry.last,
+                                  let price = Double(priceStr),
+                                  let qty = Double(qtyStr) else {
+                                print("DEBUG: Skipping invalid bid entry for \(pair)-\(marketType): \(bidEntry)")
+                                continue
+                            }
+                            bidDepth += price * qty
+                            if price > bestBidPrice { bestBidPrice = price }
+                        }
+                        for ask in asks.prefix(10) {
+                            guard ask.count >= 2,
+                                  let priceStr = ask.first,
+                                  let qtyStr = ask.last,
+                                  let price = Double(priceStr),
+                                  let qty = Double(qtyStr) else {
+                                print("DEBUG: Skipping invalid ask entry for \(pair)-\(marketType): \(ask)")
+                                continue
+                            }
+                            askDepth += price * qty
+                            if bestAskPrice == 0.0 || price < bestAskPrice { bestAskPrice = price }
+                        }
+                        guard bidDepth > 0 || askDepth > 0 else {
+                            print("Failed to parse KuCoin order book data for \(pair)-\(marketType): Empty depth")
+                            Task { @MainActor in
+                                logAlert(event: "Failed to parse KuCoin order book data for \(pair)-\(marketType): Empty depth")
+                            }
+                            let attemptFetch: @Sendable () -> Void = {
+                                let newRetryCount = localRetryCountCopy + 1
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                    fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                                }
+                            }
+                            attemptFetch()
+                            return
+                        }
+                        let totalDepth = bidDepth + askDepth
+                        let spread = bestAskPrice > 0 && bestBidPrice > 0 ? bestAskPrice - bestBidPrice : nil
+                        Task { @MainActor in
+                            if let spread = spread {
+                                let timestamp = ISO8601DateFormatter().string(from: Date())
+                                let spreadEntry = "\(timestamp),\(pair),\(marketType),\(bestBidPrice),\(bestAskPrice),\(spread)\n"
+                                do {
+                                    let fileURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/historical_spreads.csv")
+                                    if !FileManager.default.fileExists(atPath: fileURL.path) {
+                                        FileManager.default.createFile(atPath: fileURL.path, contents: "timestamp,pair,market_type,bid_price,ask_price,spread\n".data(using: .utf8))
+                                    }
+                                    let fileHandle = try FileHandle(forWritingTo: fileURL)
+                                    fileHandle.seekToEndOfFile()
+                                    if let data = spreadEntry.data(using: .utf8) {
+                                        fileHandle.write(data)
+                                    }
+                                    fileHandle.closeFile()
+                                } catch {
+                                    print("DEBUG: Failed to write to historical_spreads.csv for \(pair)-\(marketType): \(error.localizedDescription)")
+                                    logAlert(event: "Failed to write to historical_spreads.csv for \(pair)-\(marketType): \(error.localizedDescription)")
+                                }
+                            }
+                            let orderBook = BevaixOrderBook(bids: bids.compactMap { entry in
+                                guard entry.count >= 2, let price = Double(entry[0]), let quantity = Double(entry[1]) else { return nil }
+                                return (price: price, quantity: quantity)
+                            }, asks: asks.compactMap { entry in
+                                guard entry.count >= 2, let price = Double(entry[0]), let quantity = Double(entry[1]) else { return nil }
+                                return (price: price, quantity: quantity)
+                            })
+                            kucoinOrderBooks[pair] = orderBook
+                            kucoinCurrentPrice[pair] = bestBidPrice > 0 ? bestBidPrice : kucoinCurrentPrice[pair] ?? 0.0
+                            print("DEBUG: KuCoin order book depth for \(pair)-\(marketType): \(totalDepth), Spread: \(spread ?? 0)")
+                            if totalDepth < getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 20000.0) {
+                                logAlert(event: "Insufficient depth for KuCoin \(pair)-\(marketType): Depth \(totalDepth), Required \(getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 20000.0))")
+                            }
+                            completion(totalDepth)
+                        }
+                    } catch {
+                        let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                        print("DEBUG: JSON parsing error for KuCoin order book \(pair)-\(marketType): \(error.localizedDescription), Body: \(responseBody)")
+                        Task { @MainActor in
+                            logAlert(event: "JSON parsing error for KuCoin order book \(pair)-\(marketType): \(error.localizedDescription), Body: \(responseBody)")
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                fetchKucoinOrderBookDepth(pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                    }
+                }.resume()
+            }
+        }.resume()
+
+        print("DEBUG: Initial KuCoin request for \(pair)-\(marketType): Timestamp \(timestamp)")
+        Task { @MainActor in
+            logAlert(event: "DEBUG: Initial KuCoin request for \(pair)-\(marketType): Timestamp \(timestamp)")
+        }
+    }
+}
+

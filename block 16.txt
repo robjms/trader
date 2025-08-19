@@ -1,0 +1,142 @@
+
+//--------------------------------------------------------------------------------------------------------------Block 16 - Spot-Futures Arbitrage Execution
+
+
+
+
+extension ExchangeWebSocket {
+    static func executeSpotFuturesArbitrage(pair: String, kucoinSpotPrice: Double, kucoinFuturesPrice: Double, bybitSpotPrice: Double, bybitFuturesPrice: Double, amount: Double, completion: @escaping (Bool) -> Void) {
+        Task {
+            let minSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.002)
+            let kucoinSpread = abs(kucoinSpotPrice - kucoinFuturesPrice) / min(kucoinSpotPrice, kucoinFuturesPrice)
+            let bybitSpread = abs(bybitSpotPrice - bybitFuturesPrice) / min(bybitSpotPrice, bybitFuturesPrice)
+            
+            guard kucoinSpread >= minSpreadThreshold || bybitSpread >= minSpreadThreshold else {
+                print("DEBUG: Spread too low for spot-futures arbitrage: KuCoin=\(kucoinSpread), Bybit=\(bybitSpread)")
+                await MainActor.run {
+                    logAlert(event: "Spread too low for spot-futures arbitrage: KuCoin=\(kucoinSpread), Bybit=\(bybitSpread)")
+                }
+                completion(false)
+                return
+            }
+            
+            let kucoinLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "spot", tradeAmount: amount, price: kucoinSpotPrice)
+            let kucoinFuturesLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "futures", tradeAmount: amount, price: kucoinFuturesPrice)
+            let bybitLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "spot", tradeAmount: amount, price: bybitSpotPrice)
+            let bybitFuturesLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "futures", tradeAmount: amount, price: bybitFuturesPrice)
+            
+            guard let kucoinLiquidity = kucoinLiquidity, let kucoinFuturesLiquidity = kucoinFuturesLiquidity,
+                  let bybitLiquidity = bybitLiquidity, let bybitFuturesLiquidity = bybitFuturesLiquidity else {
+                print("DEBUG: Insufficient liquidity for spot-futures arbitrage: \(pair)")
+                await MainActor.run {
+                    logAlert(event: "Insufficient liquidity for spot-futures arbitrage: \(pair)")
+                }
+                completion(false)
+                return
+            }
+            
+            // Integrate liquidity into weighted trade amount calculation
+            let kucoinLiquidityFactor = min(kucoinLiquidity, kucoinFuturesLiquidity) / (kucoinLiquidity + kucoinFuturesLiquidity)
+            let bybitLiquidityFactor = min(bybitLiquidity, bybitFuturesLiquidity) / (bybitLiquidity + bybitFuturesLiquidity)
+            
+            let kucoinFundingRate = kucoinFundingRates[pair] ?? 0.0
+            let bybitFundingRate = bybitFundingRates[pair] ?? 0.0
+            let maxFundingRateValue = await MainActor.run { maxFundingRate }
+            
+            guard abs(kucoinFundingRate) < maxFundingRateValue && abs(bybitFundingRate) < maxFundingRateValue else {
+                print("DEBUG: Funding rate too high for \(pair): KuCoin=\(kucoinFundingRate), Bybit=\(bybitFundingRate)")
+                await MainActor.run {
+                    logAlert(event: "Funding rate too high for \(pair): KuCoin=\(kucoinFundingRate), Bybit=\(bybitFundingRate)")
+                }
+                completion(false)
+                return
+            }
+            
+            let kucoinProfit = kucoinSpread * amount - amount * (kucoinTakerFee + kucoinMakerFee) * 2
+            let bybitProfit = bybitSpread * amount - amount * (bybitTakerFee + bybitMakerFee) * 2
+            let minProfitThreshold = await MainActor.run { spotMinProfitPercentage }
+            
+            guard kucoinProfit > minProfitThreshold * amount * min(kucoinSpotPrice, kucoinFuturesPrice) ||
+                  bybitProfit > minProfitThreshold * amount * min(bybitSpotPrice, bybitFuturesPrice) else {
+                print("DEBUG: Expected profit too low for spot-futures arbitrage: KuCoin=\(kucoinProfit), Bybit=\(bybitProfit)")
+                await MainActor.run {
+                    logAlert(event: "Expected profit too low for spot-futures arbitrage: KuCoin=\(kucoinProfit), Bybit=\(bybitProfit)")
+                }
+                completion(false)
+                return
+            }
+            
+            let kucoinTradeAmount = await dynamicTradeAmount(balance: kucoinBalance, riskPercent: 0.3, volatility: 0.5) * kucoinLiquidityFactor
+            let bybitTradeAmount = await dynamicTradeAmount(balance: bybitBalance, riskPercent: 0.3, volatility: 0.5) * bybitLiquidityFactor
+            
+            if kucoinSpread > bybitSpread && kucoinProfit > bybitProfit {
+                let potentialLoss = kucoinTradeAmount * kucoinSpotPrice * stopLossPercentage
+                if await checkDailyLossLimit(exchange: "kucoin", pair: pair, potentialLoss: potentialLoss) {
+                    print("DEBUG: Daily loss limit exceeded for KuCoin-\(pair)")
+                    completion(false)
+                    return
+                }
+                
+                executeSingleExchangeArbitrage(
+                    exchange: "kucoin",
+                    pair: pair,
+                    spotPrice: kucoinSpotPrice,
+                    futuresPrice: kucoinFuturesPrice,
+                    strategy: "Spot-to-Futures",
+                    kucoinSpotPrices: kucoinPrices[pair] ?? [],
+                    bybitSpotPrices: [],
+                    tradeAmount: kucoinTradeAmount
+                )
+                await MainActor.run {
+                    tradeMetrics[pair, default: (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)].totalProfit += kucoinProfit
+                    tradeMetrics[pair, default: (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)].totalFees += amount * (kucoinTakerFee + kucoinMakerFee) * 2
+                    tradeMetrics[pair, default: (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)].wins += kucoinProfit > 0 ? 1 : 0
+                    performanceMetrics[pair, default: (profit: 0.0, fees: 0.0, trades: 0, wins: 0)].profit += kucoinProfit
+                    performanceMetrics[pair, default: (profit: 0.0, fees: 0.0, trades: 0, wins: 0)].fees += amount * (kucoinTakerFee + kucoinMakerFee) * 2
+                    performanceMetrics[pair, default: (profit: 0.0, fees: 0.0, trades: 0, wins: 0)].trades += 1
+                    performanceMetrics[pair, default: (profit: 0.0, fees: 0.0, trades: 0, wins: 0)].wins += kucoinProfit > 0 ? 1 : 0
+                    kucoinBalance += kucoinProfit - amount * (kucoinTakerFee + kucoinMakerFee) * 2
+                    logTradeToCSV(pair: pair, strategy: "Spot-to-Futures", profit: kucoinProfit, fees: amount * (kucoinTakerFee + kucoinMakerFee) * 2, tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/trades.csv"))
+                    print("DEBUG: Executed spot-futures arbitrage on KuCoin for \(pair): Profit=\(kucoinProfit)")
+                    logAlert(event: "Executed spot-futures arbitrage on KuCoin for \(pair): Profit=\(kucoinProfit)")
+                }
+                completion(true)
+            } else {
+                let potentialLoss = bybitTradeAmount * bybitSpotPrice * stopLossPercentage
+                if await checkDailyLossLimit(exchange: "bybit", pair: pair, potentialLoss: potentialLoss) {
+                    print("DEBUG: Daily loss limit exceeded for Bybit-\(pair)")
+                    completion(false)
+                    return
+                }
+                
+                executeSingleExchangeArbitrage(
+                    exchange: "bybit",
+                    pair: pair,
+                    spotPrice: bybitSpotPrice,
+                    futuresPrice: bybitFuturesPrice,
+                    strategy: "Spot-to-Futures",
+                    kucoinSpotPrices: [],
+                    bybitSpotPrices: bybitPrices[pair] ?? [],
+                    tradeAmount: bybitTradeAmount
+                )
+                await MainActor.run {
+                    tradeMetrics[pair, default: (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)].totalProfit += bybitProfit
+                    tradeMetrics[pair, default: (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)].totalFees += amount * (bybitTakerFee + bybitMakerFee) * 2
+                    tradeMetrics[pair, default: (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)].wins += bybitProfit > 0 ? 1 : 0
+                    performanceMetrics[pair, default: (profit: 0.0, fees: 0.0, trades: 0, wins: 0)].profit += bybitProfit
+                    performanceMetrics[pair, default: (profit: 0.0, fees: 0.0, trades: 0, wins: 0)].fees += amount * (bybitTakerFee + bybitMakerFee) * 2
+                    performanceMetrics[pair, default: (profit: 0.0, fees: 0.0, trades: 0, wins: 0)].trades += 1
+                    performanceMetrics[pair, default: (profit: 0.0, fees: 0.0, trades: 0, wins: 0)].wins += bybitProfit > 0 ? 1 : 0
+                    bybitBalance += bybitProfit - amount * (bybitTakerFee + bybitMakerFee) * 2
+                    logTradeToCSV(pair: pair, strategy: "Spot-to-Futures", profit: bybitProfit, fees: amount * (bybitTakerFee + bybitMakerFee) * 2, tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
+                    print("DEBUG: Executed spot-futures arbitrage on Bybit for \(pair): Profit=\(bybitProfit)")
+                    logAlert(event: "Executed spot-futures arbitrage on Bybit for \(pair): Profit=\(bybitProfit)")
+                }
+                completion(true)
+            }
+        }
+    }
+}
+
+
+

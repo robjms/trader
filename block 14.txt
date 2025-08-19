@@ -1,0 +1,117 @@
+
+//------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
+
+
+import Foundation
+
+extension ExchangeWebSocket {
+    static func startTradingLoop() {
+        Task { @MainActor in
+            ExchangeWebSocket.connectKucoin()
+            ExchangeWebSocket.connectBybit()
+            await ExchangeWebSocket.startOrderBookPolling()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                ExchangeWebSocket.monitorHFTScalpingOpportunities()
+                print("✅ TRADING ACTIVE")
+            }
+        }
+    }
+
+    static func executeTrade(exchange: String, pair: String, side: String, price: Double, amount: Double, strategy: String) async -> Bool {
+        guard await checkDailyLossLimit(exchange: exchange, pair: pair, potentialLoss: amount * price * getDouble("STOP_LOSS_PERCENTAGE", defaultValue: 0.02)) else {
+            print("DEBUG: Trade skipped for \(exchange)-\(pair): Daily loss limit exceeded")
+            return false
+        }
+
+        guard let _ = await checkLiquidityAsyncUnique(exchange: exchange, pair: pair, marketType: "spot", tradeAmount: amount, price: price) else {
+            print("DEBUG: Trade skipped for \(exchange)-\(pair): Insufficient liquidity")
+            return false
+        }
+
+        let volatility = await calculateVolatility(pair: pair, exchange: exchange)
+        let tradeAmount = await dynamicTradeAmount(balance: exchange == "kucoin" ? kucoinBalance : bybitBalance, riskPercent: getDouble("RISK_PERCENTAGE", defaultValue: 0.01), volatility: volatility, pair: pair)
+
+        guard tradeAmount > 0 else {
+            print("DEBUG: Trade skipped for \(exchange)-\(pair): Invalid trade amount (\(tradeAmount))")
+            return false
+        }
+
+        let adjustedAmount = min(amount, tradeAmount)
+        ExchangeWebSocket.executeHFTTrade(exchange: exchange, pair: pair, side: side, price: price, amount: adjustedAmount)
+
+        let profit = side == "buy" ? -adjustedAmount * price : adjustedAmount * price
+        let fees = adjustedAmount * price * (exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee)
+        let netProfit = profit - fees
+
+        await MainActor.run {
+            updateTradeMetrics(
+                pair: pair,
+                profit: netProfit,
+                fees: fees,
+                isWin: netProfit > 0,
+                dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
+                totalProfit: &ExchangeWebSocket.totalProfit,
+                totalFees: &ExchangeWebSocket.totalFees
+            )
+            logTradeToCSV(
+                pair: pair,
+                strategy: strategy,
+                profit: netProfit,
+                fees: fees,
+                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv")
+            )
+            sendTradeToFlaskServer(strategy: strategy, pair: pair, exchange: exchange, spotPrice: price, futuresPrice: 0.0, tradeAmount: adjustedAmount, profit: netProfit)
+        }
+
+        return netProfit > 0
+    }
+
+    static func calculateVolatility(pair: String, exchange: String) async -> Double {
+        let prices = exchange == "kucoin" ? kucoinPrices[pair] : bybitPrices[pair]
+        guard let priceArray = prices, priceArray.count >= 60 else {
+            return getDouble("DEFAULT_VOLATILITY", defaultValue: 0.01)
+        }
+        let recentPrices = priceArray.suffix(60)
+        let mean = recentPrices.reduce(0.0, +) / Double(recentPrices.count)
+        let variance = recentPrices.reduce(0.0) { $0 + pow($1 - mean, 2) } / Double(recentPrices.count)
+        return sqrt(variance) / mean
+    }
+
+    static func startOrderBookPolling() async {
+        while true {
+            for pair in tradingPairs {
+                for exchange in ["kucoin", "bybit"] {
+                    for marketType in ["spot", "futures"] {
+                        do {
+                            let _ = try await fetchOrderBookDepth(for: exchange, pair: pair, marketType: marketType)
+                            await MainActor.run {
+                                let orderBook = exchange == "kucoin" ? kucoinOrderBooks[pair] : bybitOrderBooks[pair]
+                                if orderBook != nil {
+                                    logAlert(event: "Updated order book for \(exchange)-\(pair)-\(marketType)")
+                                }
+                            }
+                        } catch {
+                            await MainActor.run {
+                                logAlert(event: "Failed to poll order book for \(exchange)-\(pair)-\(marketType): \(error)")
+                            }
+                        }
+                    }
+                }
+            }
+            try? await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+        }
+    }
+}
+
+// Main entry point
+DispatchQueue.main.async {
+    ExchangeWebSocket.initializeParameters {
+        ExchangeWebSocket.startTradingLoop()
+        ExchangeWebSocket.logDashboardMetrics()
+    }
+}
+
+RunLoop.main.run()
+
+

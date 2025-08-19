@@ -1,0 +1,448 @@
+
+//---------------------------------------------------------------------------------------------------------Block 15 - High-Frequency Trading Scalping
+
+
+
+import Foundation
+
+extension ExchangeWebSocket {
+    static func structureTradeData(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double) -> [String: Any] {
+        let timestampFormatter = ISO8601DateFormatter()
+        timestampFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let timestamp = timestampFormatter.string(from: Date())
+
+        return [
+            "strategy": strategy,
+            "pair": pair,
+            "exchange": exchange,
+            "spot_price": spotPrice,
+            "futures_price": futuresPrice,
+            "trade_amount": tradeAmount,
+            "profit": profit,
+            "timestamp": timestamp
+        ]
+    }
+
+    @MainActor
+    static func logTradeLocally(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double) {
+        let tradeData = structureTradeData(strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit)
+        let timestamp = tradeData["timestamp"] as? String ?? ISO8601DateFormatter().string(from: Date())
+        let logEntry = "\(timestamp),\(strategy),\(pair),\(exchange),\(spotPrice),\(futuresPrice),\(tradeAmount),\(profit)\n"
+        let logURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log_fallback.csv")
+
+        do {
+            let fileManager = FileManager.default
+            let directoryPath = logURL.deletingLastPathComponent().path
+            if !fileManager.fileExists(atPath: directoryPath) {
+                try fileManager.createDirectory(atPath: directoryPath, withIntermediateDirectories: true, attributes: nil)
+                print("DEBUG: Created directory for trade_log_fallback.csv at \(directoryPath)")
+            }
+
+            if !fileManager.fileExists(atPath: logURL.path) {
+                try "timestamp,strategy,pair,exchange,spot_price,futures_price,trade_amount,profit\n".write(to: logURL, atomically: true, encoding: .utf8)
+            }
+
+            if let fileHandle = try? FileHandle(forWritingTo: logURL) {
+                defer { fileHandle.closeFile() }
+                if let data = logEntry.data(using: .utf8) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                }
+            } else {
+                try logEntry.write(to: logURL, atomically: true, encoding: .utf8)
+            }
+            print("DEBUG: Logged trade to fallback CSV: \(logEntry)")
+        } catch {
+            print("DEBUG: Failed to write to trade_log_fallback.csv: \(error.localizedDescription)")
+        }
+    }
+
+    static func attemptSend(attempt: Int, request: URLRequest, strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double, retries: Int) {
+        let delay = pow(2.0, Double(attempt - 1))
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("DEBUG: Failed to send trade to Flask server (attempt \(attempt)): \(error.localizedDescription)")
+                if attempt < retries {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        ExchangeWebSocket.attemptSend(attempt: attempt + 1, request: request, strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit, retries: retries)
+                    }
+                } else {
+                    Task { @MainActor in
+                        logTradeLocally(strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit)
+                    }
+                }
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("DEBUG: Failed to send trade to Flask server (attempt \(attempt)): No HTTP response")
+                if attempt < retries {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        ExchangeWebSocket.attemptSend(attempt: attempt + 1, request: request, strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit, retries: retries)
+                    }
+                } else {
+                    Task { @MainActor in
+                        logTradeLocally(strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit)
+                    }
+                }
+                return
+            }
+
+            print("DEBUG: Flask server response status (attempt \(attempt)): \(httpResponse.statusCode)")
+            if httpResponse.statusCode == 200 {
+                print("DEBUG: Successfully sent trade to Flask server: \(strategy) for \(pair) on \(exchange)")
+            } else {
+                print("DEBUG: Failed to send trade to Flask server (attempt \(attempt)): Status code \(httpResponse.statusCode)")
+                if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                    print("DEBUG: Flask server response body: \(responseBody)")
+                }
+                if attempt < retries {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        ExchangeWebSocket.attemptSend(attempt: attempt + 1, request: request, strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit, retries: retries)
+                    }
+                } else {
+                    Task { @MainActor in
+                        logTradeLocally(strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit)
+                    }
+                }
+            }
+        }
+        task.resume()
+    }
+
+    static func sendTradeToFlaskServer(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double, retries: Int = 3) {
+        let url = URL(string: "http://127.0.0.1:5001/trade")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30.0
+
+        let tradeData = structureTradeData(strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit)
+
+        print("DEBUG: Attempting to send trade to Flask server: \(tradeData)")
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: tradeData, options: [])
+            request.httpBody = jsonData
+            attemptSend(attempt: 1, request: request, strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit, retries: retries)
+        } catch {
+            print("DEBUG: Failed to serialize trade data: \(error.localizedDescription)")
+            Task { @MainActor in
+                logTradeLocally(strategy: strategy, pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, tradeAmount: tradeAmount, profit: profit)
+            }
+        }
+    }
+
+    @MainActor
+    static func saveHistoricalSpreadsToCSV(pair: String, spread: Double, predictedSpreadChange: Double?) {
+        print("DEBUG: Entering saveHistoricalSpreadsToCSV for \(pair), spread: \(spread), predictedSpreadChange: \(predictedSpreadChange ?? 0.0) at \(ISO8601DateFormatter().string(from: Date()))")
+        
+        guard spread > 0 else {
+            print("DEBUG: Skipping invalid spread for \(pair): \(spread)")
+            logAlert(event: "Skipping invalid spread for \(pair): \(spread)")
+            return
+        }
+        
+        let timestampFormatter = ISO8601DateFormatter()
+        timestampFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let timestamp = timestampFormatter.string(from: Date())
+        let predictedSpreadChangeValue = predictedSpreadChange ?? 0.0
+        
+        let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
+        let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
+        let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
+        let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
+        let kucoinSpotRsi = calculateRSI(prices: kucoinPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0
+        let kucoinFuturesRsi = calculateRSI(prices: kucoinFuturesPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0
+        let bybitSpotRsi = calculateRSI(prices: bybitPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0
+        let bybitFuturesRsi = calculateRSI(prices: bybitFuturesPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0
+        let kucoinSpotMacd = calculateMACD(prices: kucoinPrices[pair] ?? [], shortPeriod: macdShortPeriod, longPeriod: macdLongPeriod, signalPeriod: macdSignalPeriod) ?? (macd: 0.0, signal: 0.0, histogram: 0.0)
+        let kucoinFuturesMacd = calculateMACD(prices: kucoinFuturesPrices[pair] ?? [], shortPeriod: macdShortPeriod, longPeriod: macdLongPeriod, signalPeriod: macdSignalPeriod) ?? (macd: 0.0, signal: 0.0, histogram: 0.0)
+        let bybitSpotMacd = calculateMACD(prices: bybitPrices[pair] ?? [], shortPeriod: macdShortPeriod, longPeriod: macdLongPeriod, signalPeriod: macdSignalPeriod) ?? (macd: 0.0, signal: 0.0, histogram: 0.0)
+        let bybitFuturesMacd = calculateMACD(prices: bybitFuturesPrices[pair] ?? [], shortPeriod: macdShortPeriod, longPeriod: macdLongPeriod, signalPeriod: macdSignalPeriod) ?? (macd: 0.0, signal: 0.0, histogram: 0.0)
+        let kucoinSpotAtr = kucoinFuturesATR[pair] ?? 0.0
+        let bybitSpotAtr = bybitFuturesATR[pair] ?? 0.0
+        let kucoinFundingRate = kucoinFundingRates[pair] ?? 0.0
+        let bybitFundingRate = bybitFundingRates[pair] ?? 0.0
+        let sentimentScore = sentimentScores[pair] ?? 0.0
+        
+        print("DEBUG: Input prices for \(pair): kucoinSpotPrice=\(kucoinSpotPrice), kucoinFuturesPrice=\(kucoinFuturesPrice), bybitSpotPrice=\(bybitSpotPrice), bybitFuturesPrice=\(bybitFuturesPrice)")
+        
+        let minimalLogEntry = "\(timestamp),\(pair),\(spread),\(predictedSpreadChangeValue)\n"
+        let spreadsCSVURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/historical_spreads.csv")
+        
+        let extendedLogEntry = "\(pair),\(timestamp),\(spread),\(predictedSpreadChangeValue),\(kucoinSpotPrice),\(kucoinFuturesPrice),\(bybitSpotPrice),\(bybitFuturesPrice),\(kucoinSpotRsi),\(kucoinFuturesRsi),\(bybitSpotRsi),\(bybitFuturesRsi),\(kucoinSpotMacd.histogram),\(kucoinFuturesMacd.histogram),\(bybitSpotMacd.histogram),\(bybitFuturesMacd.histogram),\(kucoinSpotAtr),\(bybitSpotAtr),\(kucoinFundingRate),\(bybitFundingRate),\(sentimentScore)\n"
+        let extendedSpreadsCSVURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/historical_spreads_extended.csv")
+        
+        let fileManager = FileManager.default
+        
+        do {
+            let directoryURL = spreadsCSVURL.deletingLastPathComponent()
+            if !fileManager.fileExists(atPath: directoryURL.path) {
+                try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+                print("DEBUG: Created directory for historical_spreads.csv at \(directoryURL.path)")
+            }
+            
+            if !fileManager.fileExists(atPath: spreadsCSVURL.path) {
+                let header = "timestamp,pair,spread,predictedSpreadChange\n"
+                try header.write(to: spreadsCSVURL, atomically: true, encoding: .utf8)
+                try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: spreadsCSVURL.path)
+                print("DEBUG: Created historical_spreads.csv with header")
+            }
+            
+            guard let minimalData = minimalLogEntry.data(using: .utf8) else {
+                print("DEBUG: Failed to convert minimal log entry to data for \(pair)")
+                logAlert(event: "Failed to convert minimal log entry to data for \(pair)")
+                return
+            }
+            
+            var writeSuccess = false
+            for attempt in 1...3 {
+                do {
+                    if let fileHandle = try? FileHandle(forWritingTo: spreadsCSVURL) {
+                        defer { fileHandle.closeFile() }
+                        fileHandle.seekToEndOfFile()
+                        fileHandle.write(minimalData)
+                        writeSuccess = true
+                        print("DEBUG: Appended minimal historical spread to CSV for \(pair) (attempt \(attempt)): Spread=\(spread), PredictedChange=\(predictedSpreadChangeValue)")
+                        break
+                    } else {
+                        try minimalLogEntry.write(to: spreadsCSVURL, atomically: true, encoding: .utf8)
+                        writeSuccess = true
+                        print("DEBUG: Wrote minimal historical spread to CSV for \(pair) (attempt \(attempt)): Spread=\(spread), PredictedChange=\(predictedSpreadChangeValue)")
+                        break
+                    }
+                } catch {
+                    print("DEBUG: Failed to write minimal historical spread to CSV for \(pair) (attempt \(attempt)): \(error.localizedDescription)")
+                    if attempt < 3 {
+                        Thread.sleep(forTimeInterval: 0.1 * Double(attempt))
+                    }
+                }
+            }
+            
+            if !writeSuccess {
+                print("DEBUG: Failed to save minimal historical spread to CSV for \(pair) after 3 attempts")
+                logAlert(event: "Failed to save minimal historical spread to CSV for \(pair) after 3 attempts")
+            }
+            
+            historicalSpreads[pair, default: []].append(spread)
+        } catch {
+            print("DEBUG: Failed to save minimal historical spread to CSV for \(pair): \(error.localizedDescription)")
+            logAlert(event: "Failed to save minimal historical spread to CSV for \(pair): \(error.localizedDescription)")
+        }
+        
+        do {
+            let directoryURL = extendedSpreadsCSVURL.deletingLastPathComponent()
+            if !fileManager.fileExists(atPath: directoryURL.path) {
+                try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+                print("DEBUG: Created directory for historical_spreads_extended.csv at \(directoryURL.path)")
+            }
+            
+            if !fileManager.fileExists(atPath: extendedSpreadsCSVURL.path) {
+                let header = "pair,timestamp,spread,predicted_spread_change,kucoin_spot_price,kucoin_futures_price,bybit_spot_price,bybit_futures_price,kucoin_spot_rsi,kucoin_futures_rsi,bybit_spot_rsi,bybit_futures_rsi,kucoin_spot_macd_histogram,kucoin_futures_macd_histogram,bybit_spot_macd_histogram,bybit_futures_macd_histogram,kucoin_spot_atr,bybit_spot_atr,kucoin_funding_rate,bybit_funding_rate,sentiment_score\n"
+                try header.write(to: extendedSpreadsCSVURL, atomically: true, encoding: .utf8)
+                try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: extendedSpreadsCSVURL.path)
+                print("DEBUG: Created historical_spreads_extended.csv with header")
+            }
+            
+            guard let extendedData = extendedLogEntry.data(using: .utf8) else {
+                print("DEBUG: Failed to convert extended log entry to data for \(pair)")
+                logAlert(event: "Failed to convert extended log entry to data for \(pair)")
+                return
+            }
+            
+            var extendedWriteSuccess = false
+            for attempt in 1...3 {
+                do {
+                    if let fileHandle = try? FileHandle(forWritingTo: extendedSpreadsCSVURL) {
+                        defer { fileHandle.closeFile() }
+                        fileHandle.seekToEndOfFile()
+                        fileHandle.write(extendedData)
+                        extendedWriteSuccess = true
+                        print("DEBUG: Appended extended historical spread to CSV for \(pair) (attempt \(attempt)): Spread=\(spread), PredictedChange=\(predictedSpreadChangeValue)")
+                        break
+                    } else {
+                        try extendedLogEntry.write(to: extendedSpreadsCSVURL, atomically: true, encoding: .utf8)
+                        extendedWriteSuccess = true
+                        print("DEBUG: Wrote extended historical spread to CSV for \(pair) (attempt \(attempt)): Spread=\(spread), PredictedChange=\(predictedSpreadChangeValue)")
+                        break
+                    }
+                } catch {
+                    print("DEBUG: Failed to write extended historical spread to CSV for \(pair) (attempt \(attempt)): \(error.localizedDescription)")
+                    if attempt < 3 {
+                        Thread.sleep(forTimeInterval: 0.1 * Double(attempt))
+                    }
+                }
+            }
+            
+            if !extendedWriteSuccess {
+                print("DEBUG: Failed to save extended historical spread to CSV for \(pair) after 3 attempts")
+                logAlert(event: "Failed to save extended historical spread to CSV for \(pair) after 3 attempts")
+            }
+        } catch {
+            print("DEBUG: Failed to save extended historical spread to CSV for \(pair): \(error.localizedDescription)")
+            logAlert(event: "Failed to save extended historical spread to CSV for \(pair): \(error.localizedDescription)")
+        }
+    }
+
+    @MainActor
+    static func logHistoricalTradeToCSV(pair: String, strategy: String, profit: Double, fees: Double) {
+        let timestampFormatter = ISO8601DateFormatter()
+        timestampFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let timestamp = timestampFormatter.string(from: Date())
+        let tradesCSVURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/historical_trades.csv")
+        let logEntry = "\(timestamp),\(pair),\(strategy),\(profit),\(fees)\n"
+        
+        do {
+            let fileManager = FileManager.default
+            let directoryURL = tradesCSVURL.deletingLastPathComponent()
+            if !fileManager.fileExists(atPath: directoryURL.path) {
+                try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+                print("DEBUG: Created directory for historical_trades.csv at \(directoryURL.path)")
+            }
+            
+            if !fileManager.fileExists(atPath: tradesCSVURL.path) {
+                let header = "timestamp,pair,strategy,profit,fees\n"
+                try header.write(to: tradesCSVURL, atomically: true, encoding: .utf8)
+                try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: tradesCSVURL.path)
+                print("DEBUG: Created historical_trades.csv with header")
+            }
+            
+            guard let data = logEntry.data(using: .utf8) else {
+                print("DEBUG: Failed to convert trade log entry to data for \(pair)")
+                logAlert(event: "Failed to convert trade log entry to data for \(pair)")
+                return
+            }
+            
+            var writeSuccess = false
+            for attempt in 1...3 {
+                do {
+                    if let fileHandle = try? FileHandle(forWritingTo: tradesCSVURL) {
+                        defer { fileHandle.closeFile() }
+                        fileHandle.seekToEndOfFile()
+                        fileHandle.write(data)
+                        writeSuccess = true
+                        print("DEBUG: Appended trade to historical_trades.csv for \(pair) (attempt \(attempt)): Profit=\(profit), Fees=\(fees)")
+                        break
+                    } else {
+                        try logEntry.write(to: tradesCSVURL, atomically: true, encoding: .utf8)
+                        writeSuccess = true
+                        print("DEBUG: Wrote trade to historical_trades.csv for \(pair) (attempt \(attempt)): Profit=\(profit), Fees=\(fees)")
+                        break
+                    }
+                } catch {
+                    print("DEBUG: Failed to write trade to historical_trades.csv for \(pair) (attempt \(attempt)): \(error.localizedDescription)")
+                    if attempt < 3 {
+                        Thread.sleep(forTimeInterval: 0.1 * Double(attempt))
+                    }
+                }
+            }
+            
+            if !writeSuccess {
+                print("DEBUG: Failed to save trade to historical_trades.csv for \(pair) after 3 attempts")
+                logAlert(event: "Failed to save trade to historical_trades.csv for \(pair) after 3 attempts")
+            }
+        } catch {
+            print("DEBUG: Failed to save trade to historical_trades.csv for \(pair): \(error.localizedDescription)")
+            logAlert(event: "Failed to save trade to historical_trades.csv for \(pair): \(error.localizedDescription)")
+        }
+    }
+
+    static func fetchSpreadPrediction(pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, retryCount: Int = 0) async -> Double? {
+        let maxRetries = 3
+        guard retryCount < maxRetries else {
+            print("DEBUG: Max retries reached for spread prediction for \(pair) on \(exchange)")
+            Task { @MainActor in
+                logAlert(event: "Max retries reached for spread prediction for \(pair) on \(exchange)")
+            }
+            return arbitrageMinSpreadThreshold
+        }
+
+        let url = URL(string: "http://127.0.0.1:5001/predict_spread")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30.0
+
+        let payload: [String: Any] = [
+            "pair": pair,
+            "exchange": exchange,
+            "spot_price": spotPrice,
+            "futures_price": futuresPrice,
+            "kucoin_spot_rsi": calculateRSI(prices: kucoinPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0,
+            "bybit_spot_rsi": calculateRSI(prices: bybitPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0,
+            "kucoin_funding_rate": kucoinFundingRates[pair] ?? 0.0,
+            "bybit_funding_rate": bybitFundingRates[pair] ?? 0.0,
+            "sentiment_score": sentimentScores[pair] ?? 0.0
+        ]
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
+            request.httpBody = jsonData
+        } catch {
+            print("DEBUG: Failed to serialize spread prediction payload for \(pair): \(error.localizedDescription)")
+            Task { @MainActor in
+                logAlert(event: "Failed to serialize spread prediction payload for \(pair): \(error.localizedDescription)")
+            }
+            return arbitrageMinSpreadThreshold
+        }
+
+        var data: Data?
+        var response: URLResponse?
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+            print("DEBUG: Fetch spread prediction response for \(pair): Status code \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+            if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                print("DEBUG: Fetch spread prediction response body: \(responseBody)")
+            }
+        } catch {
+            print("DEBUG: Failed to fetch spread prediction for \(pair): \(error.localizedDescription)")
+            Task { @MainActor in
+                logAlert(event: "Failed to fetch spread prediction for \(pair): \(error.localizedDescription)")
+            }
+            let delay = pow(2.0, Double(retryCount))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                return await fetchSpreadPrediction(pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, retryCount: retryCount + 1)
+            } catch {
+                print("DEBUG: Failed to sleep during retry for spread prediction: \(error.localizedDescription)")
+                return arbitrageMinSpreadThreshold
+            }
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            print("DEBUG: Invalid spread prediction response for \(pair): Status code \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+            Task { @MainActor in
+                logAlert(event: "Invalid spread prediction response for \(pair)")
+            }
+            let delay = pow(2.0, Double(retryCount))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                return await fetchSpreadPrediction(pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, retryCount: retryCount + 1)
+            } catch {
+                print("DEBUG: Failed to sleep during retry for spread prediction: \(error.localizedDescription)")
+                return arbitrageMinSpreadThreshold
+            }
+        }
+
+        guard let fetchedData = data,
+              let json = try? JSONSerialization.jsonObject(with: fetchedData) as? [String: Any],
+              let predictedSpread = json["predicted_spread"] as? Double else {
+            print("DEBUG: Failed to parse spread prediction for \(pair)")
+            Task { @MainActor in
+                logAlert(event: "Failed to parse spread prediction for \(pair)")
+            }
+            let delay = pow(2.0, Double(retryCount))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                return await fetchSpreadPrediction(pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, retryCount: retryCount + 1)
+            } catch {
+                print("DEBUG: Failed to sleep during retry for spread prediction: \(error.localizedDescription)")
+                return arbitrageMinSpreadThreshold
+            }
+        }
+
+        print("DEBUG: Successfully fetched spread prediction for \(pair): \(predictedSpread)")
+        return predictedSpread
+    }
+}

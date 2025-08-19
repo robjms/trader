@@ -1,0 +1,342 @@
+
+//--------------------------------------------------------------------------------------------------------------Block 19 - Machine Learning Prediction Engine
+
+
+import Foundation // Added for String.Encoding and other Foundation types
+
+
+extension ExchangeWebSocket {
+    @MainActor static var kucoinRunningProfitLoss: Double = 0.0
+    @MainActor static var bybitRunningProfitLoss: Double = 0.0
+    static var hftLastTradeTime: [String: (exchange: String, timestamp: Date)] = [:]
+
+    static func evaluateHFTStrategy(pair: String, kucoinSpotRsi: Double, bybitSpotRsi: Double) async {
+        let kucoinSpotPrice = await MainActor.run(body: { kucoinCurrentPrice[pair] }) ?? 0.0
+        let bybitSpotPrice = await MainActor.run(body: { bybitCurrentPrice[pair] }) ?? 0.0
+        let kucoinSpotPrices = await MainActor.run(body: { kucoinPrices[pair] }) ?? []
+        let bybitSpotPrices = await MainActor.run(body: { bybitPrices[pair] }) ?? []
+        let kucoinBalanceValue = kucoinBalance
+        let kucoinRunningProfitLossValue = kucoinRunningProfitLoss
+        let bybitBalanceValue = bybitBalance
+        let bybitRunningProfitLossValue = bybitRunningProfitLoss
+        let kucoinLastTrade = await MainActor.run(body: { hftLastTradeTime["kucoin_\(pair)"] })
+        let bybitLastTrade = await MainActor.run(body: { hftLastTradeTime["bybit_\(pair)"] })
+        let scalpEntryThreshold: Double = getDouble("SCALP_ENTRY_THRESHOLD", defaultValue: 0.0006)
+        let scalpExitThreshold: Double = getDouble("SCALP_PROFIT_TARGET", defaultValue: 0.0012)
+        let rsiOverboughtThreshold: Double = getDouble("SPOT_RSI_UPPER_THRESHOLD", defaultValue: 70.0)
+        let rsiOversoldThreshold: Double = getDouble("SPOT_RSI_LOWER_THRESHOLD", defaultValue: 30.0)
+
+        func executeHFTTrade(exchange: String, price: Double, prices: [Double], balance: Double, runningProfitLoss: Double, rsi: Double) async -> (newBalance: Double, newRunningProfitLoss: Double) {
+            var balanceLocal = balance
+            var runningProfitLossLocal = runningProfitLoss
+            let priceChange = prices.count >= 2 ? (price - prices[prices.count - 2]) / prices[prices.count - 2] : 0.0
+            let kellySize = await calculateKellyCriterion(pair: pair)
+            let baseTradeAmount = min(balanceLocal * getDouble("HFT_MAX_BALANCE_PERCENTAGE", defaultValue: 0.3), getDouble("HFT_TRADE_AMOUNT", defaultValue: 100.0))
+            let targetNetProfit = getDouble("TARGET_NET_PROFIT", defaultValue: 0.20)
+            let makerFee = exchange == "kucoin" ? kucoinMakerFee : bybitMakerFee
+            let takerFee = exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee
+            let orderType = environment["HFT_ORDER_TYPE"]?.lowercased() ?? "market"
+            let feeRate = orderType == "limit" ? makerFee : takerFee
+            let minPriceMove = scalpExitThreshold + (feeRate * 2)
+            let tradeAmount = targetNetProfit / minPriceMove * price * kellySize
+            let trailingStopPercentage = getDouble("HFT_TRAILING_STOP_PERCENTAGE", defaultValue: 0.03)
+
+            guard tradeAmount <= baseTradeAmount else {
+                print("DEBUG: Trade amount exceeds base trade amount for \(exchange)-\(pair): TradeAmount=\(tradeAmount), BaseTradeAmount=\(baseTradeAmount)")
+                await MainActor.run(body: {
+                    logAlert(event: "Trade amount exceeds base trade amount for \(exchange)-\(pair): TradeAmount=\(tradeAmount), BaseTradeAmount=\(baseTradeAmount)")
+                })
+                return (balanceLocal, runningProfitLossLocal)
+            }
+
+            guard balanceLocal >= tradeAmount * price else {
+                print("DEBUG: Insufficient balance for \(exchange)-\(pair): Available \(balanceLocal), Required \(tradeAmount * price)")
+                await MainActor.run(body: {
+                    logAlert(event: "Insufficient balance for \(exchange)-\(pair): Available \(balanceLocal), Required \(tradeAmount * price)")
+                })
+                return (balanceLocal, runningProfitLossLocal)
+            }
+
+            guard let book = await MainActor.run(body: { exchange == "kucoin" ? kucoinOrderBooks[pair] : bybitOrderBooks[pair] }),
+                  let entryPrice = book.bids.first?.price,
+                  abs(price - entryPrice) / entryPrice < getDouble("MAX_SLIPPAGE", defaultValue: 0.005) else {
+                print("DEBUG: HFT Trade skipped for \(exchange)-\(pair): Slippage too high or invalid order book")
+                return (balanceLocal, runningProfitLossLocal)
+            }
+
+            if priceChange >= scalpEntryThreshold && tradeAmount > 0 && balanceLocal >= tradeAmount && rsi < rsiOverboughtThreshold && rsi >= rsiOversoldThreshold {
+                let entryPrice = price
+                var exitPrice: Double = 0.0
+                let startTime = Date()
+
+                while Date().timeIntervalSince(startTime) <= getDouble("HFT_MAX_TRADE_DURATION_SECONDS", defaultValue: 20.0) {
+                    let currentPrice = await MainActor.run(body: { exchange == "kucoin" ? kucoinCurrentPrice[pair] : bybitCurrentPrice[pair] }) ?? entryPrice
+                    if currentPrice > 0 {
+                        let peakPrice = max(entryPrice, currentPrice)
+                        let priceDiff = (currentPrice - entryPrice) / entryPrice
+                        let dropFromPeak = (peakPrice - currentPrice) / peakPrice
+                        if priceDiff >= scalpExitThreshold || priceDiff <= -getDouble("SCALP_STOP_LOSS", defaultValue: 0.0015) || dropFromPeak >= trailingStopPercentage {
+                            exitPrice = currentPrice
+                            break
+                        }
+                    }
+                    try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+                }
+
+                if exitPrice == 0.0 {
+                    exitPrice = await MainActor.run(body: { exchange == "kucoin" ? kucoinCurrentPrice[pair] : bybitCurrentPrice[pair] }) ?? entryPrice
+                }
+
+                let quantity = tradeAmount / entryPrice
+                let grossProfit = (exitPrice - entryPrice) * quantity
+                let fees = tradeAmount * feeRate * 2
+                let feeBuffer = fees * 1.2
+                let netProfit = grossProfit - fees
+
+                if netProfit <= feeBuffer {
+                    print("INFO: HFT Trade skipped for \(exchange)-\(pair): Net profit (\(netProfit)) does not exceed fee buffer (\(feeBuffer))")
+                    return (balanceLocal, runningProfitLossLocal)
+                }
+
+                balanceLocal += netProfit
+                runningProfitLossLocal += netProfit
+
+                let isWin = netProfit > 0
+                if var metrics = await MainActor.run(body: { tradeMetrics[pair] }) {
+                    metrics.wins += isWin ? 1 : 0
+                    metrics.losses += isWin ? 0 : 1
+                    metrics.totalProfit += netProfit
+                    metrics.totalFees += fees
+                    await MainActor.run(body: { tradeMetrics[pair] = metrics })
+                }
+                if var perfMetrics = await MainActor.run(body: { performanceMetrics[pair] }) {
+                    perfMetrics.trades += 1
+                    perfMetrics.wins += isWin ? 1 : 0
+                    perfMetrics.profit += netProfit
+                    perfMetrics.fees += fees
+                    await MainActor.run(body: { performanceMetrics[pair] = perfMetrics })
+                }
+
+                print("INFO: \(exchange.capitalized) HFT Trade for \(pair): Type: Scalp, Amount: \(tradeAmount) USDT, Entry: \(entryPrice), Exit: \(exitPrice), Gross Profit: \(grossProfit), Fees: \(fees), Net Profit: \(netProfit), Running P/L: \(runningProfitLossLocal), Balance: \(balanceLocal)")
+                
+                await MainActor.run(body: { hftLastTradeTime["\(exchange)_\(pair)"] = (exchange, Date()) })
+                ExchangeWebSocket.sendTradeToFlaskServer(
+                    strategy: "HFT-Scalp",
+                    pair: pair,
+                    exchange: exchange,
+                    spotPrice: entryPrice,
+                    futuresPrice: exitPrice,
+                    tradeAmount: tradeAmount,
+                    profit: netProfit
+                )
+
+                let timestamp = ISO8601DateFormatter().string(from: Date())
+                let logEntry = "\(timestamp),HFT-Scalp,\(pair),\(exchange),\(entryPrice),\(exitPrice),\(tradeAmount),\(netProfit),\(fees)\n"
+                let tradesCSVURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv")
+                do {
+                    let fileManager = FileManager.default
+                    let directoryURL = tradesCSVURL.deletingLastPathComponent()
+                    if !fileManager.fileExists(atPath: directoryURL.path) {
+                        try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+                    }
+                    if !fileManager.fileExists(atPath: tradesCSVURL.path) {
+                        let header = "timestamp,strategy,pair,exchange,entry_price,exit_price,trade_amount,net_profit,fees\n"
+                        try header.write(to: tradesCSVURL, atomically: true, encoding: .utf8)
+                    }
+                    if let fileHandle = try? FileHandle(forWritingTo: tradesCSVURL) {
+                        defer { fileHandle.closeFile() }
+                        if let data = logEntry.data(using: .utf8) {
+                            fileHandle.seekToEndOfFile()
+                            fileHandle.write(data)
+                        }
+                    } else {
+                        let existingContent = (try? String(contentsOf: tradesCSVURL, encoding: .utf8)) ?? ""
+                        let newContent = existingContent + logEntry
+                        try newContent.write(to: tradesCSVURL, atomically: true, encoding: .utf8)
+                    }
+                } catch {
+                    print("DEBUG: Failed to log trade to CSV: \(error.localizedDescription)")
+                    await MainActor.run(body: {
+                        logAlert(event: "Failed to log trade to CSV: \(error.localizedDescription)")
+                    })
+                }
+            }
+            return (balanceLocal, runningProfitLossLocal)
+        }
+
+        if let lastKucoinTrade = kucoinLastTrade, lastKucoinTrade.exchange == "kucoin" {
+            let timeSinceLastTrade = Date().timeIntervalSince(lastKucoinTrade.timestamp)
+            if timeSinceLastTrade < hftCooldownSeconds {
+                print("INFO: KuCoin HFT on cooldown for \(pair): \(Int(hftCooldownSeconds - timeSinceLastTrade)) seconds remaining")
+            } else {
+                if kucoinSpotPrice > 0 && kucoinSpotPrices.count >= spotEmaShortPeriod {
+                    let (newKucoinBalance, newKucoinRunningProfitLoss) = await executeHFTTrade(
+                        exchange: "kucoin",
+                        price: kucoinSpotPrice,
+                        prices: kucoinSpotPrices,
+                        balance: kucoinBalanceValue,
+                        runningProfitLoss: kucoinRunningProfitLossValue,
+                        rsi: kucoinSpotRsi
+                    )
+                    kucoinBalance = newKucoinBalance
+                    kucoinRunningProfitLoss = newKucoinRunningProfitLoss
+                }
+            }
+        } else {
+            if kucoinSpotPrice > 0 && kucoinSpotPrices.count >= spotEmaShortPeriod {
+                let (newKucoinBalance, newKucoinRunningProfitLoss) = await executeHFTTrade(
+                    exchange: "kucoin",
+                    price: kucoinSpotPrice,
+                    prices: kucoinSpotPrices,
+                    balance: kucoinBalanceValue,
+                    runningProfitLoss: kucoinRunningProfitLossValue,
+                    rsi: kucoinSpotRsi
+                )
+                kucoinBalance = newKucoinBalance
+                kucoinRunningProfitLoss = newKucoinRunningProfitLoss
+            }
+        }
+
+        if let lastBybitTrade = bybitLastTrade, lastBybitTrade.exchange == "bybit" {
+            let timeSinceLastTrade = Date().timeIntervalSince(lastBybitTrade.timestamp)
+            if timeSinceLastTrade < hftCooldownSeconds {
+                print("INFO: Bybit HFT on cooldown for \(pair): \(Int(hftCooldownSeconds - timeSinceLastTrade)) seconds remaining")
+            } else {
+                if bybitSpotPrice > 0 && bybitSpotPrices.count >= spotEmaShortPeriod {
+                    let (newBybitBalance, newBybitRunningProfitLoss) = await executeHFTTrade(
+                        exchange: "bybit",
+                        price: bybitSpotPrice,
+                        prices: bybitSpotPrices,
+                        balance: bybitBalanceValue,
+                        runningProfitLoss: bybitRunningProfitLossValue,
+                        rsi: bybitSpotRsi
+                    )
+                    bybitBalance = newBybitBalance
+                    bybitRunningProfitLoss = newBybitRunningProfitLoss
+                }
+            }
+        } else {
+            if bybitSpotPrice > 0 && bybitSpotPrices.count >= spotEmaShortPeriod {
+                let (newBybitBalance, newBybitRunningProfitLoss) = await executeHFTTrade(
+                    exchange: "bybit",
+                    price: bybitSpotPrice,
+                    prices: bybitSpotPrices,
+                    balance: bybitBalanceValue,
+                    runningProfitLoss: bybitRunningProfitLossValue,
+                    rsi: bybitSpotRsi
+                )
+                bybitBalance = newBybitBalance
+                bybitRunningProfitLoss = newBybitRunningProfitLoss
+            }
+        }
+    }
+
+    static func evaluateFundingRateMomentum(pair: String, kucoinFundingRate: Double, bybitFundingRate: Double) async {
+        let fundingMomentumThreshold = getDouble("FUNDING_MOMENTUM_THRESHOLD", defaultValue: 0.00008)
+        let tradeAmount = getDouble("FUTURES_TRADE_AMOUNT", defaultValue: 150.0)
+        let kucoinFuturesPrice = await MainActor.run(body: { kucoinCurrentFuturesPrice[pair] }) ?? 0.0
+        let bybitFuturesPrice = await MainActor.run(body: { bybitCurrentFuturesPrice[pair] }) ?? 0.0
+
+        if kucoinFundingRate > fundingMomentumThreshold && kucoinFuturesPrice > 0 {
+            let tradeAmount = min(tradeAmount, kucoinBalance)
+            if tradeAmount > 0 && kucoinBalance >= tradeAmount {
+                print("INFO: KuCoin Funding Rate Momentum Trade for \(pair): Long, Amount: \(tradeAmount), Funding Rate: \(kucoinFundingRate)")
+                kucoinBalance -= tradeAmount * kucoinFuturesPrice * futuresStopLossPercentage
+            }
+        }
+
+        if bybitFundingRate > fundingMomentumThreshold && bybitFuturesPrice > 0 {
+            let tradeAmount = min(tradeAmount, bybitBalance)
+            if tradeAmount > 0 && bybitBalance >= tradeAmount {
+                print("INFO: Bybit Funding Rate Momentum Trade for \(pair): Long, Amount: \(tradeAmount), Target Profit: \(spoofingProfitTarget)")
+                bybitBalance += tradeAmount * spoofingProfitTarget
+            }
+        }
+    }
+
+    static func spoofLiquidity(pair: String, kucoinOrderBook: [[String: Any]], bybitOrderBook: [[String: Any]]) async {
+        let spoofingVolumeThreshold = getDouble("SPOOFING_VOLUME_THRESHOLD", defaultValue: 1.5)
+        let spoofingProfitTarget = getDouble("SPOOFING_PROFIT_TARGET", defaultValue: 0.008)
+
+        let kucoinVolume = kucoinOrderBook.reduce(0.0) { $0 + ($1["volume"] as? Double ?? 0.0) }
+        let bybitVolume = bybitOrderBook.reduce(0.0) { $0 + ($1["volume"] as? Double ?? 0.0) }
+
+        if kucoinVolume > spoofingVolumeThreshold {
+            let tradeAmount = min(kucoinBalance * 0.1, getDouble("SLIPPAGE_TRADE_AMOUNT", defaultValue: 100.0))
+            if tradeAmount > 0 && kucoinBalance >= tradeAmount {
+                print("INFO: KuCoin Spoofing Liquidity Trade for \(pair): Amount: \(tradeAmount), Target Profit: \(spoofingProfitTarget)")
+                kucoinBalance += tradeAmount * spoofingProfitTarget
+            }
+        }
+
+        if bybitVolume > spoofingVolumeThreshold {
+            let tradeAmount = min(bybitBalance * 0.1, getDouble("SLIPPAGE_TRADE_AMOUNT", defaultValue: 100.0))
+            if tradeAmount > 0 && bybitBalance >= tradeAmount {
+                print("INFO: Bybit Spoofing Liquidity Trade for \(pair): Amount: \(tradeAmount), Target Profit: \(spoofingProfitTarget)")
+                bybitBalance += tradeAmount * spoofingProfitTarget
+            }
+        }
+    }
+
+    static func optimizeTradeLatency(pair: String) async {
+        let latencySpikeThreshold = getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 80.0)
+        let latency = await measureTradeExecutionLatency()
+        if latency > latencySpikeThreshold {
+            print("INFO: Latency spike detected for \(pair): \(latency)ms. Optimizing trade execution...")
+            await MainActor.run {
+                logAlert(event: "High latency detected for trade execution for \(pair): \(latency)ms")
+            }
+            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+        }
+    }
+
+    static func measureTradeExecutionLatency() async -> Double {
+        let start = Date()
+        try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+        return Date().timeIntervalSince(start) * 1000
+    }
+
+    static func sendTradeToFlaskServer(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double) {
+        let flaskUrl = URL(string: environment["FLASK_SERVER_URL"] ?? "http://localhost:5001/log_trade")!
+        var request = URLRequest(url: flaskUrl)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 10.0
+        
+        let tradeData: [String: Any] = [
+            "strategy": strategy,
+            "pair": pair,
+            "exchange": exchange,
+            "spot_price": spotPrice,
+            "futures_price": futuresPrice,
+            "trade_amount": tradeAmount,
+            "profit": profit,
+            "timestamp": ISO8601DateFormatter().string(from: Date())
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: tradeData)
+        } catch {
+            print("DEBUG: Failed to serialize trade data for Flask server: \(error.localizedDescription)")
+            Task { @MainActor in
+                logAlert(event: "Failed to serialize trade data for Flask server: \(error.localizedDescription)")
+            }
+            return
+        }
+        
+        let startTime = Date()
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let latency = Date().timeIntervalSince(startTime) * 1000
+            Task { @MainActor in
+                lastLatency["flask-trade-log"] = latency
+                if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 80.0) {
+                    logAlert(event: "High latency detected for Flask trade log: \(latency)ms")
+                }
+                if let error = error {
+                    logAlert(event: "Failed to send trade to Flask server: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
+}
+

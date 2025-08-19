@@ -1,0 +1,177 @@
+
+//----------------------------------------------------------------------------------------------------------------------Block 4 - Technical Indicator Computations
+
+
+
+
+
+extension ExchangeWebSocket {
+    static func checkLiquidity(exchange: String, pair: String, marketType: String, tradeAmount: Double, price: Double) async -> Double? {
+        let requiredLiquidity = tradeAmount * price * liquidityDepthMultiplier
+        
+        async let spotDepth = marketType == "spot" ? await fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: "spot") : nil
+        async let futuresDepth = marketType == "futures" ? await fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: "futures") : nil
+        
+        do {
+            let depth = try await (marketType == "spot" ? spotDepth : futuresDepth) ?? minLiquidityThreshold
+            let totalLiquidity = depth
+            
+            if totalLiquidity < requiredLiquidity {
+                print("Insufficient liquidity for \(exchange)-\(pair)-\(marketType): Depth \(totalLiquidity), Required \(requiredLiquidity)")
+                await MainActor.run {
+                    logAlert(event: "Insufficient liquidity for \(exchange)-\(pair)-\(marketType): Depth \(totalLiquidity), Required \(requiredLiquidity)")
+                }
+                return nil
+            } else {
+                print("DEBUG: Liquidity check passed for \(exchange)-\(pair)-\(marketType): Depth \(totalLiquidity)")
+                return totalLiquidity
+            }
+        } catch {
+            print("DEBUG: Error fetching order book depth for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
+            await MainActor.run {
+                logAlert(event: "Error fetching order book depth for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
+            }
+            return nil
+        }
+    }
+
+    static func fetchOrderBookDepth(exchange: String, pair: String, marketType: String, retryCount: Int = 0) async throws -> Double? {
+        let maxRetries = getInt("API_MAX_RETRIES", defaultValue: 3)
+        guard retryCount < maxRetries else {
+            print("Max retries reached for order book fetch: \(exchange)-\(pair)-\(marketType)")
+            await MainActor.run {
+                logAlert(event: "Max retries reached for order book fetch: \(exchange)-\(pair)-\(marketType)")
+            }
+            let book = exchange == "bybit" ? bybitOrderBooks[pair] : kucoinOrderBooks[pair]
+            let cachedDepth = book.map { book in
+                let bidDepth = book.bids.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity }
+                let askDepth = book.asks.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity }
+                return bidDepth + askDepth
+            } ?? getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 500.0)
+            print("DEBUG: Using cached depth for \(exchange)-\(pair)-\(marketType): \(cachedDepth)")
+            return cachedDepth
+        }
+
+        var url: URL?
+        let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+        
+        if exchange == "bybit" {
+            let category = marketType == "spot" ? "spot" : "linear"
+            url = URL(string: "https://api.bybit.com/v5/market/orderbook?category=\(category)&symbol=\(symbol)&limit=50")
+        } else {
+            let endpoint = marketType == "spot" ? "/api/v1/market/orderbook/level2_50?symbol=\(symbol)" : "/api/v1/contractMarket/level2?symbol=\(symbol)M"
+            url = URL(string: "https://api\(marketType == "spot" ? "" : "-futures").kucoin.com\(endpoint)")
+        }
+
+        guard let requestUrl = url else {
+            print("Invalid order book URL for \(exchange)-\(pair)-\(marketType)")
+            await MainActor.run {
+                logAlert(event: "Invalid order book URL for \(exchange)-\(pair)-\(marketType)")
+            }
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+            return try await fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+        }
+
+        var request = URLRequest(url: requestUrl)
+        request.httpMethod = "GET"
+        request.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 10.0)
+
+        let startTime = Date()
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            let latency = Date().timeIntervalSince(startTime) * 1000
+            await MainActor.run {
+                lastLatency[pair] = latency
+                if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
+                    print("High latency detected for order book fetch: \(latency)ms")
+                    logAlert(event: "High latency detected for order book fetch: \(latency)ms")
+                }
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                print("Invalid order book response for \(exchange)-\(pair)-\(marketType)")
+                await MainActor.run {
+                    logAlert(event: "Invalid order book response for \(exchange)-\(pair)-\(marketType)")
+                }
+                try await Task.sleep(nanoseconds: 2_000_000_000)
+                return try await fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+            }
+
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            if exchange == "bybit" {
+                guard let result = json?["result"] as? [String: Any],
+                      let bids = result["b"] as? [[String]],
+                      let asks = result["a"] as? [[String]],
+                      !bids.isEmpty, !asks.isEmpty else {
+                    print("Failed to parse Bybit order book data for \(pair)-\(marketType)")
+                    await MainActor.run {
+                        logAlert(event: "Failed to parse Bybit order book data for \(pair)-\(marketType)")
+                    }
+                    try await Task.sleep(nanoseconds: 2_000_000_000)
+                    return try await fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+                }
+
+                var bidDepth: Double = 0.0
+                var askDepth: Double = 0.0
+
+                for bid in bids.prefix(10) {
+                    if let priceStr = bid.first, let qtyStr = bid.last,
+                       let price = Double(priceStr), let qty = Double(qtyStr) {
+                        bidDepth += price * qty
+                    }
+                }
+
+                for ask in asks.prefix(10) {
+                    if let priceStr = ask.first, let qtyStr = ask.last,
+                       let price = Double(priceStr), let qty = Double(qtyStr) {
+                        askDepth += price * qty
+                    }
+                }
+
+                let totalDepth = bidDepth + askDepth
+                print("DEBUG: Bybit order book depth for \(pair)-\(marketType): \(totalDepth)")
+                return totalDepth
+            } else {
+                guard let dataDict = json?["data"] as? [String: Any],
+                      let bids = dataDict["bids"] as? [[String]],
+                      let asks = dataDict["asks"] as? [[String]],
+                      !bids.isEmpty, !asks.isEmpty else {
+                    print("Failed to parse KuCoin order book data for \(pair)-\(marketType)")
+                    await MainActor.run {
+                        logAlert(event: "Failed to parse KuCoin order book data for \(pair)-\(marketType)")
+                    }
+                    try await Task.sleep(nanoseconds: 2_000_000_000)
+                    return try await fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+                }
+
+                var bidDepth: Double = 0.0
+                var askDepth: Double = 0.0
+
+                for bid in bids.prefix(10) {
+                    if let priceStr = bid.first, let qtyStr = bid.last,
+                       let price = Double(priceStr), let qty = Double(qtyStr) {
+                        bidDepth += price * qty
+                    }
+                }
+
+                for ask in asks.prefix(10) {
+                    if let priceStr = ask.first, let qtyStr = ask.last,
+                       let price = Double(priceStr), let qty = Double(qtyStr) {
+                        askDepth += price * qty
+                    }
+                }
+
+                let totalDepth = bidDepth + askDepth
+                print("DEBUG: KuCoin order book depth for \(pair)-\(marketType): \(totalDepth)")
+                return totalDepth
+            }
+        } catch {
+            print("Failed to fetch order book for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
+            await MainActor.run {
+                logAlert(event: "Failed to fetch order book for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
+            }
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+            return try await fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+        }
+    }
+}

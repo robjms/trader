@@ -1,0 +1,433 @@
+
+
+//-------------------------------------------------------------------------------------------------------------------------Block 20 - API Data Retrieval and Authentication
+
+
+import CryptoKit
+import Foundation
+
+extension Data {
+    func hmac(key: String) -> String {
+        let keyData = key.data(using: .utf8)!
+        let signature = HMAC<SHA256>.authenticationCode(for: self, using: SymmetricKey(data: keyData))
+        return Data(signature).base64EncodedString()
+    }
+}
+// Extension for Block 20 API Interactions and Authentication
+extension ExchangeWebSocket {
+    static func fetchBalance(exchange: String) async {
+        let _ = getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20)
+        let maxRetries = getInt("API_MAX_RETRIES", defaultValue: 5)
+        var retries = 0
+
+        while retries < maxRetries {
+            let startTime = Date()
+            do {
+                if exchange == "kucoin" {
+                    let balance = try await fetchKuCoinBalance()
+                    await MainActor.run {
+                        kucoinLiveBalance = balance
+                        kucoinBalance = balance ?? kucoinFallbackBalance
+                        print("DEBUG: Fetched KuCoin balance: \(kucoinBalance) USDT")
+                    }
+                    break
+                } else if exchange == "bybit" {
+                    let balance = try await fetchBybitBalance()
+                    await MainActor.run {
+                        bybitLiveBalance = balance
+                        bybitBalance = balance ?? bybitFallbackBalance
+                        print("DEBUG: Fetched Bybit balance: \(bybitBalance) USDT")
+                    }
+                    break
+                }
+            } catch {
+                retries += 1
+                let latency = Date().timeIntervalSince(startTime) * 1000
+                await MainActor.run {
+                    logAlert(event: "Failed to fetch \(exchange) balance: \(error.localizedDescription), retry \(retries)/\(maxRetries), latency: \(latency)ms")
+                }
+                if retries == maxRetries {
+                    await MainActor.run {
+                        logAlert(event: "Max retries reached for \(exchange) balance fetch")
+                        if exchange == "kucoin" {
+                            kucoinBalance = kucoinFallbackBalance
+                        } else {
+                            bybitBalance = bybitFallbackBalance
+                        }
+                    }
+                }
+                try? await Task.sleep(nanoseconds: UInt64(1_000_000_000)) // 1-second delay
+            }
+        }
+    }
+
+    static func fetchKuCoinBalance() async throws -> Double? {
+        // DEBUG: Log function start
+        await MainActor.run {
+            logAlert(event: "🔴 DEBUG: fetchKuCoinBalance() function started")
+            logAlert(event: "🔴 DEBUG: KuCoin API Key exists: \(environment["KUCOIN_API_KEY"] != nil)")
+            logAlert(event: "🔴 DEBUG: KuCoin API Secret exists: \(environment["KUCOIN_API_SECRET"] != nil)")
+            logAlert(event: "🔴 DEBUG: KuCoin Passphrase exists: \(environment["KUCOIN_API_PASSPHRASE"] != nil)")
+        }
+        
+        guard let apiKey = environment["KUCOIN_API_KEY"],
+              let apiSecret = environment["KUCOIN_API_SECRET"],
+              let apiPassphrase = environment["KUCOIN_API_PASSPHRASE"] else {
+            await MainActor.run {
+                logAlert(event: "🔴 ERROR: Missing KuCoin API credentials")
+            }
+            throw NSError(domain: "KuCoinAPI", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing API credentials"])
+        }
+        
+        let url = URL(string: "https://api.kucoin.com/api/v1/accounts?currency=USDT&type=trade")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = Double(getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20))
+
+        let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
+        let endpoint = "/api/v1/accounts?currency=USDT&type=trade"
+        let method = "GET"
+        let body = "" // Empty body for GET request
+        let strToSign = timestamp + method + endpoint + body
+        
+        await MainActor.run {
+            logAlert(event: "🔴 DEBUG: KuCoin signing string: \(strToSign)")
+        }
+        
+        let signature = strToSign.data(using: .utf8)!.hmac(key: apiSecret)
+        
+        // For API v2.0+: Encrypt passphrase with HMAC-SHA256 using API secret, then base64 encode
+        let encryptedPassphrase = apiPassphrase.data(using: .utf8)!.hmac(key: apiSecret)
+
+        // Set headers for API v2.0+
+        request.addValue(apiKey, forHTTPHeaderField: "KC-API-KEY")
+        request.addValue(signature, forHTTPHeaderField: "KC-API-SIGN")
+        request.addValue(timestamp, forHTTPHeaderField: "KC-API-TIMESTAMP")
+        request.addValue(encryptedPassphrase, forHTTPHeaderField: "KC-API-PASSPHRASE")
+        request.addValue("2", forHTTPHeaderField: "KC-API-KEY-VERSION") // Critical: API version 2
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        await MainActor.run {
+            logAlert(event: "🔴 DEBUG: KuCoin request headers set, making API call...")
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            await MainActor.run {
+                logAlert(event: "🔴 ERROR: Non-HTTP response for KuCoin balance fetch")
+            }
+            throw NSError(domain: "KuCoinAPI", code: -1, userInfo: [NSLocalizedDescriptionKey: "Non-HTTP response"])
+        }
+        
+        let responseBody = String(data: data, encoding: .utf8) ?? "Invalid data"
+        await MainActor.run {
+            logAlert(event: "🔴 DEBUG: KuCoin response status: \(httpResponse.statusCode)")
+            logAlert(event: "🔴 DEBUG: KuCoin response: \(responseBody)")
+        }
+        
+        if httpResponse.statusCode != 200 {
+            await MainActor.run {
+                logAlert(event: "🔴 ERROR: Invalid KuCoin response status \(httpResponse.statusCode): \(responseBody)")
+            }
+            throw NSError(domain: "KuCoinAPI", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode)"])
+        }
+
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        guard let code = json?["code"] as? String else {
+            await MainActor.run {
+                logAlert(event: "🔴 ERROR: KuCoin response missing code field")
+            }
+            return nil
+        }
+        guard code == "200000" else {
+            let errorMsg = json?["msg"] as? String ?? "Unknown error"
+            await MainActor.run {
+                logAlert(event: "🔴 ERROR: KuCoin API error code \(code): \(errorMsg)")
+            }
+            return nil
+        }
+        guard let dataJson = json?["data"] as? [[String: Any]] else {
+            await MainActor.run {
+                logAlert(event: "🔴 ERROR: KuCoin response missing data array")
+            }
+            return nil
+        }
+        
+        await MainActor.run {
+            logAlert(event: "🔴 DEBUG: KuCoin found \(dataJson.count) accounts")
+        }
+        
+        let balance = dataJson.reduce(0.0) { sum, account in
+            if (account["type"] as? String) == "trade" && (account["currency"] as? String) == "USDT",
+               let availableStr = account["available"] as? String,
+               let available = Double(availableStr) {
+                return sum + available
+            }
+            return sum
+        }
+        
+        if balance == 0.0 {
+            await MainActor.run {
+                logAlert(event: "🔴 WARNING: KuCoin USDT trade account has zero balance")
+            }
+        }
+
+        await MainActor.run {
+            logAlert(event: "🔴 SUCCESS: KuCoin balance parsed: \(balance) USDT")
+        }
+
+        return balance
+    }
+
+    static func fetchBybitBalance() async throws -> Double? {
+        // DEBUG: Log function start
+        await MainActor.run {
+            logAlert(event: "🔵 DEBUG: fetchBybitBalance() function started")
+            logAlert(event: "🔵 DEBUG: Bybit API Key exists: \(environment["BYBIT_API_KEY"] != nil)")
+            logAlert(event: "🔵 DEBUG: Bybit API Secret exists: \(environment["BYBIT_API_SECRET"] != nil)")
+        }
+        
+        guard let apiKey = environment["BYBIT_API_KEY"],
+              let apiSecret = environment["BYBIT_API_SECRET"] else {
+            await MainActor.run {
+                logAlert(event: "🔵 ERROR: Missing Bybit API credentials")
+            }
+            throw NSError(domain: "BybitAPI", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing API credentials"])
+        }
+        
+        let url = URL(string: "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED&coin=USDT")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = Double(getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20))
+
+        let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
+        let recvWindow = environment["BYBIT_RECV_WINDOW"] ?? "5000"
+        let queryString = "accountType=UNIFIED&coin=USDT"
+        let paramStr = timestamp + apiKey + recvWindow + queryString
+        
+        await MainActor.run {
+            logAlert(event: "🔵 DEBUG: Bybit signing string: \(paramStr)")
+        }
+        
+        let signature = paramStr.data(using: .utf8)!.hmac(key: apiSecret)
+
+        request.addValue(apiKey, forHTTPHeaderField: "X-BAPI-API-KEY")
+        request.addValue(timestamp, forHTTPHeaderField: "X-BAPI-TIMESTAMP")
+        request.addValue(recvWindow, forHTTPHeaderField: "X-BAPI-RECV-WINDOW")
+        request.addValue(signature, forHTTPHeaderField: "X-BAPI-SIGN")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        await MainActor.run {
+            logAlert(event: "🔵 DEBUG: Bybit request headers set, making API call...")
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            await MainActor.run {
+                logAlert(event: "🔵 ERROR: Non-HTTP response for Bybit balance fetch")
+            }
+            throw NSError(domain: "BybitAPI", code: -1, userInfo: [NSLocalizedDescriptionKey: "Non-HTTP response"])
+        }
+        
+        let responseBody = String(data: data, encoding: .utf8) ?? "Invalid data"
+        await MainActor.run {
+            logAlert(event: "🔵 DEBUG: Bybit response status: \(httpResponse.statusCode)")
+            logAlert(event: "🔵 DEBUG: Bybit response: \(responseBody)")
+        }
+        
+        if httpResponse.statusCode != 200 {
+            await MainActor.run {
+                logAlert(event: "🔵 ERROR: Invalid Bybit response status \(httpResponse.statusCode): \(responseBody)")
+            }
+            throw NSError(domain: "BybitAPI", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode)"])
+        }
+
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        guard let retCode = json?["retCode"] as? Int else {
+            await MainActor.run {
+                logAlert(event: "🔵 ERROR: Bybit response missing retCode")
+            }
+            return nil
+        }
+        guard retCode == 0 else {
+            let retMsg = json?["retMsg"] as? String ?? "Unknown error"
+            await MainActor.run {
+                logAlert(event: "🔵 ERROR: Bybit API error code \(retCode): \(retMsg)")
+            }
+            return nil
+        }
+        guard let result = json?["result"] as? [String: Any],
+              let list = result["list"] as? [[String: Any]] else {
+            await MainActor.run {
+                logAlert(event: "🔵 ERROR: Bybit response missing result.list")
+            }
+            return nil
+        }
+        
+        await MainActor.run {
+            logAlert(event: "🔵 DEBUG: Bybit found \(list.count) accounts")
+        }
+        
+        var balance = 0.0
+        for account in list {
+            if let coinList = account["coin"] as? [[String: Any]] {
+                if let usdt = coinList.first(where: { ($0["coin"] as? String) == "USDT" }),
+                   let walletBalanceStr = usdt["walletBalance"] as? String,
+                   let walletBalance = Double(walletBalanceStr) {
+                    balance += walletBalance
+                }
+            }
+        }
+        
+        if balance == 0.0 {
+            await MainActor.run {
+                logAlert(event: "🔵 WARNING: Bybit USDT account has zero balance")
+            }
+        }
+
+        await MainActor.run {
+            logAlert(event: "🔵 SUCCESS: Bybit balance parsed: \(balance) USDT")
+        }
+
+        return balance
+    }
+
+    static func fetchKuCoinOrderBook(pair: String, isFutures: Bool) async -> BevaixOrderBook? {
+        // DEBUG: Log function start
+        await MainActor.run {
+            logAlert(event: "🟡 DEBUG: fetchKuCoinOrderBook() started for \(pair) (futures: \(isFutures))")
+        }
+        
+        let symbol = isFutures ? pair.replacingOccurrences(of: "-", with: "") + "M" : pair
+        let baseURL = isFutures ? "https://api-futures.kucoin.com" : "https://api.kucoin.com"
+        let path = isFutures ? "/api/v1/level2/snapshot" : "/api/v3/market/orderbook/level2"
+        var endpoint = path + "?symbol=\(symbol)"
+        if !isFutures {
+            endpoint += "&limit=100"
+        }
+        let urlString = baseURL + endpoint
+        
+        await MainActor.run {
+            logAlert(event: "🟡 DEBUG: KuCoin orderbook URL: \(urlString)")
+        }
+        
+        guard let url = URL(string: urlString) else {
+            await MainActor.run {
+                logAlert(event: "🟡 ERROR: Invalid KuCoin orderbook URL: \(urlString)")
+            }
+            return nil
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = Double(getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20))
+
+        // Only add authentication headers for futures
+        if isFutures {
+            guard let apiKey = environment["KUCOIN_API_KEY"],
+                  let apiSecret = environment["KUCOIN_API_SECRET"],
+                  let apiPassphrase = environment["KUCOIN_API_PASSPHRASE"] else {
+                await MainActor.run {
+                    logAlert(event: "🟡 ERROR: Missing KuCoin API credentials for futures")
+                }
+                return nil
+            }
+            
+            let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
+            let method = "GET"
+            let body = ""
+            let strToSign = timestamp + method + endpoint + body
+            let signature = strToSign.data(using: .utf8)!.hmac(key: apiSecret)
+            let encryptedPassphrase = apiPassphrase.data(using: .utf8)!.hmac(key: apiSecret)
+
+            request.addValue(apiKey, forHTTPHeaderField: "KC-API-KEY")
+            request.addValue(signature, forHTTPHeaderField: "KC-API-SIGN")
+            request.addValue(timestamp, forHTTPHeaderField: "KC-API-TIMESTAMP")
+            request.addValue(encryptedPassphrase, forHTTPHeaderField: "KC-API-PASSPHRASE")
+            request.addValue("2", forHTTPHeaderField: "KC-API-KEY-VERSION")
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                await MainActor.run {
+                    logAlert(event: "🟡 ERROR: Non-HTTP response for KuCoin orderbook \(pair)")
+                }
+                return nil
+            }
+            let responseBody = String(data: data, encoding: .utf8) ?? "Invalid data"
+            
+            await MainActor.run {
+                logAlert(event: "🟡 DEBUG: KuCoin orderbook response status: \(httpResponse.statusCode)")
+                logAlert(event: "🟡 DEBUG: KuCoin orderbook response: \(responseBody)")
+            }
+            
+            if httpResponse.statusCode != 200 {
+                await MainActor.run {
+                    logAlert(event: "🟡 ERROR: Invalid KuCoin orderbook status \(httpResponse.statusCode) for \(pair): \(responseBody)")
+                }
+                return nil
+            }
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            guard let code = json?["code"] as? String else {
+                await MainActor.run {
+                    logAlert(event: "🟡 ERROR: KuCoin orderbook response missing code for \(pair)")
+                }
+                return nil
+            }
+            guard code == "200000" else {
+                let errorMsg = json?["msg"] as? String ?? "Unknown error"
+                await MainActor.run {
+                    logAlert(event: "🟡 ERROR: KuCoin orderbook API error for \(pair) - code: \(code), msg: \(errorMsg)")
+                }
+                return nil
+            }
+            guard let dataJson = json?["data"] as? [String: Any],
+                  let bids = dataJson["bids"] as? [[String]],
+                  let asks = dataJson["asks"] as? [[String]] else {
+                await MainActor.run {
+                    logAlert(event: "🟡 ERROR: KuCoin orderbook missing bids/asks for \(pair): \(responseBody)")
+                }
+                return nil
+            }
+            
+            await MainActor.run {
+                logAlert(event: "🟡 DEBUG: KuCoin orderbook raw bids: \(bids.count), asks: \(asks.count)")
+            }
+            
+            let parsedBids = bids.compactMap { arr -> (Double, Double)? in
+                guard arr.count >= 2, let price = Double(arr[0]), let qty = Double(arr[1]) else { return nil }
+                return (price, qty)
+            }
+            let parsedAsks = asks.compactMap { arr -> (Double, Double)? in
+                guard arr.count >= 2, let price = Double(arr[0]), let qty = Double(arr[1]) else { return nil }
+                return (price, qty)
+            }
+            
+            await MainActor.run {
+                logAlert(event: "🟡 DEBUG: KuCoin orderbook parsed bids: \(parsedBids.count), asks: \(parsedAsks.count)")
+            }
+            
+            if parsedBids.isEmpty || parsedAsks.isEmpty {
+                await MainActor.run {
+                    logAlert(event: "🟡 ERROR: KuCoin orderbook empty after parsing for \(pair)")
+                }
+                return nil
+            }
+            
+            await MainActor.run {
+                logAlert(event: "🟡 SUCCESS: KuCoin orderbook parsed for \(pair)")
+            }
+            
+            return BevaixOrderBook(bids: parsedBids, asks: parsedAsks)
+        } catch {
+            await MainActor.run {
+                logAlert(event: "🟡 ERROR: Failed to fetch KuCoin orderbook for \(pair): \(error.localizedDescription)")
+            }
+            return nil
+        }
+    }
+}
+
+
+

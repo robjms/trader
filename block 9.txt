@@ -1,0 +1,559 @@
+
+//---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
+
+
+
+
+
+
+class KucoinWebSocketDelegate: WebSocketDelegate {
+    private static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 8
+        return formatter
+    }()
+
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
+                print("KuCoin Spot WebSocket connected with headers: \(headers)")
+                ExchangeWebSocket.kucoinIsConnected = true
+            case .disconnected(let reason, let code):
+                print("KuCoin Spot WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.kucoinIsConnected = false
+            case .text(let string):
+                print("DEBUG: KuCoin Spot WebSocket received message: \(string)")
+                if let data = string.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let type = json["type"] as? String, type == "message",
+                       let topic = json["topic"] as? String {
+                        if topic.hasPrefix("/market/ticker:"),
+                           let dataDict = json["data"] as? [String: Any] {
+                            let priceKeys = ["price", "last", "bestAsk", "bestBid"]
+                            var priceStr: String?
+                            for key in priceKeys {
+                                if let value = dataDict[key] as? String {
+                                    priceStr = value
+                                    break
+                                }
+                            }
+                            guard let priceStr = priceStr else {
+                                print("Failed to find price in KuCoin Spot message. Available keys: \(dataDict.keys), Full message: \(dataDict)")
+                                return
+                            }
+                            var price: Double?
+                            if let priceNum = Self.numberFormatter.number(from: priceStr) {
+                                price = Double(priceNum.description)
+                            } else if let parsedPrice = Double(priceStr) {
+                                price = parsedPrice
+                            }
+                            guard let price = price else {
+                                print("Failed to parse price '\(priceStr)' from KuCoin Spot message. Full message: \(dataDict)")
+                                return
+                            }
+                            let spotSymbol = topic.components(separatedBy: ":").last ?? ""
+                            let pair = spotSymbol
+                            ExchangeWebSocket.kucoinCurrentPrice[pair] = price
+                            ExchangeWebSocket.kucoinPrices[pair, default: []].append(price)
+                            if ExchangeWebSocket.kucoinPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                ExchangeWebSocket.kucoinPrices[pair]!.removeFirst()
+                            }
+                            let volStr = dataDict["size"] as? String ?? dataDict["volume"] as? String
+                            if let volStr = volStr {
+                                var vol: Double?
+                                if let volNum = Self.numberFormatter.number(from: volStr) {
+                                    vol = Double(volNum.description)
+                                } else if let parsedVol = Double(volStr) {
+                                    vol = parsedVol
+                                }
+                                if let vol = vol {
+                                    ExchangeWebSocket.kucoinSpotVolume[pair, default: []].append(vol)
+                                    if ExchangeWebSocket.kucoinSpotVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                        ExchangeWebSocket.kucoinSpotVolume[pair]!.removeFirst()
+                                    }
+                                } else {
+                                    print("Failed to parse volume '\(volStr)' from KuCoin Spot message. Full message: \(dataDict)")
+                                }
+                            }
+                            print("Updated KuCoin spot price for \(pair): \(price)")
+                        }
+                    }
+                }
+            case .error(let error):
+                print("KuCoin WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                ExchangeWebSocket.kucoinIsConnected = false
+            case .pong(_):
+                print("Received pong from KuCoin WebSocket")
+            default:
+                break
+            }
+        }
+    }
+}
+
+class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
+    private static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 8
+        return formatter
+    }()
+
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
+                print("KuCoin Futures WebSocket connected with headers: \(headers)")
+                ExchangeWebSocket.kucoinFuturesIsConnected = true
+            case .disconnected(let reason, let code):
+                print("KuCoin Futures WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.kucoinFuturesIsConnected = false
+            case .text(let string):
+                print("DEBUG: KuCoin Futures WebSocket received message: \(string)")
+                if let data = string.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let type = json["type"] as? String, type == "message",
+                       let topic = json["topic"] as? String {
+                        if topic.hasPrefix("/contractMarket/tickerV2:"),
+                           let dataDict = json["data"] as? [String: Any] {
+                            let priceKeys = ["bestAskPrice", "bestBidPrice", "lastPrice", "indexPrice"]
+                            var priceStr: String?
+                            for key in priceKeys {
+                                if let value = dataDict[key] as? String {
+                                    priceStr = value
+                                    break
+                                }
+                            }
+                            guard let priceStr = priceStr else {
+                                print("Failed to find price in KuCoin Futures message. Available keys: \(dataDict.keys), Full message: \(dataDict)")
+                                return
+                            }
+                            var price: Double?
+                            if let priceNum = Self.numberFormatter.number(from: priceStr) {
+                                price = priceNum.doubleValue
+                            } else if let parsedPrice = Double(priceStr) {
+                                price = parsedPrice
+                            }
+                            guard let price = price else {
+                                print("Failed to parse price '\(priceStr)' from KuCoin Futures message. Full message: \(dataDict)")
+                                return
+                            }
+                            let futuresSymbol = topic.components(separatedBy: ":").last ?? ""
+                            guard let pair = ExchangeWebSocket.kucoinFuturesSymbols.first(where: { $0.value == futuresSymbol })?.key else {
+                                print("No pair found for futures symbol: \(futuresSymbol)")
+                                return
+                            }
+                            ExchangeWebSocket.kucoinCurrentFuturesPrice[pair] = price
+                            ExchangeWebSocket.kucoinFuturesPrices[pair, default: []].append(price)
+                            if ExchangeWebSocket.kucoinFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                ExchangeWebSocket.kucoinFuturesPrices[pair]!.removeFirst()
+                            }
+                            let volStr = dataDict["volume"] as? String ?? dataDict["size"] as? String
+                            if let volStr = volStr {
+                                var vol: Double?
+                                if let volNum = Self.numberFormatter.number(from: volStr) {
+                                    vol = volNum.doubleValue
+                                } else if let parsedVol = Double(volStr) {
+                                    vol = parsedVol
+                                }
+                                if let vol = vol {
+                                    ExchangeWebSocket.kucoinFuturesVolume[pair, default: []].append(vol)
+                                    if ExchangeWebSocket.kucoinFuturesVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                        ExchangeWebSocket.kucoinFuturesVolume[pair]!.removeFirst()
+                                    }
+                                } else {
+                                    print("Failed to parse volume '\(volStr)' from KuCoin Futures message. Full message: \(dataDict)")
+                                }
+                            }
+                            print("Updated KuCoin futures price for \(pair): \(price)")
+                        } else if topic.hasPrefix("/contractMarket/level2:"),
+                                  let dataDict = json["data"] as? [String: Any] {
+                            print("DEBUG: Processing KuCoin Futures order book for topic \(topic)")
+
+                            let futuresSymbol = topic.components(separatedBy: ":").last ?? ""
+                            guard let pair = ExchangeWebSocket.kucoinFuturesSymbols.first(where: { $0.value == futuresSymbol })?.key else {
+                                print("No pair found for futures symbol: \(futuresSymbol)")
+                                return
+                            }
+
+                            var orderBook: [(price: Double, volume: Double, side: String)] = []
+
+                            if let bids = dataDict["bids"] as? [[String]],
+                               let asks = dataDict["asks"] as? [[String]] {
+                                print("DEBUG: Snapshot received - Bids: \(bids.count), Asks: \(asks.count)")
+                                for bid in bids {
+                                    if let priceStr = bid.first, let qtyStr = bid.last,
+                                       let price = Double(priceStr), let qty = Double(qtyStr), qty > 0 {
+                                        orderBook.append((price: price, volume: qty, side: "buy"))
+                                    } else {
+                                        print("Failed to parse bid entry: \(bid)")
+                                    }
+                                }
+                                for ask in asks {
+                                    if let priceStr = ask.first, let qtyStr = ask.last,
+                                       let price = Double(priceStr), let qty = Double(qtyStr), qty > 0 {
+                                        orderBook.append((price: price, volume: qty, side: "sell"))
+                                    } else {
+                                        print("Failed to parse ask entry: \(ask)")
+                                    }
+                                }
+                            } else if let change = dataDict["change"] as? String {
+                                print("DEBUG: Incremental update received - Change: \(change)")
+                                orderBook = ExchangeWebSocket.kucoinFuturesOrderBook[pair] ?? []
+                                let components = change.components(separatedBy: ",")
+                                if components.count == 3,
+                                   let price = Double(components[0]),
+                                   let size = Double(components[2]) {
+                                    let side = components[1].lowercased() == "buy" ? "buy" : "sell"
+                                    orderBook.removeAll { $0.price == price && $0.side == side }
+                                    if size > 0 {
+                                        orderBook.append((price: price, volume: size, side: side))
+                                    }
+                                } else {
+                                    print("Failed to parse change field: \(change)")
+                                    return
+                                }
+                            } else {
+                                print("Failed to parse order book data: \(dataDict)")
+                                return
+                            }
+
+                            ExchangeWebSocket.kucoinFuturesOrderBook[pair] = orderBook
+                            print("DEBUG: Updated KuCoin futures order book for \(pair): \(orderBook.count) entries")
+                        } else if topic.hasPrefix("/contract/instrument:"),
+                                  let dataDict = json["data"] as? [String: Any],
+                                  let fundingRateStr = dataDict["fundingRate"] as? String,
+                                  let fundingRateNum = Self.numberFormatter.number(from: fundingRateStr),
+                                  let fundingRate = Double(fundingRateNum.description),
+                                  let futuresSymbol = topic.components(separatedBy: ":").last,
+                                  let pair = ExchangeWebSocket.kucoinFuturesSymbols.first(where: { $0.value == futuresSymbol })?.key {
+                            ExchangeWebSocket.kucoinFundingRates[pair] = fundingRate
+                            print("Updated KuCoin funding rate for \(pair): \(fundingRate)")
+                        }
+                    }
+                }
+            case .error(let error):
+                print("KuCoin Futures WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                ExchangeWebSocket.kucoinFuturesIsConnected = false
+            case .pong(_):
+                print("Received pong from KuCoin Futures WebSocket")
+            default:
+                break
+            }
+        }
+    }
+}
+
+class BybitWebSocketDelegate: WebSocketDelegate {
+    private static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 8
+        return formatter
+    }()
+
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
+                print("Bybit Spot WebSocket connected with headers: \(headers)")
+                ExchangeWebSocket.bybitIsConnected = true
+            case .disconnected(let reason, let code):
+                print("Bybit Spot WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.bybitIsConnected = false
+            case .text(let string):
+                print("DEBUG: Bybit Spot WebSocket received message: \(string)")
+                if let data = string.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let success = json["success"] as? Bool {
+                        if success, let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
+                            print("Bybit Spot subscription confirmed")
+                        } else if !success {
+                            print("Bybit Spot WebSocket error: \(json)")
+                        }
+                    } else if let topic = json["topic"] as? String {
+                        if topic.hasPrefix("tickers."),
+                           let dataDict = json["data"] as? [String: Any],
+                           let symbol = dataDict["symbol"] as? String {
+                            let priceKeys = ["lastPrice", "bestAskPrice", "ask1Price", "indexPrice"]
+                            var priceStr: String?
+                            for key in priceKeys {
+                                if let value = dataDict[key] as? String {
+                                    priceStr = value
+                                    break
+                                }
+                            }
+                            guard let priceStr = priceStr else {
+                                print("Failed to find price in Bybit Spot message. Available keys: \(dataDict.keys), Full message: \(dataDict)")
+                                return
+                            }
+                            var price: Double?
+                            if let priceNum = Self.numberFormatter.number(from: priceStr) {
+                                price = Double(priceNum.description)
+                            } else if let parsedPrice = Double(priceStr) {
+                                price = parsedPrice
+                            }
+                            guard let price = price else {
+                                print("Failed to parse price '\(priceStr)' from Bybit Spot message. Full message: \(dataDict)")
+                                return
+                            }
+                            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                            ExchangeWebSocket.bybitCurrentPrice[pair] = price
+                            ExchangeWebSocket.bybitPrices[pair, default: []].append(price)
+                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                ExchangeWebSocket.bybitPrices[pair]!.removeFirst()
+                            }
+                            let volStr = dataDict["volume24h"] as? String
+                            if let volStr = volStr {
+                                var vol: Double?
+                                if let volNum = Self.numberFormatter.number(from: volStr) {
+                                    vol = Double(volNum.description)
+                                } else if let parsedVol = Double(volStr) {
+                                    vol = parsedVol
+                                }
+                                if let vol = vol {
+                                    ExchangeWebSocket.bybitSpotVolume[pair, default: []].append(vol)
+                                    if ExchangeWebSocket.bybitSpotVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                        ExchangeWebSocket.bybitSpotVolume[pair]!.removeFirst()
+                                    }
+                                } else {
+                                    print("Failed to parse volume '\(volStr)' from Bybit Spot message. Full message: \(dataDict)")
+                                }
+                            }
+                            print("Updated Bybit spot price for \(pair): \(price)")
+                        } else if topic.hasPrefix("orderbook.50."),
+                                  let dataDict = json["data"] as? [String: Any],
+                                  let symbol = dataDict["s"] as? String,
+                                  let asks = dataDict["a"] as? [[String]],
+                                  let bids = dataDict["b"] as? [[String]] {
+                            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                            var orderBook: [(price: Double, volume: Double, side: String)] = []
+                            for ask in asks {
+                                if let priceStr = ask.first, let volStr = ask.last,
+                                   let priceNum = Self.numberFormatter.number(from: priceStr),
+                                   let volNum = Self.numberFormatter.number(from: volStr),
+                                   let price = Double(priceNum.description),
+                                   let vol = Double(volNum.description) {
+                                    orderBook.append((price: price, volume: vol, side: "sell"))
+                                }
+                            }
+                            for bid in bids {
+                                if let priceStr = bid.first, let volStr = bid.last,
+                                   let priceNum = Self.numberFormatter.number(from: priceStr),
+                                   let volNum = Self.numberFormatter.number(from: volStr),
+                                   let price = Double(priceNum.description),
+                                   let vol = Double(volNum.description) {
+                                    orderBook.append((price: price, volume: vol, side: "buy"))
+                                }
+                            }
+                            ExchangeWebSocket.bybitFuturesOrderBook[pair] = orderBook
+                            print("Updated Bybit spot order book for \(pair): \(orderBook.count) entries")
+                        } else if topic.hasPrefix("publicTrade."),
+                                  let dataArray = json["data"] as? [[String: Any]],
+                                  let firstTrade = dataArray.first,
+                                  let priceStr = firstTrade["p"] as? String,
+                                  let priceNum = Self.numberFormatter.number(from: priceStr),
+                                  let price = Double(priceNum.description),
+                                  let symbol = firstTrade["s"] as? String {
+                            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                            ExchangeWebSocket.bybitCurrentPrice[pair] = price
+                            ExchangeWebSocket.bybitPrices[pair, default: []].append(price)
+                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                ExchangeWebSocket.bybitPrices[pair]!.removeFirst()
+                            }
+                            print("Updated Bybit spot price from trade for \(pair): \(price)")
+                        }
+                    }
+                }
+            case .error(let error):
+                print("Bybit Spot WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                ExchangeWebSocket.bybitIsConnected = false
+            case .pong(_):
+                print("Received pong from Bybit Spot WebSocket")
+            default:
+                break
+            }
+        }
+    }
+}
+
+class BybitFuturesWebSocketDelegate: WebSocketDelegate {
+    private static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 8
+        return formatter
+    }()
+
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
+                print("Bybit Futures WebSocket connected with headers: \(headers)")
+                ExchangeWebSocket.bybitFuturesIsConnected = true
+            case .disconnected(let reason, let code):
+                print("Bybit Futures WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.bybitFuturesIsConnected = false
+            case .text(let string):
+                print("DEBUG: Bybit Futures WebSocket received message: \(string)")
+                if let data = string.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let success = json["success"] as? Bool {
+                        if success, let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
+                            print("Bybit Futures subscription confirmed")
+                        } else if !success {
+                            print("Bybit Futures WebSocket error: \(json)")
+                        }
+                    } else if let topic = json["topic"] as? String {
+                        if topic.hasPrefix("tickers."),
+                           let dataDict = json["data"] as? [String: Any],
+                           let symbol = dataDict["symbol"] as? String {
+                            let priceKeys = ["lastPrice", "bestAskPrice", "ask1Price", "bid1Price", "indexPrice", "markPrice"]
+                            var priceStr: String?
+                            for key in priceKeys {
+                                if let value = dataDict[key] as? String {
+                                    priceStr = value
+                                    break
+                                }
+                            }
+                            guard let priceStr = priceStr else {
+                                print("Failed to find price in Bybit Futures message. Available keys: \(dataDict.keys), Full message: \(dataDict)")
+                                return
+                            }
+                            var price: Double?
+                            if let priceNum = Self.numberFormatter.number(from: priceStr) {
+                                price = Double(priceNum.description)
+                            } else if let parsedPrice = Double(priceStr) {
+                                price = parsedPrice
+                            }
+                            guard let price = price else {
+                                print("Failed to parse price '\(priceStr)' from Bybit Futures message. Full message: \(dataDict)")
+                                return
+                            }
+                            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                            ExchangeWebSocket.bybitCurrentFuturesPrice[pair] = price
+                            ExchangeWebSocket.bybitFuturesPrices[pair, default: []].append(price)
+                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                ExchangeWebSocket.bybitFuturesPrices[pair]!.removeFirst()
+                            }
+                            let volStr = dataDict["volume24h"] as? String
+                            if let volStr = volStr {
+                                var vol: Double?
+                                if let volNum = Self.numberFormatter.number(from: volStr) {
+                                    vol = Double(volNum.description)
+                                } else if let parsedVol = Double(volStr) {
+                                    vol = parsedVol
+                                }
+                                if let vol = vol {
+                                    ExchangeWebSocket.bybitFuturesVolume[pair, default: []].append(vol)
+                                    if ExchangeWebSocket.bybitFuturesVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                        ExchangeWebSocket.bybitFuturesVolume[pair]!.removeFirst()
+                                    }
+                                } else {
+                                    print("Failed to parse volume '\(volStr)' from Bybit Futures message. Full message: \(dataDict)")
+                                }
+                            }
+                            let fundingRateStr = dataDict["fundingRate"] as? String
+                            if let fundingRateStr = fundingRateStr {
+                                var fundingRate: Double?
+                                if let fundingRateNum = Self.numberFormatter.number(from: fundingRateStr) {
+                                    fundingRate = Double(fundingRateNum.description)
+                                } else if let parsedFundingRate = Double(fundingRateStr) {
+                                    fundingRate = parsedFundingRate
+                                }
+                                if let fundingRate = fundingRate {
+                                    ExchangeWebSocket.bybitFundingRates[pair] = fundingRate
+                                    print("Updated Bybit funding rate for \(pair): \(fundingRate)")
+                                } else {
+                                    print("Failed to parse funding rate '\(fundingRateStr)' from Bybit Futures message. Full message: \(dataDict)")
+                                }
+                            }
+                            print("Updated Bybit futures price for \(pair): \(price)")
+                        } else if topic.hasPrefix("orderbook.50."),
+                                  let dataDict = json["data"] as? [String: Any],
+                                  let symbol = dataDict["s"] as? String,
+                                  let updateType = dataDict["type"] as? String {
+                            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                            var orderBook: [(price: Double, volume: Double, side: String)]
+                            
+                            if updateType == "snapshot" {
+                                orderBook = []
+                            } else {
+                                orderBook = ExchangeWebSocket.bybitFuturesOrderBook[pair] ?? []
+                            }
+                            
+                            if let asks = dataDict["a"] as? [[String]] {
+                                for ask in asks {
+                                    if let priceStr = ask.first, let volStr = ask.last,
+                                       let priceNum = Self.numberFormatter.number(from: priceStr),
+                                       let volNum = Self.numberFormatter.number(from: volStr),
+                                       let price = Double(priceNum.description),
+                                       let vol = Double(volNum.description) {
+                                        orderBook.removeAll { $0.price == price && $0.side == "sell" }
+                                        if vol > 0 {
+                                            orderBook.append((price: price, volume: vol, side: "sell"))
+                                        }
+                                    } else {
+                                        print("Failed to parse ask entry: \(ask)")
+                                    }
+                                }
+                            }
+                            if let bids = dataDict["b"] as? [[String]] {
+                                for bid in bids {
+                                    if let priceStr = bid.first, let volStr = bid.last,
+                                       let priceNum = Self.numberFormatter.number(from: priceStr),
+                                       let volNum = Self.numberFormatter.number(from: volStr),
+                                       let price = Double(priceNum.description),
+                                       let vol = Double(volNum.description) {
+                                        orderBook.removeAll { $0.price == price && $0.side == "buy" }
+                                        if vol > 0 {
+                                            orderBook.append((price: price, volume: vol, side: "buy"))
+                                        }
+                                    } else {
+                                        print("Failed to parse bid entry: \(bid)")
+                                    }
+                                }
+                            }
+                            ExchangeWebSocket.bybitFuturesOrderBook[pair] = orderBook
+                            print("DEBUG: Updated Bybit futures order book for \(pair): \(orderBook.count) entries (Type: \(updateType))")
+                        } else if topic.hasPrefix("publicTrade."),
+                                  let dataArray = json["data"] as? [[String: Any]],
+                                  let firstTrade = dataArray.first,
+                                  let priceStr = firstTrade["p"] as? String,
+                                  let priceNum = Self.numberFormatter.number(from: priceStr),
+                                  let price = Double(priceNum.description),
+                                  let symbol = firstTrade["s"] as? String {
+                            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                            ExchangeWebSocket.bybitCurrentFuturesPrice[pair] = price
+                            ExchangeWebSocket.bybitFuturesPrices[pair, default: []].append(price)
+                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                ExchangeWebSocket.bybitFuturesPrices[pair]!.removeFirst()
+                            }
+                            print("Updated Bybit futures price from trade for \(pair): \(price)")
+                        }
+                    }
+                }
+            case .error(let error):
+                print("Bybit Futures WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                ExchangeWebSocket.bybitFuturesIsConnected = false
+            case .pong(_):
+                print("Received pong from Bybit Futures WebSocket")
+            default:
+                break
+            }
+        }
+    }
+}
+
+
+

@@ -1,0 +1,709 @@
+
+//---------------------------------------------------------------------------------------------------------Block 13 - Trade Performance and Logging
+
+import Foundation
+import SwiftUI
+
+extension ExchangeWebSocket {
+    @MainActor
+    static func updateTradeMetrics(pair: String, profit: Double, fees: Double, isWin: Bool, dashboardJSONURL: URL, totalProfit: inout Double, totalFees: inout Double) {
+        var metrics = tradeMetrics[pair] ?? (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)
+        metrics.totalProfit += profit
+        metrics.totalFees += fees
+        if isWin {
+            metrics.wins += 1
+        } else {
+            metrics.losses += 1
+        }
+        tradeMetrics[pair] = metrics
+
+        var performance = performanceMetrics[pair] ?? (profit: 0.0, fees: 0.0, trades: 0, wins: 0)
+        performance.profit += profit
+        performance.fees += fees
+        performance.trades += 1
+        if isWin {
+            performance.wins += 1
+        }
+        performanceMetrics[pair] = performance
+
+        totalProfit += profit
+        totalFees += fees
+
+        do {
+            let tradeMetricData = tradeMetrics.mapValues { metric in
+                ["totalProfit": metric.totalProfit, "totalFees": metric.totalFees, "wins": metric.wins, "losses": metric.losses]
+            }
+            let performanceMetricData = performanceMetrics.mapValues { metric in
+                ["profit": metric.profit, "fees": metric.fees, "trades": metric.trades, "wins": metric.wins]
+            }
+            let dashboardData: [String: Any] = [
+                "tradeMetrics": tradeMetricData,
+                "performanceMetrics": performanceMetricData,
+                "totalProfit": totalProfit,
+                "totalFees": totalFees
+            ]
+            let jsonData = try JSONSerialization.data(withJSONObject: dashboardData, options: [.prettyPrinted, .sortedKeys])
+            try jsonData.write(to: dashboardJSONURL)
+            print("Dashboard updated at \(dashboardJSONURL.path)")
+        } catch {
+            print("Dashboard update failed: \(error.localizedDescription)")
+            logAlert(event: "Dashboard update failed: \(error.localizedDescription)")
+        }
+    }
+
+    @MainActor
+    static func logTradeToCSV(pair: String, strategy: String, profit: Double, fees: Double, tradesCSVURL: URL) {
+        let timestampFormatter = ISO8601DateFormatter()
+        timestampFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let timestamp = timestampFormatter.string(from: Date())
+        let logEntry = "\(pair),\(timestamp),\(strategy),\(profit),\(fees)\n"
+
+        do {
+            let fileManager = FileManager.default
+            let directoryPath = tradesCSVURL.deletingLastPathComponent().path
+            if !fileManager.fileExists(atPath: directoryPath) {
+                try fileManager.createDirectory(atPath: directoryPath, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o755])
+                print("FILE DEBUG: Created directory for trades.csv at \(directoryPath)")
+            }
+
+            if !fileManager.fileExists(atPath: tradesCSVURL.path) {
+                try "pair,timestamp,strategy,profit,fees\n".write(to: tradesCSVURL, atomically: true, encoding: .utf8)
+                try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: tradesCSVURL.path)
+                print("FILE DEBUG: Created trades.csv with header")
+            }
+
+            if let fileHandle = try? FileHandle(forWritingTo: tradesCSVURL) {
+                defer { fileHandle.closeFile() }
+                if let data = logEntry.data(using: .utf8) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    print("FILE DEBUG: Wrote trade to trades.csv: \(logEntry.trimmingCharacters(in: .whitespacesAndNewlines))")
+                } else {
+                    throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert trade log entry to data"])
+                }
+            } else {
+                let existingContent = try String(contentsOf: tradesCSVURL, encoding: .utf8)
+                let newContent = existingContent + logEntry
+                try newContent.write(to: tradesCSVURL, atomically: true, encoding: .utf8)
+                print("FILE DEBUG: Fallback write to trades.csv: \(logEntry.trimmingCharacters(in: .whitespacesAndNewlines))")
+            }
+        } catch {
+            print("FILE WRITE FAILURE: Failed to write to trades.csv: \(error.localizedDescription)")
+            logAlert(event: "TRADES_CSV_ERROR: \(error.localizedDescription)")
+        }
+    }
+
+    static func saveHistoricalSpreadsToCSV(pair: String, spread: Double, predictedSpreadChange: Double) {
+        guard !spread.isZero else {
+            print("DEBUG: Zero spread prevented logging for \(pair)")
+            logAlert(event: "Zero spread prevented logging for \(pair)")
+            return
+        }
+        let timestamp = ISO8601DateFormatter().string(from: Date())
+        let logEntry = "\(timestamp),\(pair),\(spread),\(predictedSpreadChange)\n"
+        let spreadsCSVURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/historical_spreads.csv")
+
+        do {
+            let fileManager = FileManager.default
+            let directoryPath = spreadsCSVURL.deletingLastPathComponent().path
+            if !fileManager.fileExists(atPath: directoryPath) {
+                try fileManager.createDirectory(atPath: directoryPath, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o755])
+                print("FILE DEBUG: Created directory for historical_spreads.csv at \(directoryPath)")
+            }
+            if !fileManager.fileExists(atPath: spreadsCSVURL.path) {
+                try "timestamp,pair,spread,predicted_change\n".write(to: spreadsCSVURL, atomically: true, encoding: .utf8)
+                try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: spreadsCSVURL.path)
+                print("FILE DEBUG: Created historical_spreads.csv with header")
+            }
+            if let fileHandle = try? FileHandle(forWritingTo: spreadsCSVURL) {
+                defer { fileHandle.closeFile() }
+                if let data = logEntry.data(using: .utf8) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    print("FILE DEBUG: Wrote spread to historical_spreads.csv: \(logEntry.trimmingCharacters(in: .whitespacesAndNewlines))")
+                } else {
+                    throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert spread log entry to data"])
+                }
+            } else {
+                let existingContent = try String(contentsOf: spreadsCSVURL, encoding: .utf8)
+                let newContent = existingContent + logEntry
+                try newContent.write(to: spreadsCSVURL, atomically: true, encoding: .utf8)
+                print("FILE DEBUG: Fallback write to historical_spreads.csv: \(logEntry.trimmingCharacters(in: .whitespacesAndNewlines))")
+            }
+        } catch {
+            print("FILE WRITE FAILURE: Failed to write to historical_spreads.csv: \(error.localizedDescription)")
+            logAlert(event: "SPREAD_CSV_ERROR: \(error.localizedDescription)")
+        }
+    }
+
+    static func handleKucoinPriceUpdate(pair: String, price: Double) {
+        print("DEBUG: KuCoin Price Update - \(pair): \(price)")
+        kucoinCurrentPrice[pair] = price
+    }
+
+    static func handleKucoinFuturesPriceUpdate(pair: String, price: Double) {
+        print("DEBUG: KuCoin Futures Price Update - \(pair): \(price)")
+        kucoinCurrentFuturesPrice[pair] = price
+    }
+
+    static func handleBybitPriceUpdate(pair: String, price: Double) {
+        print("DEBUG: Bybit Price Update - \(pair): \(price)")
+        bybitCurrentPrice[pair] = price
+    }
+
+    static func handleBybitFuturesPriceUpdate(pair: String, price: Double) {
+        print("DEBUG: Bybit Futures Price Update - \(pair): \(price)")
+        bybitCurrentFuturesPrice[pair] = price
+    }
+
+    static func executeSingleExchangeArbitrage(exchange: String, pair: String, spotPrice: Double, futuresPrice: Double, strategy: String, kucoinSpotPrices: [Double], bybitSpotPrices: [Double], tradeAmount: Double) {
+        Task {
+            let spread = abs(spotPrice - futuresPrice) / min(max(spotPrice, 0.0001), max(futuresPrice, 0.0001))
+            let minSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.001)
+            saveHistoricalSpreadsToCSV(pair: pair, spread: spread, predictedSpreadChange: 0.0)
+
+            print("""
+TRADE CHECK: \(pair) (\(exchange))
+Spread: \(spread) >= Threshold: \(minSpreadThreshold) -> \(spread >= minSpreadThreshold)
+""")
+            guard spread >= minSpreadThreshold else {
+                print("DEBUG: Spread too low for \(exchange)-\(pair): \(spread)")
+                logAlert(event: "Spread too low for \(exchange)-\(pair): \(spread)")
+                return
+            }
+
+            let liquidity = await checkLiquidityAsync(exchange: exchange, pair: pair, marketType: "spot", tradeAmount: tradeAmount, price: spotPrice)
+            let futuresLiquidity = await checkLiquidityAsync(exchange: exchange, pair: pair, marketType: "futures", tradeAmount: tradeAmount, price: futuresPrice)
+            let minLiquidityThresholdValue = await MainActor.run { minLiquidityThreshold }
+            print("TRADE CHECK: \(pair) Liquidity - Spot: \(liquidity ?? -1.0) >= \(minLiquidityThresholdValue), Futures: \(futuresLiquidity ?? -1.0) >= \(minLiquidityThresholdValue)")
+            guard let liquidity = liquidity, let futuresLiquidity = futuresLiquidity,
+                  liquidity >= minLiquidityThresholdValue, futuresLiquidity >= minLiquidityThresholdValue else {
+                print("DEBUG: Invalid liquidity for \(exchange)-\(pair): Spot=\(String(describing: liquidity)), Futures=\(String(describing: futuresLiquidity))")
+                logAlert(event: "Invalid liquidity for \(exchange)-\(pair): Spot=\(String(describing: liquidity)), Futures=\(String(describing: futuresLiquidity))")
+                return
+            }
+
+            let fundingRate = await MainActor.run { exchange == "kucoin" ? kucoinFundingRates[pair] ?? 0.0 : bybitFundingRates[pair] ?? 0.0 }
+            let maxFundingRateValue = await MainActor.run { maxFundingRate }
+            print("TRADE CHECK: \(pair) Funding: \(abs(fundingRate)) < \(maxFundingRateValue) -> \(abs(fundingRate) < maxFundingRateValue)")
+            guard abs(fundingRate) < maxFundingRateValue else {
+                print("DEBUG: Funding rate too high for \(exchange)-\(pair): \(fundingRate)")
+                logAlert(event: "Funding rate too high for \(exchange)-\(pair): \(fundingRate)")
+                return
+            }
+
+            let balance = exchange == "kucoin" ? kucoinBalance : bybitBalance
+            print("TRADE CHECK: \(pair) Balance: \(balance) >= \(tradeAmount * spotPrice) -> \(balance >= tradeAmount * spotPrice)")
+            guard balance >= tradeAmount * spotPrice else {
+                print("DEBUG: Insufficient balance for \(exchange)-\(pair)")
+                logAlert(event: "Insufficient balance for \(exchange)-\(pair)")
+                return
+            }
+
+            let feeRate = exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee
+            let fees = tradeAmount * feeRate * 2
+            let grossProfit = tradeAmount * spread
+            let profit = grossProfit - fees
+            let minProfitPercentage = await MainActor.run { spotMinProfitPercentage }
+            print("TRADE CHECK: \(pair) Profit: \(profit) > Min: \(minProfitPercentage * tradeAmount * min(spotPrice, futuresPrice))")
+            guard profit > minProfitPercentage * tradeAmount * min(spotPrice, futuresPrice) else {
+                print("DEBUG: Expected profit too low for \(exchange)-\(pair): \(profit)")
+                logAlert(event: "Expected profit too low for \(exchange)-\(pair): \(profit)")
+                return
+            }
+
+            let success = await executeScalpingTrade(
+                pair: pair,
+                exchange: exchange,
+                entryPrice: spotPrice,
+                targetPrice: futuresPrice,
+                stopPrice: spotPrice * (1 - scalpStopLoss),
+                tradeAmount: tradeAmount,
+                maxActiveTrades: maxActiveSpotTrades
+            )
+
+            if success {
+                print("ARBITRAGE TRIGGERED: \(exchange) \(pair) at \(Date())")
+                await MainActor.run {
+                    updateTradeMetrics(
+                        pair: pair,
+                        profit: profit,
+                        fees: fees,
+                        isWin: profit > 0,
+                        dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
+                        totalProfit: &ExchangeWebSocket.totalProfit,
+                        totalFees: &ExchangeWebSocket.totalFees
+                    )
+                    logTradeToCSV(pair: pair, strategy: strategy, profit: profit, fees: fees, tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
+                    print("DEBUG: Executed single-exchange arbitrage for \(exchange)-\(pair): Profit=\(profit), Fees=\(fees)")
+                    logAlert(event: "Executed single-exchange arbitrage for \(exchange)-\(pair): Profit=\(profit), Fees=\(fees)")
+                }
+            }
+        }
+    }
+
+    static func executeEnhancedCrossExchangeArbitrage(pair: String, kucoinSpotPrice: Double, bybitSpotPrice: Double, strategy: String, kucoinSpotPrices: [Double], bybitSpotPrices: [Double], amount: Double, completion: @escaping (Bool) -> Void) {
+        Task {
+            let spread = abs(kucoinSpotPrice - bybitSpotPrice) / min(max(kucoinSpotPrice, 0.0001), max(bybitSpotPrice, 0.0001))
+            let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: "cross", spotPrice: kucoinSpotPrice, futuresPrice: bybitSpotPrice) ?? 0.0
+            saveHistoricalSpreadsToCSV(pair: pair, spread: spread, predictedSpreadChange: predictedSpread)
+
+            let minSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.001)
+            print("""
+TRADE CHECK: \(pair) (Cross-Exchange)
+Spread: \(spread) >= Threshold: \(minSpreadThreshold) -> \(spread >= minSpreadThreshold)
+""")
+            guard spread >= minSpreadThreshold else {
+                print("DEBUG: Spread too low for cross-exchange arbitrage: \(pair), Spread=\(spread)")
+                logAlert(event: "Spread too low for cross-exchange arbitrage: \(pair), Spread=\(spread)")
+                completion(false)
+                return
+            }
+
+            let kucoinLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "spot", tradeAmount: amount, price: kucoinSpotPrice)
+            let bybitLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "spot", tradeAmount: amount, price: bybitSpotPrice)
+            let minLiquidityThresholdValue = await MainActor.run { minLiquidityThreshold }
+            print("TRADE CHECK: \(pair) Liquidity - KuCoin: \(kucoinLiquidity ?? -1.0) >= \(minLiquidityThresholdValue), Bybit: \(bybitLiquidity ?? -1.0) >= \(minLiquidityThresholdValue)")
+            guard let kucoinLiquidity = kucoinLiquidity, let bybitLiquidity = bybitLiquidity,
+                  kucoinLiquidity >= minLiquidityThresholdValue, bybitLiquidity >= minLiquidityThresholdValue else {
+                print("DEBUG: Insufficient liquidity for cross-exchange arbitrage: \(pair)")
+                logAlert(event: "Insufficient liquidity for cross-exchange arbitrage: \(pair)")
+                completion(false)
+                return
+            }
+
+            let feeRate = kucoinTakerFee + bybitTakerFee
+            let fees = amount * feeRate * 2
+            let grossProfit = amount * spread
+            let profit = grossProfit - fees
+            let minProfitPercentage = await MainActor.run { spotMinProfitPercentage }
+            print("TRADE CHECK: \(pair) Profit: \(profit) > Min: \(minProfitPercentage * amount * min(kucoinSpotPrice, bybitSpotPrice))")
+            guard profit > minProfitPercentage * amount * min(kucoinSpotPrice, bybitSpotPrice) else {
+                print("DEBUG: Expected profit too low for cross-exchange arbitrage: \(pair), Profit=\(profit)")
+                logAlert(event: "Expected profit too low for cross-exchange arbitrage: \(pair), Profit=\(profit)")
+                completion(false)
+                return
+            }
+
+            let success = await executeScalpingTrade(
+                pair: pair,
+                exchange: kucoinSpotPrice < bybitSpotPrice ? "kucoin" : "bybit",
+                entryPrice: min(kucoinSpotPrice, bybitSpotPrice),
+                targetPrice: max(kucoinSpotPrice, bybitSpotPrice),
+                stopPrice: min(kucoinSpotPrice, bybitSpotPrice) * (1 - scalpStopLoss),
+                tradeAmount: amount,
+                maxActiveTrades: maxActiveSpotTrades
+            )
+
+            if success {
+                print("ARBITRAGE TRIGGERED: Cross-Exchange \(pair) at \(Date())")
+                await MainActor.run {
+                    if kucoinSpotPrice < bybitSpotPrice {
+                        kucoinBalance += profit - fees
+                        bybitBalance -= amount * bybitTakerFee
+                    } else {
+                        bybitBalance += profit - fees
+                        kucoinBalance -= amount * kucoinTakerFee
+                    }
+                    updateTradeMetrics(
+                        pair: pair,
+                        profit: profit,
+                        fees: fees,
+                        isWin: profit > 0,
+                        dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
+                        totalProfit: &ExchangeWebSocket.totalProfit,
+                        totalFees: &ExchangeWebSocket.totalFees
+                    )
+                    logTradeToCSV(pair: pair, strategy: strategy, profit: profit, fees: fees, tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
+                    print("DEBUG: Executed cross-exchange arbitrage for \(pair): Profit=\(profit), Fees=\(fees)")
+                    logAlert(event: "Executed cross-exchange arbitrage for \(pair): Profit=\(profit), Fees=\(fees)")
+                    completion(true)
+                }
+            } else {
+                completion(false)
+            }
+        }
+    }
+
+    static func startTrading() {
+        print("Starting Trading Bot...")
+        initializeParameters {
+            connectKucoin()
+            connectKucoinFutures()
+            connectBybit()
+            print("Initializing balances...")
+            fetchAndLogBalances(isInitial: true) {
+                Task { @MainActor in
+                    print("Starting timers...")
+                    print("Trading Bot Running...")
+                    
+                    let dashboardJSONURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json")
+                    let tradesCSVURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv")
+                    
+                    Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+                        Task { @MainActor in
+                            fetchAndLogBalances(isInitial: false) {
+                                Task { @MainActor in
+                                    rebalanceExchanges()
+                                }
+                            }
+                        }
+                    }
+                    
+                    Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { timer in
+                        let queue = DispatchQueue(label: "com.bevaixbot.feeUpdate")
+                        queue.async {
+                            let group = DispatchGroup()
+                            group.enter()
+                            Task { @MainActor in
+                                fetchExchangeFees(exchange: "kucoin") { maker, taker in
+                                    DispatchQueue.main.async {
+                                        if let maker, let taker {
+                                            kucoinMakerFee = maker
+                                            kucoinTakerFee = taker
+                                            lastFeeUpdate = Date()
+                                        }
+                                        group.leave()
+                                    }
+                                }
+                            }
+                            group.enter()
+                            Task { @MainActor in
+                                fetchExchangeFees(exchange: "bybit") { maker, taker in
+                                    DispatchQueue.main.async {
+                                        if let maker, let taker {
+                                            bybitMakerFee = maker
+                                            bybitTakerFee = taker
+                                            lastFeeUpdate = Date()
+                                        }
+                                        group.leave()
+                                    }
+                                }
+                            }
+                            group.notify(queue: .main) {
+                            }
+                        }
+                    }
+                    
+                    Timer.scheduledTimer(withTimeInterval: Double(await MainActor.run { liquidityCheckInterval }), repeats: true) { _ in
+                        Task { @MainActor in
+                            for pair in tradingPairs {
+                                Task {
+                                    let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
+                                    let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
+                                    let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
+                                    let kucoinSpotLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "spot", tradeAmount: spotTradeAmount, price: kucoinSpotPrice)
+                                    let kucoinFuturesLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "futures", tradeAmount: futuresTradeAmount, price: kucoinFuturesPrice)
+                                    let bybitSpotLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "spot", tradeAmount: spotTradeAmount, price: kucoinSpotPrice)
+                                    let bybitFuturesLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "futures", tradeAmount: futuresTradeAmount, price: bybitFuturesPrice)
+                                    print("LIQUIDITY DEBUG: \(pair) - KuCoin Spot: \(kucoinSpotLiquidity ?? -1.0), KuCoin Futures: \(kucoinFuturesLiquidity ?? -1.0), Bybit Spot: \(bybitSpotLiquidity ?? -1.0), Bybit Futures: \(bybitFuturesLiquidity ?? -1.0)")
+                                }
+                            }
+                        }
+                    }
+                    
+                    Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+                        Task { @MainActor in
+                            let tradeCooldown = getDouble("TRADE_EXECUTION_COOLDOWN_SECONDS", defaultValue: 0.5)
+                            let _ = 0.0001 // Line 4427: Suppress warning for debugThreshold
+                            let _ = -100.0 // Line 4428: Suppress warning for debugMACDThreshold
+                            do {
+                                try await Task.sleep(nanoseconds: UInt64(tradeCooldown * 1_000_000_000))
+                            } catch {
+                                print("Trade execution sleep interrupted: \(error.localizedDescription)")
+                                logAlert(event: "Trade execution sleep interrupted: \(error.localizedDescription)")
+                            }
+                            
+                            print("DEBUG: Trading pairs: \(tradingPairs)")
+                            for pair in tradingPairs {
+                                if ExchangeWebSocket.detectVolatilitySpike(exchange: "kucoin", pair: pair) || ExchangeWebSocket.detectVolatilitySpike(exchange: "bybit", pair: pair) {
+                                    print("Volatility spike detected for pair: \(pair)")
+                                    logAlert(event: "Volatility spike detected for pair: \(pair)")
+                                    continue
+                                }
+                                checkCircuitBreaker(pair: pair)
+                                let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
+                                let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
+                                let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
+                                let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
+                                print("""
+LIVE PRICE DEBUG: \(pair)
+KC Spot: \(kucoinSpotPrice)
+KC Futures: \(kucoinFuturesPrice)
+BB Spot: \(bybitSpotPrice)
+BB Futures: \(bybitFuturesPrice)
+""")
+                                
+                                let kucoinSpotLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "spot", tradeAmount: spotTradeAmount, price: kucoinSpotPrice)
+                                let kucoinFuturesLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "futures", tradeAmount: futuresTradeAmount, price: kucoinFuturesPrice)
+                                let bybitSpotLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "spot", tradeAmount: spotTradeAmount, price: bybitSpotPrice)
+                                let bybitFuturesLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "futures", tradeAmount: futuresTradeAmount, price: bybitFuturesPrice)
+                                print("LIQUIDITY DEBUG: \(pair) - KuCoin Spot: \(kucoinSpotLiquidity ?? -1.0), KuCoin Futures: \(kucoinFuturesLiquidity ?? -1.0), Bybit Spot: \(bybitSpotLiquidity ?? -1.0), Bybit Futures: \(bybitFuturesLiquidity ?? -1.0)")
+                                
+                                print("Executing Trading Strategies...")
+                                print("Checking Arbitrage profitability...")
+                                
+                                print("Live Prices:")
+                                for pair in tradingPairs {
+                                    let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
+                                    let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
+                                    let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
+                                    let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
+                                    print("\(pair) | KC: \(String(format: "%.4f", kucoinSpotPrice)) | KC-F: \(String(format: "%.4f", kucoinFuturesPrice)) | BB: \(String(format: "%.4f", bybitSpotPrice)) | BB-F: \(String(format: "%.4f", bybitFuturesPrice))")
+                                }
+                                
+                                var tradeExecuted = false
+                                
+                                for pair in tradingPairs {
+                                    let kucoinOrderBook = kucoinFuturesOrderBook[pair] ?? []
+                                    let bybitOrderBook = bybitFuturesOrderBook[pair] ?? []
+
+                                    let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
+                                    let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
+                                    let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
+                                    let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
+
+                                    let kucoinSpotPrices = ExchangeWebSocket.kucoinPrices[pair] ?? []
+                                    let kucoinFuturesPrices = kucoinFuturesPrices[pair] ?? []
+                                    let bybitSpotPrices = ExchangeWebSocket.bybitPrices[pair] ?? []
+                                    let bybitFuturesPrices = bybitFuturesPrices[pair] ?? []
+
+                                    let kucoinSpotEmaShort = ExchangeWebSocket.calculateEMA(prices: kucoinSpotPrices, period: spotEmaShortPeriod) ?? 0.0
+                                    let kucoinSpotEmaLong = ExchangeWebSocket.calculateEMA(prices: kucoinSpotPrices, period: spotEmaLongPeriod) ?? 0.0
+                                    let kucoinFuturesEmaShort = ExchangeWebSocket.calculateEMA(prices: kucoinFuturesPrices, period: futuresEmaShortPeriod) ?? 0.0
+                                    let kucoinFuturesEmaLong = ExchangeWebSocket.calculateEMA(prices: kucoinFuturesPrices, period: futuresEmaLongPeriod) ?? 0.0
+                                    let bybitSpotEmaShort = ExchangeWebSocket.calculateEMA(prices: bybitSpotPrices, period: spotEmaShortPeriod) ?? 0.0
+                                    let bybitSpotEmaLong = ExchangeWebSocket.calculateEMA(prices: bybitSpotPrices, period: spotEmaLongPeriod) ?? 0.0
+                                    let _ = ExchangeWebSocket.calculateEMA(prices: bybitFuturesPrices, period: futuresEmaShortPeriod) ?? 0.0 // Line 4496
+                                    let _ = ExchangeWebSocket.calculateEMA(prices: bybitFuturesPrices, period: futuresEmaLongPeriod) ?? 0.0 // Line 4497
+
+                                    let kucoinSpotMacd = ExchangeWebSocket.calculateMACD(prices: kucoinSpotPrices, shortPeriod: macdShortPeriod, longPeriod: macdLongPeriod, signalPeriod: macdSignalPeriod)
+                                    let kucoinFuturesMacd = ExchangeWebSocket.calculateMACD(prices: kucoinFuturesPrices, shortPeriod: macdShortPeriod, longPeriod: macdLongPeriod, signalPeriod: macdSignalPeriod)
+                                    let bybitSpotMacd = ExchangeWebSocket.calculateMACD(prices: bybitSpotPrices, shortPeriod: macdShortPeriod, longPeriod: macdLongPeriod, signalPeriod: macdSignalPeriod)
+                                    let bybitFuturesMacd = ExchangeWebSocket.calculateMACD(prices: bybitFuturesPrices, shortPeriod: macdShortPeriod, longPeriod: macdLongPeriod, signalPeriod: macdSignalPeriod)
+
+                                    let kucoinSpotRsi = ExchangeWebSocket.calculateRSI(prices: kucoinSpotPrices, period: spotRsiPeriod) ?? 50.0
+                                    let bybitSpotRsi = ExchangeWebSocket.calculateRSI(prices: bybitSpotPrices, period: spotRsiPeriod) ?? 50.0
+                                    print("DEBUG: RSI for \(pair) - KuCoin Spot: \(kucoinSpotRsi), Bybit Spot: \(bybitSpotRsi)")
+
+                                    let kucoinSpotATR = ExchangeWebSocket.calculateATR(prices: kucoinSpotPrices) ?? 0.0
+                                    let bybitSpotATR = ExchangeWebSocket.calculateATR(prices: bybitSpotPrices) ?? 0.0
+                                    let volatility = max(kucoinSpotATR, bybitSpotATR) / max(kucoinSpotPrice, bybitSpotPrice, 1.0)
+
+                                    let kucoinArbitrageTradeAmount = await Task { await dynamicTradeAmount(balance: kucoinBalance, riskPercent: 0.3, volatility: volatility) }.value
+                                    let bybitArbitrageTradeAmount = await Task { await dynamicTradeAmount(balance: bybitBalance, riskPercent: 0.3, volatility: volatility) }.value
+                                    let crossExchangeTradeAmount = await Task { await dynamicTradeAmount(balance: min(kucoinBalance, bybitBalance), riskPercent: 0.1, volatility: 0.5) }.value
+
+                                    let kucoinPriceChange = kucoinSpotPrices.count >= 1800 ? (kucoinSpotPrice - kucoinSpotPrices[kucoinSpotPrices.count - 1800]) / kucoinSpotPrices[kucoinSpotPrices.count - 1800] : 0.0
+
+                                    let kucoinOrderBookStruct = kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+                                    let volumeSpikeThreshold = getDouble("VOLUME_SPIKE_THRESHOLD", defaultValue: 1.5)
+                                    let orderImbalanceThreshold = getDouble("ORDER_IMBALANCE_THRESHOLD", defaultValue: 1.5)
+                                    let vwapPeriod = getInt("VWAP_PERIOD", defaultValue: 60)
+                                    print("DEBUG: VWAP period for \(pair): \(vwapPeriod)")
+                                    let volumes = kucoinSpotVolume[pair] ?? []
+                                    let avgVolume = volumes.isEmpty ? 0.0 : volumes.reduce(0.0, +) / Double(volumes.count)
+                                    let currentVolume = volumes.last ?? 0.0
+                                    let volumeSpike = avgVolume > 0 ? currentVolume / avgVolume : 1.0
+                                    let orderImbalance = calculateOrderBookImbalance(book: kucoinOrderBookStruct)
+                                    let vwap = calculateOrderBookVWAP(pair: pair, exchange: "kucoin", priceRange: orderBookPriceRange, currentPrice: kucoinSpotPrice) ?? kucoinSpotPrice
+
+                                    marketMaker(pair: pair, exchange: "kucoin")
+                                    marketMaker(pair: pair, exchange: "bybit")
+
+                                    if kucoinSpotPrice > 0 || kucoinFuturesPrice > 0 {
+                                        let currentSpread = abs(kucoinSpotPrice - kucoinFuturesPrice) / min(max(kucoinSpotPrice, 0.0001), max(kucoinFuturesPrice, 0.0001))
+                                        let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: "kucoin", spotPrice: kucoinSpotPrice, futuresPrice: kucoinFuturesPrice) ?? 0.0
+                                        saveHistoricalSpreadsToCSV(pair: pair, spread: currentSpread, predictedSpreadChange: predictedSpread)
+                                        let shouldTradeKucoin = predictedSpread > currentSpread && kucoinFuturesMacd != nil && kucoinFuturesMacd!.histogram > -100.0 && kucoinFuturesEmaShort > kucoinFuturesEmaLong && kucoinSpotRsi > 30 && kucoinSpotRsi < 70 && abs(kucoinSpotPrice - vwap) / kucoinSpotPrice < 0.01
+                                        let macdConfirmed = kucoinSpotMacd != nil && kucoinSpotMacd!.histogram > -100.0
+                                        let feeAdjustedThreshold = 0.0001
+                                        let emaConfirmed = kucoinSpotPrice < kucoinFuturesPrice
+                                            ? (kucoinSpotEmaShort > kucoinSpotEmaLong && (kucoinSpotEmaShort - kucoinSpotEmaLong) / kucoinSpotEmaLong > 0.0026)
+                                            : (kucoinSpotEmaShort < kucoinSpotEmaLong && (kucoinSpotEmaLong - kucoinSpotEmaShort) / kucoinSpotEmaLong > 0.0026)
+                                        let trendConfirmed = kucoinPriceChange > 0.001 && kucoinSpotEmaShort > kucoinSpotEmaLong || kucoinPriceChange < -0.001 && kucoinSpotEmaShort < kucoinSpotEmaLong
+                                        let sentimentConfirmed = sentimentScores[pair] ?? 0.0 > 0.5
+                                        let volumeConfirmed = volumeSpike >= volumeSpikeThreshold
+                                        let imbalanceConfirmed = orderImbalance < orderImbalanceThreshold
+
+                                        print("KuCoin Spot-to-Futures for \(pair): Spread: \(currentSpread), Threshold: \(feeAdjustedThreshold), ML: \(shouldTradeKucoin), MACD: \(macdConfirmed), EMA: \(emaConfirmed), Trend: \(trendConfirmed), Sentiment: \(sentimentConfirmed), Volume: \(volumeConfirmed), Imbalance: \(imbalanceConfirmed)")
+
+                                        if (shouldTradeKucoin || currentSpread >= feeAdjustedThreshold) && !kucoinOrderBook.isEmpty && emaConfirmed && trendConfirmed && sentimentConfirmed && volumeConfirmed && imbalanceConfirmed {
+                                            if let lastArbitrage = arbitrageExecuted[pair], lastArbitrage.0 && Date().timeIntervalSince(lastArbitrage.1) < tradeCooldown {
+                                                print("KuCoin Spot-to-Futures for \(pair): Skipped (Cooldown)")
+                                                logAlert(event: "KuCoin Spot-to-Futures for \(pair): Skipped (Cooldown)")
+                                            } else {
+                                                let potentialLoss = kucoinArbitrageTradeAmount * kucoinSpotPrice * stopLossPercentage
+                                                if !(await ExchangeWebSocket.checkDailyLossLimit(exchange: "kucoin", pair: pair, potentialLoss: potentialLoss)) {
+                                                    print("Initiating KuCoin Spot-to-Futures Arbitrage for \(pair): Amount: \(kucoinArbitrageTradeAmount)")
+                                                    executeSingleExchangeArbitrage(exchange: "kucoin", pair: pair, spotPrice: kucoinSpotPrice, futuresPrice: kucoinFuturesPrice, strategy: "Spot-to-Futures", kucoinSpotPrices: kucoinSpotPrices, bybitSpotPrices: [], tradeAmount: kucoinArbitrageTradeAmount)
+                                                    let spread = abs(kucoinSpotPrice - kucoinFuturesPrice)
+                                                    let grossProfit = kucoinArbitrageTradeAmount * spread
+                                                    let fees = kucoinArbitrageTradeAmount * (kucoinTakerFee + kucoinMakerFee) * 2
+                                                    let profit = grossProfit - fees
+                                                    tradeExecuted = true
+                                                    arbitrageExecuted[pair] = (true, Date())
+                                                    await MainActor.run {
+                                                        updateTradeMetrics(
+                                                            pair: pair,
+                                                            profit: profit,
+                                                            fees: fees,
+                                                            isWin: profit > 0,
+                                                            dashboardJSONURL: dashboardJSONURL,
+                                                            totalProfit: &ExchangeWebSocket.totalProfit,
+                                                            totalFees: &ExchangeWebSocket.totalFees
+                                                        )
+                                                        logTradeToCSV(pair: pair, strategy: "Spot-to-Futures", profit: profit, fees: fees, tradesCSVURL: tradesCSVURL)
+                                                    }
+                                                } else {
+                                                    print("KuCoin Spot-to-Futures for \(pair): Skipped (Daily loss limit)")
+                                                    logAlert(event: "KuCoin Spot-to-Futures for \(pair): Skipped (Daily loss limit)")
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if bybitSpotPrice > 0 || bybitFuturesPrice > 0 {
+                                        let currentSpread = abs(bybitSpotPrice - bybitFuturesPrice) / min(max(bybitSpotPrice, 0.0001), max(bybitFuturesPrice, 0.0001))
+                                        let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: "bybit", spotPrice: bybitSpotPrice, futuresPrice: bybitFuturesPrice) ?? 0.0
+                                        saveHistoricalSpreadsToCSV(pair: pair, spread: currentSpread, predictedSpreadChange: predictedSpread)
+                                        let shouldTradeBybit = predictedSpread > currentSpread && bybitFuturesMacd != nil && bybitFuturesMacd!.histogram > -100.0
+                                        let macdConfirmed = bybitSpotMacd != nil && bybitSpotMacd!.histogram > -100.0
+                                        let feeAdjustedThreshold = 0.0001
+                                        let emaConfirmed = bybitSpotPrice < bybitFuturesPrice
+                                            ? (bybitSpotEmaShort > bybitSpotEmaLong && (bybitSpotEmaShort - bybitSpotEmaLong) / bybitSpotEmaLong > 0.0016)
+                                            : (bybitSpotEmaShort < bybitSpotEmaLong && (bybitSpotEmaLong - bybitSpotEmaShort) / bybitSpotEmaLong > 0.0016)
+                                        let trendConfirmed = kucoinPriceChange > 0.0016 && kucoinSpotEmaShort > kucoinSpotEmaLong || kucoinPriceChange < -0.0016 && kucoinSpotEmaShort < kucoinSpotEmaLong
+                                        let sentimentConfirmed = sentimentScores[pair] ?? 0.0 > 0.5
+                                        let volumeConfirmed = volumeSpike >= volumeSpikeThreshold
+                                        let imbalanceConfirmed = orderImbalance < orderImbalanceThreshold
+
+                                        print("Bybit Spot-to-Futures for \(pair): Spread: \(currentSpread), Threshold: \(feeAdjustedThreshold), ML: \(shouldTradeBybit), MACD: \(macdConfirmed), EMA: \(emaConfirmed), Trend: \(trendConfirmed), Sentiment: \(sentimentConfirmed), Volume: \(volumeConfirmed), Imbalance: \(imbalanceConfirmed)")
+
+                                        if (shouldTradeBybit || currentSpread >= feeAdjustedThreshold) && !bybitOrderBook.isEmpty && emaConfirmed && macdConfirmed && trendConfirmed && sentimentConfirmed && volumeConfirmed && imbalanceConfirmed {
+                                            if let lastArbitrage = arbitrageExecuted[pair], lastArbitrage.0 && Date().timeIntervalSince(lastArbitrage.1) < tradeCooldown {
+                                                print("Bybit Spot-to-Futures for \(pair): Skipped (Cooldown)")
+                                                logAlert(event: "Bybit Spot-to-Futures for \(pair): Skipped (Cooldown)")
+                                            } else {
+                                                let potentialLoss = bybitArbitrageTradeAmount * bybitSpotPrice * stopLossPercentage
+                                                if !(await ExchangeWebSocket.checkDailyLossLimit(exchange: "bybit", pair: pair, potentialLoss: potentialLoss)) {
+                                                    print("Initiating Bybit Spot-to-Futures Arbitrage for \(pair): Amount: \(bybitArbitrageTradeAmount)")
+                                                    executeSingleExchangeArbitrage(
+                                                        exchange: "bybit",
+                                                        pair: pair,
+                                                        spotPrice: bybitSpotPrice,
+                                                        futuresPrice: bybitFuturesPrice,
+                                                        strategy: "Spot-to-Futures",
+                                                        kucoinSpotPrices: [],
+                                                        bybitSpotPrices: bybitSpotPrices,
+                                                        tradeAmount: bybitArbitrageTradeAmount
+                                                    )
+                                                    let spread = abs(bybitSpotPrice - bybitFuturesPrice)
+                                                    let grossProfit = bybitArbitrageTradeAmount * spread
+                                                    let fees = bybitArbitrageTradeAmount * (bybitTakerFee + bybitMakerFee) * 2
+                                                    let profit = grossProfit - fees
+                                                    tradeExecuted = true
+                                                    arbitrageExecuted[pair] = (true, Date())
+                                                    await MainActor.run {
+                                                        updateTradeMetrics(
+                                                            pair: pair,
+                                                            profit: profit,
+                                                            fees: fees,
+                                                            isWin: profit > 0,
+                                                            dashboardJSONURL: dashboardJSONURL,
+                                                            totalProfit: &ExchangeWebSocket.totalProfit,
+                                                            totalFees: &ExchangeWebSocket.totalFees
+                                                        )
+                                                        logTradeToCSV(pair: pair, strategy: "Spot-to-Futures", profit: profit, fees: fees, tradesCSVURL: tradesCSVURL)
+                                                    }
+                                                } else {
+                                                    print("Bybit Spot-to-Futures for \(pair): Skipped (Daily loss limit)")
+                                                    logAlert(event: "Bybit Spot-to-Futures for \(pair): Skipped (Daily loss limit)")
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if kucoinSpotPrice > 0 || bybitSpotPrice > 0 {
+                                        let currentSpread = abs(kucoinSpotPrice - bybitSpotPrice) / min(max(kucoinSpotPrice, 0.0001), max(bybitSpotPrice, 0.0001))
+                                        let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: "cross", spotPrice: kucoinSpotPrice, futuresPrice: bybitSpotPrice) ?? 0.0
+                                        saveHistoricalSpreadsToCSV(pair: pair, spread: currentSpread, predictedSpreadChange: predictedSpread)
+                                        let shouldTradeCross = predictedSpread > currentSpread && kucoinSpotRsi > 30 && kucoinSpotRsi < 70
+                                        let macdConfirmed = kucoinSpotMacd != nil && bybitSpotMacd != nil && kucoinSpotMacd!.histogram > -100.0 && bybitSpotMacd!.histogram > -100.0
+                                        let feeAdjustedThreshold = 0.0001
+                                        let emaConfirmed = kucoinSpotPrice < bybitSpotPrice
+                                            ? (kucoinSpotEmaShort > kucoinSpotEmaLong && (kucoinSpotEmaShort - kucoinSpotEmaLong) / kucoinSpotEmaLong > 0.0016 && bybitSpotEmaShort < bybitSpotEmaLong && (bybitSpotEmaLong - bybitSpotEmaShort) / bybitSpotEmaLong > 0.0016)
+                                            : (kucoinSpotEmaShort < kucoinSpotEmaLong && (kucoinSpotEmaLong - kucoinSpotEmaShort) / kucoinSpotEmaLong > 0.0016 && bybitSpotEmaShort > bybitSpotEmaLong && (bybitSpotEmaShort - bybitSpotEmaLong) / bybitSpotEmaLong > 0.0016)
+                                        let trendConfirmed = kucoinPriceChange > 0.0016 && kucoinSpotEmaShort > kucoinSpotEmaLong || kucoinPriceChange < -0.0016 && kucoinSpotEmaShort < kucoinSpotEmaLong
+                                        let sentimentConfirmed = sentimentScores[pair] ?? 0.0 > 0.5
+                                        let volumeConfirmed = volumeSpike >= volumeSpikeThreshold
+                                        let imbalanceConfirmed = orderImbalance < orderImbalanceThreshold
+
+                                        print("Cross-Exchange Spot for \(pair): Spread: \(currentSpread), Threshold: \(feeAdjustedThreshold), ML: \(shouldTradeCross), MACD: \(macdConfirmed), EMA: \(emaConfirmed), Trend: \(trendConfirmed), Sentiment: \(sentimentConfirmed), Volume: \(volumeConfirmed), Imbalance: \(imbalanceConfirmed)")
+
+                                        if (shouldTradeCross || currentSpread >= feeAdjustedThreshold) && !kucoinOrderBook.isEmpty && !bybitOrderBook.isEmpty && emaConfirmed && macdConfirmed && trendConfirmed && sentimentConfirmed && volumeConfirmed && imbalanceConfirmed {
+                                            if let lastCrossArbitrage = crossExchangeArbitrageExecuted[pair], lastCrossArbitrage.0 && Date().timeIntervalSince(lastCrossArbitrage.1) < tradeCooldown {
+                                                print("Cross-Exchange Spot for \(pair): Skipped (Cooldown)")
+                                                logAlert(event: "Cross-Exchange Spot for \(pair): Skipped (Cooldown)")
+                                            } else {
+                                                let potentialLoss = crossExchangeTradeAmount * kucoinSpotPrice * stopLossPercentage
+                                                let kucoinLossLimitOk = !(await ExchangeWebSocket.checkDailyLossLimit(exchange: "kucoin", pair: pair, potentialLoss: potentialLoss))
+                                                let bybitLossLimitOk = !(await ExchangeWebSocket.checkDailyLossLimit(exchange: "bybit", pair: pair, potentialLoss: potentialLoss))
+                                                if kucoinLossLimitOk && bybitLossLimitOk {
+                                                    print("Initiating Cross-Exchange for \(pair): Amount: \(crossExchangeTradeAmount)")
+                                                    executeEnhancedCrossExchangeArbitrage(
+                                                        pair: pair,
+                                                        kucoinSpotPrice: kucoinSpotPrice,
+                                                        bybitSpotPrice: bybitSpotPrice,
+                                                        strategy: "Cross-Exchange",
+                                                        kucoinSpotPrices: kucoinSpotPrices,
+                                                        bybitSpotPrices: bybitSpotPrices,
+                                                        amount: crossExchangeTradeAmount,
+                                                        completion: { success in
+                                                            if success {
+                                                                let spread = abs(kucoinSpotPrice - bybitSpotPrice)
+                                                                let grossProfit = crossExchangeTradeAmount * spread
+                                                                let fees = crossExchangeTradeAmount * (kucoinTakerFee + bybitTakerFee) * 2
+                                                                let profit = grossProfit - fees
+                                                                tradeExecuted = true
+                                                                crossExchangeArbitrageExecuted[pair] = (true, Date())
+                                                                Task { @MainActor in
+                                                                    updateTradeMetrics(
+                                                                        pair: pair,
+                                                                        profit: profit,
+                                                                        fees: fees,
+                                                                        isWin: profit > 0,
+                                                                        dashboardJSONURL: dashboardJSONURL,
+                                                                        totalProfit: &ExchangeWebSocket.totalProfit,
+                                                                        totalFees: &ExchangeWebSocket.totalFees
+                                                                    )
+                                                                    logTradeToCSV(pair: pair, strategy: "Cross-Exchange", profit: profit, fees: fees, tradesCSVURL: tradesCSVURL)
+                                                                }
+                                                            }
+                                                        }
+                                                    )
+                                                } else {
+                                                    print("Cross-Exchange Spot for \(pair): Skipped (Daily loss limit)")
+                                                    logAlert(event: "Cross-Exchange Spot for \(pair): Skipped (Daily loss limit)")
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                if !tradeExecuted {
+                                    print("DEBUG: No trade executed in this cycle for \(pair)")
+                                    logAlert(event: "No trade executed in this cycle for \(pair)")
+                                }
+                                
+                                updateDashboardJSON(dashboardJSONURL: dashboardJSONURL, totalProfit: ExchangeWebSocket.totalProfit, totalFees: ExchangeWebSocket.totalFees)
+                                printPeriodicSummary()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

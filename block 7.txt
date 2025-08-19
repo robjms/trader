@@ -1,0 +1,259 @@
+
+
+//-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
+
+
+
+
+
+extension ExchangeWebSocket {
+    static func connectKucoinWebSocket(completion: @escaping () -> Void) {
+        guard !kucoinIsConnected else {
+            print("KuCoin WebSocket already connected")
+            completion()
+            return
+        }
+
+        guard let token = kucoinToken else {
+            print("KuCoin WebSocket token not available")
+            Task { @MainActor in
+                logAlert(event: "KuCoin WebSocket token not available")
+            }
+            completion()
+            return
+        }
+
+        let url = URL(string: "wss://ws-api.kucoin.com/endpoint?token=\(token)")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = Double(websocketTimeoutSeconds)
+        kucoinSocket = WebSocket(request: request)
+        
+        kucoinSocket?.onEvent = { event in
+            switch event {
+            case .connected(_):
+                Task { @MainActor in
+                    kucoinIsConnected = true
+                    kucoinReconnectAttempts = 0
+                    print("KuCoin WebSocket connected")
+                    logAlert(event: "KuCoin WebSocket connected")
+                }
+                completion()
+            case .disconnected(let reason, let code):
+                Task { @MainActor in
+                    kucoinIsConnected = false
+                    print("KuCoin WebSocket disconnected: \(reason), code: \(code)")
+                    logAlert(event: "KuCoin WebSocket disconnected: \(reason), code: \(code)")
+                    if kucoinReconnectAttempts < maxReconnectAttempts {
+                        kucoinReconnectAttempts += 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                            connectKucoinWebSocket(completion: completion)
+                        }
+                    }
+                }
+            case .text(let string):
+                do {
+                    guard let json = try JSONSerialization.jsonObject(with: string.data(using: .utf8)!) as? [String: Any],
+                          let type = json["type"] as? String else { return }
+                    
+                    if type == "message", let data = json["data"] as? [String: Any], let topic = json["topic"] as? String {
+                        let components = topic.components(separatedBy: ":")
+                        guard components.count > 1 else { return }
+                        let pair = components[1].replacingOccurrences(of: "USDTM", with: "-USDT")
+                        
+                        if topic.contains("/market/ticker") {
+                            if let priceStr = data["price"] as? String, let price = Double(priceStr) {
+                                Task { @MainActor in
+                                    kucoinCurrentPrice[pair] = price
+                                    kucoinPrices[pair, default: []].append(price)
+                                    if kucoinPrices[pair]!.count > priceHistoryRetention {
+                                        kucoinPrices[pair]!.removeFirst()
+                                    }
+                                    lastPriceUpdate[pair] = (price: price, timestamp: Date())
+                                    print("DEBUG: KuCoin \(pair) price updated: \(price)")
+                                }
+                            }
+                        } else if topic.contains("/market/level2") {
+                            if let dataDict = data["data"] as? [String: Any],
+                               let bids = dataDict["bids"] as? [[String]],
+                               let asks = dataDict["asks"] as? [[String]] {
+                                let bidBook = bids.compactMap { arr -> (price: Double, quantity: Double)? in
+                                    guard let priceStr = arr.first, let qtyStr = arr.last,
+                                          let price = Double(priceStr), let qty = Double(qtyStr) else { return nil }
+                                    return (price: price, quantity: qty)
+                                }
+                                let askBook = asks.compactMap { arr -> (price: Double, quantity: Double)? in
+                                    guard let priceStr = arr.first, let qtyStr = arr.last,
+                                          let price = Double(priceStr), let qty = Double(qtyStr) else { return nil }
+                                    return (price: price, quantity: qty)
+                                }
+                                Task { @MainActor in
+                                    kucoinOrderBooks[pair] = BevaixOrderBook(bids: bidBook, asks: askBook)
+                                    print("DEBUG: Updated KuCoin order book for \(pair): bids=\(bidBook.count), asks=\(askBook.count)")
+                                }
+                            }
+                        }
+                    } else if type == "pong" {
+                        Task { @MainActor in
+                            lastHeartbeat["kucoin"] = Date()
+                        }
+                    }
+                } catch {
+                    print("DEBUG: Failed to parse KuCoin WebSocket message: \(error.localizedDescription)")
+                    Task { @MainActor in
+                        logAlert(event: "Failed to parse KuCoin WebSocket message: \(error.localizedDescription)")
+                    }
+                }
+            case .error(let error):
+                print("KuCoin WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                Task { @MainActor in
+                    logAlert(event: "KuCoin WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                }
+            default:
+                break
+            }
+        }
+        
+        kucoinSocket?.connect()
+        Task {
+            try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+            if !kucoinIsConnected {
+                print("KuCoin WebSocket connection timed out")
+                Task { @MainActor in
+                    logAlert(event: "KuCoin WebSocket connection timed out")
+                }
+                kucoinSocket?.disconnect()
+                if kucoinReconnectAttempts < maxReconnectAttempts {
+                    kucoinReconnectAttempts += 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                        connectKucoinWebSocket(completion: completion)
+                    }
+                }
+            }
+        }
+    }
+
+    static func connectBybitWebSocket(completion: @escaping () -> Void) {
+        guard !bybitIsConnected else {
+            print("Bybit WebSocket already connected")
+            completion()
+            return
+        }
+
+        let url = URL(string: "wss://stream.bybit.com/v5/public/linear")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = Double(websocketTimeoutSeconds)
+        bybitSocket = WebSocket(request: request)
+        
+        bybitSocket?.onEvent = { event in
+            switch event {
+            case .connected(_):
+                Task { @MainActor in
+                    bybitIsConnected = true
+                    bybitReconnectAttempts = 0
+                    print("Bybit WebSocket connected")
+                    logAlert(event: "Bybit WebSocket connected")
+                    let subscribeMessage: [String: Any] = [
+                        "op": "subscribe",
+                        "args": tradingPairs.map { "orderBook_50.\($0.replacingOccurrences(of: "-USDT", with: "USDT"))" } +
+                                tradingPairs.map { "tickers.\($0.replacingOccurrences(of: "-USDT", with: "USDT"))" }
+                    ]
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage)
+                        bybitSocket?.write(data: jsonData)
+                        print("DEBUG: Sent Bybit WebSocket subscription: \(subscribeMessage)")
+                    } catch {
+                        print("DEBUG: Failed to send Bybit WebSocket subscription: \(error.localizedDescription)")
+                        Task { @MainActor in
+                            logAlert(event: "Failed to send Bybit WebSocket subscription: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                completion()
+            case .disconnected(let reason, let code):
+                Task { @MainActor in
+                    bybitIsConnected = false
+                    print("Bybit WebSocket disconnected: \(reason), code: \(code)")
+                    logAlert(event: "Bybit WebSocket disconnected: \(reason), code: \(code)")
+                    if bybitReconnectAttempts < maxReconnectAttempts {
+                        bybitReconnectAttempts += 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                            connectBybitWebSocket(completion: completion)
+                        }
+                    }
+                }
+            case .text(let string):
+                do {
+                    guard let json = try JSONSerialization.jsonObject(with: string.data(using: .utf8)!) as? [String: Any],
+                          let topic = json["topic"] as? String else { return }
+                    
+                    let pair = topic.components(separatedBy: ".").last!.replacingOccurrences(of: "USDT", with: "-USDT")
+                    if topic.contains("orderBook") {
+                        if let data = json["data"] as? [String: Any],
+                           let bids = data["b"] as? [[String]],
+                           let asks = data["a"] as? [[String]] {
+                            let bidBook = bids.compactMap { arr -> (price: Double, quantity: Double)? in
+                                guard let priceStr = arr.first, let qtyStr = arr.last,
+                                      let price = Double(priceStr), let qty = Double(qtyStr) else { return nil }
+                                return (price: price, quantity: qty)
+                            }
+                            let askBook = asks.compactMap { arr -> (price: Double, quantity: Double)? in
+                                guard let priceStr = arr.first, let qtyStr = arr.last,
+                                      let price = Double(priceStr), let qty = Double(qtyStr) else { return nil }
+                                return (price: price, quantity: qty)
+                            }
+                            Task { @MainActor in
+                                bybitOrderBooks[pair] = BevaixOrderBook(bids: bidBook, asks: askBook)
+                                print("DEBUG: Updated Bybit order book for \(pair): bids=\(bidBook.count), asks=\(askBook.count)")
+                            }
+                        }
+                    } else if topic.contains("tickers") {
+                        if let data = json["data"] as? [String: Any],
+                           let priceStr = data["lastPrice"] as? String,
+                           let price = Double(priceStr) {
+                            Task { @MainActor in
+                                bybitCurrentPrice[pair] = price
+                                bybitPrices[pair, default: []].append(price)
+                                if bybitPrices[pair]!.count > priceHistoryRetention {
+                                    bybitPrices[pair]!.removeFirst()
+                                }
+                                lastPriceUpdate[pair] = (price: price, timestamp: Date())
+                                print("DEBUG: Bybit \(pair) price updated: \(price)")
+                            }
+                        }
+                    }
+                } catch {
+                    print("DEBUG: Failed to parse Bybit WebSocket message: \(error.localizedDescription)")
+                    Task { @MainActor in
+                        logAlert(event: "Failed to parse Bybit WebSocket message: \(error.localizedDescription)")
+                    }
+                }
+            case .error(let error):
+                print("Bybit WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                Task { @MainActor in
+                    logAlert(event: "Bybit WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                }
+            default:
+                break
+            }
+        }
+        
+        bybitSocket?.connect()
+        Task {
+            try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+            if !bybitIsConnected {
+                print("Bybit WebSocket connection timed out")
+                Task { @MainActor in
+                    logAlert(event: "Bybit WebSocket connection timed out")
+                }
+                bybitSocket?.disconnect()
+                if bybitReconnectAttempts < maxReconnectAttempts {
+                    bybitReconnectAttempts += 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                        connectBybitWebSocket(completion: completion)
+                    }
+                }
+            }
+        }
+    }
+}
+

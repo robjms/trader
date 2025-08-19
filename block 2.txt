@@ -1,0 +1,346 @@
+
+//-----------------------------------------------------------------------------------------------------------------------------Block 2 - Environment Setup and Logging
+
+
+struct OrderBookEntry {
+    let price: Double
+    let size: Double
+}
+
+struct OrderBook {
+    var bids: [OrderBookEntry]
+    var asks: [OrderBookEntry]
+}
+
+struct FuturesOrderBookEntry {
+    let price: Double
+    let volume: Double
+    let side: String
+}
+
+// Enhanced Market Signal Detection
+struct SignalGenerator {
+    static func generateMomentumSignal(prices: [Double], volume: [Double]) -> AdvancedSignal? {
+        guard prices.count >= 20, volume.count >= 20 else { return nil }
+        
+        let recentPrices = Array(prices.suffix(20))
+        let recentVolume = Array(volume.suffix(20))
+        
+        // Calculate momentum strength
+        let priceChange = (recentPrices.last! - recentPrices.first!) / recentPrices.first!
+        let avgVolume = recentVolume.reduce(0, +) / Double(recentVolume.count)
+        let currentVolume = recentVolume.last!
+        
+        let volumeBoost = currentVolume / avgVolume
+        let momentumStrength = abs(priceChange) * volumeBoost
+        
+        let signalType = priceChange > 0 ? "momentum_bullish" : "momentum_bearish"
+        let confidence = min(momentumStrength * 100, 100.0)
+        
+        return AdvancedSignal(
+            type: signalType,
+            strength: momentumStrength,
+            confidence: confidence,
+            timestamp: Date(),
+            pair: "",
+            exchange: ""
+        )
+    }
+    
+    static func generateArbitrageSignal(kucoinPrice: Double, bybitPrice: Double, threshold: Double) -> AdvancedSignal? {
+        let spread = abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
+        
+        guard spread > threshold else { return nil }
+        
+        let direction = kucoinPrice > bybitPrice ? "kucoin_premium" : "bybit_premium"
+        let confidence = min(spread / threshold * 100, 100.0)
+        
+        return AdvancedSignal(
+            type: "arbitrage_\(direction)",
+            strength: spread,
+            confidence: confidence,
+            timestamp: Date(),
+            pair: "",
+            exchange: "cross"
+        )
+    }
+    
+    static func generateScalpingSignal(rsi: Double, price: Double, vwap: Double, orderBookImbalance: Double) -> AdvancedSignal? {
+        var signals: [Double] = []
+        
+        // RSI signals
+        if rsi < 30 { signals.append(0.7) } // Oversold
+        else if rsi > 70 { signals.append(-0.7) } // Overbought
+        
+        // Price vs VWAP
+        let vwapDivergence = (price - vwap) / vwap
+        if abs(vwapDivergence) > 0.002 {
+            signals.append(vwapDivergence > 0 ? -0.5 : 0.5)
+        }
+        
+        // Order book imbalance
+        if orderBookImbalance > 2.0 {
+            signals.append(0.6)
+        } else if orderBookImbalance < 0.5 {
+            signals.append(-0.6)
+        }
+        
+        guard !signals.isEmpty else { return nil }
+        
+        let averageSignal = signals.reduce(0, +) / Double(signals.count)
+        let signalType = averageSignal > 0 ? "scalp_buy" : "scalp_sell"
+        
+        return AdvancedSignal(
+            type: signalType,
+            strength: abs(averageSignal),
+            confidence: min(abs(averageSignal) * 150, 100.0),
+            timestamp: Date(),
+            pair: "",
+            exchange: ""
+        )
+    }
+}
+
+// Enhanced Market Condition Analysis
+struct MarketAnalyzer {
+    static func analyzeMarketCondition(prices: [Double], volumes: [Double]) -> MarketCondition {
+        guard prices.count >= 50, volumes.count >= 50 else {
+            return MarketCondition(volatility: 0.02, trend: "unknown", volume: 0, momentum: 0, timestamp: Date())
+        }
+        
+        let recentPrices = Array(prices.suffix(50))
+        let recentVolumes = Array(volumes.suffix(50))
+        
+        // Calculate volatility
+        let returns = zip(recentPrices.dropFirst(), recentPrices.dropLast()).map { (current, previous) in
+            (current - previous) / previous
+        }
+        let meanReturn = returns.reduce(0, +) / Double(returns.count)
+        let variance = returns.map { pow($0 - meanReturn, 2) }.reduce(0, +) / Double(returns.count)
+        let volatility = sqrt(variance)
+        
+        // Determine trend
+        let sma20 = recentPrices.suffix(20).reduce(0, +) / 20.0
+        let sma50 = recentPrices.reduce(0, +) / Double(recentPrices.count)
+        let currentPrice = recentPrices.last!
+        
+        var trend = "sideways"
+        if currentPrice > sma20 && sma20 > sma50 {
+            trend = "bullish"
+        } else if currentPrice < sma20 && sma20 < sma50 {
+            trend = "bearish"
+        }
+        
+        // Calculate momentum
+        let momentum = (currentPrice - recentPrices.first!) / recentPrices.first!
+        
+        // Average volume
+        let avgVolume = recentVolumes.reduce(0, +) / Double(recentVolumes.count)
+        
+        return MarketCondition(
+            volatility: volatility,
+            trend: trend,
+            volume: avgVolume,
+            momentum: momentum,
+            timestamp: Date()
+        )
+    }
+    
+    static func calculateCorrelation(prices1: [Double], prices2: [Double]) -> Double {
+        guard prices1.count == prices2.count, prices1.count > 1 else { return 0.0 }
+        
+        let mean1 = prices1.reduce(0, +) / Double(prices1.count)
+        let mean2 = prices2.reduce(0, +) / Double(prices2.count)
+        
+        let numerator = zip(prices1, prices2).map { (x1, x2) in
+            (x1 - mean1) * (x2 - mean2)
+        }.reduce(0, +)
+        
+        let denominator1 = prices1.map { pow($0 - mean1, 2) }.reduce(0, +)
+        let denominator2 = prices2.map { pow($0 - mean2, 2) }.reduce(0, +)
+        let denominator = sqrt(denominator1 * denominator2)
+        
+        return denominator != 0 ? numerator / denominator : 0.0
+    }
+}
+
+// Enhanced Risk Calculator
+struct RiskCalculator {
+    static func calculateVaR(returns: [Double], confidence: Double = 0.95) -> Double {
+        guard !returns.isEmpty else { return 0.0 }
+        
+        let sortedReturns = returns.sorted()
+        let index = Int((1.0 - confidence) * Double(sortedReturns.count))
+        return index < sortedReturns.count ? abs(sortedReturns[index]) : 0.0
+    }
+    
+    static func calculateExpectedShortfall(returns: [Double], confidence: Double = 0.95) -> Double {
+        guard !returns.isEmpty else { return 0.0 }
+        
+        let var95 = calculateVaR(returns: returns, confidence: confidence)
+        let tailReturns = returns.filter { $0 <= -var95 }
+        return tailReturns.isEmpty ? 0.0 : abs(tailReturns.reduce(0, +) / Double(tailReturns.count))
+    }
+    
+    static func calculateMaxDrawdown(prices: [Double]) -> Double {
+        guard prices.count > 1 else { return 0.0 }
+        
+        var maxDrawdown = 0.0
+        var peak = prices[0]
+        
+        for price in prices {
+            if price > peak {
+                peak = price
+            }
+            let drawdown = (peak - price) / peak
+            maxDrawdown = max(maxDrawdown, drawdown)
+        }
+        
+        return maxDrawdown
+    }
+    
+    static func calculateKellyFraction(winRate: Double, avgWin: Double, avgLoss: Double) -> Double {
+        guard avgLoss > 0 else { return 0.0 }
+        let b = avgWin / avgLoss
+        return (winRate * (b + 1) - 1) / b
+    }
+}
+
+// Dedicated struct to hold environment variables with enhanced validation
+struct AppConfig {
+    static let environment: [String: String] = {
+        let env = loadEnv()
+        print("DEBUG: Loaded environment keys: \(env.keys)")
+        validateCriticalEnvironmentVariables(env)
+        return env
+    }()
+    
+    static func validateCriticalEnvironmentVariables(_ env: [String: String]) {
+        let criticalKeys = [
+            "BYBIT_API_KEY", "BYBIT_API_SECRET",
+            "KUCOIN_API_KEY", "KUCOIN_API_SECRET", "KUCOIN_API_PASSPHRASE",
+            "ACTIVE_PAIRS"
+        ]
+        
+        var missingKeys: [String] = []
+        for key in criticalKeys {
+            if env[key]?.isEmpty != false {
+                missingKeys.append(key)
+            }
+        }
+        
+        if !missingKeys.isEmpty {
+            print("❌ CRITICAL: Missing environment variables: \(missingKeys.joined(separator: ", "))")
+            print("⚠️  Bot may not function properly without these credentials!")
+        } else {
+            print("✅ All critical environment variables loaded successfully")
+        }
+    }
+}
+
+func findProjectRoot(from directory: URL) -> URL? {
+    var currentDirectory = directory
+    while currentDirectory.path != "/" {
+        let packageFile = currentDirectory.appendingPathComponent("Package.swift")
+        if FileManager.default.fileExists(atPath: packageFile.path) {
+            return currentDirectory
+        }
+        currentDirectory = currentDirectory.deletingLastPathComponent()
+    }
+    return nil
+}
+
+func loadEnv() -> [String: String] {
+    var env: [String: String] = [:]
+    let fileManager = FileManager.default
+    
+    let currentDirectory = fileManager.currentDirectoryPath
+    let currentEnvPath = URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
+    
+    print("Current working directory: \(currentDirectory)")
+    print("Looking for .env file at: \(currentEnvPath)")
+    
+    if fileManager.fileExists(atPath: currentEnvPath) {
+        do {
+            let contents = try String(contentsOfFile: currentEnvPath, encoding: .utf8)
+            print("Successfully read .env file contents: \(contents)")
+            let lines = contents.components(separatedBy: .newlines)
+            for line in lines {
+                let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                print("Processing line: '\(trimmed)'")
+                if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
+                let parts = trimmed.components(separatedBy: "=")
+                if parts.count >= 2 {
+                    let key = parts[0].trimmingCharacters(in: .whitespaces)
+                    let value = parts.dropFirst().joined(separator: "=").trimmingCharacters(in: .whitespaces)
+                    print("Parsed key: '\(key)', value: '\(value)'")
+                    env[key] = value
+                } else {
+                    print("Skipping invalid line (expected key=value format): '\(trimmed)'")
+                    Task { @MainActor in
+                        logAlert(event: "Skipping invalid .env line: '\(trimmed)'")
+                    }
+                }
+            }
+        } catch {
+            print("Error loading .env file: \(error)")
+            Task { @MainActor in
+                logAlert(event: "Error loading .env file: \(error)")
+            }
+        }
+    } else {
+        print("Could not find .env file at path: \(currentEnvPath)")
+        Task { @MainActor in
+            logAlert(event: "Could not find .env file at path: \(currentEnvPath)")
+        }
+        
+        let binaryURL = URL(fileURLWithPath: CommandLine.arguments[0])
+        if let projectRoot = findProjectRoot(from: binaryURL.deletingLastPathComponent()) {
+            let rootEnvPath = projectRoot.appendingPathComponent(".env").path
+            print("Falling back to project root: \(projectRoot.path)")
+            print("Looking for .env file at: \(rootEnvPath)")
+            if fileManager.fileExists(atPath: rootEnvPath) {
+                do {
+                    let contents = try String(contentsOfFile: rootEnvPath, encoding: .utf8)
+                    print("Successfully read .env file contents: \(contents)")
+                    let lines = contents.components(separatedBy: .newlines)
+                    for line in lines {
+                        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                        print("Processing line: '\(trimmed)'")
+                        if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
+                        let parts = trimmed.components(separatedBy: "=")
+                        if parts.count >= 2 {
+                            let key = parts[0].trimmingCharacters(in: .whitespaces)
+                            let value = parts.dropFirst().joined(separator: "=").trimmingCharacters(in: .whitespaces)
+                            print("Parsed key: '\(key)', value: '\(value)'")
+                            env[key] = value
+                        } else {
+                            print("Skipping invalid line (expected key=value format): '\(trimmed)'")
+                            Task { @MainActor in
+                                logAlert(event: "Skipping invalid .env line: '\(trimmed)'")
+                            }
+                        }
+                    }
+                } catch {
+                    print("Error loading .env file: \(error)")
+                    Task { @MainActor in
+                        logAlert(event: "Error loading .env file: \(error)")
+                    }
+                }
+            } else {
+                print("Could not find .env file at fallback path: \(rootEnvPath)")
+                Task { @MainActor in
+                    logAlert(event: "Could not find .env file at fallback path: \(rootEnvPath)")
+                }
+            }
+        } else {
+            print("Could not locate project root for fallback .env loading")
+            Task { @MainActor in
+                logAlert(event: "Could not locate project root for fallback .env loading")
+            }
+        }
+    }
+    
+    print("DEBUG: Final loaded environment variables: \(env)")
+    return env
+}

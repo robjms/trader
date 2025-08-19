@@ -1,0 +1,434 @@
+
+
+//-------------------------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
+
+extension ExchangeWebSocket {
+    static func checkLiquidity(exchange: String, pair: String, completion: @escaping @Sendable (Double?) -> Void) {
+        let tradeAmount = getDouble("SPOT_TRADE_AMOUNT", defaultValue: 50.0)
+        let currentPrice = exchange == "bybit" ? (bybitCurrentPrice[pair] ?? lastPriceUpdate[pair]?.price ?? 1.0) : (kucoinCurrentPrice[pair] ?? lastPriceUpdate[pair]?.price ?? 1.0)
+        let requiredLiquidity = tradeAmount * currentPrice * liquidityDepthMultiplier
+        let minLiquidityThresholdValue = minLiquidityThreshold
+        
+        Task { @MainActor in
+            // Fix: Use async/await to handle MainActor-isolated fetchOrderBookDepth
+            let spotDepth = await withCheckedContinuation { continuation in
+                fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: "spot") { depth in
+                    continuation.resume(returning: depth)
+                }
+            }
+            let futuresDepth = await withCheckedContinuation { continuation in
+                fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: "futures") { depth in
+                    continuation.resume(returning: depth)
+                }
+            }
+            
+            let spotDepthValue = spotDepth ?? minLiquidityThresholdValue
+            let futuresDepthValue = futuresDepth ?? minLiquidityThresholdValue
+            let totalLiquidity = spotDepthValue + futuresDepthValue
+            
+            // ENHANCED: Basic liquidity analysis using existing variables
+            let liquidityScore = calculateBasicLiquidityScore(totalLiquidity: totalLiquidity)
+            print("DEBUG: Liquidity score for \(exchange)-\(pair): \(liquidityScore)")
+            
+            if totalLiquidity < requiredLiquidity {
+                print("Insufficient liquidity for \(exchange)-\(pair): Depth \(totalLiquidity), Required \(requiredLiquidity)")
+                logAlert(event: "Insufficient liquidity for \(exchange)-\(pair): Depth \(totalLiquidity), Required \(requiredLiquidity), Score: \(liquidityScore)")
+                completion(nil)
+            } else {
+                print("DEBUG: Liquidity check passed for \(exchange)-\(pair): Depth \(totalLiquidity), Score: \(liquidityScore)")
+                completion(totalLiquidity)
+            }
+        }
+    }
+
+    static func fetchOrderBookDepth(exchange: String, pair: String, marketType: String, retryCount: Int = 0, completion: @escaping @Sendable (Double?) -> Void) {
+        let maxRetries = getInt("API_MAX_RETRIES", defaultValue: 3)
+        let localRetryCountCopy = retryCount // Local copy to avoid mutation
+        guard localRetryCountCopy < maxRetries else {
+            print("Max retries reached for order book fetch: \(exchange)-\(pair)-\(marketType)")
+            Task { @MainActor in
+                logAlert(event: "Max retries reached for order book fetch: \(exchange)-\(pair)-\(marketType)")
+            }
+            // Fallback to cached order book data
+            let book = exchange == "bybit" ?
+                bybitOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: []) :
+                kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+            completion(calculateOrderBookDepth(book))
+            return
+        }
+        
+        // Original URL building logic
+        var url: URL?
+        let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+        
+        if exchange == "bybit" {
+            let category = marketType == "spot" ? "spot" : "linear"
+            url = URL(string: "https://api.bybit.com/v5/market/orderbook?category=\(category)&symbol=\(symbol)&limit=50")
+        } else {
+            let endpoint = marketType == "spot" ? "/api/v1/market/orderbook/level2_50?symbol=\(symbol)" : "/api/v1/contractMarket/level2?symbol=\(symbol)M"
+            url = URL(string: "https://api\(marketType == "spot" ? "" : "-futures").kucoin.com\(endpoint)")
+        }
+
+        guard let requestUrl = url else {
+            print("Invalid order book URL for \(exchange)-\(pair)-\(marketType)")
+            Task { @MainActor in
+                logAlert(event: "Invalid order book URL for \(exchange)-\(pair)-\(marketType)")
+            }
+            let attemptFetch: @Sendable () -> Void = {
+                let newRetryCount = localRetryCountCopy + 1
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                }
+            }
+            attemptFetch()
+            return
+        }
+
+        var request = URLRequest(url: requestUrl)
+        request.httpMethod = "GET"
+        request.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 10.0)
+
+        let startTime = Date()
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let latency = Date().timeIntervalSince(startTime) * 1000
+            Task { @MainActor in
+                lastLatency[pair] = latency
+                if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
+                    print("High latency detected for order book fetch: \(latency)ms")
+                    logAlert(event: "High latency detected for order book fetch: \(latency)ms")
+                }
+            }
+
+            if let error = error {
+                print("Failed to fetch order book for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to fetch order book for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
+                }
+                let attemptFetch: @Sendable () -> Void = {
+                    let newRetryCount = localRetryCountCopy + 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                    }
+                }
+                attemptFetch()
+                return
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                print("Invalid order book response for \(exchange)-\(pair)-\(marketType)")
+                Task { @MainActor in
+                    logAlert(event: "Invalid order book response for \(exchange)-\(pair)-\(marketType)")
+                }
+                let attemptFetch: @Sendable () -> Void = {
+                    let newRetryCount = localRetryCountCopy + 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                    }
+                }
+                attemptFetch()
+                return
+            }
+
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                    print("Failed to parse JSON for \(exchange)-\(pair)-\(marketType)")
+                    Task { @MainActor in
+                        logAlert(event: "Failed to parse JSON for \(exchange)-\(pair)-\(marketType)")
+                    }
+                    let attemptFetch: @Sendable () -> Void = {
+                        let newRetryCount = localRetryCountCopy + 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                        }
+                    }
+                    attemptFetch()
+                    return
+                }
+
+                if exchange == "bybit" {
+                    guard let result = json["result"] as? [String: Any],
+                          let bids = result["b"] as? [[String]],
+                          let asks = result["a"] as? [[String]],
+                          !bids.isEmpty, !asks.isEmpty else {
+                        print("Failed to parse Bybit order book data for \(pair)-\(marketType)")
+                        Task { @MainActor in
+                            logAlert(event: "Failed to parse Bybit order book data for \(pair)-\(marketType)")
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                        return
+                    }
+
+                    var bidDepth: Double = 0.0
+                    var askDepth: Double = 0.0
+                    for bid in bids.prefix(10) {
+                        if let price = Double(bid[0]), let quantity = Double(bid[1]) {
+                            bidDepth += price * quantity
+                        }
+                    }
+                    for ask in asks.prefix(10) {
+                        if let price = Double(ask[0]), let quantity = Double(ask[1]) {
+                            askDepth += price * quantity
+                        }
+                    }
+                    let totalDepth = bidDepth + askDepth
+                    Task { @MainActor in
+                        if marketType == "spot" {
+                            bybitOrderBooks[pair] = BevaixOrderBook(
+                                bids: bids.prefix(10).compactMap { b in
+                                    if let price = Double(b[0]), let quantity = Double(b[1]) {
+                                        return (price: price, quantity: quantity)
+                                    }
+                                    return nil
+                                },
+                                asks: asks.prefix(10).compactMap { a in
+                                    if let price = Double(a[0]), let quantity = Double(a[1]) {
+                                        return (price: price, quantity: quantity)
+                                    }
+                                    return nil
+                                }
+                            )
+                        } else {
+                            bybitFuturesOrderBook[pair] = bids.prefix(10).compactMap { b in
+                                if let price = Double(b[0]), let volume = Double(b[1]) {
+                                    return (price: price, volume: volume, side: "buy")
+                                }
+                                return nil
+                            } + asks.prefix(10).compactMap { a in
+                                if let price = Double(a[0]), let volume = Double(a[1]) {
+                                    return (price: price, volume: volume, side: "sell")
+                                }
+                                return nil
+                            }
+                        }
+                        
+                        // ENHANCED: Basic order book analysis
+                        analyzeOrderBookBasic(exchange: exchange, pair: pair, marketType: marketType)
+                    }
+                    completion(totalDepth)
+                } else {
+                    guard let data = json["data"] as? [String: Any],
+                          let bids = data["bids"] as? [[String]],
+                          let asks = data["asks"] as? [[String]],
+                          !bids.isEmpty, !asks.isEmpty else {
+                        print("Failed to parse KuCoin order book data for \(pair)-\(marketType)")
+                        Task { @MainActor in
+                            logAlert(event: "Failed to parse KuCoin order book data for \(pair)-\(marketType)")
+                        }
+                        let attemptFetch: @Sendable () -> Void = {
+                            let newRetryCount = localRetryCountCopy + 1
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                            }
+                        }
+                        attemptFetch()
+                        return
+                    }
+
+                    var bidDepth: Double = 0.0
+                    var askDepth: Double = 0.0
+                    for bid in bids.prefix(10) {
+                        if let price = Double(bid[0]), let quantity = Double(bid[1]) {
+                            bidDepth += price * quantity
+                        }
+                    }
+                    for ask in asks.prefix(10) {
+                        if let price = Double(ask[0]), let quantity = Double(ask[1]) {
+                            askDepth += price * quantity
+                        }
+                    }
+                    let totalDepth = bidDepth + askDepth
+                    Task { @MainActor in
+                        if marketType == "spot" {
+                            kucoinOrderBooks[pair] = BevaixOrderBook(
+                                bids: bids.prefix(10).compactMap { b in
+                                    if let price = Double(b[0]), let quantity = Double(b[1]) {
+                                        return (price: price, quantity: quantity)
+                                    }
+                                    return nil
+                                },
+                                asks: asks.prefix(10).compactMap { a in
+                                    if let price = Double(a[0]), let quantity = Double(a[1]) {
+                                        return (price: price, quantity: quantity)
+                                    }
+                                    return nil
+                                }
+                            )
+                        } else {
+                            kucoinFuturesOrderBook[pair] = bids.prefix(10).compactMap { b in
+                                if let price = Double(b[0]), let volume = Double(b[1]) {
+                                    return (price: price, volume: volume, side: "buy")
+                                }
+                                return nil
+                            } + asks.prefix(10).compactMap { a in
+                                if let price = Double(a[0]), let volume = Double(a[1]) {
+                                    return (price: price, volume: volume, side: "sell")
+                                }
+                                return nil
+                            }
+                        }
+                        
+                        // ENHANCED: Basic order book analysis
+                        analyzeOrderBookBasic(exchange: exchange, pair: pair, marketType: marketType)
+                    }
+                    completion(totalDepth)
+                }
+            } catch {
+                print("Error parsing order book data: \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "Error parsing order book data: \(error.localizedDescription)")
+                }
+                let attemptFetch: @Sendable () -> Void = {
+                    let newRetryCount = localRetryCountCopy + 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        fetchOrderBookDepth(exchange: exchange, pair: pair, marketType: marketType, retryCount: newRetryCount, completion: completion)
+                    }
+                }
+                attemptFetch()
+            }
+        }.resume()
+    }
+
+    static func checkLiquidityAsync(exchange: String, pair: String, marketType: String, tradeAmount: Double, price: Double) async -> Double? {
+        await withCheckedContinuation { continuation in
+            checkLiquidity(exchange: exchange, pair: pair) { liquidity in
+                continuation.resume(returning: liquidity)
+            }
+        }
+    }
+    
+    // ENHANCED FEATURES: Using only existing variables
+    
+    static func calculateBasicLiquidityScore(totalLiquidity: Double) -> Double {
+        let baseThreshold = minLiquidityThreshold
+        let ratio = totalLiquidity / baseThreshold
+        
+        if ratio >= 10 { return 100 }
+        else if ratio >= 5 { return 85 }
+        else if ratio >= 3 { return 70 }
+        else if ratio >= 2 { return 55 }
+        else if ratio >= 1 { return 40 }
+        else { return 20 }
+    }
+    
+    @MainActor
+    static func analyzeOrderBookBasic(exchange: String, pair: String, marketType: String) {
+        let orderBook = exchange == "bybit" ?
+            bybitOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: []) :
+            kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+        
+        guard !orderBook.bids.isEmpty && !orderBook.asks.isEmpty else { return }
+        
+        // Calculate basic spread metrics
+        let bestBid = orderBook.bids.first?.price ?? 0
+        let bestAsk = orderBook.asks.first?.price ?? 0
+        let spread = bestAsk - bestBid
+        let midPrice = (bestBid + bestAsk) / 2
+        let spreadPercent = midPrice > 0 ? (spread / midPrice) * 100 : 0
+        
+        // Analyze basic order book imbalance
+        let bidVolume = orderBook.bids.prefix(5).reduce(0) { $0 + $1.quantity }
+        let askVolume = orderBook.asks.prefix(5).reduce(0) { $0 + $1.quantity }
+        let totalVolume = bidVolume + askVolume
+        let imbalance = totalVolume > 0 ? abs(bidVolume - askVolume) / totalVolume : 0
+        
+        // Log significant findings using existing logging
+        if spreadPercent > 0.2 {
+            logAlert(event: "Wide spread detected for \(exchange)-\(pair): \(String(format: "%.3f", spreadPercent))%")
+        }
+        
+        if imbalance > 0.4 {
+            logAlert(event: "Order book imbalance detected for \(exchange)-\(pair): \(String(format: "%.1f", imbalance * 100))%")
+        }
+        
+        // Basic large order detection
+        detectBasicLargeOrders(exchange: exchange, pair: pair, orderBook: orderBook)
+    }
+    
+    @MainActor
+    static func detectBasicLargeOrders(exchange: String, pair: String, orderBook: BevaixOrderBook) {
+        guard !orderBook.bids.isEmpty && !orderBook.asks.isEmpty else { return }
+        
+        let avgBidSize = orderBook.bids.reduce(0) { $0 + $1.quantity } / Double(orderBook.bids.count)
+        let avgAskSize = orderBook.asks.reduce(0) { $0 + $1.quantity } / Double(orderBook.asks.count)
+        let avgSize = (avgBidSize + avgAskSize) / 2
+        let largeOrderThreshold = avgSize * 5 // 5x average size
+        
+        var largeOrderCount = 0
+        
+        // Count large bids
+        for bid in orderBook.bids {
+            if bid.quantity > largeOrderThreshold {
+                largeOrderCount += 1
+            }
+        }
+        
+        // Count large asks
+        for ask in orderBook.asks {
+            if ask.quantity > largeOrderThreshold {
+                largeOrderCount += 1
+            }
+        }
+        
+        // Log if significant large orders found
+        if largeOrderCount >= 3 {
+            logAlert(event: "Multiple large orders detected in \(exchange)-\(pair): \(largeOrderCount) orders > \(String(format: "%.1f", largeOrderThreshold))")
+        }
+    }
+    
+    // Helper function for order book depth calculation
+    static func calculateOrderBookDepth(_ orderBook: BevaixOrderBook) -> Double {
+        let bidDepth = orderBook.bids.prefix(10).reduce(0) { $0 + ($1.price * $1.quantity) }
+        let askDepth = orderBook.asks.prefix(10).reduce(0) { $0 + ($1.price * $1.quantity) }
+        return bidDepth + askDepth
+    }
+    
+    // ENHANCED: Cross-exchange liquidity comparison using existing variables
+    @MainActor
+    static func compareExchangeLiquidity(pair: String) -> String {
+        let bybitBook = bybitOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+        let kucoinBook = kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+        
+        let bybitDepth = calculateOrderBookDepth(bybitBook)
+        let kucoinDepth = calculateOrderBookDepth(kucoinBook)
+        
+        let result = bybitDepth > kucoinDepth ? "bybit" : "kucoin"
+        let diff = abs(bybitDepth - kucoinDepth)
+        
+        print("DEBUG: Liquidity comparison for \(pair) - Bybit: \(bybitDepth), KuCoin: \(kucoinDepth), Best: \(result)")
+        
+        if diff > 1000 { // Significant difference
+            logAlert(event: "Significant liquidity difference for \(pair): \(result) has \(String(format: "%.0f", diff)) more depth")
+        }
+        
+        return result
+    }
+    
+    // ENHANCED: Real-time order book health check
+    @MainActor
+    static func checkOrderBookHealth(exchange: String, pair: String) -> Bool {
+        let orderBook = exchange == "bybit" ?
+            bybitOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: []) :
+            kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+        
+        // Basic health checks
+        let hasSufficientLevels = orderBook.bids.count >= 5 && orderBook.asks.count >= 5
+        let hasValidSpread = orderBook.bids.first?.price ?? 0 < (orderBook.asks.first?.price ?? Double.infinity)
+        
+        if !hasSufficientLevels {
+            logAlert(event: "Insufficient order book levels for \(exchange)-\(pair): bids=\(orderBook.bids.count), asks=\(orderBook.asks.count)")
+        }
+        
+        if !hasValidSpread {
+            logAlert(event: "Invalid spread detected for \(exchange)-\(pair) - possible data issue")
+        }
+        
+        return hasSufficientLevels && hasValidSpread
+    }
+}
+

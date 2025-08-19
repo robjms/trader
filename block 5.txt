@@ -1,0 +1,208 @@
+
+
+//------------------------------------------------------------------------------------------------------------------------------Block 5 - Risk Assessment and Management
+
+
+
+
+
+extension ExchangeWebSocket {
+    static func calculateEMA(prices: [Double], period: Int) -> Double? {
+        guard prices.count >= period else { return nil }
+        let k = 2.0 / Double(period + 1)
+        var ema = prices[0]
+        for i in 1..<prices.count {
+            ema = prices[i] * k + ema * (1 - k)
+        }
+        return ema
+    }
+
+    static func calculateMultiTimeframeEMAs(pair: String, exchange: String, prices: [Double]) {
+        let minPrices1 = Array(prices.suffix(60)) // 1-minute timeframe
+        let minPrices5 = Array(prices.suffix(300)) // 5-minute timeframe
+        let minPrices15 = Array(prices.suffix(900)) // 15-minute timeframe
+
+        let shortPeriod = spotEmaShortPeriod
+        let mediumPeriod = spotEmaMediumPeriod
+        let longPeriod = spotEmaLongPeriod
+
+        if let emaShort1 = calculateEMA(prices: minPrices1, period: shortPeriod),
+           let emaMedium1 = calculateEMA(prices: minPrices1, period: mediumPeriod),
+           let emaLong1 = calculateEMA(prices: minPrices1, period: longPeriod),
+           let emaShort5 = calculateEMA(prices: minPrices5, period: shortPeriod),
+           let emaMedium5 = calculateEMA(prices: minPrices5, period: mediumPeriod),
+           let emaLong5 = calculateEMA(prices: minPrices5, period: longPeriod),
+           let emaShort15 = calculateEMA(prices: minPrices15, period: shortPeriod),
+           let emaMedium15 = calculateEMA(prices: minPrices15, period: mediumPeriod),
+           let emaLong15 = calculateEMA(prices: minPrices15, period: longPeriod) {
+            Task { @MainActor in
+                if exchange == "kucoin" {
+                    kucoinSpotEMA1Min[pair] = (emaShort1, emaMedium1, emaLong1)
+                    kucoinSpotEMA5Min[pair] = (emaShort5, emaMedium5, emaLong5)
+                    kucoinSpotEMA15Min[pair] = (emaShort15, emaMedium15, emaLong15)
+                } else {
+                    bybitSpotEMA1Min[pair] = (emaShort1, emaMedium1, emaLong1)
+                    bybitSpotEMA5Min[pair] = (emaShort5, emaMedium5, emaLong5)
+                    bybitSpotEMA15Min[pair] = (emaShort15, emaMedium15, emaLong15)
+                }
+            }
+        }
+    }
+
+    static func calculateMACD(prices: [Double], shortPeriod: Int, longPeriod: Int, signalPeriod: Int) -> (macd: Double, signal: Double, histogram: Double)? {
+        guard prices.count >= max(longPeriod, signalPeriod) else { return nil }
+        
+        guard let shortEMA = calculateEMA(prices: prices, period: shortPeriod),
+              let longEMA = calculateEMA(prices: prices, period: longPeriod) else {
+            return nil
+        }
+        
+        let macd = shortEMA - longEMA
+        let macdSeries = prices.suffix(signalPeriod).enumerated().map { _ in
+            shortEMA - longEMA // Simplified, assumes recent prices for signal
+        }
+        
+        guard let signal = calculateEMA(prices: macdSeries, period: signalPeriod) else {
+            return nil
+        }
+        
+        let histogram = macd - signal
+        return (macd: macd, signal: signal, histogram: histogram)
+    }
+
+    static func calculateRSI(prices: [Double], period: Int) -> Double? {
+        guard prices.count >= period + 1 else { return nil }
+        var gains: [Double] = []
+        var losses: [Double] = []
+        for i in 1..<prices.count {
+            let diff = prices[i] - prices[i - 1]
+            if diff > 0 {
+                gains.append(diff)
+                losses.append(0)
+            } else {
+                gains.append(0)
+                losses.append(abs(diff))
+            }
+        }
+        guard gains.count >= period else { return nil }
+        let avgGain = gains.suffix(period).reduce(0.0, +) / Double(period)
+        let avgLoss = losses.suffix(period).reduce(0.0, +) / Double(period)
+        guard avgLoss != 0 else { return 100 }
+        let rs = avgGain / avgLoss
+        return 100 - (100 / (1 + rs))
+    }
+
+    static func calculateATR(prices: [Double]) -> Double? {
+        guard prices.count > 1 else { return nil }
+        var trs: [Double] = []
+        for i in 1..<prices.count {
+            let highLow = abs(prices[i] - prices[i - 1])
+            trs.append(highLow)
+        }
+        guard !trs.isEmpty else { return nil }
+        return trs.reduce(0, +) / Double(trs.count)
+    }
+
+    static func calculateVaR(pair: String, tradeAmount: Double, prices: [Double]) -> Double? {
+        guard prices.count >= 1440 else { return nil } // 24 hours of data
+        let returns = prices.enumerated().dropFirst().map { (i, price) in
+            log(price / prices[i - 1])
+        }
+        guard !returns.isEmpty else { return nil }
+        let meanReturn = returns.reduce(0, +) / Double(returns.count)
+        let variance = returns.reduce(0.0) { $0 + pow($1 - meanReturn, 2) } / Double(returns.count)
+        let stdDev = sqrt(variance)
+        let zScore = -1.645 // 95% confidence level
+        let varValue = tradeAmount * (meanReturn + zScore * stdDev)
+        Task { @MainActor in
+            varEstimates[pair] = varValue
+        }
+        return varValue
+    }
+
+    static func calculateKellySize(pair: String, balance: Double, sentimentScore: Double) -> Double {
+        let winProb = kellyWinProbability
+        let rewardToRisk = kellyRewardToRisk
+        let sentimentAdjustment = sentimentScore < 0 ? 0.5 : 1.0
+        let kellyFraction = (winProb * (rewardToRisk + 1) - 1) / rewardToRisk
+        let adjustedFraction = kellyFraction * sentimentAdjustment
+        let positionSize = balance * max(0.01, min(0.3, adjustedFraction))
+        Task { @MainActor in
+            kellySizes[pair] = positionSize
+        }
+        return positionSize
+    }
+
+    static func checkVolatility(exchange: String, pair: String, atr: Double) -> Bool {
+        let currentPrice = exchange == "bybit" ? bybitCurrentFuturesPrice[pair] ?? 0.0 : kucoinCurrentFuturesPrice[pair] ?? 0.0
+        guard currentPrice > 0 else { return false }
+        let atrPercentage = atr / currentPrice
+        return atrPercentage >= atrMultiplier
+    }
+
+    static func detectVolatilitySpike(exchange: String, pair: String) -> Bool {
+        let prices = exchange == "bybit" ? bybitFuturesPrices[pair] ?? [] : kucoinFuturesPrices[pair] ?? []
+        guard prices.count >= volatilitySpikeWindowMinutes else { return false }
+        let recentPrices = prices.suffix(volatilitySpikeWindowMinutes)
+        guard let minPrice = recentPrices.min(), let maxPrice = recentPrices.max() else { return false }
+        let priceRange = (maxPrice - minPrice) / minPrice
+        return priceRange >= volatilitySpikeThreshold
+    }
+
+    static func checkVolumeAnomaly(exchange: String, pair: String, marketType: String) -> Bool {
+        let volumes: [Double]
+        switch (exchange, marketType) {
+        case ("kucoin", "spot"):
+            volumes = kucoinSpotVolume[pair] ?? []
+        case ("kucoin", "futures"):
+            volumes = kucoinFuturesVolume[pair] ?? []
+        case ("bybit", "spot"):
+            volumes = bybitSpotVolume[pair] ?? []
+        case ("bybit", "futures"):
+            volumes = bybitFuturesVolume[pair] ?? []
+        default:
+            return false
+        }
+        guard volumes.count >= volumeAnomalyWindowHours * 60 else { return false }
+        let recentVolumes = volumes.suffix(volumeAnomalyWindowHours * 60)
+        let avgVolume = recentVolumes.reduce(0, +) / Double(recentVolumes.count)
+        guard let maxVolume = recentVolumes.max() else { return false }
+        return maxVolume >= avgVolume * volumeAnomalyMultiplier
+    }
+
+    static func isPrimeTradingTime() -> Bool {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = Date()
+        guard let gmtZone = TimeZone(identifier: "GMT") else { return false }
+        let components = calendar.dateComponents(in: gmtZone, from: now)
+        guard let currentHour = components.hour else { return false }
+        let londonHours = 8...17
+        let nyHours = 13...22
+        return londonHours.contains(currentHour) || nyHours.contains(currentHour)
+    }
+
+    static func dynamicCooldown(volatility: Double) -> Double {
+        return max(2, min(10, 10 * (1 - volatility)))
+    }
+
+    static func calculateBollingerBands(prices: [Double], period: Int, multiplier: Double = 2.0) -> (upper: Double, middle: Double, lower: Double)? {
+        guard prices.count >= period else { return nil }
+        let recentPrices = prices.suffix(period)
+        let sma = recentPrices.reduce(0, +) / Double(period)
+        let variance = recentPrices.reduce(0.0) { $0 + pow($1 - sma, 2) } / Double(period)
+        let stdDev = sqrt(variance)
+        let upperBand = sma + multiplier * stdDev
+        let lowerBand = sma - multiplier * stdDev
+        return (upper: upperBand, middle: sma, lower: lowerBand)
+    }
+
+    static func calculateFundingRateTrend(pair: String, exchange: String) -> Double? {
+        let history = exchange == "bybit" ? bybitFundingRateHistory[pair] ?? [] : kucoinFundingRateHistory[pair] ?? []
+        guard history.count >= 3 else { return nil }
+        let recentRates = history.suffix(3)
+        let trend = recentRates.enumerated().reduce(0.0) { (sum, item) in
+            sum + (item.element - (recentRates[recentRates.count - 1] / Double(recentRates.count)))
+        } / Double(recentRates.count)
+        return trend
+    }
+}
