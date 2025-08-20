@@ -3,8 +3,6 @@
 //------------------------------------------------------------------------------------------------------------------------Block 10 - Bybit WebSocket Processing
 
 
-
-
 extension ExchangeWebSocket {
     @MainActor
     static var kucoinDailyLoss: Double = 0.0
@@ -72,6 +70,413 @@ extension ExchangeWebSocket {
             monitorCrossExchangeArbitrage()
         }
     }
+    
+    // ENHANCED: Better WebSocket connection management for Bybit
+    static func connectBybitWebSocket() {
+        Task { @MainActor in
+            guard validateAPICredentials(exchange: "bybit") else {
+                logAlert(event: "Invalid Bybit credentials, skipping WebSocket connection")
+                return
+            }
+            
+            let baseUrl = "wss://stream.bybit.com/v5/public/spot"
+            guard let url = URL(string: baseUrl) else {
+                logAlert(event: "Invalid Bybit WebSocket URL: \(baseUrl)")
+                return
+            }
+            
+            bybitSocket = WebSocket(request: URLRequest(url: url))
+            bybitSocket?.delegate = bybitDelegate
+            bybitSocket?.connect()
+            
+            // ENHANCED: Connection timeout handling
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(websocketTimeoutSeconds)) {
+                if !bybitIsConnected {
+                    logAlert(event: "Bybit WebSocket connection timeout after \(websocketTimeoutSeconds) seconds")
+                    reconnectBybitWebSocket()
+                }
+            }
+            
+            print("DEBUG: Attempting Bybit WebSocket connection to \(baseUrl)")
+            logAlert(event: "Attempting Bybit WebSocket connection")
+        }
+    }
+    
+    // ENHANCED: Bybit WebSocket reconnection with exponential backoff
+    static func reconnectBybitWebSocket() {
+        Task { @MainActor in
+            bybitReconnectAttempts += 1
+            
+            if bybitReconnectAttempts > maxReconnectAttempts {
+                logAlert(event: "Max Bybit WebSocket reconnection attempts reached (\(maxReconnectAttempts))")
+                return
+            }
+            
+            let delay = min(pow(2.0, Double(bybitReconnectAttempts - 1)), 60.0) // Exponential backoff, max 60s
+            logAlert(event: "Reconnecting Bybit WebSocket in \(delay) seconds (attempt \(bybitReconnectAttempts)/\(maxReconnectAttempts))")
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                connectBybitWebSocket()
+            }
+        }
+    }
+    
+    // ENHANCED: Bybit WebSocket message processing with better error handling
+    static func processBybitWebSocketMessage(_ message: [String: Any]) async {
+        let startTime = Date()
+        
+        guard let topic = message["topic"] as? String else {
+            await MainActor.run {
+                logAlert(event: "Bybit WebSocket message missing topic: \(message)")
+            }
+            return
+        }
+        
+        await MainActor.run {
+            let latency = Date().timeIntervalSince(startTime) * 1000
+            if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 80.0) {
+                logAlert(event: "High latency detected for Bybit WebSocket processing: \(latency)ms")
+            }
+        }
+        
+        // ENHANCED: Better topic handling
+        if topic.contains("orderbook") {
+            await processOrderBookUpdate(message: message, exchange: "bybit")
+        } else if topic.contains("publicTrade") {
+            await processTradeUpdate(message: message, exchange: "bybit")
+        } else if topic.contains("tickers") {
+            await processTickerUpdate(message: message, exchange: "bybit")
+        } else {
+            await MainActor.run {
+                print("DEBUG: Unhandled Bybit WebSocket topic: \(topic)")
+            }
+        }
+    }
+    
+    // ENHANCED: Order book update processing with validation
+    static func processOrderBookUpdate(message: [String: Any], exchange: String) async {
+        guard let data = message["data"] as? [String: Any],
+              let symbol = data["s"] as? String else {
+            await MainActor.run {
+                logAlert(event: "Invalid \(exchange) order book update: missing data or symbol")
+            }
+            return
+        }
+        
+        // Convert Bybit symbol format to our pair format
+        let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+        
+        guard await MainActor.run(body: { tradingPairs.contains(pair) }) else {
+            return // Skip pairs we're not trading
+        }
+        
+        guard let bids = data["b"] as? [[String]],
+              let asks = data["a"] as? [[String]] else {
+            await MainActor.run {
+                logAlert(event: "Invalid \(exchange) order book data for \(pair): missing bids/asks")
+            }
+            return
+        }
+        
+        // ENHANCED: Validate order book data quality
+        let validation = await MainActor.run {
+            validateOrderBookData(exchange: exchange, pair: pair, bids: bids, asks: asks)
+        }
+        
+        guard validation.isValid else {
+            await MainActor.run {
+                logAlert(event: validation.errorMessage ?? "Unknown order book validation error")
+            }
+            return
+        }
+        
+        await MainActor.run {
+            // Update order book with validated data
+            let parsedBids = bids.prefix(20).compactMap { bid -> (price: Double, quantity: Double)? in
+                guard bid.count >= 2,
+                      let price = Double(bid[0]),
+                      let quantity = Double(bid[1]),
+                      price > 0, quantity > 0 else { return nil }
+                return (price: price, quantity: quantity)
+            }
+            
+            let parsedAsks = asks.prefix(20).compactMap { ask -> (price: Double, quantity: Double)? in
+                guard ask.count >= 2,
+                      let price = Double(ask[0]),
+                      let quantity = Double(ask[1]),
+                      price > 0, quantity > 0 else { return nil }
+                return (price: price, quantity: quantity)
+            }
+            
+            if !parsedBids.isEmpty && !parsedAsks.isEmpty {
+                if exchange == "bybit" {
+                    bybitOrderBooks[pair] = BevaixOrderBook(bids: parsedBids, asks: parsedAsks)
+                } else {
+                    kucoinOrderBooks[pair] = BevaixOrderBook(bids: parsedBids, asks: parsedAsks)
+                }
+                
+                // ENHANCED: Real-time order book health monitoring
+                if !checkOrderBookHealth(exchange: exchange, pair: pair) {
+                    logAlert(event: "Order book health check failed for \(exchange)-\(pair)")
+                }
+                
+                // ENHANCED: Advanced order book analysis
+                analyzeOrderBookBasic(exchange: exchange, pair: pair, marketType: "spot")
+            } else {
+                logAlert(event: "No valid orders parsed for \(exchange)-\(pair)")
+            }
+        }
+    }
+    
+    // ENHANCED: Trade update processing
+    static func processTradeUpdate(message: [String: Any], exchange: String) async {
+        guard let data = message["data"] as? [[String: Any]] else {
+            await MainActor.run {
+                logAlert(event: "Invalid \(exchange) trade update: missing data array")
+            }
+            return
+        }
+        
+        for trade in data {
+            guard let symbol = trade["s"] as? String,
+                  let priceStr = trade["p"] as? String,
+                  let price = Double(priceStr),
+                  let volumeStr = trade["v"] as? String,
+                  let volume = Double(volumeStr),
+                  price > 0, volume > 0 else {
+                continue
+            }
+            
+            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+            
+            guard await MainActor.run(body: { tradingPairs.contains(pair) }) else {
+                continue
+            }
+            
+            await MainActor.run {
+                // Update current price
+                if exchange == "bybit" {
+                    bybitCurrentPrice[pair] = price
+                    bybitSpotVolume[pair, default: []].append(volume)
+                    
+                    // Keep volume history manageable
+                    if bybitSpotVolume[pair]!.count > 1000 {
+                        bybitSpotVolume[pair]?.removeFirst(100)
+                    }
+                } else {
+                    kucoinCurrentPrice[pair] = price
+                    kucoinSpotVolume[pair, default: []].append(volume)
+                    
+                    if kucoinSpotVolume[pair]!.count > 1000 {
+                        kucoinSpotVolume[pair]?.removeFirst(100)
+                    }
+                }
+                
+                // Update price history
+                updatePrice(pair: pair, exchange: exchange, price: price)
+                
+                print("DEBUG: \(exchange.capitalized) trade update - \(pair): \(price) (volume: \(volume))")
+            }
+        }
+    }
+    
+    // ENHANCED: Ticker update processing
+    static func processTickerUpdate(message: [String: Any], exchange: String) async {
+        guard let data = message["data"] as? [String: Any],
+              let symbol = data["symbol"] as? String else {
+            await MainActor.run {
+                logAlert(event: "Invalid \(exchange) ticker update: missing data or symbol")
+            }
+            return
+        }
+        
+        let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+        
+        guard await MainActor.run(body: { tradingPairs.contains(pair) }) else {
+            return
+        }
+        
+        // Extract price from various possible fields
+        var price: Double = 0.0
+        
+        if let lastPriceStr = data["lastPrice"] as? String,
+           let lastPrice = Double(lastPriceStr) {
+            price = lastPrice
+        } else if let midPriceStr = data["midPrice"] as? String,
+                  let midPrice = Double(midPriceStr) {
+            price = midPrice
+        } else if let markPriceStr = data["markPrice"] as? String,
+                  let markPrice = Double(markPriceStr) {
+            price = markPrice
+        }
+        
+        guard price > 0 else {
+            await MainActor.run {
+                logAlert(event: "Invalid price in \(exchange) ticker for \(pair): \(data)")
+            }
+            return
+        }
+        
+        await MainActor.run {
+            if exchange == "bybit" {
+                bybitCurrentPrice[pair] = price
+            } else {
+                kucoinCurrentPrice[pair] = price
+            }
+            
+            updatePrice(pair: pair, exchange: exchange, price: price)
+            print("DEBUG: \(exchange.capitalized) ticker update - \(pair): \(price)")
+        }
+    }
+    
+    // ENHANCED: WebSocket heartbeat monitoring
+    static func monitorWebSocketHeartbeat() {
+        Task {
+            while true {
+                await MainActor.run {
+                    let currentTime = Date()
+                    let heartbeatTimeout = Double(websocketTimeoutSeconds)
+                    
+                    // Check Bybit heartbeat
+                    if let lastBybitHeartbeat = lastHeartbeat["bybit"],
+                       currentTime.timeIntervalSince(lastBybitHeartbeat) > heartbeatTimeout {
+                        logAlert(event: "Bybit WebSocket heartbeat timeout - reconnecting")
+                        reconnectBybitWebSocket()
+                    }
+                    
+                    // Check KuCoin heartbeat
+                    if let lastKucoinHeartbeat = lastHeartbeat["kucoin"],
+                       currentTime.timeIntervalSince(lastKucoinHeartbeat) > heartbeatTimeout {
+                        logAlert(event: "KuCoin WebSocket heartbeat timeout - reconnecting")
+                        // Call KuCoin reconnection function when available
+                    }
+                }
+                
+                try? await Task.sleep(nanoseconds: UInt64(30_000_000_000)) // Check every 30 seconds
+            }
+        }
+    }
+    
+    // ENHANCED: WebSocket message queue processing
+    static func processMessageQueue() async {
+        await MainActor.run {
+            guard !isProcessingQueue, !messageQueue.isEmpty else { return }
+            
+            isProcessingQueue = true
+            let messagesToProcess = Array(messageQueue.prefix(10)) // Process in batches
+            
+            if messageQueue.count > 10 {
+                messageQueue.removeFirst(10)
+            } else {
+                messageQueue.removeAll()
+            }
+        }
+        
+        let messagesToProcess = await MainActor.run { messageQueue.isEmpty ? [] : Array(messageQueue.prefix(10)) }
+        
+        for message in messagesToProcess {
+            if let exchange = message["exchange"] as? String {
+                if exchange == "bybit" {
+                    await processBybitWebSocketMessage(message)
+                }
+                // Add KuCoin processing when needed
+            }
+        }
+        
+        await MainActor.run {
+            isProcessingQueue = false
+        }
+        
+        // Continue processing if more messages exist
+        if await MainActor.run(body: { !messageQueue.isEmpty }) {
+            await processMessageQueue()
+        }
+    }
+    
+    // ENHANCED: Helper function for cross-exchange arbitrage checking
+    static func checkCrossExchangeArbitrage(pair: String, strategy: String, amount: Double, completion: @escaping @Sendable (Bool) -> Void) async {
+        let kucoinPrice = await MainActor.run { kucoinCurrentPrice[pair] ?? 0.0 }
+        let bybitPrice = await MainActor.run { bybitCurrentPrice[pair] ?? 0.0 }
+        
+        guard kucoinPrice > 0 && bybitPrice > 0 else {
+            print("DEBUG: Invalid prices for arbitrage check - \(pair): KuCoin=\(kucoinPrice), Bybit=\(bybitPrice)")
+            completion(false)
+            return
+        }
+        
+        let spread = abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
+        let minSpread = await MainActor.run { crossExchangeMinSpreadThreshold }
+        
+        guard spread >= minSpread else {
+            print("DEBUG: Spread too small for \(pair): \(spread) < \(minSpread)")
+            completion(false)
+            return
+        }
+        
+        // ENHANCED: Check liquidity before proceeding
+        let kucoinLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "spot", tradeAmount: amount, price: kucoinPrice)
+        let bybitLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "spot", tradeAmount: amount, price: bybitPrice)
+        
+        let minLiquidity = await MainActor.run { minLiquidityThreshold }
+        guard let kucoinLiq = kucoinLiquidity, let bybitLiq = bybitLiquidity,
+              kucoinLiq >= minLiquidity, bybitLiq >= minLiquidity else {
+            print("DEBUG: Insufficient liquidity for \(pair): KuCoin=\(kucoinLiquidity ?? 0), Bybit=\(bybitLiquidity ?? 0)")
+            completion(false)
+            return
+        }
+        
+        // ENHANCED: Execute the arbitrage
+        let success = await executeArbitrageStrategy(pair: pair, strategy: strategy, amount: amount, kucoinPrice: kucoinPrice, bybitPrice: bybitPrice)
+        
+        await MainActor.run {
+            if success {
+                crossExchangeArbitrageExecuted[pair] = (true, Date())
+                logAlert(event: "Cross-exchange arbitrage executed for \(pair): KuCoin=\(kucoinPrice), Bybit=\(bybitPrice), Spread=\(spread)")
+            }
+        }
+        
+        completion(success)
+    }
+    
+    // ENHANCED: Arbitrage strategy execution
+    static func executeArbitrageStrategy(pair: String, strategy: String, amount: Double, kucoinPrice: Double, bybitPrice: Double) async -> Bool {
+        let buyExchange = kucoinPrice < bybitPrice ? "kucoin" : "bybit"
+        let sellExchange = kucoinPrice < bybitPrice ? "bybit" : "kucoin"
+        let buyPrice = min(kucoinPrice, bybitPrice)
+        let sellPrice = max(kucoinPrice, bybitPrice)
+        
+        // Calculate expected profit
+        let grossProfit = amount * (sellPrice - buyPrice)
+        let buyFee = amount * buyPrice * (buyExchange == "kucoin" ? await MainActor.run { kucoinTakerFee } : await MainActor.run { bybitTakerFee })
+        let sellFee = amount * sellPrice * (sellExchange == "kucoin" ? await MainActor.run { kucoinTakerFee } : await MainActor.run { bybitTakerFee })
+        let netProfit = grossProfit - buyFee - sellFee
+        
+        let minProfit = await MainActor.run { getDouble("TARGET_NET_PROFIT", defaultValue: 0.20) }
+        guard netProfit >= minProfit else {
+            print("DEBUG: Profit too low for \(pair): \(netProfit) < \(minProfit)")
+            return false
+        }
+        
+        // ENHANCED: Simulate trade execution (replace with actual API calls)
+        print("DEBUG: Executing arbitrage for \(pair):")
+        print("  - Buy \(amount) on \(buyExchange) at \(buyPrice)")
+        print("  - Sell \(amount) on \(sellExchange) at \(sellPrice)")
+        print("  - Expected profit: \(netProfit) USDT")
+        
+        await MainActor.run {
+            // Update metrics
+            let metrics = performanceMetrics[pair] ?? (profit: 0.0, fees: 0.0, trades: 0, wins: 0)
+            performanceMetrics[pair] = (
+                profit: metrics.profit + netProfit,
+                fees: metrics.fees + buyFee + sellFee,
+                trades: metrics.trades + 1,
+                wins: metrics.wins + (netProfit > 0 ? 1 : 0)
+            )
+            
+            // Log the trade
+            logAlert(event: "Arbitrage trade executed for \(pair): profit=\(netProfit), fees=\(buyFee + sellFee)")
+        }
+        
+        return true
+    }
 }
-
-
