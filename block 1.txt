@@ -1,15 +1,14 @@
 
 // --------------------------------------------------------- Block 1 - Core Data Structures and Utilities
 
+// --------------------------------------------------------- Block 1 - Core Data Structures and Utilities
+//--------------- Block 1 - Core Data Structures and Utilities
+// VARIABLES TO ADD: No new variables needed - all variables are present in this block
 
 @preconcurrency import Starscream
 import Foundation
 import SwiftDotenv
 import CryptoKit
-
-
-
-
 
 // BevaixOrderBook struct definition to avoid conflicts
 struct BevaixOrderBook {
