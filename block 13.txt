@@ -1,6 +1,7 @@
 
 //---------------------------------------------------------------------------------------------------------Block 13 - Trade Performance and Logging
 
+
 import Foundation
 import SwiftUI
 
@@ -641,7 +642,7 @@ BB Futures: \(bybitFuturesPrice)
 
                                         print("Cross-Exchange Spot for \(pair): Spread: \(currentSpread), Threshold: \(feeAdjustedThreshold), ML: \(shouldTradeCross), MACD: \(macdConfirmed), EMA: \(emaConfirmed), Trend: \(trendConfirmed), Sentiment: \(sentimentConfirmed), Volume: \(volumeConfirmed), Imbalance: \(imbalanceConfirmed)")
 
-                                        if (shouldTradeCross || currentSpread >= feeAdjustedThreshold) && !kucoinOrderBook.isEmpty && !bybitOrderBook.isEmpty && emaConfirmed && macdConfirmed && trendConfirmed && sentimentConfirmed && volumeConfirmed && imbalanceConfirmed {
+                                        if (shouldTradeCross || currentSpread >= feeAdjustedThreshold) && !kucoinOrderBookStruct.isEmpty && !bybitOrderBook.isEmpty && emaConfirmed && macdConfirmed && trendConfirmed && sentimentConfirmed && volumeConfirmed && imbalanceConfirmed {
                                             if let lastCrossArbitrage = crossExchangeArbitrageExecuted[pair], lastCrossArbitrage.0 && Date().timeIntervalSince(lastCrossArbitrage.1) < tradeCooldown {
                                                 print("Cross-Exchange Spot for \(pair): Skipped (Cooldown)")
                                                 logAlert(event: "Cross-Exchange Spot for \(pair): Skipped (Cooldown)")
@@ -706,4 +707,3 @@ BB Futures: \(bybitFuturesPrice)
         }
     }
 }
-
