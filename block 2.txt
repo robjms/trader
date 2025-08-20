@@ -344,3 +344,4 @@ func loadEnv() -> [String: String] {
     print("DEBUG: Final loaded environment variables: \(env)")
     return env
 }
+
