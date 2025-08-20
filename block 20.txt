@@ -13,6 +13,7 @@ extension Data {
         return Data(signature).base64EncodedString()
     }
 }
+
 // Extension for Block 20 API Interactions and Authentication
 extension ExchangeWebSocket {
     static func fetchBalance(exchange: String) async {
@@ -427,7 +428,236 @@ extension ExchangeWebSocket {
             return nil
         }
     }
+    
+    // FIX: Removed redundant fetchSentimentScore(pair:completion:) to resolve redeclaration at line 7839
+    // The enhanced version with retry logic is already defined in Block 1
+    
+    // FIX: Enhanced sendTradeToFlaskServer with improved error handling and retry logic
+    static func sendTradeToFlaskServer(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double) {
+        let maxRetries = 3
+        let retryDelay: UInt64 = 2_000_000_000 // 2 seconds
+        
+        func attemptSend(attempt: Int) {
+            let url = URL(string: environment["FLASK_SERVER_URL"] ?? "http://127.0.0.1:5000/trade")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.timeoutInterval = Double(getInt("FLASK_TIMEOUT", defaultValue: 10))
+
+            let payload: [String: Any] = [
+                "strategy": strategy,
+                "pair": pair,
+                "exchange": exchange,
+                "spotPrice": spotPrice,
+                "futuresPrice": futuresPrice,
+                "tradeAmount": tradeAmount,
+                "profit": profit,
+                "timestamp": ISO8601DateFormatter().string(from: Date())
+            ]
+
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
+                request.httpBody = jsonData
+            } catch {
+                print("DEBUG: Failed to serialize trade payload: \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to serialize trade payload: \(error.localizedDescription)")
+                }
+                if attempt < maxRetries {
+                    DispatchQueue.global().asyncAfter(deadline: .now() + .nanoseconds(Int(retryDelay))) {
+                        attemptSend(attempt: attempt + 1)
+                    }
+                }
+                return
+            }
+
+            let startTime = Date()
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                let latency = Date().timeIntervalSince(startTime) * 1000
+                Task { @MainActor in
+                    if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 80.0) {
+                        logAlert(event: "High latency detected for Flask server: \(latency)ms")
+                    }
+                }
+
+                if let error = error {
+                    print("DEBUG: Failed to send trade to Flask server (attempt \(attempt)): \(error.localizedDescription)")
+                    Task { @MainActor in
+                        logAlert(event: "Failed to send trade to Flask server (attempt \(attempt)): \(error.localizedDescription)")
+                    }
+                    if attempt < maxRetries {
+                        DispatchQueue.global().asyncAfter(deadline: .now() + .nanoseconds(Int(retryDelay))) {
+                            attemptSend(attempt: attempt + 1)
+                        }
+                    }
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("DEBUG: Invalid HTTP response from Flask server")
+                    Task { @MainActor in
+                        logAlert(event: "Invalid HTTP response from Flask server")
+                    }
+                    if attempt < maxRetries {
+                        DispatchQueue.global().asyncAfter(deadline: .now() + .nanoseconds(Int(retryDelay))) {
+                            attemptSend(attempt: attempt + 1)
+                        }
+                    }
+                    return
+                }
+
+                if httpResponse.statusCode == 200 {
+                    print("DEBUG: Successfully sent trade to Flask server")
+                    Task { @MainActor in
+                        logAlert(event: "Successfully sent trade to Flask server: \(strategy) \(pair) profit: \(profit)")
+                    }
+                } else {
+                    let responseBody = data != nil ? String(data: data!, encoding: .utf8) ?? "Invalid data" : "No data"
+                    print("DEBUG: Flask server error \(httpResponse.statusCode): \(responseBody)")
+                    Task { @MainActor in
+                        logAlert(event: "Flask server error \(httpResponse.statusCode): \(responseBody)")
+                    }
+                    if attempt < maxRetries {
+                        DispatchQueue.global().asyncAfter(deadline: .now() + .nanoseconds(Int(retryDelay))) {
+                            attemptSend(attempt: attempt + 1)
+                        }
+                    }
+                }
+            }
+            task.resume()
+        }
+        
+        attemptSend(attempt: 1)
+    }
+    
+    // Enhanced API helper functions for better error handling
+    static func validateAPICredentials(exchange: String) -> Bool {
+        if exchange == "kucoin" {
+            return environment["KUCOIN_API_KEY"] != nil &&
+                   environment["KUCOIN_API_SECRET"] != nil &&
+                   environment["KUCOIN_API_PASSPHRASE"] != nil &&
+                   !environment["KUCOIN_API_KEY"]!.isEmpty &&
+                   !environment["KUCOIN_API_SECRET"]!.isEmpty &&
+                   !environment["KUCOIN_API_PASSPHRASE"]!.isEmpty
+        } else if exchange == "bybit" {
+            return environment["BYBIT_API_KEY"] != nil &&
+                   environment["BYBIT_API_SECRET"] != nil &&
+                   !environment["BYBIT_API_KEY"]!.isEmpty &&
+                   !environment["BYBIT_API_SECRET"]!.isEmpty
+        }
+        return false
+    }
+    
+    // Enhanced error handling for API responses
+    static func handleAPIError(exchange: String, statusCode: Int, responseBody: String) async {
+        let errorMessage: String
+        switch statusCode {
+        case 401:
+            errorMessage = "\(exchange) API authentication failed (401): Invalid credentials"
+        case 403:
+            errorMessage = "\(exchange) API access forbidden (403): Check API permissions"
+        case 404:
+            errorMessage = "\(exchange) API endpoint not found (404): Invalid URL or endpoint deprecated"
+        case 429:
+            errorMessage = "\(exchange) API rate limit exceeded (429): Too many requests"
+        case 500...599:
+            errorMessage = "\(exchange) API server error (\(statusCode)): Internal server error"
+        default:
+            errorMessage = "\(exchange) API error (\(statusCode)): \(responseBody)"
+        }
+        
+        await MainActor.run {
+            logAlert(event: errorMessage)
+        }
+        
+        // Implement exponential backoff for certain errors
+        if statusCode == 429 || (statusCode >= 500 && statusCode < 600) {
+            try? await Task.sleep(nanoseconds: UInt64(5_000_000_000)) // 5 seconds
+        }
+    }
+    
+    // Enhanced market data fetching with fallback mechanisms
+    static func fetchMarketDataWithFallback(exchange: String, pair: String) async -> [String: Any]? {
+        let primaryEndpoints: [String: String] = [
+            "kucoin": "https://api.kucoin.com/api/v1/market/stats?symbol=\(pair)",
+            "bybit": "https://api.bybit.com/v5/market/tickers?category=spot&symbol=\(pair.replacingOccurrences(of: "-", with: ""))"
+        ]
+        
+        let fallbackEndpoints: [String: String] = [
+            "kucoin": "https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=\(pair)",
+            "bybit": "https://api.bybit.com/v5/market/orderbook?category=spot&symbol=\(pair.replacingOccurrences(of: "-", with: ""))&limit=1"
+        ]
+        
+        // Try primary endpoint first
+        if let data = await fetchMarketDataFromEndpoint(primaryEndpoints[exchange] ?? "", exchange: exchange) {
+            return data
+        }
+        
+        // Fall back to secondary endpoint
+        if let data = await fetchMarketDataFromEndpoint(fallbackEndpoints[exchange] ?? "", exchange: exchange) {
+            return data
+        }
+        
+        await MainActor.run {
+            logAlert(event: "Failed to fetch market data for \(exchange)-\(pair) from all endpoints")
+        }
+        return nil
+    }
+    
+    private static func fetchMarketDataFromEndpoint(_ urlString: String, exchange: String) async -> [String: Any]? {
+        guard let url = URL(string: urlString) else { return nil }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10.0
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+                return nil
+            }
+            
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            return json
+        } catch {
+            await MainActor.run {
+                logAlert(event: "Error fetching market data from \(urlString): \(error.localizedDescription)")
+            }
+            return nil
+        }
+    }
+    
+    // Enhanced spread prediction with multiple data sources
+    static func fetchSpreadPrediction(pair: String, exchange: String, spotPrice: Double, futuresPrice: Double) async -> Double? {
+        // Calculate basic spread prediction using historical data
+        let historicalData = historicalSpreads[pair] ?? []
+        guard historicalData.count >= 10 else {
+            return nil // Not enough historical data
+        }
+        
+        // Simple moving average prediction
+        let recentSpreads = historicalData.suffix(10)
+        let averageSpread = recentSpreads.reduce(0.0, +) / Double(recentSpreads.count)
+        
+        // Add volatility adjustment
+        let currentSpread = abs(spotPrice - futuresPrice) / min(spotPrice, futuresPrice)
+        let volatility = calculateSpreadVolatility(spreads: Array(recentSpreads))
+        
+        // Predict based on trend and volatility
+        let trendAdjustment = recentSpreads.last! - averageSpread
+        let prediction = averageSpread + trendAdjustment * 0.5 + volatility * 0.1
+        
+        return max(0.0, prediction) // Ensure non-negative prediction
+    }
+    
+    private static func calculateSpreadVolatility(spreads: [Double]) -> Double {
+        guard spreads.count > 1 else { return 0.0 }
+        
+        let mean = spreads.reduce(0.0, +) / Double(spreads.count)
+        let variance = spreads.reduce(0.0) { result, spread in
+            result + pow(spread - mean, 2)
+        } / Double(spreads.count - 1)
+        
+        return sqrt(variance)
+    }
 }
-
-
-
