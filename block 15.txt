@@ -446,3 +446,4 @@ extension ExchangeWebSocket {
         return predictedSpread
     }
 }
+
