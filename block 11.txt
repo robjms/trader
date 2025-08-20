@@ -1,342 +1,765 @@
 
-//-------------------------------------------------------------------------------------------------------------------------Block 11 - WebSocket Data Handling
+//--------------------------------------------------------------------------------------------------------------------------Block 12 - Trading Loop Monitoring and Support
 
+
+
+import Foundation // Added for String.Encoding and other Foundation types
 
 extension ExchangeWebSocket {
-    private static var kucoinDelegate: KucoinWebSocketDelegate?
-    private static var kucoinFuturesDelegate: KucoinFuturesWebSocketDelegate?
-    private static var bybitDelegate: BybitWebSocketDelegate?
-    private static var bybitFuturesDelegate: BybitFuturesWebSocketDelegate?
+    static var totalProfit: Double = 0.0
+    static var totalFees: Double = 0.0
+    static var kellyCreditRatio: Double = getDouble("KELLY_CREDIT_RATIO", defaultValue: 2.0)
 
-    @MainActor
-    static func connectKucoin() {
-        guard hasValidKuCoinCredentials else {
-            print("Skipping KuCoin WebSocket connection due to missing credentials")
-            Task { @MainActor in
-                logAlert(event: "Skipping KuCoin WebSocket connection due to missing credentials")
+    static func checkLiquidityAsyncUnique(exchange: String, pair: String, marketType: String, tradeAmount: Double, price: Double) async -> Double? {
+        let minLiquidity = getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 500.0)
+        let requiredLiquidity = tradeAmount * price * liquidityDepthMultiplier
+
+        do {
+            let depth = try await fetchOrderBookDepth(for: exchange, pair: pair, marketType: marketType, retryCount: 0)
+            guard let unwrappedDepth = depth, unwrappedDepth >= max(minLiquidity, requiredLiquidity) else {
+                print("📝 DEBUG: Insufficient liquidity for \(exchange)-\(pair)-\(marketType): Depth \(String(describing: depth)), Required \(requiredLiquidity)")
+                await MainActor.run(body: {
+                    logAlert(event: "Insufficient liquidity for \(exchange)-\(pair)-\(marketType): Depth \(String(describing: depth))")
+                })
+                return nil
             }
+            print("DEBUG: Liquidity check passed for \(exchange)-\(pair)-\(marketType): Depth \(unwrappedDepth)")
+            return unwrappedDepth
+        } catch {
+            print("DEBUG: Error fetching order book depth for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
+            await MainActor.run(body: {
+                logAlert(event: "Error fetching order book depth for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
+            })
+            return nil
+        }
+    }
+
+    static func fetchOrderBookDepth(for exchange: String, pair: String, marketType: String, retryCount: Int = 0) async throws -> Double? {
+        let maxRetries = getInt("API_MAX_RETRIES", defaultValue: 3)
+        guard retryCount < maxRetries else {
+            let book = exchange == "bybit" ? bybitOrderBooks[pair] : kucoinOrderBooks[pair]
+            let cachedDepth = book.map { book in
+                let bidDepth = book.bids.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity }
+                let askDepth = book.asks.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity }
+                return bidDepth + askDepth
+            } ?? getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 500.0)
+            print("DEBUG: Max retries reached, using cached depth for \(exchange)-\(pair)-\(marketType): \(cachedDepth)")
+            await MainActor.run(body: {
+                logAlert(event: "Max retries reached for order book fetch: \(exchange)-\(pair)-\(marketType)")
+            })
+            return cachedDepth
+        }
+
+        let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+        var url: URL?
+        if exchange == "bybit" {
+            let category = marketType == "spot" ? "spot" : "linear"
+            url = URL(string: "https://api.bybit.com/v5/market/orderbook?category=\(category)&symbol=\(symbol)&limit=50")
+        } else {
+            let endpoint = marketType == "spot" ? "/api/v1/market/orderbook/level2_50?symbol=\(symbol)" : "/api/v1/contractMarket/level2?symbol=\(symbol)M"
+            url = URL(string: "https://api\(marketType == "spot" ? "" : "-futures").kucoin.com\(endpoint)")
+        }
+
+        guard let requestUrl = url else {
+            print("Invalid order book URL for \(exchange)-\(pair)-\(marketType)")
+            await MainActor.run(body: {
+                logAlert(event: "Invalid order book URL for \(exchange)-\(pair)-\(marketType)")
+            })
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+            return try await fetchOrderBookDepth(for: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+        }
+
+        var request = URLRequest(url: requestUrl)
+        request.httpMethod = "GET"
+        request.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 10.0)
+
+        let startTime = Date()
+        let (data, response) = try await URLSession.shared.data(for: request)
+        let latency = Date().timeIntervalSince(startTime) * 1000
+        await MainActor.run(body: {
+            lastLatency[pair] = latency
+            if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
+                print("High latency detected for order book fetch: \(latency)ms")
+                logAlert(event: "High latency detected for order book fetch: \(latency)ms")
+            }
+        })
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            print("Invalid HTTP response for \(exchange)-\(pair)-\(marketType)")
+            await MainActor.run(body: {
+                logAlert(event: "Invalid HTTP response for \(exchange)-\(pair)-\(marketType)")
+            })
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+            return try await fetchOrderBookDepth(for: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+        }
+        
+        // ENHANCED: Better error handling for different status codes
+        if httpResponse.statusCode != 200 {
+            let responseBody = String(data: data, encoding: .utf8) ?? "Invalid data"
+            print("Invalid order book response for \(exchange)-\(pair)-\(marketType): Status \(httpResponse.statusCode)")
+            await MainActor.run(body: {
+                handleAPIError(exchange: exchange, statusCode: httpResponse.statusCode, responseBody: responseBody)
+                logAlert(event: "Invalid order book response for \(exchange)-\(pair)-\(marketType): Status \(httpResponse.statusCode)")
+            })
+            
+            // Don't retry for certain error codes
+            if httpResponse.statusCode == 404 || httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                return getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 500.0)
+            }
+            
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+            return try await fetchOrderBookDepth(for: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+        }
+
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        if exchange == "bybit" {
+            guard let result = json?["result"] as? [String: Any],
+                  let bids = result["b"] as? [[String]],
+                  let asks = result["a"] as? [[String]],
+                  !bids.isEmpty, !asks.isEmpty else {
+                print("Failed to parse Bybit order book data for \(pair)-\(marketType)")
+                await MainActor.run(body: {
+                    logAlert(event: "Failed to parse Bybit order book data for \(pair)-\(marketType)")
+                })
+                try await Task.sleep(nanoseconds: 2_000_000_000)
+                return try await fetchOrderBookDepth(for: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+            }
+
+            var bidDepth: Double = 0.0
+            var askDepth: Double = 0.0
+
+            for bid in bids.prefix(10) {
+                if let priceStr = bid.first, let qtyStr = bid.last,
+                   let price = Double(priceStr), let qty = Double(qtyStr), price > 0, qty > 0 {
+                    bidDepth += price * qty
+                }
+            }
+
+            for ask in asks.prefix(10) {
+                if let priceStr = ask.first, let qtyStr = ask.last,
+                   let price = Double(priceStr), let qty = Double(qtyStr), price > 0, qty > 0 {
+                    askDepth += price * qty
+                }
+            }
+
+            let totalDepth = bidDepth + askDepth
+            print("DEBUG: Bybit order book depth for \(pair)-\(marketType): \(totalDepth)")
+            return totalDepth
+        } else {
+            guard let dataDict = json?["data"] as? [String: Any],
+                  let bids = dataDict["bids"] as? [[String]],
+                  let asks = dataDict["asks"] as? [[String]],
+                  !bids.isEmpty, !asks.isEmpty else {
+                print("Failed to parse KuCoin order book data for \(pair)-\(marketType)")
+                await MainActor.run(body: {
+                    logAlert(event: "Failed to parse KuCoin order book data for \(pair)-\(marketType)")
+                })
+                try await Task.sleep(nanoseconds: 2_000_000_000)
+                return try await fetchOrderBookDepth(for: exchange, pair: pair, marketType: marketType, retryCount: retryCount + 1)
+            }
+
+            var bidDepth: Double = 0.0
+            var askDepth: Double = 0.0
+
+            for bid in bids.prefix(10) {
+                if let priceStr = bid.first, let qtyStr = bid.last,
+                   let price = Double(priceStr), let qty = Double(qtyStr), price > 0, qty > 0 {
+                    bidDepth += price * qty
+                }
+            }
+
+            for ask in asks.prefix(10) {
+                if let priceStr = ask.first, let qtyStr = ask.last,
+                   let price = Double(priceStr), let qty = Double(qtyStr), price > 0, qty > 0 {
+                    askDepth += price * qty
+                }
+            }
+
+            let totalDepth = bidDepth + askDepth
+            print("DEBUG: KuCoin order book depth for \(pair)-\(marketType): \(totalDepth)")
+            return totalDepth
+        }
+    }
+
+    private static func fetchAndLogBalances(isInitial: Bool = false, completion: @escaping @Sendable () -> Void) {
+        // ENHANCED: Better balance fetching with error handling
+        let balanceGroup = DispatchGroup()
+        var kucoinBalanceFetched = false
+        var bybitBalanceFetched = false
+        
+        balanceGroup.enter()
+        fetchKucoinBalance { balance in
+            Task { @MainActor in
+                if let balance = balance {
+                    kucoinBalance = balance
+                    kucoinBalanceFetched = true
+                } else {
+                    kucoinBalance = kucoinFallbackBalance
+                    logAlert(event: "Failed to fetch KuCoin balance, using fallback: \(kucoinFallbackBalance)")
+                }
+                balanceGroup.leave()
+            }
+        }
+        
+        balanceGroup.enter()
+        fetchBybitBalance { balance in
+            Task { @MainActor in
+                if let balance = balance {
+                    bybitBalance = balance
+                    bybitBalanceFetched = true
+                } else {
+                    bybitBalance = bybitFallbackBalance
+                    logAlert(event: "Failed to fetch Bybit balance, using fallback: \(bybitFallbackBalance)")
+                }
+                balanceGroup.leave()
+            }
+        }
+        
+        balanceGroup.notify(queue: .main) {
+            Task { @MainActor in
+                if isInitial {
+                    let status = "KuCoin: \(kucoinBalanceFetched ? "✓" : "✗ (fallback)") | Bybit: \(bybitBalanceFetched ? "✓" : "✗ (fallback)")"
+                    print("💵 Initial Balances: KuCoin: \(ExchangeWebSocket.kucoinBalance) | Bybit: \(ExchangeWebSocket.bybitBalance) | Status: \(status)")
+                    logAlert(event: "Initial balances loaded - \(status)")
+                }
+                completion()
+            }
+        }
+    }
+
+    static func dynamicTradeAmount(balance: Double, riskPercent: Double, volatility: Double, pair: String = tradingPairs.first ?? "BTC-USDT") async -> Double {
+        let kellyFraction = await calculateKellyCriterion(pair: pair)
+        let baseAmount = min(balance * riskPercent, balance * 0.6)
+        let volatilityAdjusted = baseAmount * (1.0 / (1.0 + volatility * 0.3))
+        let kellyAmount = balance * max(0.0, min(kellyFraction, 0.6))
+        let finalAmount = min(volatilityAdjusted, kellyAmount)
+        
+        // ENHANCED: Minimum trade amount validation
+        let minTradeAmount = getDouble("MIN_TRADE_AMOUNT", defaultValue: 10.0)
+        return max(finalAmount, minTradeAmount)
+    }
+
+    static func rebalanceExchanges() {
+        let balanceDifferenceThreshold = 0.08
+        let totalBalance = kucoinBalance + bybitBalance
+        
+        guard totalBalance > 0 else {
+            logAlert(event: "Cannot rebalance exchanges: total balance is zero")
             return
         }
-        print("Attempting to connect to KuCoin WebSocket...")
-        fetchKuCoinWsToken { token in
-            guard let token = token else {
-                print("Failed to fetch KuCoin WebSocket token, retrying in 5 seconds...")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    connectKucoin()
-                }
-                return
-            }
-            Task { @MainActor in
-                kucoinToken = token
-                let wsURLString = "wss://ws-api.kucoin.com/endpoint?token=\(token)&acceptUserMessage=true"
-                guard let wsURL = URL(string: wsURLString) else {
-                    print("Invalid KuCoin WebSocket URL: \(wsURLString), retrying in 5 seconds...")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectKucoin()
-                    }
-                    return
-                }
-                var request = URLRequest(url: wsURL)
-                request.timeoutInterval = 10
-                kucoinSocket = WebSocket(request: request)
-                kucoinDelegate = KucoinWebSocketDelegate()
-                kucoinSocket?.delegate = kucoinDelegate
-                kucoinSocket?.connect()
-                
-                weak var ws = kucoinSocket
-                ws?.onEvent = { event in
-                    Task { @MainActor in
-                        switch event {
-                        case .connected(_):
-                            for (index, pair) in tradingPairs.enumerated() {
-                                // Fixed symbol formatting for KuCoin spot
-                                let formattedPair = pair.replacingOccurrences(of: "-", with: "")
-                                let spotTopic = "/market/ticker:\(formattedPair)"
-                                let spotSubscribeMessage: [String: Any] = [
-                                    "id": Int(Date().timeIntervalSince1970 * 1000) + index,
-                                    "type": "subscribe",
-                                    "topic": spotTopic,
-                                    "privateChannel": false,
-                                    "response": true
-                                ]
-                                if let spotData = try? JSONSerialization.data(withJSONObject: spotSubscribeMessage),
-                                   let spotMessage = String(data: spotData, encoding: .utf8) {
-                                    ws?.write(string: spotMessage)
-                                    print("Subscribed to KuCoin spot topic: \(spotTopic) for pair: \(pair)")
-                                } else {
-                                    print("Failed to subscribe to KuCoin spot topic: \(spotTopic) for pair: \(pair)")
-                                }
-                            }
-                            Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { _ in
-                                Task { @MainActor in
-                                    let pingMessage = "{\"id\": \"ping_\(Int(Date().timeIntervalSince1970))\", \"type\": \"ping\"}"
-                                    ws?.write(string: pingMessage)
-                                    print("Sent ping to KuCoin Spot WebSocket")
-                                }
-                            }
-                        case .disconnected(_, _):
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectKucoin()
-                            }
-                        case .error(_):
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectKucoin()
-                            }
-                        case .text(let string):
-                            if let data = string.data(using: .utf8),
-                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                               let type = json["type"] as? String, type == "welcome" {
-                                print("KuCoin Spot WebSocket subscription confirmed")
-                            }
-                        default:
-                            break
-                        }
-                    }
+        
+        let kucoinBalanceRatio = kucoinBalance / totalBalance
+        let bybitBalanceRatio = bybitBalance / totalBalance
+        
+        if abs(kucoinBalanceRatio - bybitBalanceRatio) > balanceDifferenceThreshold {
+            let targetBalance = totalBalance / 2
+            let transferAmount = abs(kucoinBalance - targetBalance)
+            
+            // ENHANCED: Minimum transfer amount to avoid unnecessary micro-transfers
+            let minTransferAmount = getDouble("MIN_TRANSFER_AMOUNT", defaultValue: 50.0)
+            
+            if transferAmount >= minTransferAmount {
+                if kucoinBalance > bybitBalance {
+                    ExchangeWebSocket.kucoinBalance -= transferAmount
+                    ExchangeWebSocket.bybitBalance += transferAmount
+                    logAlert(event: "Rebalanced: Transferred \(transferAmount) USDT from KuCoin to Bybit")
+                } else {
+                    ExchangeWebSocket.bybitBalance -= transferAmount
+                    ExchangeWebSocket.kucoinBalance += transferAmount
+                    logAlert(event: "Rebalanced: Transferred \(transferAmount) USDT from Bybit to KuCoin")
                 }
             }
         }
     }
 
-    @MainActor
-    static func connectKucoinFutures() {
-        guard hasValidKuCoinCredentials else {
-            print("Skipping KuCoin Futures WebSocket connection due to missing credentials")
-            Task { @MainActor in
-                logAlert(event: "Skipping KuCoin Futures WebSocket connection due to missing credentials")
-            }
+    static func fetchExchangeFees(exchange: String, completion: @escaping @Sendable (Double?, Double?) -> Void) {
+        // ENHANCED: Return current fees or fetch from API if needed
+        if exchange == "kucoin" {
+            // These could be updated via API calls if needed
+            completion(kucoinMakerFee, kucoinTakerFee)
+        } else if exchange == "bybit" {
+            completion(bybitMakerFee, bybitTakerFee)
+        } else {
+            completion(nil, nil)
+        }
+    }
+
+    static func printPeriodicSummary() {
+        let currentTime = Date()
+        
+        // ENHANCED: Only print summary if enough time has passed
+        if currentTime.timeIntervalSince(lastSummaryTime) < 300 { // 5 minutes
             return
         }
-        print("Attempting to connect to KuCoin Futures WebSocket...")
-        fetchKucoinFuturesWsToken { token in
-            guard let token = token else {
-                print("Failed to fetch KuCoin Futures WebSocket token, retrying in 5 seconds...")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    connectKucoinFutures()
-                }
-                return
+        
+        lastSummaryTime = currentTime
+        
+        print("📊 Performance Summary:")
+        print("📊 Total Profit: \(totalProfit), Total Fees: \(totalFees)")
+        print("📊 Net Profit: \(totalProfit - totalFees)")
+        
+        var totalTrades = 0
+        var totalWins = 0
+        
+        for (pair, metrics) in tradeMetrics {
+            totalTrades += metrics.wins + metrics.losses
+            totalWins += metrics.wins
+            print("📊 \(pair): Wins: \(metrics.wins), Losses: \(metrics.losses), Profit: \(metrics.totalProfit), Fees: \(metrics.totalFees)")
+        }
+        
+        let winRate = totalTrades > 0 ? Double(totalWins) / Double(totalTrades) * 100 : 0
+        print("📊 Overall: Trades: \(totalTrades), Win Rate: \(String(format: "%.1f", winRate))%")
+        
+        logAlert(event: "Performance Summary - Trades: \(totalTrades), Win Rate: \(String(format: "%.1f", winRate))%, Net Profit: \(totalProfit - totalFees)")
+    }
+
+    static func executeHFTTrade(exchange: String, pair: String, side: String, price: Double, amount: Double) {
+        print("💸 Trade: \(side) \(amount) of \(pair) on \(exchange) at \(price)")
+        let fee = amount * price * (exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee)
+        totalFees += fee
+        
+        // ENHANCED: Better balance management
+        if exchange == "kucoin" {
+            let tradeValue = amount * price
+            if side == "buy" {
+                kucoinBalance -= (tradeValue + fee)
+                kucoinPositions[pair] = (kucoinPositions[pair] ?? 0.0) + amount
+            } else {
+                kucoinBalance += (tradeValue - fee)
+                kucoinPositions[pair] = (kucoinPositions[pair] ?? 0.0) - amount
             }
-            Task { @MainActor in
-                kucoinFuturesToken = token
-                let connectId = UUID().uuidString
-                let wsURLString = "wss://ws-api-futures.kucoin.com/?token=\(token)&connectId=\(connectId)"
-                guard let wsURL = URL(string: wsURLString) else {
-                    print("Invalid KuCoin Futures WebSocket URL: \(wsURLString), retrying in 5 seconds...")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectKucoinFutures()
-                    }
-                    return
-                }
-                var request = URLRequest(url: wsURL)
-                request.timeoutInterval = 10
-                kucoinFuturesSocket = WebSocket(request: request)
-                kucoinFuturesDelegate = KucoinFuturesWebSocketDelegate()
-                kucoinFuturesSocket?.delegate = kucoinFuturesDelegate
-                kucoinFuturesSocket?.connect()
-                
-                weak var ws = kucoinFuturesSocket
-                ws?.onEvent = { event in
-                    Task { @MainActor in
-                        switch event {
-                        case .connected(_):
-                            for (index, pair) in tradingPairs.enumerated() {
-                                guard let futuresSymbol = kucoinFuturesSymbols[pair] else {
-                                    print("No futures symbol found for pair: \(pair), skipping subscription")
-                                    continue
-                                }
-                                let priceTopic = "/contractMarket/tickerV2:\(futuresSymbol)"
-                                let priceSubscription: [String: Any] = [
-                                    "id": Int(Date().timeIntervalSince1970 * 1000) + index,
-                                    "type": "subscribe",
-                                    "topic": priceTopic,
-                                    "privateChannel": false,
-                                    "response": true
-                                ]
-                                if let priceData = try? JSONSerialization.data(withJSONObject: priceSubscription),
-                                   let priceMessage = String(data: priceData, encoding: .utf8) {
-                                    ws?.write(string: priceMessage)
-                                    print("Subscribed to KuCoin Futures price topic: \(priceTopic) for pair: \(pair)")
-                                } else {
-                                    print("Failed to subscribe to KuCoin Futures price topic: \(priceTopic) for pair: \(pair)")
-                                }
-                                let orderBookTopic = "/contractMarket/level2:\(futuresSymbol)"
-                                let orderBookSubscription: [String: Any] = [
-                                    "id": Int(Date().timeIntervalSince1970 * 1000) + index + 2000,
-                                    "type": "subscribe",
-                                    "topic": orderBookTopic,
-                                    "privateChannel": false,
-                                    "response": true
-                                ]
-                                if let orderBookData = try? JSONSerialization.data(withJSONObject: orderBookSubscription),
-                                   let orderBookMessage = String(data: orderBookData, encoding: .utf8) {
-                                    ws?.write(string: orderBookMessage)
-                                    print("Subscribed to KuCoin Futures order book topic: \(orderBookTopic) for pair: \(pair)")
-                                } else {
-                                    print("Failed to subscribe to KuCoin Futures order book topic: \(orderBookTopic) for pair: \(pair)")
-                                }
-                                let fundingTopic = "/contract/instrument:\(futuresSymbol)"
-                                let fundingSubscription: [String: Any] = [
-                                    "id": Int(Date().timeIntervalSince1970 * 1000) + index + 1000,
-                                    "type": "subscribe",
-                                    "topic": fundingTopic,
-                                    "privateChannel": false,
-                                    "response": true
-                                ]
-                                if let fundingData = try? JSONSerialization.data(withJSONObject: fundingSubscription),
-                                   let fundingMessage = String(data: fundingData, encoding: .utf8) {
-                                    ws?.write(string: fundingMessage)
-                                    print("Subscribed to KuCoin Futures funding rate topic: \(fundingTopic) for pair: \(pair)")
-                                } else {
-                                    print("Failed to subscribe to KuCoin Futures funding rate topic: \(fundingTopic) for pair: \(pair)")
-                                }
-                            }
-                            Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { _ in
-                                Task { @MainActor in
-                                    let pingMessage = "{\"id\": \"ping_\(Int(Date().timeIntervalSince1970))\", \"type\": \"ping\"}"
-                                    ws?.write(string: pingMessage)
-                                    print("Sent ping to KuCoin Futures WebSocket")
-                                }
-                            }
-                        case .disconnected(_, _):
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectKucoinFutures()
-                            }
-                        case .error(_):
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectKucoinFutures()
-                            }
-                        case .text(let string):
-                            if let data = string.data(using: .utf8),
-                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                               let type = json["type"] as? String, type == "welcome" {
-                                print("KuCoin Futures WebSocket subscription confirmed")
-                            }
-                        default:
-                            break
-                        }
-                    }
-                }
+        } else {
+            let tradeValue = amount * price
+            if side == "buy" {
+                bybitBalance -= (tradeValue + fee)
+                bybitPositions[pair] = (bybitPositions[pair] ?? 0.0) + amount
+            } else {
+                bybitBalance += (tradeValue - fee)
+                bybitPositions[pair] = (bybitPositions[pair] ?? 0.0) - amount
+            }
+        }
+        
+        // ENHANCED: Update last trade time
+        lastTradeTime[pair] = Date()
+        
+        logAlert(event: "HFT Trade executed: \(side) \(amount) \(pair) on \(exchange) at \(price) (fee: \(fee))")
+    }
+
+    static func connectWebSocket(exchange: String, pair: String, marketType: String) {
+        print("📡 Connecting WebSocket for \(exchange), pair: \(pair), marketType: \(marketType)")
+        
+        // ENHANCED: Track connection attempts
+        await MainActor.run {
+            if exchange == "bybit" {
+                bybitReconnectAttempts = 0
+                connectBybitWebSocket()
+            } else if exchange == "kucoin" {
+                kucoinReconnectAttempts = 0
+                // Call KuCoin WebSocket connection when available
             }
         }
     }
 
-    @MainActor
-    static func connectBybit() {
-        print("Attempting to connect to Bybit WebSocket...")
-        bybitSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/spot")!))
-        bybitDelegate = BybitWebSocketDelegate()
-        bybitSocket?.delegate = bybitDelegate
-        bybitSocket?.connect()
+    static func checkCircuitBreaker(pair: String) {
+        let prices = ExchangeWebSocket.kucoinPrices[pair] ?? []
+        guard prices.count >= 60 else { return }
         
-        weak var spotWs = bybitSocket
-        spotWs?.onEvent = { event in
+        let recentPrices = prices.suffix(60)
+        let maxPrice = recentPrices.max() ?? 0
+        let minPrice = recentPrices.min() ?? 0
+        let avgPrice = recentPrices.reduce(0, +) / Double(recentPrices.count)
+        
+        // ENHANCED: Better volatility calculation
+        let priceRange = maxPrice - minPrice
+        let volatility = avgPrice > 0 ? priceRange / avgPrice : 0
+        
+        if volatility > ExchangeWebSocket.volatilitySpikeThreshold {
+            isTradingPaused[pair] = true
+            lastVolatilityPause = Date()
+            
+            let message = "Circuit breaker triggered for \(pair): Volatility: \(String(format: "%.4f", volatility)) (threshold: \(ExchangeWebSocket.volatilitySpikeThreshold))"
+            print("⚖️ \(message)")
             Task { @MainActor in
-                switch event {
-                case .connected(_):
-                    for pair in tradingPairs {
-                        // Fixed symbol formatting for Bybit
-                        let symbol = pair.replacingOccurrences(of: "-", with: "")
-                        let subscribeMessage: [String: Any] = [
-                            "req_id": "bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))",
-                            "op": "subscribe",
-                            "args": [
-                                "tickers.\(symbol)",
-                                "orderbook.50.\(symbol)",
-                                "publicTrade.\(symbol)"
-                            ]
-                        ]
-                        if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
-                           let message = String(data: data, encoding: .utf8) {
-                            spotWs?.write(string: message)
-                            print("Subscribed to Bybit spot topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
-                        } else {
-                            print("Failed to subscribe to Bybit spot topics for pair: \(pair)")
-                        }
-                    }
-                    Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
-                        Task { @MainActor in
-                            let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
-                            spotWs?.write(string: pingMessage)
-                            print("Sent ping to Bybit Spot WebSocket")
-                        }
-                    }
-                case .disconnected(_, _):
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                case .error(_):
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                case .text(let string):
-                    if let data = string.data(using: .utf8),
-                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let success = json["success"] as? Bool, success,
-                       let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
-                        print("Bybit Spot subscription confirmed")
-                    }
-                default:
+                logAlert(event: message)
+            }
+            
+            // ENHANCED: Auto-resume after cooldown
+            DispatchQueue.main.asyncAfter(deadline: .now() + volatilityPauseSeconds) {
+                isTradingPaused[pair] = false
+                logAlert(event: "Circuit breaker cleared for \(pair) after \(volatilityPauseSeconds) seconds")
+            }
+        }
+    }
+
+    static func marketMaker(pair: String, exchange: String) {
+        let spread = getDouble("MARKET_MAKING_SPREAD", defaultValue: 0.001)
+        let price = exchange == "kucoin" ? kucoinCurrentPrice[pair] ?? 0.0 : bybitCurrentPrice[pair] ?? 0.0
+        
+        guard price > 0 else {
+            print("DEBUG: Cannot make market for \(pair) on \(exchange): invalid price")
+            return
+        }
+        
+        let bidPrice = price * (1 - spread)
+        let askPrice = price * (1 + spread)
+        
+        print("📈 Market-making for \(pair) on \(exchange): Bid: \(String(format: "%.4f", bidPrice)), Ask: \(String(format: "%.4f", askPrice))")
+        
+        // ENHANCED: Track market making activity
+        marketMakingSignals[pair] = spread
+    }
+
+    static func executeScalpingTrade(pair: String, exchange: String, entryPrice: Double, targetPrice: Double, stopPrice: Double, tradeAmount: Double, maxActiveTrades: Int) async -> Bool {
+        // ENHANCED: Check if we can execute more trades
+        let activeTrades = activeSpotTrades[pair] ?? 0
+        guard activeTrades < maxActiveTrades else {
+            print("DEBUG: Max active trades reached for \(pair): \(activeTrades)/\(maxActiveTrades)")
+            return false
+        }
+        
+        let trailingProfitPercent = getDouble("TRAILING_PROFIT_PERCENT", defaultValue: 0.03)
+        let feeRate = exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee
+        let quantity = tradeAmount / entryPrice
+        var highestPrice = entryPrice
+        var trailingTargetPrice = entryPrice * (1 + trailingProfitPercent)
+        var exitPrice: Double = 0.0
+        let startTime = Date()
+        let maxTradeTime = getDouble("MAX_SCALP_TRADE_TIME", defaultValue: 60.0)
+        let dashboardJSONURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json")
+
+        // Copy balance to avoid inout capture
+        var localKucoinBalance = kucoinBalance
+        var localBybitBalance = bybitBalance
+        
+        // ENHANCED: Mark trade as active
+        await MainActor.run {
+            activeSpotTrades[pair] = activeTrades + 1
+        }
+
+        while Date().timeIntervalSince(startTime) < maxTradeTime {
+            if let currentPrice = await MainActor.run(body: { exchange == "bybit" ? bybitCurrentPrice[pair] : kucoinCurrentPrice[pair] }) {
+                if currentPrice > highestPrice {
+                    highestPrice = currentPrice
+                    trailingTargetPrice = highestPrice * (1 - trailingProfitPercent)
+                }
+                if currentPrice >= targetPrice || currentPrice <= stopPrice || currentPrice <= trailingTargetPrice {
+                    exitPrice = currentPrice
                     break
                 }
             }
+            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+        }
+
+        // ENHANCED: Mark trade as completed
+        await MainActor.run {
+            activeSpotTrades[pair] = max(0, (activeSpotTrades[pair] ?? 1) - 1)
+        }
+
+        if exitPrice == 0.0 {
+            exitPrice = await MainActor.run(body: { exchange == "bybit" ? bybitCurrentPrice[pair] : kucoinCurrentPrice[pair] }) ?? entryPrice
+        }
+
+        let profit = quantity * (exitPrice - entryPrice)
+        let fees = tradeAmount * feeRate * 2
+        let netProfit = profit - fees
+        
+        if exchange == "kucoin" {
+            localKucoinBalance += netProfit
+        } else {
+            localBybitBalance += netProfit
         }
         
-        bybitSpotSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/linear")!))
-        bybitFuturesDelegate = BybitFuturesWebSocketDelegate()
-        bybitSpotSocket?.delegate = bybitFuturesDelegate
-        bybitSpotSocket?.connect()
+        let tradeSuccess = netProfit > 0
+        print("📊 Scalping trade for \(pair) on \(exchange): Entry: \(entryPrice), Exit: \(exitPrice), Profit: \(netProfit), Fees: \(fees)")
         
-        weak var futuresWs = bybitSpotSocket
-        futuresWs?.onEvent = { event in
-            Task { @MainActor in
-                switch event {
-                case .connected(_):
-                    for pair in tradingPairs {
-                        // Fixed symbol formatting for Bybit futures
-                        let symbol = pair.replacingOccurrences(of: "-", with: "")
-                        let subscribeMessage: [String: Any] = [
-                            "req_id": "bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))",
-                            "op": "subscribe",
-                            "args": [
-                                "tickers.\(symbol)",
-                                "orderbook.50.\(symbol)",
-                                "publicTrade.\(symbol)"
-                            ]
-                        ]
-                        if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
-                           let message = String(data: data, encoding: .utf8) {
-                            futuresWs?.write(string: message)
-                            print("Subscribed to Bybit futures topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
-                        } else {
-                            print("Failed to subscribe to Bybit futures topics for pair: \(pair)")
-                        }
-                    }
-                    Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
-                        Task { @MainActor in
-                            let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
-                            futuresWs?.write(string: pingMessage)
-                            print("Sent ping to Bybit Futures WebSocket")
-                        }
-                    }
-                case .disconnected(_, _):
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                case .error(_):
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                case .text(let string):
-                    if let data = string.data(using: .utf8),
-                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let success = json["success"] as? Bool, success,
-                       let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
-                        print("Bybit Futures subscription confirmed")
-                    }
-                default:
+        await MainActor.run(body: {
+            // Update global balances after Task
+            if exchange == "kucoin" {
+                kucoinBalance = localKucoinBalance
+            } else {
+                bybitBalance = localBybitBalance
+            }
+            updateTradeMetrics(
+                pair: pair,
+                profit: netProfit,
+                fees: fees,
+                isWin: tradeSuccess,
+                dashboardJSONURL: dashboardJSONURL,
+                totalProfit: &ExchangeWebSocket.totalProfit,
+                totalFees: &ExchangeWebSocket.totalFees
+            )
+            logTradeToCSV(
+                pair: pair,
+                strategy: "HFT Scalping",
+                profit: netProfit,
+                fees: fees,
+                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv")
+            )
+            sendTradeToFlaskServer(strategy: "HFT Scalping", pair: pair, exchange: exchange, spotPrice: entryPrice, futuresPrice: exitPrice, tradeAmount: tradeAmount, profit: netProfit)
+        })
+        
+        return tradeSuccess
+    }
+
+    static func executeFuturesTrade(pair: String, exchange: String, entryPrice: Double, targetPrice: Double, stopPrice: Double, tradeAmount: Double) {
+        let feeRate = exchange == "bybit" ? bybitTakerFee : kucoinTakerFee
+        let quantity = tradeAmount / entryPrice
+        let leverage = exchange == "bybit" ? getDouble("BYBIT_LEVERAGE", defaultValue: 3.0) : getDouble("KUCOIN_LEVERAGE", defaultValue: 3.0)
+        let effectiveTradeAmount = tradeAmount * leverage
+        var exitPrice: Double = 0.0
+        let startTime = Date()
+        let maxTradeTime = getDouble("MAX_FUTURES_TRADE_TIME", defaultValue: 60.0)
+        let dashboardJSONURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json")
+        
+        // Copy balance to avoid inout capture
+        var localKucoinBalance = kucoinBalance
+        var localBybitBalance = bybitBalance
+
+        while Date().timeIntervalSince(startTime) < maxTradeTime {
+            if let price = (exchange == "bybit" ? bybitCurrentFuturesPrice[pair] : kucoinCurrentFuturesPrice[pair]) {
+                if price >= targetPrice || price <= stopPrice {
+                    exitPrice = price
                     break
                 }
             }
+            Thread.sleep(forTimeInterval: 0.1)
         }
+        
+        if exitPrice == 0.0 {
+            exitPrice = (exchange == "bybit" ? bybitCurrentFuturesPrice[pair] : kucoinCurrentFuturesPrice[pair]) ?? entryPrice
+        }
+        
+        let grossProfit = (exitPrice - entryPrice) * quantity * leverage
+        let fees = effectiveTradeAmount * feeRate * 2
+        let profit = grossProfit - fees
+        
+        if exchange == "bybit" {
+            localBybitBalance += profit
+        } else {
+            localKucoinBalance += profit
+        }
+        
+        print("📊 Futures trade for \(pair) on \(exchange): Entry: \(entryPrice), Exit: \(exitPrice), Profit: \(profit), Fees: \(fees), Leverage: \(leverage)x")
+        
+        Task { @MainActor in
+            // Update global balances after Task
+            if exchange == "bybit" {
+                bybitBalance = localBybitBalance
+            } else {
+                kucoinBalance = localKucoinBalance
+            }
+            updateTradeMetrics(
+                pair: pair,
+                profit: profit,
+                fees: fees,
+                isWin: profit > 0,
+                dashboardJSONURL: dashboardJSONURL,
+                totalProfit: &ExchangeWebSocket.totalProfit,
+                totalFees: &ExchangeWebSocket.totalFees
+            )
+            logTradeToCSV(
+                pair: pair,
+                strategy: "Funding Rate Momentum",
+                profit: profit,
+                fees: fees,
+                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv")
+            )
+            sendTradeToFlaskServer(strategy: "Funding Rate Momentum", pair: pair, exchange: exchange, spotPrice: entryPrice, futuresPrice: exitPrice, tradeAmount: effectiveTradeAmount, profit: profit)
+        }
+    }
+
+    static func updateDashboardJSON(dashboardJSONURL: URL, totalProfit: Double, totalFees: Double) {
+        Task { @MainActor in
+            let timestamp = ISO8601DateFormatter().string(from: Date())
+            do {
+                let fileManager = FileManager.default
+                let directoryURL = dashboardJSONURL.deletingLastPathComponent()
+                if !fileManager.fileExists(atPath: directoryURL.path) {
+                    try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+                }
+                
+                // ENHANCED: More comprehensive dashboard data
+                var perPairMetrics: [[String: Any]] = []
+                for pair in tradingPairs {
+                    let metrics = tradeMetrics[pair] ?? (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)
+                    let trades = metrics.wins + metrics.losses
+                    let winRate = trades > 0 ? Double(metrics.wins) / Double(trades) * 100.0 : 0.0
+                    let sentiment = sentimentScores[pair] ?? 0.0
+                    let lastTradeTimeForPair = lastTradeTime[pair]
+                    let activeTrades = activeSpotTrades[pair] ?? 0
+                    
+                    let pairData: [String: Any] = [
+                        "pair": pair,
+                        "trades": trades,
+                        "wins": metrics.wins,
+                        "losses": metrics.losses,
+                        "winRate": winRate,
+                        "profit": metrics.totalProfit,
+                        "fees": metrics.totalFees,
+                        "netProfit": metrics.totalProfit - metrics.totalFees,
+                        "sentiment": sentiment,
+                        "activeTrades": activeTrades,
+                        "lastTradeTime": lastTradeTimeForPair?.timeIntervalSince1970 ?? 0,
+                        "tradingPaused": isTradingPaused[pair] ?? false
+                    ]
+                    perPairMetrics.append(pairData)
+                }
+                
+                let dashboardData: [String: Any] = [
+                    "timestamp": timestamp,
+                    "totalProfit": totalProfit,
+                    "totalFees": totalFees,
+                    "netProfit": totalProfit - totalFees,
+                    "totalTrades": tradeMetrics.values.reduce(0) { $0 + $1.wins + $1.losses },
+                    "kucoinBalance": kucoinBalance,
+                    "bybitBalance": bybitBalance,
+                    "totalBalance": kucoinBalance + bybitBalance,
+                    "perPairMetrics": perPairMetrics,
+                    "livePrices": tradingPairs.map { pair in
+                        [
+                            "pair": pair,
+                            "kucoinSpot": kucoinCurrentPrice[pair] ?? 0.0,
+                            "kucoinFutures": kucoinCurrentFuturesPrice[pair] ?? 0.0,
+                            "bybitSpot": bybitCurrentPrice[pair] ?? 0.0,
+                            "bybitFutures": bybitCurrentFuturesPrice[pair] ?? 0.0,
+                            "spread": calculateCrossExchangeSpread(pair: pair)
+                        ]
+                    },
+                    "systemHealth": [
+                        "kucoinConnected": kucoinIsConnected,
+                        "bybitConnected": bybitIsConnected,
+                        "emergencyStopActive": emergencyStopActive,
+                        "lastUpdate": timestamp
+                    ]
+                ]
+                
+                let jsonData = try JSONSerialization.data(withJSONObject: dashboardData, options: [.prettyPrinted])
+                try jsonData.write(to: dashboardJSONURL, options: .atomic)
+                print("📈 Updated dashboard JSON at \(dashboardJSONURL.path)")
+            } catch {
+                print("⚠️ Failed to update dashboard JSON: \(error.localizedDescription)")
+                logAlert(event: "Failed to update dashboard JSON: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    static func calculateKellyCriterion(pair: String) async -> Double {
+        // Use empirical win probability from tradeMetrics, fallback to default
+        let metrics = tradeMetrics[pair] ?? (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)
+        let totalTrades = metrics.wins + metrics.losses
+        let winProbability = totalTrades > 0 ? Double(metrics.wins) / Double(totalTrades) : kellyWinProbability
+        
+        // Adjust reward-to-risk based on ATR for volatility
+        let atr = kucoinFuturesATR[pair] ?? 0.01
+        let currentPrice = kucoinCurrentPrice[pair] ?? 1.0
+        let volatilityAdjustment = atr / currentPrice
+        let rewardToRisk = kellyRewardToRisk * (1 + volatilityAdjustment * 0.5) // Scale by volatility
+        
+        // Calculate Kelly fraction
+        let kelly = (winProbability * (rewardToRisk + 1) - 1) / rewardToRisk
+        
+        // Apply bounds and validation
+        guard rewardToRisk > 0 else {
+            Task { @MainActor in
+                logAlert(event: "🟡 Invalid reward-to-risk ratio for \(pair): \(rewardToRisk)")
+            }
+            return 0.01 // Minimum safe fraction
+        }
+        
+        // Clamp between 0.01 and 0.5 for safety
+        let clampedKelly = max(min(kelly, 0.5), 0.01)
+        
+        // Store in kellySizes for pair-specific sizing
+        await MainActor.run {
+            kellySizes[pair] = clampedKelly
+            if totalTrades >= 10 { // Only log after sufficient trades
+                logAlert(event: "🟡 Kelly fraction for \(pair): \(String(format: "%.3f", clampedKelly)) (p=\(String(format: "%.2f", winProbability)), r=\(String(format: "%.2f", rewardToRisk)))")
+            }
+        }
+        
+        return clampedKelly
+    }
+
+    static func calculateOrderBookVWAP(pair: String, exchange: String, priceRange: Double, currentPrice: Double) -> Double? {
+        let orderBook = exchange == "kucoin" ? kucoinOrderBooks[pair] : bybitOrderBooks[pair]
+        guard let book = orderBook, !book.isEmpty else {
+            print("DEBUG: Order book unavailable for \(pair) on \(exchange)")
+            Task { @MainActor in
+                logAlert(event: "Order book unavailable for \(pair) on \(exchange)")
+            }
+            return nil
+        }
+
+        let minPrice = currentPrice * (1 - priceRange)
+        let maxPrice = currentPrice * (1 + priceRange)
+
+        var totalVolume: Double = 0.0
+        var totalPriceVolume: Double = 0.0
+
+        for bid in book.bids {
+            if bid.price >= minPrice && bid.price <= maxPrice {
+                totalPriceVolume += bid.price * bid.quantity
+                totalVolume += bid.quantity
+            }
+        }
+
+        for ask in book.asks {
+            if ask.price >= minPrice && ask.price <= maxPrice {
+                totalPriceVolume += ask.price * ask.quantity
+                totalVolume += ask.quantity
+            }
+        }
+
+        guard totalVolume > 0 else {
+            print("DEBUG: Zero total volume in VWAP calculation for \(pair) on \(exchange)")
+            Task { @MainActor in
+                logAlert(event: "Zero total volume in VWAP calculation for \(pair) on \(exchange)")
+            }
+            return nil
+        }
+
+        let vwap = totalPriceVolume / totalVolume
+        print("DEBUG: Calculated VWAP for \(pair) on \(exchange): \(vwap)")
+        return vwap
+    }
+
+    static func checkDailyLossLimit(exchange: String, pair: String, potentialLoss: Double) async -> Bool {
+        let dailyLossLimit = getDouble("DAILY_LOSS_LIMIT", defaultValue: 100.0)
+        let currentLoss = await MainActor.run(body: { dailyLoss[exchange] ?? 0.0 })
+        let newTotalLoss = currentLoss + potentialLoss
+        let exceedsLimit = newTotalLoss > dailyLossLimit
+        
+        if exceedsLimit {
+            print("DEBUG: Daily loss limit exceeded for \(exchange)-\(pair): Current \(currentLoss), Potential \(potentialLoss), Limit \(dailyLossLimit)")
+            await MainActor.run(body: {
+                logAlert(event: "Daily loss limit exceeded for \(exchange)-\(pair): Current \(currentLoss), Potential \(potentialLoss)")
+            })
+        }
+        return !exceedsLimit
+    }
+    
+    // ENHANCED: Helper function to calculate cross-exchange spread
+    static func calculateCrossExchangeSpread(pair: String) -> Double {
+        let kucoinPrice = kucoinCurrentPrice[pair] ?? 0.0
+        let bybitPrice = bybitCurrentPrice[pair] ?? 0.0
+        
+        guard kucoinPrice > 0 && bybitPrice > 0 else { return 0.0 }
+        
+        return abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
+    }
+    
+    // ENHANCED: Volatility spike detection
+    static func detectVolatilitySpike(exchange: String, pair: String) -> Bool {
+        let prices = exchange == "kucoin" ? kucoinPrices[pair] : bybitPrices[pair]
+        guard let priceArray = prices, priceArray.count >= 30 else { return false }
+        
+        let recentPrices = Array(priceArray.suffix(30))
+        let maxPrice = recentPrices.max() ?? 0
+        let minPrice = recentPrices.min() ?? 0
+        let avgPrice = recentPrices.reduce(0, +) / Double(recentPrices.count)
+        
+        let volatility = avgPrice > 0 ? (maxPrice - minPrice) / avgPrice : 0
+        
+        return volatility > volatilitySpikeThreshold
     }
 }
-
