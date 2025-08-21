@@ -57,7 +57,7 @@ extension ExchangeWebSocket {
         }
     }
 
-    static func attemptSend(attempt: Int, request: URLRequest, strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double, retries: Int) {
+    @Sendable static func attemptSend(attempt: Int, request: URLRequest, strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double, retries: Int) {
         let delay = pow(2.0, Double(attempt - 1))
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -445,5 +445,103 @@ extension ExchangeWebSocket {
         print("DEBUG: Successfully fetched spread prediction for \(pair): \(predictedSpread)")
         return predictedSpread
     }
-}
 
+    // Enhanced HFT monitoring with proper MainActor isolation
+    static func enhancedHFTMonitoring() {
+        Task { @MainActor in
+            while tradingActive && !emergencyStopActive {
+                for pair in tradingPairs {
+                    guard !isTradingPaused[pair, default: false] else { continue }
+                    
+                    let kucoinOrderBook = kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+                    let bybitOrderBook = bybitOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+                    
+                    // FIX: Use isEmpty property instead of non-existent member
+                    if !kucoinOrderBook.isEmpty {
+                        let kucoinSpread = (kucoinOrderBook.asks.first?.price ?? 0.0) - (kucoinOrderBook.bids.first?.price ?? 0.0)
+                        let kucoinPrice = (kucoinOrderBook.bids.first?.price ?? 0.0 + kucoinOrderBook.asks.first?.price ?? 0.0) / 2
+                        
+                        if kucoinPrice > 0 {
+                            let spreadPercent = kucoinSpread / kucoinPrice
+                            if spreadPercent >= getDouble("HFT_SPREAD_THRESHOLD", defaultValue: 0.003) {
+                                print("HFT opportunity on KuCoin for \(pair): \(String(format: "%.4f", spreadPercent * 100))%")
+                                
+                                // Execute HFT trade logic
+                                let tradeAmount = min(kucoinBalance * 0.02, getDouble("HFT_TRADE_AMOUNT", defaultValue: 200.0))
+                                if tradeAmount > 5.0 {
+                                    Task {
+                                        let success = await executeScalpingTrade(
+                                            pair: pair,
+                                            exchange: "kucoin",
+                                            entryPrice: kucoinOrderBook.bids.first?.price ?? kucoinPrice,
+                                            targetPrice: kucoinOrderBook.asks.first?.price ?? kucoinPrice,
+                                            stopPrice: kucoinPrice * (1 - getDouble("SCALP_STOP_LOSS", defaultValue: 0.0015)),
+                                            tradeAmount: tradeAmount,
+                                            maxActiveTrades: getInt("MAX_ACTIVE_SPOT_TRADES", defaultValue: 2)
+                                        )
+                                        
+                                        if success {
+                                            await MainActor.run {
+                                                hftArbitrageExecuted[pair] = (profit: spreadPercent * tradeAmount, timestamp: Date())
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // FIX: Use isEmpty property instead of non-existent member
+                    if !bybitOrderBook.isEmpty {
+                        let bybitSpread = (bybitOrderBook.asks.first?.price ?? 0.0) - (bybitOrderBook.bids.first?.price ?? 0.0)
+                        let bybitPrice = (bybitOrderBook.bids.first?.price ?? 0.0 + bybitOrderBook.asks.first?.price ?? 0.0) / 2
+                        
+                        if bybitPrice > 0 {
+                            let spreadPercent = bybitSpread / bybitPrice
+                            if spreadPercent >= getDouble("HFT_SPREAD_THRESHOLD", defaultValue: 0.003) {
+                                print("HFT opportunity on Bybit for \(pair): \(String(format: "%.4f", spreadPercent * 100))%")
+                                
+                                // Execute HFT trade logic
+                                let tradeAmount = min(bybitBalance * 0.02, getDouble("HFT_TRADE_AMOUNT", defaultValue: 200.0))
+                                if tradeAmount > 5.0 {
+                                    Task {
+                                        let success = await executeScalpingTrade(
+                                            pair: pair,
+                                            exchange: "bybit",
+                                            entryPrice: bybitOrderBook.bids.first?.price ?? bybitPrice,
+                                            targetPrice: bybitOrderBook.asks.first?.price ?? bybitPrice,
+                                            stopPrice: bybitPrice * (1 - getDouble("SCALP_STOP_LOSS", defaultValue: 0.0015)),
+                                            tradeAmount: tradeAmount,
+                                            maxActiveTrades: getInt("MAX_ACTIVE_SPOT_TRADES", defaultValue: 2)
+                                        )
+                                        
+                                        if success {
+                                            await MainActor.run {
+                                                hftArbitrageExecuted[pair] = (profit: spreadPercent * tradeAmount, timestamp: Date())
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // FIX: Wrap MainActor-isolated calls in await MainActor.run
+                await MainActor.run {
+                    printPeriodicSummary()
+                }
+                
+                await MainActor.run {
+                    updateDashboardJSON(
+                        dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
+                        totalProfit: totalProfit,
+                        totalFees: totalFees
+                    )
+                }
+                
+                try? await Task.sleep(nanoseconds: UInt64(getDouble("HFT_COOLDOWN_SECONDS", defaultValue: 1.5) * 1_000_000_000))
+            }
+        }
+    }
+}
