@@ -6444,8 +6444,7 @@ BB Futures: \(bybitFuturesPrice)
 
 //------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
 
-//--------------- Block 14 - Core Trading Loop Execution
-// VARIABLES TO ADD: Fixed redeclaration of detectVolatilitySpike and isEmpty usage on BevaixOrderBook
+
 
 import Foundation
 
@@ -6792,8 +6791,7 @@ RunLoop.main.run()
 
 //---------------------------------------------------------------------------------------------------------Block 15 - High-Frequency Trading Scalping
 
-//--------------- Block 15 - High-Frequency Trading Scalping
-// VARIABLES TO ADD: Fixed unnecessary await expressions, isEmpty usage, and MainActor isolation issues
+
 
 import Foundation
 
@@ -8423,8 +8421,7 @@ extension ExchangeWebSocket {
 
 //-------------------------------------------------------------------------------------------------------------------------Block 20 - API Data Retrieval and Authentication
 
-//--------------- Block 20 - API Data Retrieval and Authentication
-// VARIABLES TO ADD: Fixed redeclaration issues and Sendable conformance problems
+
 
 import CryptoKit
 import Foundation
