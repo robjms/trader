@@ -1,5 +1,7 @@
 //---------------------------------------------------------------------------------------------------------------Block 18 - Market Making Operations
 
+
+
 extension ExchangeWebSocket {
     static func monitorHFTScalpingOpportunities() {
         let localKucoinOrderBooks = kucoinOrderBooks
