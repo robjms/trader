@@ -59,16 +59,6 @@ extension ExchangeWebSocket {
     }
 
     static func fetchKuCoinWsToken(completion: @escaping @Sendable (String?) -> Void) {
-        // ENHANCED: Check credentials before attempting WebSocket connection
-        guard validateAPICredentials(exchange: "kucoin") else {
-            print("Invalid KuCoin credentials, skipping WebSocket token fetch")
-            Task { @MainActor in
-                logAlert(event: "Invalid KuCoin credentials, skipping WebSocket token fetch")
-            }
-            completion(nil)
-            return
-        }
-        
         let url = URL(string: "https://api.kucoin.com/api/v1/bullet-public")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -94,31 +84,10 @@ extension ExchangeWebSocket {
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("Invalid KuCoin WebSocket token response: Non-HTTP response")
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                print("Invalid KuCoin WebSocket token response")
                 Task { @MainActor in
-                    logAlert(event: "Invalid KuCoin WebSocket token response: Non-HTTP response")
-                }
-                completion(nil)
-                return
-            }
-            
-            // ENHANCED: Better error handling for different status codes
-            if httpResponse.statusCode != 200 {
-                let responseBody = data != nil ? String(data: data!, encoding: .utf8) ?? "Invalid data" : "No data"
-                print("Invalid KuCoin WebSocket token response: Status \(httpResponse.statusCode)")
-                Task { @MainActor in
-                    handleAPIError(exchange: "kucoin", statusCode: httpResponse.statusCode, responseBody: responseBody)
-                    logAlert(event: "Invalid KuCoin WebSocket token response: Status \(httpResponse.statusCode)")
-                }
-                completion(nil)
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received for KuCoin WebSocket token")
-                Task { @MainActor in
-                    logAlert(event: "No data received for KuCoin WebSocket token")
+                    logAlert(event: "Invalid KuCoin WebSocket token response")
                 }
                 completion(nil)
                 return
@@ -131,16 +100,6 @@ extension ExchangeWebSocket {
                     print("Failed to parse KuCoin WebSocket token")
                     Task { @MainActor in
                         logAlert(event: "Failed to parse KuCoin WebSocket token")
-                    }
-                    completion(nil)
-                    return
-                }
-                
-                // ENHANCED: Validate token format
-                if token.isEmpty || token.count < 10 {
-                    print("Invalid KuCoin WebSocket token format: \(token)")
-                    Task { @MainActor in
-                        logAlert(event: "Invalid KuCoin WebSocket token format")
                     }
                     completion(nil)
                     return
@@ -166,16 +125,6 @@ extension ExchangeWebSocket {
     }
 
     static func fetchKucoinFuturesWsToken(completion: @escaping @Sendable (String?) -> Void) {
-        // ENHANCED: Check credentials before attempting WebSocket connection
-        guard validateAPICredentials(exchange: "kucoin") else {
-            print("Invalid KuCoin credentials, skipping Futures WebSocket token fetch")
-            Task { @MainActor in
-                logAlert(event: "Invalid KuCoin credentials, skipping Futures WebSocket token fetch")
-            }
-            completion(nil)
-            return
-        }
-        
         let url = URL(string: "https://api-futures.kucoin.com/api/v1/bullet-public")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -201,31 +150,10 @@ extension ExchangeWebSocket {
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("Invalid KuCoin Futures WebSocket token response: Non-HTTP response")
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                print("Invalid KuCoin Futures WebSocket token response")
                 Task { @MainActor in
-                    logAlert(event: "Invalid KuCoin Futures WebSocket token response: Non-HTTP response")
-                }
-                completion(nil)
-                return
-            }
-            
-            // ENHANCED: Better error handling for different status codes
-            if httpResponse.statusCode != 200 {
-                let responseBody = data != nil ? String(data: data!, encoding: .utf8) ?? "Invalid data" : "No data"
-                print("Invalid KuCoin Futures WebSocket token response: Status \(httpResponse.statusCode)")
-                Task { @MainActor in
-                    handleAPIError(exchange: "kucoin", statusCode: httpResponse.statusCode, responseBody: responseBody)
-                    logAlert(event: "Invalid KuCoin Futures WebSocket token response: Status \(httpResponse.statusCode)")
-                }
-                completion(nil)
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received for KuCoin Futures WebSocket token")
-                Task { @MainActor in
-                    logAlert(event: "No data received for KuCoin Futures WebSocket token")
+                    logAlert(event: "Invalid KuCoin Futures WebSocket token response")
                 }
                 completion(nil)
                 return
@@ -238,16 +166,6 @@ extension ExchangeWebSocket {
                     print("Failed to parse KuCoin Futures WebSocket token")
                     Task { @MainActor in
                         logAlert(event: "Failed to parse KuCoin Futures WebSocket token")
-                    }
-                    completion(nil)
-                    return
-                }
-                
-                // ENHANCED: Validate token format
-                if token.isEmpty || token.count < 10 {
-                    print("Invalid KuCoin Futures WebSocket token format: \(token)")
-                    Task { @MainActor in
-                        logAlert(event: "Invalid KuCoin Futures WebSocket token format")
                     }
                     completion(nil)
                     return
@@ -273,30 +191,18 @@ extension ExchangeWebSocket {
     }
 
     static func fetchKucoinBalance(completion: @escaping @Sendable (Double?) -> Void) {
-        // ENHANCED: Validate credentials before making API call
         guard let apiKey = environment["KUCOIN_API_KEY"],
               let apiSecret = environment["KUCOIN_API_SECRET"],
               let apiPassphrase = environment["KUCOIN_API_PASSPHRASE"] else {
             print("Missing KuCoin API credentials")
             Task { @MainActor in
                 logAlert(event: "Missing KuCoin API credentials")
-                // FIX: Improved fallback balance handling
-                kucoinBalance = kucoinFallbackBalance
-                logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
             }
-            completion(kucoinFallbackBalance)
-            return
-        }
-        
-        // ENHANCED: Validate credential format
-        if apiKey.isEmpty || apiSecret.isEmpty || apiPassphrase.isEmpty {
-            print("Empty KuCoin API credentials")
             Task { @MainActor in
-                logAlert(event: "Empty KuCoin API credentials")
-                kucoinBalance = kucoinFallbackBalance
-                logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
+                // FIX: Access fallback balance within MainActor context
+                let fallbackValue = await MainActor.run { kucoinFallbackBalance }
+                completion(fallbackValue)
             }
-            completion(kucoinFallbackBalance)
             return
         }
         
@@ -331,173 +237,77 @@ extension ExchangeWebSocket {
                 print("Failed to fetch KuCoin balance: \(error.localizedDescription)")
                 Task { @MainActor in
                     logAlert(event: "Failed to fetch KuCoin balance: \(error.localizedDescription)")
-                    // FIX: Use fallback balance on error
-                    kucoinBalance = kucoinFallbackBalance
-                    logAlert(event: "Using KuCoin fallback balance due to error: \(kucoinFallbackBalance) USDT")
                 }
-                completion(kucoinFallbackBalance)
+                Task { @MainActor in
+                    // FIX: Access fallback balance within MainActor context
+                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
+                    completion(fallbackValue)
+                }
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("Invalid KuCoin balance response: Non-HTTP response")
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                print("Invalid KuCoin balance response")
                 Task { @MainActor in
-                    logAlert(event: "Invalid KuCoin balance response: Non-HTTP response")
-                    kucoinBalance = kucoinFallbackBalance
-                    logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
+                    logAlert(event: "Invalid KuCoin balance response")
                 }
-                completion(kucoinFallbackBalance)
-                return
-            }
-            
-            // ENHANCED: Better error handling for different status codes
-            if httpResponse.statusCode != 200 {
-                let responseBody = data != nil ? String(data: data!, encoding: .utf8) ?? "Invalid data" : "No data"
-                print("Invalid KuCoin balance response: Status \(httpResponse.statusCode)")
                 Task { @MainActor in
-                    handleAPIError(exchange: "kucoin", statusCode: httpResponse.statusCode, responseBody: responseBody)
-                    logAlert(event: "Invalid KuCoin balance response: Status \(httpResponse.statusCode)")
-                    kucoinBalance = kucoinFallbackBalance
-                    logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
+                    // FIX: Access fallback balance within MainActor context
+                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
+                    completion(fallbackValue)
                 }
-                completion(kucoinFallbackBalance)
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received for KuCoin balance")
-                Task { @MainActor in
-                    logAlert(event: "No data received for KuCoin balance")
-                    kucoinBalance = kucoinFallbackBalance
-                    logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
-                }
-                completion(kucoinFallbackBalance)
                 return
             }
             
             do {
-                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                    print("Failed to parse KuCoin balance JSON")
+                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let dataArray = json["data"] as? [[String: Any]],
+                      let usdtAccount = dataArray.first(where: { ($0["currency"] as? String) == "USDT" }),
+                      let balanceStr = usdtAccount["balance"] as? String,
+                      let balance = Double(balanceStr) else {
+                    print("Failed to parse KuCoin balance")
                     Task { @MainActor in
-                        logAlert(event: "Failed to parse KuCoin balance JSON")
-                        kucoinBalance = kucoinFallbackBalance
-                        logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
+                        logAlert(event: "Failed to parse KuCoin balance")
                     }
-                    completion(kucoinFallbackBalance)
+                    Task { @MainActor in
+                        // FIX: Access fallback balance within MainActor context
+                        let fallbackValue = await MainActor.run { kucoinFallbackBalance }
+                        completion(fallbackValue)
+                    }
                     return
                 }
-                
-                // ENHANCED: Better JSON validation and error handling
-                guard let code = json["code"] as? String else {
-                    print("KuCoin balance response missing code field")
-                    Task { @MainActor in
-                        logAlert(event: "KuCoin balance response missing code field")
-                        kucoinBalance = kucoinFallbackBalance
-                        logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
-                    }
-                    completion(kucoinFallbackBalance)
-                    return
-                }
-                
-                guard code == "200000" else {
-                    let errorMsg = json["msg"] as? String ?? "Unknown error"
-                    print("KuCoin balance API error - code: \(code), msg: \(errorMsg)")
-                    Task { @MainActor in
-                        logAlert(event: "KuCoin balance API error - code: \(code), msg: \(errorMsg)")
-                        kucoinBalance = kucoinFallbackBalance
-                        logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
-                    }
-                    completion(kucoinFallbackBalance)
-                    return
-                }
-                
-                guard let dataArray = json["data"] as? [[String: Any]] else {
-                    print("KuCoin balance response missing data array")
-                    Task { @MainActor in
-                        logAlert(event: "KuCoin balance response missing data array")
-                        kucoinBalance = kucoinFallbackBalance
-                        logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
-                    }
-                    completion(kucoinFallbackBalance)
-                    return
-                }
-                
-                // ENHANCED: Better balance parsing with multiple account types
-                var totalBalance = 0.0
-                var usdtAccountFound = false
-                
-                for account in dataArray {
-                    if let currency = account["currency"] as? String,
-                       currency == "USDT",
-                       let balanceStr = account["balance"] as? String,
-                       let balance = Double(balanceStr),
-                       balance > 0 {
-                        totalBalance += balance
-                        usdtAccountFound = true
-                        
-                        let accountType = account["type"] as? String ?? "unknown"
-                        print("DEBUG: Found KuCoin USDT account (\(accountType)): \(balance) USDT")
-                    }
-                }
-                
-                if !usdtAccountFound {
-                    print("No KuCoin USDT accounts found")
-                    Task { @MainActor in
-                        logAlert(event: "No KuCoin USDT accounts found")
-                        kucoinBalance = kucoinFallbackBalance
-                        logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
-                    }
-                    completion(kucoinFallbackBalance)
-                    return
-                }
-                
-                // Use fallback if balance is suspiciously low (might indicate API issue)
-                let finalBalance = totalBalance < 1.0 ? kucoinFallbackBalance : totalBalance
                 
                 Task { @MainActor in
-                    kucoinBalance = finalBalance
-                    print("DEBUG: Fetched KuCoin balance: \(finalBalance) USDT (total from API: \(totalBalance))")
-                    if finalBalance != totalBalance {
-                        logAlert(event: "Used KuCoin fallback balance due to low API balance: \(totalBalance) -> \(finalBalance)")
-                    }
+                    kucoinBalance = balance
+                    print("DEBUG: Fetched KuCoin balance: \(balance)")
+                    completion(balance)
                 }
-                completion(finalBalance)
             } catch {
                 print("Failed to parse JSON for KuCoin balance: \(error.localizedDescription)")
                 Task { @MainActor in
                     logAlert(event: "Failed to parse JSON for KuCoin balance: \(error.localizedDescription)")
-                    kucoinBalance = kucoinFallbackBalance
-                    logAlert(event: "Using KuCoin fallback balance: \(kucoinFallbackBalance) USDT")
                 }
-                completion(kucoinFallbackBalance)
+                Task { @MainActor in
+                    // FIX: Access fallback balance within MainActor context
+                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
+                    completion(fallbackValue)
+                }
             }
         }.resume()
     }
 
     static func fetchBybitBalance(completion: @escaping @Sendable (Double?) -> Void) {
-        // ENHANCED: Validate credentials before making API call
         guard let apiKey = environment["BYBIT_API_KEY"],
               let apiSecret = environment["BYBIT_API_SECRET"] else {
             print("Missing Bybit API credentials")
             Task { @MainActor in
                 logAlert(event: "Missing Bybit API credentials")
-                // FIX: Improved fallback balance handling
-                bybitBalance = bybitFallbackBalance
-                logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
             }
-            completion(bybitFallbackBalance)
-            return
-        }
-        
-        // ENHANCED: Validate credential format
-        if apiKey.isEmpty || apiSecret.isEmpty {
-            print("Empty Bybit API credentials")
             Task { @MainActor in
-                logAlert(event: "Empty Bybit API credentials")
-                bybitBalance = bybitFallbackBalance
-                logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
+                // FIX: Access fallback balance within MainActor context
+                let fallbackValue = await MainActor.run { bybitFallbackBalance }
+                completion(fallbackValue)
             }
-            completion(bybitFallbackBalance)
             return
         }
         
@@ -532,177 +342,65 @@ extension ExchangeWebSocket {
                 print("Failed to fetch Bybit balance: \(error.localizedDescription)")
                 Task { @MainActor in
                     logAlert(event: "Failed to fetch Bybit balance: \(error.localizedDescription)")
-                    // FIX: Use fallback balance on error
-                    bybitBalance = bybitFallbackBalance
-                    logAlert(event: "Using Bybit fallback balance due to error: \(bybitFallbackBalance) USDT")
                 }
-                completion(bybitFallbackBalance)
+                Task { @MainActor in
+                    // FIX: Access fallback balance within MainActor context
+                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
+                    completion(fallbackValue)
+                }
                 return
             }
             
-            guard let httpResponse = response as? HTTPURLResponse else {
-                print("Invalid Bybit balance response: Non-HTTP response")
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                print("Invalid Bybit balance response")
                 Task { @MainActor in
-                    logAlert(event: "Invalid Bybit balance response: Non-HTTP response")
-                    bybitBalance = bybitFallbackBalance
-                    logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
+                    logAlert(event: "Invalid Bybit balance response")
                 }
-                completion(bybitFallbackBalance)
-                return
-            }
-            
-            // ENHANCED: Better error handling for different status codes
-            if httpResponse.statusCode != 200 {
-                let responseBody = data != nil ? String(data: data!, encoding: .utf8) ?? "Invalid data" : "No data"
-                print("Invalid Bybit balance response: Status \(httpResponse.statusCode)")
                 Task { @MainActor in
-                    handleAPIError(exchange: "bybit", statusCode: httpResponse.statusCode, responseBody: responseBody)
-                    logAlert(event: "Invalid Bybit balance response: Status \(httpResponse.statusCode)")
-                    bybitBalance = bybitFallbackBalance
-                    logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
+                    // FIX: Access fallback balance within MainActor context
+                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
+                    completion(fallbackValue)
                 }
-                completion(bybitFallbackBalance)
-                return
-            }
-            
-            guard let data = data else {
-                print("No data received for Bybit balance")
-                Task { @MainActor in
-                    logAlert(event: "No data received for Bybit balance")
-                    bybitBalance = bybitFallbackBalance
-                    logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
-                }
-                completion(bybitFallbackBalance)
                 return
             }
             
             do {
-                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                    print("Failed to parse Bybit balance JSON")
+                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let result = json["result"] as? [String: Any],
+                      let list = result["list"] as? [[String: Any]],
+                      let unifiedAccount = list.first,
+                      let coinArray = unifiedAccount["coin"] as? [[String: Any]],
+                      let usdtCoin = coinArray.first(where: { ($0["coin"] as? String) == "USDT" }),
+                      let balanceStr = usdtCoin["equity"] as? String,
+                      let balance = Double(balanceStr) else {
+                    print("Failed to parse Bybit balance")
                     Task { @MainActor in
-                        logAlert(event: "Failed to parse Bybit balance JSON")
-                        bybitBalance = bybitFallbackBalance
-                        logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
+                        logAlert(event: "Failed to parse Bybit balance")
                     }
-                    completion(bybitFallbackBalance)
+                    Task { @MainActor in
+                        // FIX: Access fallback balance within MainActor context
+                        let fallbackValue = await MainActor.run { bybitFallbackBalance }
+                        completion(fallbackValue)
+                    }
                     return
                 }
-                
-                // ENHANCED: Better JSON validation and error handling
-                guard let retCode = json["retCode"] as? Int else {
-                    print("Bybit balance response missing retCode")
-                    Task { @MainActor in
-                        logAlert(event: "Bybit balance response missing retCode")
-                        bybitBalance = bybitFallbackBalance
-                        logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
-                    }
-                    completion(bybitFallbackBalance)
-                    return
-                }
-                
-                guard retCode == 0 else {
-                    let retMsg = json["retMsg"] as? String ?? "Unknown error"
-                    print("Bybit balance API error - retCode: \(retCode), retMsg: \(retMsg)")
-                    Task { @MainActor in
-                        logAlert(event: "Bybit balance API error - retCode: \(retCode), retMsg: \(retMsg)")
-                        bybitBalance = bybitFallbackBalance
-                        logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
-                    }
-                    completion(bybitFallbackBalance)
-                    return
-                }
-                
-                guard let result = json["result"] as? [String: Any],
-                      let list = result["list"] as? [[String: Any]] else {
-                    print("Bybit balance response missing result.list")
-                    Task { @MainActor in
-                        logAlert(event: "Bybit balance response missing result.list")
-                        bybitBalance = bybitFallbackBalance
-                        logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
-                    }
-                    completion(bybitFallbackBalance)
-                    return
-                }
-                
-                // ENHANCED: Better balance parsing with validation
-                var totalBalance = 0.0
-                var usdtAccountFound = false
-                
-                for unifiedAccount in list {
-                    if let coinArray = unifiedAccount["coin"] as? [[String: Any]] {
-                        for coin in coinArray {
-                            if let coinName = coin["coin"] as? String,
-                               coinName == "USDT",
-                               let balanceStr = coin["equity"] as? String,
-                               let balance = Double(balanceStr),
-                               balance >= 0 {
-                                totalBalance += balance
-                                usdtAccountFound = true
-                                
-                                let walletBalance = coin["walletBalance"] as? String ?? "0"
-                                print("DEBUG: Found Bybit USDT account - equity: \(balance), wallet: \(walletBalance)")
-                            }
-                        }
-                    }
-                }
-                
-                if !usdtAccountFound {
-                    print("No Bybit USDT accounts found")
-                    Task { @MainActor in
-                        logAlert(event: "No Bybit USDT accounts found")
-                        bybitBalance = bybitFallbackBalance
-                        logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
-                    }
-                    completion(bybitFallbackBalance)
-                    return
-                }
-                
-                // Use fallback if balance is suspiciously low (might indicate API issue)
-                let finalBalance = totalBalance < 1.0 ? bybitFallbackBalance : totalBalance
                 
                 Task { @MainActor in
-                    bybitBalance = finalBalance
-                    print("DEBUG: Fetched Bybit balance: \(finalBalance) USDT (total from API: \(totalBalance))")
-                    if finalBalance != totalBalance {
-                        logAlert(event: "Used Bybit fallback balance due to low API balance: \(totalBalance) -> \(finalBalance)")
-                    }
+                    bybitBalance = balance
+                    print("DEBUG: Fetched Bybit balance: \(balance)")
+                    completion(balance)
                 }
-                completion(finalBalance)
             } catch {
                 print("Failed to parse JSON for Bybit balance: \(error.localizedDescription)")
                 Task { @MainActor in
                     logAlert(event: "Failed to parse JSON for Bybit balance: \(error.localizedDescription)")
-                    bybitBalance = bybitFallbackBalance
-                    logAlert(event: "Using Bybit fallback balance: \(bybitFallbackBalance) USDT")
                 }
-                completion(bybitFallbackBalance)
+                Task { @MainActor in
+                    // FIX: Access fallback balance within MainActor context
+                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
+                    completion(fallbackValue)
+                }
             }
         }.resume()
-    }
-    
-    // ENHANCED: Helper function to evaluate funding rate momentum
-    static func evaluateFundingRateMomentum(pair: String, kucoinFundingRate: Double, bybitFundingRate: Double) async {
-        let rateThreshold = await MainActor.run { fundingMomentumThreshold }
-        let rateDifference = abs(kucoinFundingRate - bybitFundingRate)
-        
-        if rateDifference > rateThreshold {
-            await MainActor.run {
-                logAlert(event: "Funding rate momentum detected for \(pair): KuCoin=\(kucoinFundingRate), Bybit=\(bybitFundingRate), Diff=\(rateDifference)")
-            }
-            
-            // Store funding rate history for analysis
-            await MainActor.run {
-                kucoinFundingRateHistory[pair, default: []].append(kucoinFundingRate)
-                bybitFundingRateHistory[pair, default: []].append(bybitFundingRate)
-                
-                // Keep only recent history
-                if kucoinFundingRateHistory[pair]!.count > 100 {
-                    kucoinFundingRateHistory[pair]?.removeFirst()
-                }
-                if bybitFundingRateHistory[pair]!.count > 100 {
-                    bybitFundingRateHistory[pair]?.removeFirst()
-                }
-            }
-        }
     }
 }
