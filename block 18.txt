@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------------------------------Block 18 - Market Making Operations
 
-
+// VARIABLES TO ADD: (All existing variables are preserved - no new variables needed)
 
 extension ExchangeWebSocket {
     static func monitorHFTScalpingOpportunities() {
