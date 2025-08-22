@@ -1,4 +1,5 @@
 // --------------------------------------------------------- Block 1 - Core Data Structures and Utilities
+// --------------------------------------------------------- Block 1 - Core Data Structures and Utilities
 //--------------- Block 1 - Core Data Structures and Utilities
 // VARIABLES TO ADD: Add isEmpty property to BevaixOrderBook struct
 
@@ -1421,8 +1422,7 @@ func loadEnv() -> [String: String] {
 
 //-------------------------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
 
-//--------------- Block 3 - Order Book and Liquidity Management
-// VARIABLES TO ADD: Fixed isEmpty usage on BevaixOrderBook (now using isEmpty property from Block 1)
+
 
 extension ExchangeWebSocket {
     static func checkLiquidity(exchange: String, pair: String, completion: @escaping @Sendable (Double?) -> Void) {
@@ -4117,6 +4117,7 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
 
 
 //------------------------------------------------------------------------------------------------------------------------Block 10 - Bybit WebSocket Processing
+
 
 extension ExchangeWebSocket {
     @MainActor
@@ -7003,6 +7004,8 @@ extension ExchangeWebSocket {
         return predictedSpread
     }
 }
+
+
 //--------------------------------------------------------------------------------------------------------------Block 16 - Spot-Futures Arbitrage Execution
 
 
@@ -7142,6 +7145,8 @@ extension ExchangeWebSocket {
         }
     }
 }
+
+
 //-------------------------------------------------------------------------------------------------------------------------Block 17 - Cross-Exchange Arbitrage Execution
 
 
@@ -7361,9 +7366,7 @@ extension ExchangeWebSocket {
 
 
 //---------------------------------------------------------------------------------------------------------------Block 18 - Market Making Operations
-//---------------------------------------------------------------------------------------------------------------Block 18 - Market Making Operations
 
-// VARIABLES TO ADD: (All existing variables are preserved - no new variables needed)
 
 extension ExchangeWebSocket {
     static func monitorHFTScalpingOpportunities() {
@@ -8085,10 +8088,7 @@ extension ExchangeWebSocket {
 
 
 //-------------------------------------------------------------------------------------------------------------------------Block 20 - API Data Retrieval and Authentication
-//-------------------------------------------------------------------------------------------------------------------------Block 20 - API Data Retrieval and Authentication
-// VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities: None required - using existing variables
-//-------------------------------------------------------------------------------------------------------------------------Block 20 - API Data Retrieval and Authentication
-// VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities: None required - using existing variables
+
 
 import CryptoKit
 import Foundation
