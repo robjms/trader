@@ -1,403 +1,254 @@
 
+
+
 extension ExchangeWebSocket {
-    static func monitorFundingRateArbitrage() {
+    static func connectKucoinWebSocket(completion: @escaping () -> Void) {
+        guard !kucoinIsConnected else {
+            print("KuCoin WebSocket already connected")
+            completion()
+            return
+        }
+
+        guard let token = kucoinToken else {
+            print("KuCoin WebSocket token not available")
+            Task { @MainActor in
+                logAlert(event: "KuCoin WebSocket token not available")
+            }
+            completion()
+            return
+        }
+
+        let url = URL(string: "wss://ws-api.kucoin.com/endpoint?token=\(token)")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = Double(websocketTimeoutSeconds)
+        kucoinSocket = WebSocket(request: request)
+        
+        kucoinSocket?.onEvent = { event in
+            switch event {
+            case .connected(_):
+                Task { @MainActor in
+                    kucoinIsConnected = true
+                    kucoinReconnectAttempts = 0
+                    print("KuCoin WebSocket connected")
+                    logAlert(event: "KuCoin WebSocket connected")
+                }
+                completion()
+            case .disconnected(let reason, let code):
+                Task { @MainActor in
+                    kucoinIsConnected = false
+                    print("KuCoin WebSocket disconnected: \(reason), code: \(code)")
+                    logAlert(event: "KuCoin WebSocket disconnected: \(reason), code: \(code)")
+                    if kucoinReconnectAttempts < maxReconnectAttempts {
+                        kucoinReconnectAttempts += 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                            connectKucoinWebSocket(completion: completion)
+                        }
+                    }
+                }
+            case .text(let string):
+                do {
+                    guard let json = try JSONSerialization.jsonObject(with: string.data(using: .utf8)!) as? [String: Any],
+                          let type = json["type"] as? String else { return }
+                    
+                    if type == "message", let data = json["data"] as? [String: Any], let topic = json["topic"] as? String {
+                        let components = topic.components(separatedBy: ":")
+                        guard components.count > 1 else { return }
+                        let pair = components[1].replacingOccurrences(of: "USDTM", with: "-USDT")
+                        
+                        if topic.contains("/market/ticker") {
+                            if let priceStr = data["price"] as? String, let price = Double(priceStr) {
+                                Task { @MainActor in
+                                    kucoinCurrentPrice[pair] = price
+                                    kucoinPrices[pair, default: []].append(price)
+                                    if kucoinPrices[pair]!.count > priceHistoryRetention {
+                                        kucoinPrices[pair]!.removeFirst()
+                                    }
+                                    lastPriceUpdate[pair] = (price: price, timestamp: Date())
+                                    print("DEBUG: KuCoin \(pair) price updated: \(price)")
+                                }
+                            }
+                        } else if topic.contains("/market/level2") {
+                            if let dataDict = data["data"] as? [String: Any],
+                               let bids = dataDict["bids"] as? [[String]],
+                               let asks = dataDict["asks"] as? [[String]] {
+                                let bidBook = bids.compactMap { arr -> (price: Double, quantity: Double)? in
+                                    guard let priceStr = arr.first, let qtyStr = arr.last,
+                                          let price = Double(priceStr), let qty = Double(qtyStr) else { return nil }
+                                    return (price: price, quantity: qty)
+                                }
+                                let askBook = asks.compactMap { arr -> (price: Double, quantity: Double)? in
+                                    guard let priceStr = arr.first, let qtyStr = arr.last,
+                                          let price = Double(priceStr), let qty = Double(qtyStr) else { return nil }
+                                    return (price: price, quantity: qty)
+                                }
+                                Task { @MainActor in
+                                    kucoinOrderBooks[pair] = BevaixOrderBook(bids: bidBook, asks: askBook)
+                                    print("DEBUG: Updated KuCoin order book for \(pair): bids=\(bidBook.count), asks=\(askBook.count)")
+                                }
+                            }
+                        }
+                    } else if type == "pong" {
+                        Task { @MainActor in
+                            lastHeartbeat["kucoin"] = Date()
+                        }
+                    }
+                } catch {
+                    print("DEBUG: Failed to parse KuCoin WebSocket message: \(error.localizedDescription)")
+                    Task { @MainActor in
+                        logAlert(event: "Failed to parse KuCoin WebSocket message: \(error.localizedDescription)")
+                    }
+                }
+            case .error(let error):
+                print("KuCoin WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                Task { @MainActor in
+                    logAlert(event: "KuCoin WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                }
+            default:
+                break
+            }
+        }
+        
+        kucoinSocket?.connect()
         Task {
-            await withTaskGroup(of: Void.self) { group in
-                let tradingPairsValue = await MainActor.run(body: { tradingPairs })
-                for pair in tradingPairsValue {
-                    group.addTask { @MainActor @Sendable in
-                        let kucoinFundingRate = kucoinFundingRates[pair] ?? 0.0
-                        let bybitFundingRate = bybitFundingRates[pair] ?? 0.0
-                        let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
-                        let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
-                        let maxFundingRateValue = maxFundingRate
-                        
-                        guard kucoinSpotPrice > 0, bybitSpotPrice > 0 else {
-                            print("DEBUG: Invalid prices for funding rate arbitrage - \(pair): KuCoin=\(kucoinSpotPrice), Bybit=\(bybitSpotPrice)")
-                            return
-                        }
-                        
-                        if kucoinFundingRate > maxFundingRateValue || bybitFundingRate > maxFundingRateValue {
-                            print("DEBUG: Funding rate too high for \(pair): KuCoin=\(kucoinFundingRate), Bybit=\(bybitFundingRate)")
-                            logAlert(event: "Funding rate too high for \(pair): KuCoin=\(kucoinFundingRate), Bybit=\(bybitFundingRate)")
-                            return
-                        }
-                        
-                        let tradeAmount = futuresTradeAmount
-                        let kucoinLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "futures", tradeAmount: tradeAmount, price: kucoinSpotPrice)
-                        let bybitLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "futures", tradeAmount: tradeAmount, price: bybitSpotPrice)
-                        
-                        // Use liquidity variables to validate before proceeding
-                        guard let kucoinLiquidity = kucoinLiquidity, let bybitLiquidity = bybitLiquidity, kucoinLiquidity >= minLiquidityThreshold, bybitLiquidity >= minLiquidityThreshold else {
-                            print("DEBUG: Insufficient liquidity for funding rate arbitrage - \(pair): KuCoin=\(kucoinLiquidity ?? 0.0), Bybit=\(bybitLiquidity ?? 0.0)")
-                            logAlert(event: "Insufficient liquidity for funding rate arbitrage - \(pair): KuCoin=\(kucoinLiquidity ?? 0.0), Bybit=\(bybitLiquidity ?? 0.0)")
-                            return
-                        }
-                        
-                        let kucoinTradeAmount = await dynamicTradeAmount(balance: kucoinBalance, riskPercent: tradeAmountPercentage, volatility: 0.01)
-                        let bybitTradeAmount = await dynamicTradeAmount(balance: bybitBalance, riskPercent: tradeAmountPercentage, volatility: 0.01)
-                        
-                        // Use trade amount variables to validate before proceeding
-                        guard kucoinTradeAmount > 0, bybitTradeAmount > 0 else {
-                            print("DEBUG: Invalid trade amounts for funding rate arbitrage - \(pair): KuCoin=\(kucoinTradeAmount), Bybit=\(bybitTradeAmount)")
-                            logAlert(event: "Invalid trade amounts for funding rate arbitrage - \(pair): KuCoin=\(kucoinTradeAmount), Bybit=\(bybitTradeAmount)")
-                            return
-                        }
-                        
-                        await evaluateFundingRateMomentum(pair: pair, kucoinFundingRate: kucoinFundingRate, bybitFundingRate: bybitFundingRate)
+            try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+            if !kucoinIsConnected {
+                print("KuCoin WebSocket connection timed out")
+                Task { @MainActor in
+                    logAlert(event: "KuCoin WebSocket connection timed out")
+                }
+                kucoinSocket?.disconnect()
+                if kucoinReconnectAttempts < maxReconnectAttempts {
+                    kucoinReconnectAttempts += 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                        connectKucoinWebSocket(completion: completion)
                     }
                 }
             }
-            
-            // Schedule the next check
-            try? await Task.sleep(nanoseconds: UInt64(getDouble("ARBITRAGE_CHECK_INTERVAL_SECONDS", defaultValue: 0.5) * 1_000_000_000))
-            monitorFundingRateArbitrage()
         }
     }
 
-    static func fetchKuCoinWsToken(completion: @escaping @Sendable (String?) -> Void) {
-        let url = URL(string: "https://api.kucoin.com/api/v1/bullet-public")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 10.0)
-        
-        let startTime = Date()
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            let latency = Date().timeIntervalSince(startTime) * 1000
-            Task { @MainActor in
-                lastLatency["kucoin-ws-token"] = latency
-                if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
-                    print("High latency detected for KuCoin WebSocket token fetch: \(latency)ms")
-                    logAlert(event: "High latency detected for KuCoin WebSocket token fetch: \(latency)ms")
-                }
-            }
-            
-            if let error = error {
-                print("Failed to fetch KuCoin WebSocket token: \(error.localizedDescription)")
-                Task { @MainActor in
-                    logAlert(event: "Failed to fetch KuCoin WebSocket token: \(error.localizedDescription)")
-                }
-                completion(nil)
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
-                print("Invalid KuCoin WebSocket token response")
-                Task { @MainActor in
-                    logAlert(event: "Invalid KuCoin WebSocket token response")
-                }
-                completion(nil)
-                return
-            }
-            
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let dataDict = json["data"] as? [String: Any],
-                      let token = dataDict["token"] as? String else {
-                    print("Failed to parse KuCoin WebSocket token")
-                    Task { @MainActor in
-                        logAlert(event: "Failed to parse KuCoin WebSocket token")
-                    }
-                    completion(nil)
-                    return
-                }
-                
-                Task { @MainActor in
-                    kucoinToken = token
-                    print("DEBUG: Fetched KuCoin WebSocket token: \(token)")
-                    kucoinSocket = WebSocket(request: URLRequest(url: URL(string: "wss://ws-api.kucoin.com/endpoint?token=\(token)")!))
-                    kucoinSocket?.delegate = kucoinDelegate
-                    kucoinSocket?.connect()
-                    print("DEBUG: KuCoin WebSocket connected for token: \(token)")
-                }
-                completion(token)
-            } catch {
-                print("Failed to parse JSON for KuCoin WebSocket token: \(error.localizedDescription)")
-                Task { @MainActor in
-                    logAlert(event: "Failed to parse JSON for KuCoin WebSocket token: \(error.localizedDescription)")
-                }
-                completion(nil)
-            }
-        }.resume()
-    }
-
-    static func fetchKucoinFuturesWsToken(completion: @escaping @Sendable (String?) -> Void) {
-        let url = URL(string: "https://api-futures.kucoin.com/api/v1/bullet-public")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.timeoutInterval = getDouble("API_TIMEOUT_SECONDS", defaultValue: 10.0)
-        
-        let startTime = Date()
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            let latency = Date().timeIntervalSince(startTime) * 1000
-            Task { @MainActor in
-                lastLatency["kucoin-futures-ws-token"] = latency
-                if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
-                    print("High latency detected for KuCoin Futures WebSocket token fetch: \(latency)ms")
-                    logAlert(event: "High latency detected for KuCoin Futures WebSocket token fetch: \(latency)ms")
-                }
-            }
-            
-            if let error = error {
-                print("Failed to fetch KuCoin Futures WebSocket token: \(error.localizedDescription)")
-                Task { @MainActor in
-                    logAlert(event: "Failed to fetch KuCoin Futures WebSocket token: \(error.localizedDescription)")
-                }
-                completion(nil)
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
-                print("Invalid KuCoin Futures WebSocket token response")
-                Task { @MainActor in
-                    logAlert(event: "Invalid KuCoin Futures WebSocket token response")
-                }
-                completion(nil)
-                return
-            }
-            
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let dataDict = json["data"] as? [String: Any],
-                      let token = dataDict["token"] as? String else {
-                    print("Failed to parse KuCoin Futures WebSocket token")
-                    Task { @MainActor in
-                        logAlert(event: "Failed to parse KuCoin Futures WebSocket token")
-                    }
-                    completion(nil)
-                    return
-                }
-                
-                Task { @MainActor in
-                    kucoinFuturesToken = token
-                    print("DEBUG: Fetched KuCoin Futures WebSocket token: \(token)")
-                    kucoinFuturesSocket = WebSocket(request: URLRequest(url: URL(string: "wss://ws-api-futures.kucoin.com/endpoint?token=\(token)")!))
-                    kucoinFuturesSocket?.delegate = kucoinFuturesDelegate
-                    kucoinFuturesSocket?.connect()
-                    print("DEBUG: KuCoin Futures WebSocket connected for token: \(token)")
-                }
-                completion(token)
-            } catch {
-                print("Failed to parse JSON for KuCoin Futures WebSocket token: \(error.localizedDescription)")
-                Task { @MainActor in
-                    logAlert(event: "Failed to parse JSON for KuCoin Futures WebSocket token: \(error.localizedDescription)")
-                }
-                completion(nil)
-            }
-        }.resume()
-    }
-
-    static func fetchKucoinBalance(completion: @escaping @Sendable (Double?) -> Void) {
-        guard let apiKey = environment["KUCOIN_API_KEY"],
-              let apiSecret = environment["KUCOIN_API_SECRET"],
-              let apiPassphrase = environment["KUCOIN_API_PASSPHRASE"] else {
-            print("Missing KuCoin API credentials")
-            Task { @MainActor in
-                logAlert(event: "Missing KuCoin API credentials")
-            }
-            Task { @MainActor in
-                // FIX: Access fallback balance within MainActor context
-                let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                completion(fallbackValue)
-            }
+    static func connectBybitWebSocket(completion: @escaping () -> Void) {
+        guard !bybitIsConnected else {
+            print("Bybit WebSocket already connected")
+            completion()
             return
         }
-        
-        let url = URL(string: "https://api.kucoin.com/api/v1/accounts")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.timeoutInterval = getDouble("BALANCE_FETCH_TIMEOUT", defaultValue: 20.0)
-        
-        let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
-        let strToSign = timestamp + "GET" + "/api/v1/accounts"
-        let signature = HMAC<SHA256>.authenticationCode(for: strToSign.data(using: .utf8)!, using: SymmetricKey(data: apiSecret.data(using: .utf8)!)).map { String(format: "%02x", $0) }.joined()
-        let passphrase = HMAC<SHA256>.authenticationCode(for: apiPassphrase.data(using: .utf8)!, using: SymmetricKey(data: apiSecret.data(using: .utf8)!)).map { String(format: "%02x", $0) }.joined()
-        
-        request.addValue(apiKey, forHTTPHeaderField: "KC-API-KEY")
-        request.addValue(timestamp, forHTTPHeaderField: "KC-API-TIMESTAMP")
-        request.addValue(signature, forHTTPHeaderField: "KC-API-SIGN")
-        request.addValue(passphrase, forHTTPHeaderField: "KC-API-PASSPHRASE")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let startTime = Date()
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            let latency = Date().timeIntervalSince(startTime) * 1000
-            Task { @MainActor in
-                lastLatency["kucoin-balance"] = latency
-                if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
-                    print("High latency detected for KuCoin balance fetch: \(latency)ms")
-                    logAlert(event: "High latency detected for KuCoin balance fetch: \(latency)ms")
-                }
-            }
-            
-            if let error = error {
-                print("Failed to fetch KuCoin balance: \(error.localizedDescription)")
-                Task { @MainActor in
-                    logAlert(event: "Failed to fetch KuCoin balance: \(error.localizedDescription)")
-                }
-                Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
-                }
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
-                print("Invalid KuCoin balance response")
-                Task { @MainActor in
-                    logAlert(event: "Invalid KuCoin balance response")
-                }
-                Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
-                }
-                return
-            }
-            
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let dataArray = json["data"] as? [[String: Any]],
-                      let usdtAccount = dataArray.first(where: { ($0["currency"] as? String) == "USDT" }),
-                      let balanceStr = usdtAccount["balance"] as? String,
-                      let balance = Double(balanceStr) else {
-                    print("Failed to parse KuCoin balance")
-                    Task { @MainActor in
-                        logAlert(event: "Failed to parse KuCoin balance")
-                    }
-                    Task { @MainActor in
-                        // FIX: Access fallback balance within MainActor context
-                        let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                        completion(fallbackValue)
-                    }
-                    return
-                }
-                
-                Task { @MainActor in
-                    kucoinBalance = balance
-                    print("DEBUG: Fetched KuCoin balance: \(balance)")
-                    completion(balance)
-                }
-            } catch {
-                print("Failed to parse JSON for KuCoin balance: \(error.localizedDescription)")
-                Task { @MainActor in
-                    logAlert(event: "Failed to parse JSON for KuCoin balance: \(error.localizedDescription)")
-                }
-                Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
-                }
-            }
-        }.resume()
-    }
 
-    static func fetchBybitBalance(completion: @escaping @Sendable (Double?) -> Void) {
-        guard let apiKey = environment["BYBIT_API_KEY"],
-              let apiSecret = environment["BYBIT_API_SECRET"] else {
-            print("Missing Bybit API credentials")
-            Task { @MainActor in
-                logAlert(event: "Missing Bybit API credentials")
+        let url = URL(string: "wss://stream.bybit.com/v5/public/linear")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = Double(websocketTimeoutSeconds)
+        bybitSocket = WebSocket(request: request)
+        
+        bybitSocket?.onEvent = { event in
+            switch event {
+            case .connected(_):
+                Task { @MainActor in
+                    bybitIsConnected = true
+                    bybitReconnectAttempts = 0
+                    print("Bybit WebSocket connected")
+                    logAlert(event: "Bybit WebSocket connected")
+                    let subscribeMessage: [String: Any] = [
+                        "op": "subscribe",
+                        "args": tradingPairs.map { "orderBook_50.\($0.replacingOccurrences(of: "-USDT", with: "USDT"))" } +
+                                tradingPairs.map { "tickers.\($0.replacingOccurrences(of: "-USDT", with: "USDT"))" }
+                    ]
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage)
+                        bybitSocket?.write(data: jsonData)
+                        print("DEBUG: Sent Bybit WebSocket subscription: \(subscribeMessage)")
+                    } catch {
+                        print("DEBUG: Failed to send Bybit WebSocket subscription: \(error.localizedDescription)")
+                        Task { @MainActor in
+                            logAlert(event: "Failed to send Bybit WebSocket subscription: \(error.localizedDescription)")
+                        }
+                    }
+                }
+                completion()
+            case .disconnected(let reason, let code):
+                Task { @MainActor in
+                    bybitIsConnected = false
+                    print("Bybit WebSocket disconnected: \(reason), code: \(code)")
+                    logAlert(event: "Bybit WebSocket disconnected: \(reason), code: \(code)")
+                    if bybitReconnectAttempts < maxReconnectAttempts {
+                        bybitReconnectAttempts += 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                            connectBybitWebSocket(completion: completion)
+                        }
+                    }
+                }
+            case .text(let string):
+                do {
+                    guard let json = try JSONSerialization.jsonObject(with: string.data(using: .utf8)!) as? [String: Any],
+                          let topic = json["topic"] as? String else { return }
+                    
+                    let pair = topic.components(separatedBy: ".").last!.replacingOccurrences(of: "USDT", with: "-USDT")
+                    if topic.contains("orderBook") {
+                        if let data = json["data"] as? [String: Any],
+                           let bids = data["b"] as? [[String]],
+                           let asks = data["a"] as? [[String]] {
+                            let bidBook = bids.compactMap { arr -> (price: Double, quantity: Double)? in
+                                guard let priceStr = arr.first, let qtyStr = arr.last,
+                                      let price = Double(priceStr), let qty = Double(qtyStr) else { return nil }
+                                return (price: price, quantity: qty)
+                            }
+                            let askBook = asks.compactMap { arr -> (price: Double, quantity: Double)? in
+                                guard let priceStr = arr.first, let qtyStr = arr.last,
+                                      let price = Double(priceStr), let qty = Double(qtyStr) else { return nil }
+                                return (price: price, quantity: qty)
+                            }
+                            Task { @MainActor in
+                                bybitOrderBooks[pair] = BevaixOrderBook(bids: bidBook, asks: askBook)
+                                print("DEBUG: Updated Bybit order book for \(pair): bids=\(bidBook.count), asks=\(askBook.count)")
+                            }
+                        }
+                    } else if topic.contains("tickers") {
+                        if let data = json["data"] as? [String: Any],
+                           let priceStr = data["lastPrice"] as? String,
+                           let price = Double(priceStr) {
+                            Task { @MainActor in
+                                bybitCurrentPrice[pair] = price
+                                bybitPrices[pair, default: []].append(price)
+                                if bybitPrices[pair]!.count > priceHistoryRetention {
+                                    bybitPrices[pair]!.removeFirst()
+                                }
+                                lastPriceUpdate[pair] = (price: price, timestamp: Date())
+                                print("DEBUG: Bybit \(pair) price updated: \(price)")
+                            }
+                        }
+                    }
+                } catch {
+                    print("DEBUG: Failed to parse Bybit WebSocket message: \(error.localizedDescription)")
+                    Task { @MainActor in
+                        logAlert(event: "Failed to parse Bybit WebSocket message: \(error.localizedDescription)")
+                    }
+                }
+            case .error(let error):
+                print("Bybit WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                Task { @MainActor in
+                    logAlert(event: "Bybit WebSocket error: \(error?.localizedDescription ?? "Unknown error")")
+                }
+            default:
+                break
             }
-            Task { @MainActor in
-                // FIX: Access fallback balance within MainActor context
-                let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                completion(fallbackValue)
-            }
-            return
         }
         
-        let url = URL(string: "https://api.bybit.com/v5/account/wallet-balance?accountType=UNIFIED")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.timeoutInterval = getDouble("BALANCE_FETCH_TIMEOUT", defaultValue: 20.0)
-        
-        let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
-        let recvWindow = bybitRecvWindow
-        let queryString = "api_key=\(apiKey)×tamp=\(timestamp)&recv_window=\(recvWindow)"
-        let signature = HMAC<SHA256>.authenticationCode(for: queryString.data(using: .utf8)!, using: SymmetricKey(data: apiSecret.data(using: .utf8)!)).map { String(format: "%02x", $0) }.joined()
-        
-        request.addValue(apiKey, forHTTPHeaderField: "X-BAPI-API-KEY")
-        request.addValue(timestamp, forHTTPHeaderField: "X-BAPI-TIMESTAMP")
-        request.addValue(signature, forHTTPHeaderField: "X-BAPI-SIGN")
-        request.addValue(recvWindow, forHTTPHeaderField: "X-BAPI-RECV-WINDOW")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let startTime = Date()
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            let latency = Date().timeIntervalSince(startTime) * 1000
-            Task { @MainActor in
-                lastLatency["bybit-balance"] = latency
-                if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
-                    print("High latency detected for Bybit balance fetch: \(latency)ms")
-                    logAlert(event: "High latency detected for Bybit balance fetch: \(latency)ms")
-                }
-            }
-            
-            if let error = error {
-                print("Failed to fetch Bybit balance: \(error.localizedDescription)")
+        bybitSocket?.connect()
+        Task {
+            try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+            if !bybitIsConnected {
+                print("Bybit WebSocket connection timed out")
                 Task { @MainActor in
-                    logAlert(event: "Failed to fetch Bybit balance: \(error.localizedDescription)")
+                    logAlert(event: "Bybit WebSocket connection timed out")
                 }
-                Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
-                }
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
-                print("Invalid Bybit balance response")
-                Task { @MainActor in
-                    logAlert(event: "Invalid Bybit balance response")
-                }
-                Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
-                }
-                return
-            }
-            
-            do {
-                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let result = json["result"] as? [String: Any],
-                      let list = result["list"] as? [[String: Any]],
-                      let unifiedAccount = list.first,
-                      let coinArray = unifiedAccount["coin"] as? [[String: Any]],
-                      let usdtCoin = coinArray.first(where: { ($0["coin"] as? String) == "USDT" }),
-                      let balanceStr = usdtCoin["equity"] as? String,
-                      let balance = Double(balanceStr) else {
-                    print("Failed to parse Bybit balance")
-                    Task { @MainActor in
-                        logAlert(event: "Failed to parse Bybit balance")
+                bybitSocket?.disconnect()
+                if bybitReconnectAttempts < maxReconnectAttempts {
+                    bybitReconnectAttempts += 1
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                        connectBybitWebSocket(completion: completion)
                     }
-                    Task { @MainActor in
-                        // FIX: Access fallback balance within MainActor context
-                        let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                        completion(fallbackValue)
-                    }
-                    return
-                }
-                
-                Task { @MainActor in
-                    bybitBalance = balance
-                    print("DEBUG: Fetched Bybit balance: \(balance)")
-                    completion(balance)
-                }
-            } catch {
-                print("Failed to parse JSON for Bybit balance: \(error.localizedDescription)")
-                Task { @MainActor in
-                    logAlert(event: "Failed to parse JSON for Bybit balance: \(error.localizedDescription)")
-                }
-                Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
                 }
             }
-        }.resume()
+        }
     }
 }
+
