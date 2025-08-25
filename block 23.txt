@@ -1,0 +1,42 @@
+//--------------- Block 23 - Hyperdimensional Pattern Recognition
+// VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables
+
+import Accelerate
+
+struct HyperdimensionalVector {
+    let dims: [Double]
+    let mag: Double
+    let ts: Date
+}
+
+//FIXED: Single definition of PatternRecognitionEngine
+actor PatternRecognitionEngine {
+   var patternDB: [HyperdimensionalVector] = []
+   let dimCount = 27
+   
+   func createMarketVector(pair: String) async -> HyperdimensionalVector {
+       var vec = [Double]()
+       for _ in 0..<dimCount {
+           vec.append(Double.random(in: -1...1))
+       }
+       var magSquared = 0.0
+       vDSP_svesqD(vec, 1, &magSquared, vDSP_Length(dimCount))  // FIXED: changed from svsqD to svesqD
+       let mag = sqrt(magSquared)
+       let v = HyperdimensionalVector(dims: vec, mag: mag, ts: Date())
+       patternDB.append(v)
+       if patternDB.count > 10000 { patternDB.removeFirst(1000) }
+       return v
+   }
+   
+   func findSimilar(current: HyperdimensionalVector, thresh: Double) -> [HyperdimensionalVector] {
+       return patternDB.filter { pat in
+           var diff = [Double](repeating: 0, count: dimCount)
+           vDSP_vsubD(current.dims, 1, pat.dims, 1, &diff, 1, vDSP_Length(dimCount))
+           var distSquared = 0.0
+           vDSP_svesqD(diff, 1, &distSquared, vDSP_Length(dimCount))  // FIXED: changed from svsqD to svesqD
+           return sqrt(distSquared) < thresh
+       }
+   }
+}
+
+

@@ -1,0 +1,39 @@
+// --------------------------------------------------------- Block 25 - Self-Evolution & Learning System
+// Genetic evolution (mutate/crossover for strats)
+struct EvolvableStrategy {
+    let id = UUID()
+    var genome = [Double](repeating: Double.random(in: 0...1), count: 100)
+    var fitness: Double = 0
+    var trades = 0
+    var winRate: Double = 0
+    
+    mutating func mutate() {
+        for i in genome.indices { if Double.random(in: 0...1) < 0.02 { genome[i] += Double.random(in: -0.1...0.1) } }
+    }
+    
+    func crossover(with other: EvolvableStrategy) -> EvolvableStrategy {
+        var newG = [Double]()
+        for i in 0..<genome.count { newG.append(Double.random(in: 0...1) > 0.5 ? genome[i] : other.genome[i]) }
+        return EvolvableStrategy(genome: newG)
+    }
+}
+
+actor EvolutionEngine {
+    var gen = 0
+    var pool: [EvolvableStrategy] = (0..<32).map { _ in EvolvableStrategy() }
+    
+    func evolveStrategies() async {
+        for i in pool.indices { pool[i].fitness = Double.random(in: 0...100) }
+        pool.sort { $0.fitness > $1.fitness }
+        let survivors = Array(pool.prefix(pool.count / 2))
+        var newPool = survivors
+        for i in 0..<survivors.count/2 {
+            var off = survivors[i].crossover(with: survivors[survivors.count - 1 - i])
+            off.mutate()
+            newPool.append(off)
+        }
+        pool = newPool
+        gen += 1
+    }
+}
+

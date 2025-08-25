@@ -1,0 +1,128 @@
+//--------------- Block 21 - Quantum Consciousness Engine
+// VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables
+
+import Accelerate
+
+// FIXED: Single definition of TemporalPrediction (resolves ambiguity)
+struct TemporalPrediction {
+    let predPrice: Double
+    let conf: Double
+    let horizon: TimeInterval
+    let prob: Double
+    let timestamp: Date
+    
+    init(predPrice: Double = 1.0, conf: Double = 0.5, horizon: TimeInterval = 300, prob: Double = 0.5) {
+        self.predPrice = predPrice
+        self.conf = conf
+        self.horizon = horizon
+        self.prob = prob
+        self.timestamp = Date()
+    }
+}
+
+struct QuantumState {
+    let superposition: [[Double]]
+    let entanglement: [String: Double]
+    let collapseProb: Double
+    let timestamp: Date
+}
+
+struct HyperdimensionalVector {
+    let dims: [Double]
+    let mag: Double
+    let ts: Date
+}
+
+enum AgentType: String, CaseIterable {
+    case microArbitrage, chaosHarvester, whalePredictor, liquidityVampire, voidExploiter, temporalOracle, patternArcheologist, sentimentWeaver, entropyMaximizer, fractalHunter, narrativeShaper, riskAlchemist, momentumSurfer, reversionHunter, arbitragePhantom, pumpDetector, dumpFader, flowTracker, volumePhantom, orderSpoofer, latencyWarrior, fundingRider, slippageSniper, correlationBreaker, volatilityVortex, regimeShifter, blackSwanGuardian, tailRiskTamer, kurtosisKnight, skewSentinel, hurstHunter, infoEntropyEater
+}
+
+// FIXED: Single definition of QuantumProcessor
+actor QuantumProcessor {
+    var quantumStates: [String: [QuantumState]] = [:]
+    var entanglementMatrix: [[Double]] = Array(repeating: Array(repeating: 0.0, count: 27), count: 27)
+    let stateCount = 1024
+    
+    func processQuantumState(pair: String) async -> QuantumState {
+        var superposition: [[Double]] = []
+        for _ in 0..<stateCount {
+            var path = [Double]()
+            for _ in 0..<27 {
+                path.append(Double.random(in: -0.01...0.01))
+            }
+            superposition.append(path)
+        }
+        let entanglement = await calculateEntanglement(pair: pair)
+        var means = [Double](repeating: 0, count: 27)
+        for i in 0..<27 {
+            let col = superposition.map { $0[i] }
+            means[i] = vDSP.mean(col)  // FIXED: changed from meanvD to mean
+        }
+        let collapseProb = means.reduce(0, +) / Double(27)
+        let state = QuantumState(superposition: superposition, entanglement: entanglement, collapseProb: collapseProb, timestamp: Date())
+        quantumStates[pair, default: []].append(state)
+        if quantumStates[pair]!.count > 100 { quantumStates[pair]!.removeFirst() }
+        return state
+    }
+    
+    func calculateEntanglement(pair: String) async -> [String: Double] {
+        let pairs = await MainActor.run { ExchangeWebSocket.tradingPairs }
+        var ent: [String: Double] = [:]
+        for other in pairs where other != pair {
+            var vec1 = [Double]()
+            var vec2 = [Double]()
+            for _ in 0..<27 {
+                vec1.append(Double.random(in: 0...1))
+                vec2.append(Double.random(in: 0...1))
+            }
+            var corr = 0.0
+            vDSP_dotprD(vec1, 1, vec2, 1, &corr, vDSP_Length(27))
+            ent[other] = corr / Double(27)
+        }
+        return ent
+    }
+}
+
+class NeuralAgent {
+    let id = UUID()
+    let type: AgentType
+    var dna = [Float](repeating: Float.random(in: 0...1), count: 100)
+    var perf: Double = 0
+    var gen: Int = 0
+    var weights: [Float] = []
+    var bias: Float = 0
+    
+    init(type: AgentType) {
+        self.type = type
+        setupNN()
+    }
+    
+    func setupNN() {
+        // FIXED: Simplified neural network without deprecated BNNS APIs
+        weights = Array(dna[0..<27])
+        bias = dna[27]
+    }
+    
+    func execute(market: [Float]) -> Float? {
+        guard market.count == 27, weights.count == 27 else { return nil }
+        
+        // FIXED: Simple dot product + bias activation using vDSP
+        var dotProduct: Float = 0
+        vDSP_dotpr(market, 1, weights, 1, &dotProduct, vDSP_Length(27))
+        let output = dotProduct + bias
+        
+        // Apply activation function (tanh)
+        return tanh(output)
+    }
+    
+    func evolve() {
+        for i in dna.indices {
+            if Float.random(in: 0...1) < 0.02 {
+                dna[i] += Float.random(in: -0.1...0.1)
+            }
+        }
+        gen += 1
+        setupNN()
+    }
+}
+

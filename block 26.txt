@@ -1,0 +1,73 @@
+// --------------------------------------------------------- Block 26 - Integrated AI Trading Loop
+
+//--------------- Block 26 - AI Trading Orchestrator
+// VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables
+
+// FIXED: Single definition of TemporalOracle
+actor TemporalOracle {
+    func predictFuture(pair: String) async -> [TemporalPrediction] {
+        let prediction = TemporalPrediction(
+            predPrice: Double.random(in: 0.8...1.2),
+            conf: Double.random(in: 0.5...1.0),
+            horizon: 300,
+            prob: Double.random(in: 0.4...0.9)
+        )
+        return [prediction]
+    }
+}
+
+// FIXED: Single definition of EvolutionEngine
+class EvolutionEngine {
+    var pool: [Strategy] = []
+    var generation: Int = 0
+    
+    struct Strategy {
+        let id = UUID()
+        var fitness: Double = 1.0
+        var parameters: [String: Double] = [:]
+    }
+    
+    func evolveStrategies() async {
+        generation += 1
+        for i in pool.indices {
+            pool[i].fitness *= Double.random(in: 0.95...1.05)
+        }
+    }
+}
+
+actor AITradingOrchestrator {
+    func startAITrading() async {
+        while await MainActor.run(body: { ExchangeWebSocket.tradingActive }) {
+            do {
+                // FIXED: Added await for async calls and proper optional handling
+                let q = await ExchangeWebSocket.quantumProcessor?.processQuantumState(pair: "BTC-USDT") ?? QuantumState(superposition: [], entanglement: [:], collapseProb: 0, timestamp: Date())
+                let p = await ExchangeWebSocket.patternEngine?.createMarketVector(pair: "BTC-USDT") ?? HyperdimensionalVector(dims: [], mag: 0, ts: Date())
+                let t = await ExchangeWebSocket.temporalOracle?.predictFuture(pair: "BTC-USDT") ?? []
+                let s = await ExchangeWebSocket.neuralSwarm?.executeSwarm(market: p.dims.map { Float($0) }) ?? []
+                
+                let a = q.collapseProb
+                let b = p.mag
+                let c = t.first?.conf ?? 0
+                let d = s.reduce(0, +) / Float(max(s.count, 1))
+                let fused = (a + b + c + Double(d)) / 4
+                
+                if fused > 0.8 {
+                    print("AI Execute: Conf \(fused)")
+                }
+                
+                try await Task.sleep(nanoseconds: 50_000_000)
+                
+                if Date().timeIntervalSinceNow > -3600 {
+                    await ExchangeWebSocket.evolutionEngine?.evolveStrategies()  // FIXED: Added await
+                }
+            } catch {
+                print("AI Trading Loop Error: \(error)")
+                await MainActor.run {
+                    logAlert(event: "AI Trading Loop Error: \(error)")
+                }
+            }
+        }
+    }
+}
+
+  

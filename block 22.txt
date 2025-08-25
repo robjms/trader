@@ -1,0 +1,69 @@
+// --------------------------------------------------------- Block 22 - Neural Agent Swarm System (Fixed)
+//--------------- Block 22 - Neural Agent Swarm System
+// VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables
+
+import Accelerate
+
+enum AgentType: String, CaseIterable {
+    case microArbitrage, chaosHarvester, whalePredictor, liquidityVampire, voidExploiter, temporalOracle, patternArcheologist, sentimentWeaver, entropyMaximizer, fractalHunter, narrativeShaper, riskAlchemist, momentumSurfer, reversionHunter, arbitragePhantom, pumpDetector, dumpFader, flowTracker, volumePhantom, orderSpoofer, latencyWarrior, fundingRider, slippageSniper, correlationBreaker, volatilityVortex, regimeShifter, blackSwanGuardian, tailRiskTamer, kurtosisKnight, skewSentinel, hurstHunter, infoEntropyEater
+}
+
+class NeuralAgent {
+    let id = UUID()
+    let type: AgentType
+    var dna = [Float](repeating: Float.random(in: 0...1), count: 100)
+    var perf: Double = 0
+    var gen: Int = 0
+    var weights: [Float] = []
+    var bias: Float = 0
+    
+    init(type: AgentType) {
+        self.type = type
+        setupNN()
+    }
+    
+    func setupNN() {
+        // FIXED: Simplified neural network without deprecated BNNS APIs
+        weights = Array(dna[0..<27])
+        bias = dna[27]
+    }
+    
+    func execute(market: [Float]) -> Float? {
+        guard market.count == 27, weights.count == 27 else { return nil }
+        
+        // FIXED: Simple dot product + bias activation using vDSP
+        var dotProduct: Float = 0
+        vDSP_dotpr(market, 1, weights, 1, &dotProduct, vDSP_Length(27))
+        let output = dotProduct + bias
+        
+        // Apply activation function (tanh)
+        return tanh(output)
+    }
+    
+    func evolve() {
+        for i in dna.indices {
+            if Float.random(in: 0...1) < 0.02 {
+                dna[i] += Float.random(in: -0.1...0.1)
+            }
+        }
+        gen += 1
+        setupNN()
+    }
+}
+
+actor NeuralSwarmCoordinator {
+    var agents: [NeuralAgent] = AgentType.allCases.map { NeuralAgent(type: $0) }
+    
+    func executeSwarm(market: [Float]) async -> [Float] {
+        return await withTaskGroup(of: Float?.self) { group in
+            for agent in agents {
+                group.addTask { agent.execute(market: market) }
+            }
+            var results: [Float] = []
+            for await res in group {
+                if let r = res { results.append(r) }
+            }
+            return results
+        }
+    }
+}
