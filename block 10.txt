@@ -1,6 +1,4 @@
 
-//------------------------------------------------------------------------------------------------------------------------Block 10 - Bybit WebSocket Processing
-
 extension ExchangeWebSocket {
     @MainActor
     static var kucoinDailyLoss: Double = 0.0
@@ -712,4 +710,3 @@ extension ExchangeWebSocket {
         }
     }
 }
-
