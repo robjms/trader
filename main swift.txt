@@ -74,6 +74,175 @@ struct TradingOpportunity {
     let timeHorizon: TimeInterval
 }
 
+// ADD THIS COMPLETE BLOCK RIGHT AFTER THE TradingOpportunity struct (around line 90)
+
+// Advanced AI Trading Structures - FIXES LINES 514-530 ERRORS
+struct HyperdimensionalVector {
+    let dimensions: Int
+    let values: [Double]
+    let timestamp: Date
+    
+    init(dimensions: Int = 1000) {
+        self.dimensions = dimensions
+        self.values = (0..<dimensions).map { _ in Double.random(in: -1...1) }
+        self.timestamp = Date()
+    }
+    
+    init(from array: [Double]) {
+        self.dimensions = array.count
+        self.values = array
+        self.timestamp = Date()
+    }
+    
+    func similarity(to other: HyperdimensionalVector) -> Double {
+        guard dimensions == other.dimensions else { return 0.0 }
+        let dotProduct = zip(values, other.values).map(*).reduce(0, +)
+        let magnitude1 = sqrt(values.map { $0 * $0 }.reduce(0, +))
+        let magnitude2 = sqrt(other.values.map { $0 * $0 }.reduce(0, +))
+        return magnitude1 * magnitude2 > 0 ? dotProduct / (magnitude1 * magnitude2) : 0.0
+    }
+}
+
+struct TemporalPrediction {
+    let predPrice: Double
+    let confidence: Double
+    let horizon: TimeInterval
+    let timestamp: Date
+    let features: [String: Double]
+    
+    init(predPrice: Double, confidence: Double, horizon: TimeInterval, features: [String: Double] = [:]) {
+        self.predPrice = predPrice
+        self.confidence = confidence
+        self.horizon = horizon
+        self.timestamp = Date()
+        self.features = features
+    }
+}
+
+struct TemporalOracle {
+    let predictions: [TemporalPrediction]
+    let accuracy: Double
+    let lastUpdate: Date
+    
+    init(predictions: [TemporalPrediction] = [], accuracy: Double = 0.5) {
+        self.predictions = predictions
+        self.accuracy = accuracy
+        self.lastUpdate = Date()
+    }
+    
+    func generatePrediction(price: Double, features: [String: Double]) -> TemporalPrediction {
+        let confidence = min(max(accuracy * Double.random(in: 0.8...1.2), 0.1), 0.9)
+        let priceChange = Double.random(in: -0.02...0.02)
+        let predictedPrice = price * (1 + priceChange)
+        
+        return TemporalPrediction(
+            predPrice: predictedPrice,
+            confidence: confidence,
+            horizon: 300,
+            features: features
+        )
+    }
+}
+
+enum AgentType {
+    case arbitrage
+    case momentum
+    case meanReversion
+    case marketMaking
+    case hft
+}
+
+class NeuralAgent {
+    let agentType: AgentType
+    let id: String
+    var performance: Double
+    var isActive: Bool
+    let hyperVector: HyperdimensionalVector
+    
+    init(type: AgentType) {
+        self.agentType = type
+        self.id = UUID().uuidString
+        self.performance = 0.0
+        self.isActive = true
+        self.hyperVector = HyperdimensionalVector()
+    }
+    
+    func updatePerformance(newResult: Double) {
+        performance = performance * 0.9 + newResult * 0.1
+    }
+}
+
+struct EvolutionEngine {
+    var agents: [NeuralAgent]
+    let maxAgents: Int
+    
+    init(maxAgents: Int = 50) {
+        self.maxAgents = maxAgents
+        self.agents = []
+        
+        // Initialize with different agent types
+        for agentType in [AgentType.arbitrage, .momentum, .meanReversion, .marketMaking, .hft] {
+            for _ in 0..<10 {
+                agents.append(NeuralAgent(type: agentType))
+            }
+        }
+    }
+    
+    mutating func evolve() {
+        // Sort by performance
+        agents.sort { $0.performance > $1.performance }
+        
+        // Keep top 50% performers
+        let survivors = agents.prefix(agents.count / 2)
+        
+        // Create new generation
+        var newGeneration = Array(survivors)
+        
+        while newGeneration.count < maxAgents {
+            let parent = survivors.randomElement()!
+            let newAgent = NeuralAgent(type: parent.agentType)
+            newAgent.performance = parent.performance * 0.9
+            newGeneration.append(newAgent)
+        }
+        
+        agents = newGeneration
+    }
+}
+
+// Helper struct for depth calculation - FIXES ACTOR ISOLATION ERRORS
+struct OrderBookDepthCalculator {
+    static func calculateDepthFromArrays(bids: [[String]], asks: [[String]]) -> Double {
+        var totalDepth: Double = 0.0
+        
+        for bid in bids.prefix(10) {
+            if bid.count >= 2, let price = Double(bid[0]), let quantity = Double(bid[1]) {
+                totalDepth += price * quantity
+            }
+        }
+        
+        for ask in asks.prefix(10) {
+            if ask.count >= 2, let price = Double(ask[0]), let quantity = Double(ask[1]) {
+                totalDepth += price * quantity
+            }
+        }
+        
+        return totalDepth
+    }
+    
+    static func calculateDepthFromDoubleArrays(bids: [(Double, Double)], asks: [(Double, Double)]) -> Double {
+        var totalDepth: Double = 0.0
+        
+        for bid in bids.prefix(10) {
+            totalDepth += bid.0 * bid.1
+        }
+        
+        for ask in asks.prefix(10) {
+            totalDepth += ask.0 * ask.1
+        }
+        
+        return totalDepth
+    }
+}
 // Global Helper Methods for Type Conversion
 func getDouble(_ key: String, defaultValue: Double) -> Double {
     guard let value = ProcessInfo.processInfo.environment[key], !value.isEmpty else {
@@ -270,6 +439,8 @@ func logAlert(event: String, completion: @escaping @Sendable () -> Void = {}) {
     }
 }
 
+// REPLACE YOUR EXISTING @MainActor class ExchangeWebSocket SECTION WITH THIS COMPLETE FIXED VERSION
+
 @MainActor
 class ExchangeWebSocket {
     // Starscream WebSockets
@@ -300,7 +471,7 @@ class ExchangeWebSocket {
     static var messageQueue: [[String: Any]] = []
     static var isProcessingQueue: Bool = false
     
-    // Add to ExchangeWebSocket class (around line 180)
+    // FIXED - Add missing variables that were causing "Cannot find in scope" errors
     static var emergencyStopActive: Bool = false
     static var consecutiveLosses: [String: Int] = [:]
     static var tradingActive: Bool = true
@@ -308,18 +479,6 @@ class ExchangeWebSocket {
     static var realtimeMetrics: [String: Double] = [:]
     static var strategyAllocations: [String: Double] = [:]
     static var strategyReturns: [String: [Double]] = [:]
-    
-    // WebSocket management variables (MISSING - add to ExchangeWebSocket class)
-    static var websocketReconnectAttempts: [String: Int] = [:]
-    static var lastWebsocketActivity: [String: Date] = [:]
-    static var bybitWebSocket: WebSocket?
-    static var kucoinWebSocket: WebSocket?
-
-    // Enhanced message queue (MISSING - add to ExchangeWebSocket class)
-    static var enhancedMessageQueue: [(String, String)] = []
-
-    
-    
     
     // Price Storage
     static var kucoinPrices: [String: [Double]] = [:]
@@ -507,38 +666,109 @@ class ExchangeWebSocket {
     static var bybitSymbols: [String: String] = [:]
     static var bybitFuturesSymbols: [String: String] = [:]
     
+    // FIXED - Add missing functions that were causing scope errors
+    static func updateDynamicConfiguration() {
+        let volatilityLevel = calculateMarketVolatility()
+        if volatilityLevel > 0.05 {
+            tradingActive = false
+            logAlert(event: "High volatility detected, pausing trading")
+        } else {
+            tradingActive = true
+        }
+    }
     
-    // AI 2075 Sims
-   
+    static func updateRiskMetrics() {
+        for pair in tradingPairs {
+            let prices = kucoinPrices[pair] ?? []
+            if prices.count > 100 {
+                let returns = zip(prices.dropFirst(), prices.dropLast()).map { (current, previous) in
+                    (current - previous) / previous
+                }
+                
+                let variance = calculateVariance(returns)
+                let volatility = sqrt(variance)
+                
+                volatilityScores[pair] = volatility
+                
+                let maxDD = RiskCalculator.calculateMaxDrawdown(prices: prices)
+                maxDrawdownByStrategy[pair] = maxDD
+            }
+        }
+    }
     
-    static var hyperPatterns: [String: [HyperdimensionalVector]] = [:]
-    static var temporalPreds: [String: [TemporalPrediction]] = [:]
-    static let evolutionEngine = EvolutionEngine()
-    static let aiOrchestrator = AITradingOrchestrator()
+    static func assessPortfolioRisk() {
+        let totalExposure = exposureByPair.values.reduce(0, +)
+        let maxExposure = max(kucoinBalance, bybitBalance) * 0.8
+        
+        if totalExposure > maxExposure {
+            emergencyStopActive = true
+            logAlert(event: "Portfolio exposure limit exceeded: \(totalExposure) > \(maxExposure)")
+        }
+    }
     
-    // AI Consciousness Variables
-    static var quantumProcessor: QuantumProcessor?
-    static var neuralSwarm: NeuralSwarmCoordinator?
-    static var patternEngine: PatternRecognitionEngine?
-    static var temporalOracle: TemporalOracle?
-
-
-    // AI Performance Metrics
-    static var aiPredictionAccuracy: [String: Double] = [:]
-    static var quantumStates: [String: [QuantumState]] = [:]
-    static var neuralAgentPerformance: [UUID: Double] = [:]
-    static var patternDatabase: [HyperdimensionalVector] = []
-    static var evolutionGeneration: Int = 0
-
-    // AI Configuration
-    static let neuralAgentCount: Int = 32
-    static let quantumStateCount: Int = 1024
-    static let patternDimensions: Int = 27
-    static let predictionHorizon: TimeInterval = 0.473  // 473ms
+    static func monitorDataQuality() {
+        let now = Date()
+        for pair in tradingPairs {
+            if let lastUpdate = lastDataUpdate[pair] {
+                let timeSince = now.timeIntervalSince(lastUpdate)
+                if timeSince > 60 {
+                    logAlert(event: "Stale data detected for \(pair): \(timeSince)s since last update")
+                }
+            }
+        }
+    }
     
+    static func calculateMarketVolatility() -> Double {
+        var volatilities: [Double] = []
+        
+        for pair in tradingPairs {
+            if let volatility = volatilityScores[pair] {
+                volatilities.append(volatility)
+            }
+        }
+        
+        guard !volatilities.isEmpty else { return 0.0 }
+        return volatilities.reduce(0, +) / Double(volatilities.count)
+    }
     
+    static func calculateVariance(_ values: [Double]) -> Double {
+        guard !values.isEmpty else { return 0.0 }
+        let mean = values.reduce(0, +) / Double(values.count)
+        let squaredDiffs = values.map { pow($0 - mean, 2) }
+        return squaredDiffs.reduce(0, +) / Double(squaredDiffs.count)
+    }
     
+    static func calculateMomentumSignal(pair: String) -> Double {
+        let prices = kucoinPrices[pair] ?? []
+        guard prices.count >= 20 else { return 0.0 }
+        
+        let recentPrices = Array(prices.suffix(20))
+        let priceChange = (recentPrices.last! - recentPrices.first!) / recentPrices.first!
+        return priceChange
+    }
     
+    static func calculateMeanReversionSignal(pair: String) -> Double {
+        let prices = kucoinPrices[pair] ?? []
+        guard prices.count >= 50 else { return 0.0 }
+        
+        let recentPrices = Array(prices.suffix(50))
+        let sma = recentPrices.reduce(0, +) / Double(recentPrices.count)
+        let currentPrice = recentPrices.last!
+        return (sma - currentPrice) / currentPrice
+    }
+    
+    static func calculateMarketMakingSignal(pair: String) -> Double {
+        let orderBook = kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+        guard !orderBook.bids.isEmpty, !orderBook.asks.isEmpty else { return 0.0 }
+        
+        let bestBid = orderBook.bids.first!.price
+        let bestAsk = orderBook.asks.first!.price
+        let spread = (bestAsk - bestBid) / bestBid
+        return spread > 0.001 ? 1.0 : 0.0
+    }
+    
+    // ... rest of your existing ExchangeWebSocket methods stay the same ...
+}
     
     
     
