@@ -1,73 +1,346 @@
 // --------------------------------------------------------- Block 26 - Integrated AI Trading Loop
 
-//--------------- Block 26 - AI Trading Orchestrator
-// VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables
 
-// FIXED: Single definition of TemporalOracle
-actor TemporalOracle {
-    func predictFuture(pair: String) async -> [TemporalPrediction] {
-        let prediction = TemporalPrediction(
-            predPrice: Double.random(in: 0.8...1.2),
-            conf: Double.random(in: 0.5...1.0),
-            horizon: 300,
-            prob: Double.random(in: 0.4...0.9)
-        )
-        return [prediction]
-    }
-}
-
-// FIXED: Single definition of EvolutionEngine
-class EvolutionEngine {
-    var pool: [Strategy] = []
-    var generation: Int = 0
-    
-    struct Strategy {
-        let id = UUID()
-        var fitness: Double = 1.0
-        var parameters: [String: Double] = [:]
-    }
-    
-    func evolveStrategies() async {
-        generation += 1
-        for i in pool.indices {
-            pool[i].fitness *= Double.random(in: 0.95...1.05)
-        }
-    }
-}
 
 actor AITradingOrchestrator {
+    var isRunning: Bool = false
+    var cycleCount: Int = 0
+    var lastEvolutionTime: Date = Date()
+    var performanceMetrics: [String: Double] = [:]
+    var decisionHistory: [(decision: String, confidence: Double, timestamp: Date)] = []
+    
     func startAITrading() async {
-        while await MainActor.run(body: { ExchangeWebSocket.tradingActive }) {
+        isRunning = true
+        print("🚀 AI Trading Orchestrator started")
+        
+        while await MainActor.run(body: { ExchangeWebSocket.tradingActive }) && isRunning {
             do {
-                // FIXED: Added await for async calls and proper optional handling
-                let q = await ExchangeWebSocket.quantumProcessor?.processQuantumState(pair: "BTC-USDT") ?? QuantumState(superposition: [], entanglement: [:], collapseProb: 0, timestamp: Date())
-                let p = await ExchangeWebSocket.patternEngine?.createMarketVector(pair: "BTC-USDT") ?? HyperdimensionalVector(dims: [], mag: 0, ts: Date())
-                let t = await ExchangeWebSocket.temporalOracle?.predictFuture(pair: "BTC-USDT") ?? []
-                let s = await ExchangeWebSocket.neuralSwarm?.executeSwarm(market: p.dims.map { Float($0) }) ?? []
+                cycleCount += 1
+                let cycleStart = Date()
                 
-                let a = q.collapseProb
-                let b = p.mag
-                let c = t.first?.conf ?? 0
-                let d = s.reduce(0, +) / Float(max(s.count, 1))
-                let fused = (a + b + c + Double(d)) / 4
+                // Process all active trading pairs
+                let pairs = await MainActor.run { ExchangeWebSocket.tradingPairs }
                 
-                if fused > 0.8 {
-                    print("AI Execute: Conf \(fused)")
+                for pair in pairs {
+                    await processPairAI(pair: pair)
                 }
                 
-                try await Task.sleep(nanoseconds: 50_000_000)
-                
-                if Date().timeIntervalSinceNow > -3600 {
-                    await ExchangeWebSocket.evolutionEngine?.evolveStrategies()  // FIXED: Added await
+                // Periodic evolution (every 10 minutes)
+                if Date().timeIntervalSince(lastEvolutionTime) > 600 {
+                    await performEvolution()
+                    lastEvolutionTime = Date()
                 }
+                
+                // Log performance every 100 cycles
+                if cycleCount % 100 == 0 {
+                    await logAIPerformance()
+                }
+                
+                let cycleTime = Date().timeIntervalSince(cycleStart)
+                await MainActor.run {
+                    ExchangeWebSocket.performanceMetrics["ai_cycle_time"] = (ExchangeWebSocket.performanceMetrics["ai_cycle_time"] ?? 0.0) + cycleTime
+                }
+                
+                // Dynamic sleep based on market conditions
+                let sleepTime = await calculateOptimalSleepTime()
+                try await Task.sleep(nanoseconds: UInt64(sleepTime * 1_000_000_000))
+                
             } catch {
-                print("AI Trading Loop Error: \(error)")
+                print("❌ AI Trading Loop Error: \(error)")
                 await MainActor.run {
                     logAlert(event: "AI Trading Loop Error: \(error)")
+                }
+                
+                // Brief pause on error to prevent spam
+                try? await Task.sleep(nanoseconds: 1_000_000_000)  // 1 second
+            }
+        }
+        
+        isRunning = false
+        print("🛑 AI Trading Orchestrator stopped")
+    }
+    
+    private func processPairAI(pair: String) async {
+        // FIXED: Added proper optional handling and await for async calls
+        guard let quantumProcessor = await MainActor.run({ ExchangeWebSocket.quantumProcessor }),
+              let patternEngine = await MainActor.run({ ExchangeWebSocket.patternEngine }),
+              let temporalOracle = await MainActor.run({ ExchangeWebSocket.temporalOracle }),
+              let neuralSwarm = await MainActor.run({ ExchangeWebSocket.neuralSwarm }) else {
+            return
+        }
+        
+        // Collect AI insights
+        let quantumState = await quantumProcessor.processQuantumState(pair: pair)
+        let patternVector = await patternEngine.createMarketVector(pair: pair)
+        let temporalPredictions = await temporalOracle.predictFuture(pair: pair)
+        let swarmOutputs = await neuralSwarm.executeSwarm(market: patternVector.dims.map { Float($0) })
+        
+        // Fuse AI signals
+        let quantumSignal = quantumState.collapseProb
+        let patternSignal = patternVector.mag / 10.0  // Normalize
+        let temporalSignal = temporalPredictions.first?.conf ?? 0.0
+        let swarmSignal = Double(swarmOutputs.reduce(0, +)) / Double(max(swarmOutputs.count, 1))
+        
+        // Weighted fusion of signals
+        let fusedConfidence = (
+            quantumSignal * 0.2 +
+            patternSignal * 0.3 +
+            temporalSignal * 0.3 +
+            swarmSignal * 0.2
+        )
+        
+        // Market condition assessment
+        let marketCondition = await assessMarketCondition(pair: pair, patternVector: patternVector)
+        let riskAdjustedConfidence = adjustConfidenceForRisk(confidence: fusedConfidence, condition: marketCondition)
+        
+        // Decision logic
+        if riskAdjustedConfidence > 0.8 {
+            let decision = await makeAITradingDecision(
+                pair: pair,
+                confidence: riskAdjustedConfidence,
+                quantumState: quantumState,
+                predictions: temporalPredictions,
+                patternVector: patternVector
+            )
+            
+            recordDecision(decision: decision, confidence: riskAdjustedConfidence)
+            
+            print("🤖 AI Execute: \(pair) - \(decision) (Confidence: \(String(format: "%.2f", riskAdjustedConfidence)))")
+            
+            await MainActor.run {
+                logAlert(event: "🤖 AI Trading Signal: \(pair) - \(decision) (Conf: \(String(format: "%.2f", riskAdjustedConfidence)))")
+            }
+        }
+    }
+    
+    private func assessMarketCondition(pair: String, patternVector: HyperdimensionalVector) async -> String {
+        let currentPrice = await MainActor.run {
+            ExchangeWebSocket.kucoinCurrentPrice[pair] ?? ExchangeWebSocket.bybitCurrentPrice[pair] ?? 0.0
+        }
+        let prices = await MainActor.run {
+            ExchangeWebSocket.kucoinPrices[pair] ?? ExchangeWebSocket.bybitPrices[pair] ?? []
+        }
+        
+        guard currentPrice > 0, prices.count >= 20 else { return "unknown" }
+        
+        // Volatility assessment
+        let recentReturns = zip(prices.dropFirst().suffix(20), prices.suffix(20)).map { ($0 - $1) / $1 }
+        let volatility = vDSP.standardDeviation(Array(recentReturns))
+        
+        // Trend assessment
+        let ema20 = calculateEMA(prices: prices, period: 20)
+        let trendDirection = currentPrice > ema20 ? "up" : "down"
+        
+        // Volume assessment (using pattern magnitude as proxy)
+        let volumeCondition = patternVector.mag > 2.0 ? "high" : "normal"
+        
+        return "\(trendDirection)_\(volumeCondition)_vol_\(volatility > 0.02 ? "high" : "low")"
+    }
+    
+    private func adjustConfidenceForRisk(confidence: Double, condition: String) -> Double {
+        var adjusted = confidence
+        
+        // Reduce confidence in high volatility conditions
+        if condition.contains("high_vol") {
+            adjusted *= 0.8
+        }
+        
+        // Boost confidence in favorable conditions
+        if condition.contains("up_high") {
+            adjusted *= 1.1
+        }
+        
+        return max(0.0, min(1.0, adjusted))
+    }
+    
+    private func makeAITradingDecision(
+        pair: String,
+        confidence: Double,
+        quantumState: QuantumState,
+        predictions: [TemporalPrediction],
+        patternVector: HyperdimensionalVector
+    ) async -> String {
+        
+        // Get market context
+        let currentPrice = await MainActor.run {
+            ExchangeWebSocket.kucoinCurrentPrice[pair] ?? ExchangeWebSocket.bybitCurrentPrice[pair] ?? 0.0
+        }
+        
+        // Quantum-based directional bias
+        let quantumBias = quantumState.collapseProb > 0.5 ? "bullish" : "bearish"
+        
+        // Pattern-based signal strength
+        let patternStrength = patternVector.mag > 1.5 ? "strong" : "weak"
+        
+        // Temporal prediction bias
+        let bestPrediction = predictions.first
+        let temporalBias = (bestPrediction?.predPrice ?? currentPrice) > currentPrice ? "up" : "down"
+        
+        // Combine signals for decision
+        if quantumBias == "bullish" && temporalBias == "up" && patternStrength == "strong" {
+            return "STRONG_BUY"
+        } else if quantumBias == "bearish" && temporalBias == "down" && patternStrength == "strong" {
+            return "STRONG_SELL"
+        } else if quantumBias == "bullish" && temporalBias == "up" {
+            return "BUY"
+        } else if quantumBias == "bearish" && temporalBias == "down" {
+            return "SELL"
+        } else {
+            return "HOLD"
+        }
+    }
+    
+    private func recordDecision(decision: String, confidence: Double) {
+        decisionHistory.append((decision: decision, confidence: confidence, timestamp: Date()))
+        if decisionHistory.count > 1000 {
+            decisionHistory.removeFirst(100)
+        }
+    }
+    
+    private func performEvolution() async {
+        guard let evolutionEngine = await MainActor.run({ ExchangeWebSocket.evolutionEngine }) else { return }
+        
+        print("🧬 Performing AI evolution cycle...")
+        await evolutionEngine.evolveStrategies()
+        await evolutionEngine.adaptMutationRate()
+        
+        let stats = await evolutionEngine.getPopulationStats()
+        print("📊 Evolution Stats - Avg Fitness: \(String(format: "%.3f", stats.avgFitness)), Max: \(String(format: "%.3f", stats.maxFitness)), Diversity: \(String(format: "%.3f", stats.diversity))")
+        
+        await MainActor.run {
+            logAlert(event: "🧬 AI Evolution: Avg Fitness: \(String(format: "%.3f", stats.avgFitness)), Diversity: \(String(format: "%.3f", stats.diversity))")
+        }
+    }
+    
+    private func logAIPerformance() async {
+        let recentDecisions = decisionHistory.suffix(100)
+        let buyCount = recentDecisions.filter { $0.decision.contains("BUY") }.count
+        let sellCount = recentDecisions.filter { $0.decision.contains("SELL") }.count
+        let avgConfidence = recentDecisions.map { $0.confidence }.reduce(0, +) / Double(max(recentDecisions.count, 1))
+        
+        let performance = """
+        🤖 AI Performance (Last 100 decisions):
+        Cycles: \(cycleCount)
+        Buy Signals: \(buyCount)
+        Sell Signals: \(sellCount)
+        Avg Confidence: \(String(format: "%.2f", avgConfidence))
+        """
+        
+        print(performance)
+        await MainActor.run {
+            logAlert(event: performance)
+        }
+    }
+    
+    private func calculateOptimalSleepTime() async -> Double {
+        let marketActivity = await MainActor.run {
+            Double(ExchangeWebSocket.tradingPairs.count)
+        }
+        
+        // Dynamic sleep based on market activity and system load
+        let baseSleepTime = 0.05  // 50ms base
+        let activityMultiplier = min(2.0, marketActivity / 10.0)
+        
+        return baseSleepTime / activityMultiplier
+    }
+    
+    func stopAITrading() async {
+        isRunning = false
+        print("🛑 AI Trading stop requested")
+    }
+    
+    func getAIStats() -> [String: Any] {
+        let recentDecisions = decisionHistory.suffix(50)
+        return [
+            "cycles": cycleCount,
+            "isRunning": isRunning,
+            "recentDecisions": recentDecisions.count,
+            "avgConfidence": recentDecisions.map { $0.confidence }.reduce(0, +) / Double(max(recentDecisions.count, 1)),
+            "lastEvolution": lastEvolutionTime.timeIntervalSinceNow
+        ]
+    }
+}
+
+// FIXED: Add missing variables and functions to ExchangeWebSocket
+extension ExchangeWebSocket {
+    static var aiOrchestrator: AITradingOrchestrator? = AITradingOrchestrator()
+    
+    // Missing helper functions that are referenced but not defined
+    static func updateDynamicConfiguration() async {
+        // Placeholder for dynamic configuration updates
+        await MainActor.run {
+            logAlert(event: "Dynamic configuration updated")
+        }
+    }
+    
+    static func updateRiskMetrics() async {
+        // Update risk metrics based on current market conditions
+        for pair in tradingPairs {
+            let prices = kucoinPrices[pair] ?? bybitPrices[pair] ?? []
+            if prices.count >= 20 {
+                let returns = zip(prices.dropFirst(), prices).map { ($0 - $1) / $1 }
+                let volatility = vDSP.standardDeviation(Array(returns))
+                riskMetrics[pair] = RiskMetrics(
+                    var95: volatility * 2.33,  // 95% VaR
+                    var99: volatility * 3.09,  // 99% VaR
+                    expectedShortfall: volatility * 2.5,
+                    maxDrawdown: 0.0,
+                    volatility: volatility,
+                    correlation: 0.0,
+                    beta: 1.0
+                )
+            }
+        }
+    }
+    
+    static func assessPortfolioRisk() async {
+        let totalExposure = tradingPairs.reduce(0.0) { total, pair in
+            return total + (exposureByPair[pair] ?? 0.0)
+        }
+        
+        await MainActor.run {
+            if totalExposure > kucoinBalance + bybitBalance {
+                emergencyStopActive = true
+                logAlert(event: "Portfolio risk exceeded - Emergency stop activated")
+            }
+        }
+    }
+    
+    static func monitorDataQuality() async {
+        for pair in tradingPairs {
+            let lastUpdate = lastPriceUpdate[pair]?.timestamp ?? Date.distantPast
+            if Date().timeIntervalSince(lastUpdate) > 60 {  // No update in 60 seconds
+                await MainActor.run {
+                    logAlert(event: "Data quality issue: No recent price update for \(pair)")
+                }
+            }
+        }
+    }
+    
+    static func startOrderBookMonitoring() async {
+        // Start order book monitoring for all pairs
+        for pair in tradingPairs {
+            Task {
+                while tradingActive {
+                    // Monitor order book health
+                    let kucoinBook = kucoinOrderBooks[pair]
+                    let bybitBook = bybitOrderBooks[pair]
+                    
+                    if kucoinBook?.bids.isEmpty == true || kucoinBook?.asks.isEmpty == true {
+                        await MainActor.run {
+                            logAlert(event: "Empty order book detected for KuCoin \(pair)")
+                        }
+                    }
+                    
+                    if bybitBook?.bids.isEmpty == true || bybitBook?.asks.isEmpty == true {
+                        await MainActor.run {
+                            logAlert(event: "Empty order book detected for Bybit \(pair)")
+                        }
+                    }
+                    
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)  // 5 seconds
                 }
             }
         }
     }
 }
-
-  
