@@ -1,5 +1,4 @@
-//--------------- Block 26 - Integrated AI Trading Loop
-// VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables
+// --------------------------------------------------------------------------------------------------------------------------------------------------- Block 26 - Integrated AI Trading Loop
 
 import Foundation
 
@@ -11,16 +10,21 @@ class AITradingOrchestrator {
         }) {
             do {
                 // FIXED: Proper async/await calls with nil coalescing
+                // FIXED: Use correct classes: quantumProcessor and patternEngine instead of evolutionEngine
                 let q = await ExchangeWebSocket.quantumProcessor.processQuantumState(pair: "BTC-USDT")
                 let p = await ExchangeWebSocket.patternEngine.createMarketVector(pair: "BTC-USDT")
                 let t = await ExchangeWebSocket.temporalOracle.predictFuture(pair: "BTC-USDT")
+                // FIXED: Assume neuralSwarm is NeuralSwarmCoordinator; call executeSwarm on it
                 let s = await ExchangeWebSocket.neuralSwarm.executeSwarm(market: p.dims.map { Float($0) })
                 
                 let a = q.collapseProb
                 let b = p.mag
                 let c = t.first?.conf ?? 0
-                let d = s.isEmpty ? 0 : s.reduce(0, +) / Float(s.count)
-                let fused = (a + b + c + Double(d)) / 4
+                // FIXED: Break up the expression to help compiler type-check
+                let sumD: Float = s.isEmpty ? 0 : s.reduce(0, +)
+                let avgD: Float = s.isEmpty ? 0 : sumD / Float(s.count)
+                let d: Double = Double(avgD)
+                let fused = (a + b + c + d) / 4
                 
                 if fused > 0.8 {
                     print("AI Execute: Conf \(fused)")
@@ -50,9 +54,13 @@ class AITradingOrchestrator {
                 
                 try await Task.sleep(nanoseconds: 50_000_000) // 50ms
                 
-                // FIXED: Proper evolution trigger
-                if Date().timeIntervalSinceNow > -3600 {
+                // FIXED: Proper evolution trigger - use lastEvolution
+                let currentTime = Date()
+                if currentTime.timeIntervalSince(ExchangeWebSocket.lastEvolution) > 3600 {
                     await ExchangeWebSocket.evolutionEngine.evolveStrategies()
+                    await MainActor.run {
+                        ExchangeWebSocket.lastEvolution = currentTime
+                    }
                 }
             } catch {
                 print("AI Trading Loop Error: \(error)")
@@ -66,6 +74,9 @@ class AITradingOrchestrator {
 }
 
 extension ExchangeWebSocket {
+    // FIXED: Add lastEvolution if not present
+    static var lastEvolution: Date = .distantPast
+    
     // FIXED: Add missing calculateStandardDeviation function
     static func calculateStandardDeviation(prices: [Double]) -> Double {
         guard prices.count > 1 else { return 0.0 }
@@ -74,38 +85,9 @@ extension ExchangeWebSocket {
         return sqrt(variance)
     }
     
-    // FIXED: Add missing executeTrade function
-    static func executeTrade(exchange: String, pair: String, side: String, price: Double, amount: Double, strategy: String) async -> Bool {
-        print("📊 Executing \(strategy) trade: \(side) \(amount) \(pair) on \(exchange) at \(price)")
-        
-        // Simulate trade execution
-        let fee = amount * price * (exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee)
-        let profit = amount * price * 0.001 // Simulated 0.1% profit
-        
-        await MainActor.run(resultType: Void.self, body: {
-            if exchange == "kucoin" {
-                kucoinBalance += (side == "buy" ? -amount * price : amount * price) - fee
-            } else {
-                bybitBalance += (side == "buy" ? -amount * price : amount * price) - fee
-            }
-            
-            // Update trade metrics
-            let metrics = tradeMetrics[pair] ?? (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)
-            let isWin = profit > 0
-            tradeMetrics[pair] = (
-                wins: metrics.wins + (isWin ? 1 : 0),
-                losses: metrics.losses + (isWin ? 0 : 1),
-                totalProfit: metrics.totalProfit + profit,
-                totalFees: metrics.totalFees + fee
-            )
-            
-            totalProfit += profit
-            totalFees += fee
-            
-            logAlert(event: "Trade executed: \(strategy) \(side) \(pair) profit=\(profit)")
-            return
-        })
-        
-        return true
+    // FIXED: Add logAlert function
+    static func logAlert(event: String) {
+        print("ALERT: \(event)")
+        // Implement additional logging if needed
     }
 }
