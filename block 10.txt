@@ -656,59 +656,66 @@ extension ExchangeWebSocket {
     }
 
     static func monitorCrossExchangeArbitrage() {
-        let localKucoinCurrentPrice = kucoinCurrentPrice
-        let localBybitCurrentPrice = bybitCurrentPrice
-        let localKucoinPrices = kucoinPrices
-        let localBybitPrices = bybitPrices
+           let localKucoinCurrentPrice = kucoinCurrentPrice
+           let localBybitCurrentPrice = bybitCurrentPrice
+           let localKucoinPrices = kucoinPrices
+           let localBybitPrices = bybitPrices
 
-        Task {
-            await withTaskGroup(of: Void.self) { group in
-                let tradingPairsValue = await MainActor.run { tradingPairs }
-                for pair in tradingPairsValue {
-                    group.addTask {
-                        let kucoinSpotPrice = await MainActor.run { localKucoinCurrentPrice[pair] ?? 0.0 }
-                        let bybitSpotPrice = await MainActor.run { localBybitCurrentPrice[pair] ?? 0.0 }
-                        let kucoinSpotPrices = await MainActor.run { localKucoinPrices[pair] ?? [] }
-                        let bybitSpotPrices = await MainActor.run { localBybitPrices[pair] ?? [] }
-                        // Suppress unused warnings for kucoinSpotPrices and bybitSpotPrices (Lines 3097, 3098)
-                        print("DEBUG: KuCoin spot prices count for \(pair): \(kucoinSpotPrices.count)")
-                        print("DEBUG: Bybit spot prices count for \(pair): \(bybitSpotPrices.count)")
+           Task {
+               await withTaskGroup(of: Void.self) { group in
+                   let tradingPairsValue = await MainActor.run { tradingPairs }
+                   for pair in tradingPairsValue {
+                       group.addTask {
+                           let kucoinSpotPrice = await MainActor.run { localKucoinCurrentPrice[pair] ?? 0.0 }
+                           let bybitSpotPrice = await MainActor.run { localBybitCurrentPrice[pair] ?? 0.0 }
+                           let kucoinSpotPrices = await MainActor.run { localKucoinPrices[pair] ?? [] }
+                           let bybitSpotPrices = await MainActor.run { localBybitPrices[pair] ?? [] }
+                           // Suppress unused warnings for kucoinSpotPrices and bybitSpotPrices (Lines 3097, 3098)
+                           print("DEBUG: KuCoin spot prices count for \(pair): \(kucoinSpotPrices.count)")
+                           print("DEBUG: Bybit spot prices count for \(pair): \(bybitSpotPrices.count)")
 
-                        guard kucoinSpotPrice > 0 && bybitSpotPrice > 0 else {
-                            print("DEBUG: Invalid prices for cross-exchange arbitrage - \(pair): KuCoin=\(kucoinSpotPrice), Bybit=\(bybitSpotPrice)")
-                            return
-                        }
+                           guard kucoinSpotPrice > 0 && bybitSpotPrice > 0 else {
+                               print("DEBUG: Invalid prices for cross-exchange arbitrage - \(pair): KuCoin=\(kucoinSpotPrice), Bybit=\(bybitSpotPrice)")
+                               return
+                           }
 
-                        let lastExecution = await MainActor.run { crossExchangeArbitrageExecuted[pair] }
-                        let cooldownSeconds = await MainActor.run { crossExchangeCooldownSeconds }
-                        if lastExecution == nil || Date().timeIntervalSince(lastExecution!.1) > cooldownSeconds {
-                            let kucoinEvents = await MainActor.run { kucoinOrderBookEvents[pair] ?? [] }
-                            let spoofingThreshold = await MainActor.run { spoofingVolumeThreshold }
-                            let spoofingDetected = kucoinEvents.filter { Date().timeIntervalSince($0.timestamp) < 60 }.count > 2 && kucoinEvents.contains(where: { $0.volume > spoofingThreshold })
-                            if spoofingDetected {
-                                print("DEBUG: Order book spoofing detected for \(pair)")
-                                await MainActor.run {
-                                    logAlert(event: "Order book spoofing detected for \(pair)")
-                                }
-                                return
-                            }
+                           let lastExecution = await MainActor.run { crossExchangeArbitrageExecuted[pair] }
+                           let cooldownSeconds = await MainActor.run { crossExchangeCooldownSeconds }
+                           if lastExecution == nil || Date().timeIntervalSince(lastExecution!.1) > cooldownSeconds {
+                               let kucoinEvents = await MainActor.run { kucoinOrderBookEvents[pair] ?? [] }
+                               let spoofingThreshold = await MainActor.run { spoofingVolumeThreshold }
+                               let spoofingDetected = kucoinEvents.filter { Date().timeIntervalSince($0.timestamp) < 60 }.count > 2 && kucoinEvents.contains(where: { $0.volume > spoofingThreshold })
+                               if spoofingDetected {
+                                   print("DEBUG: Order book spoofing detected for \(pair)")
+                                   await MainActor.run {
+                                       logAlert(event: "Order book spoofing detected for \(pair)")
+                                   }
+                                   return
+                               }
 
-                            let tradeAmount = await MainActor.run { crossExchangeTradeAmount }
-                            
-                            // Log arbitrage opportunity (removed ambiguous function call)
-                            print("DEBUG: Cross-exchange arbitrage opportunity detected for \(pair) with spread and trade amount \(tradeAmount)")
-                            await MainActor.run {
-                                logAlert(event: "Cross-exchange arbitrage opportunity detected for \(pair)")
-                            }
-                        } else {
-                            print("DEBUG: Cross-exchange arbitrage for \(pair) on cooldown")
-                        }
-                    }
-                }
-            }
-            try? await Task.sleep(nanoseconds: UInt64(getDouble("ARBITRAGE_CHECK_INTERVAL_SECONDS", defaultValue: 0.5) * 1_000_000_000))
-            monitorCrossExchangeArbitrage()
-        }
-    }
-}
+                               let tradeAmount = await MainActor.run { crossExchangeTradeAmount }
+                               await checkCrossExchangeArbitrage(
+                                   pair: pair,
+                                   strategy: "momentum",
+                                   amount: tradeAmount,
+                                   completion: { success in
+                                       if success {
+                                           print("DEBUG: Cross-exchange arbitrage executed for \(pair)")
+                                       } else {
+                                           print("DEBUG: Cross-exchange arbitrage failed for \(pair)")
+                                       }
+                                   }
+                               )
+                           } else {
+                               print("DEBUG: Cross-exchange arbitrage for \(pair) on cooldown")
+                           }
+                       }
+                   }
+               }
+               try? await Task.sleep(nanoseconds: UInt64(getDouble("ARBITRAGE_CHECK_INTERVAL_SECONDS", defaultValue: 0.5) * 1_000_000_000))
+               monitorCrossExchangeArbitrage()
+           }
+       }
+   }
+
 
