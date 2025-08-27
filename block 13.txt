@@ -1,5 +1,5 @@
-
 //---------------------------------------------------------------------------------------------------------Block 13 - Trade Performance and Logging
+
 
 
 import Foundation
@@ -157,172 +157,170 @@ extension ExchangeWebSocket {
         bybitCurrentFuturesPrice[pair] = price
     }
 
-    static func executeSingleExchangeArbitrage(exchange: String, pair: String, spotPrice: Double, futuresPrice: Double, strategy: String, kucoinSpotPrices: [Double], bybitSpotPrices: [Double], tradeAmount: Double) {
-        Task {
-            let spread = abs(spotPrice - futuresPrice) / min(max(spotPrice, 0.0001), max(futuresPrice, 0.0001))
-            let minSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.001)
-            saveHistoricalSpreadsToCSV(pair: pair, spread: spread, predictedSpreadChange: 0.0)
+    // FIX: Mark function as async to handle async calls properly
+    static func executeSingleExchangeArbitrage(exchange: String, pair: String, spotPrice: Double, futuresPrice: Double, strategy: String, kucoinSpotPrices: [Double], bybitSpotPrices: [Double], tradeAmount: Double) async {
+        let spread = abs(spotPrice - futuresPrice) / min(max(spotPrice, 0.0001), max(futuresPrice, 0.0001))
+        let minSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.001)
+        saveHistoricalSpreadsToCSV(pair: pair, spread: spread, predictedSpreadChange: 0.0)
 
-            print("""
+        print("""
 TRADE CHECK: \(pair) (\(exchange))
 Spread: \(spread) >= Threshold: \(minSpreadThreshold) -> \(spread >= minSpreadThreshold)
 """)
-            guard spread >= minSpreadThreshold else {
-                print("DEBUG: Spread too low for \(exchange)-\(pair): \(spread)")
-                logAlert(event: "Spread too low for \(exchange)-\(pair): \(spread)")
-                return
-            }
+        guard spread >= minSpreadThreshold else {
+            print("DEBUG: Spread too low for \(exchange)-\(pair): \(spread)")
+            logAlert(event: "Spread too low for \(exchange)-\(pair): \(spread)")
+            return
+        }
 
-            let liquidity = await checkLiquidityAsync(exchange: exchange, pair: pair, marketType: "spot", tradeAmount: tradeAmount, price: spotPrice)
-            let futuresLiquidity = await checkLiquidityAsync(exchange: exchange, pair: pair, marketType: "futures", tradeAmount: tradeAmount, price: futuresPrice)
-            let minLiquidityThresholdValue = await MainActor.run { minLiquidityThreshold }
-            print("TRADE CHECK: \(pair) Liquidity - Spot: \(liquidity ?? -1.0) >= \(minLiquidityThresholdValue), Futures: \(futuresLiquidity ?? -1.0) >= \(minLiquidityThresholdValue)")
-            guard let liquidity = liquidity, let futuresLiquidity = futuresLiquidity,
-                  liquidity >= minLiquidityThresholdValue, futuresLiquidity >= minLiquidityThresholdValue else {
-                print("DEBUG: Invalid liquidity for \(exchange)-\(pair): Spot=\(String(describing: liquidity)), Futures=\(String(describing: futuresLiquidity))")
-                logAlert(event: "Invalid liquidity for \(exchange)-\(pair): Spot=\(String(describing: liquidity)), Futures=\(String(describing: futuresLiquidity))")
-                return
-            }
+        let liquidity = await checkLiquidityAsync(exchange: exchange, pair: pair, marketType: "spot", tradeAmount: tradeAmount, price: spotPrice)
+        let futuresLiquidity = await checkLiquidityAsync(exchange: exchange, pair: pair, marketType: "futures", tradeAmount: tradeAmount, price: futuresPrice)
+        let minLiquidityThresholdValue = await MainActor.run { minLiquidityThreshold }
+        print("TRADE CHECK: \(pair) Liquidity - Spot: \(liquidity ?? -1.0) >= \(minLiquidityThresholdValue), Futures: \(futuresLiquidity ?? -1.0) >= \(minLiquidityThresholdValue)")
+        guard let liquidity = liquidity, let futuresLiquidity = futuresLiquidity,
+              liquidity >= minLiquidityThresholdValue, futuresLiquidity >= minLiquidityThresholdValue else {
+            print("DEBUG: Invalid liquidity for \(exchange)-\(pair): Spot=\(String(describing: liquidity)), Futures=\(String(describing: futuresLiquidity))")
+            logAlert(event: "Invalid liquidity for \(exchange)-\(pair): Spot=\(String(describing: liquidity)), Futures=\(String(describing: futuresLiquidity))")
+            return
+        }
 
-            let fundingRate = await MainActor.run { exchange == "kucoin" ? kucoinFundingRates[pair] ?? 0.0 : bybitFundingRates[pair] ?? 0.0 }
-            let maxFundingRateValue = await MainActor.run { maxFundingRate }
-            print("TRADE CHECK: \(pair) Funding: \(abs(fundingRate)) < \(maxFundingRateValue) -> \(abs(fundingRate) < maxFundingRateValue)")
-            guard abs(fundingRate) < maxFundingRateValue else {
-                print("DEBUG: Funding rate too high for \(exchange)-\(pair): \(fundingRate)")
-                logAlert(event: "Funding rate too high for \(exchange)-\(pair): \(fundingRate)")
-                return
-            }
+        let fundingRate = await MainActor.run { exchange == "kucoin" ? kucoinFundingRates[pair] ?? 0.0 : bybitFundingRates[pair] ?? 0.0 }
+        let maxFundingRateValue = await MainActor.run { maxFundingRate }
+        print("TRADE CHECK: \(pair) Funding: \(abs(fundingRate)) < \(maxFundingRateValue) -> \(abs(fundingRate) < maxFundingRateValue)")
+        guard abs(fundingRate) < maxFundingRateValue else {
+            print("DEBUG: Funding rate too high for \(exchange)-\(pair): \(fundingRate)")
+            logAlert(event: "Funding rate too high for \(exchange)-\(pair): \(fundingRate)")
+            return
+        }
 
-            let balance = exchange == "kucoin" ? kucoinBalance : bybitBalance
-            print("TRADE CHECK: \(pair) Balance: \(balance) >= \(tradeAmount * spotPrice) -> \(balance >= tradeAmount * spotPrice)")
-            guard balance >= tradeAmount * spotPrice else {
-                print("DEBUG: Insufficient balance for \(exchange)-\(pair)")
-                logAlert(event: "Insufficient balance for \(exchange)-\(pair)")
-                return
-            }
+        let balance = exchange == "kucoin" ? kucoinBalance : bybitBalance
+        print("TRADE CHECK: \(pair) Balance: \(balance) >= \(tradeAmount * spotPrice) -> \(balance >= tradeAmount * spotPrice)")
+        guard balance >= tradeAmount * spotPrice else {
+            print("DEBUG: Insufficient balance for \(exchange)-\(pair)")
+            logAlert(event: "Insufficient balance for \(exchange)-\(pair)")
+            return
+        }
 
-            let feeRate = exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee
-            let fees = tradeAmount * feeRate * 2
-            let grossProfit = tradeAmount * spread
-            let profit = grossProfit - fees
-            let minProfitPercentage = await MainActor.run { spotMinProfitPercentage }
-            print("TRADE CHECK: \(pair) Profit: \(profit) > Min: \(minProfitPercentage * tradeAmount * min(spotPrice, futuresPrice))")
-            guard profit > minProfitPercentage * tradeAmount * min(spotPrice, futuresPrice) else {
-                print("DEBUG: Expected profit too low for \(exchange)-\(pair): \(profit)")
-                logAlert(event: "Expected profit too low for \(exchange)-\(pair): \(profit)")
-                return
-            }
+        let feeRate = exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee
+        let fees = tradeAmount * feeRate * 2
+        let grossProfit = tradeAmount * spread
+        let profit = grossProfit - fees
+        let minProfitPercentage = await MainActor.run { spotMinProfitPercentage }
+        print("TRADE CHECK: \(pair) Profit: \(profit) > Min: \(minProfitPercentage * tradeAmount * min(spotPrice, futuresPrice))")
+        guard profit > minProfitPercentage * tradeAmount * min(spotPrice, futuresPrice) else {
+            print("DEBUG: Expected profit too low for \(exchange)-\(pair): \(profit)")
+            logAlert(event: "Expected profit too low for \(exchange)-\(pair): \(profit)")
+            return
+        }
 
-            let success = await executeScalpingTrade(
-                pair: pair,
-                exchange: exchange,
-                entryPrice: spotPrice,
-                targetPrice: futuresPrice,
-                stopPrice: spotPrice * (1 - scalpStopLoss),
-                tradeAmount: tradeAmount,
-                maxActiveTrades: maxActiveSpotTrades
-            )
+        let success = await executeScalpingTrade(
+            pair: pair,
+            exchange: exchange,
+            entryPrice: spotPrice,
+            targetPrice: futuresPrice,
+            stopPrice: spotPrice * (1 - scalpStopLoss),
+            tradeAmount: tradeAmount,
+            maxActiveTrades: maxActiveSpotTrades
+        )
 
-            if success {
-                print("ARBITRAGE TRIGGERED: \(exchange) \(pair) at \(Date())")
-                await MainActor.run {
-                    updateTradeMetrics(
-                        pair: pair,
-                        profit: profit,
-                        fees: fees,
-                        isWin: profit > 0,
-                        dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
-                        totalProfit: &ExchangeWebSocket.totalProfit,
-                        totalFees: &ExchangeWebSocket.totalFees
-                    )
-                    logTradeToCSV(pair: pair, strategy: strategy, profit: profit, fees: fees, tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
-                    print("DEBUG: Executed single-exchange arbitrage for \(exchange)-\(pair): Profit=\(profit), Fees=\(fees)")
-                    logAlert(event: "Executed single-exchange arbitrage for \(exchange)-\(pair): Profit=\(profit), Fees=\(fees)")
-                }
+        if success {
+            print("ARBITRAGE TRIGGERED: \(exchange) \(pair) at \(Date())")
+            await MainActor.run {
+                updateTradeMetrics(
+                    pair: pair,
+                    profit: profit,
+                    fees: fees,
+                    isWin: profit > 0,
+                    dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
+                    totalProfit: &ExchangeWebSocket.totalProfit,
+                    totalFees: &ExchangeWebSocket.totalFees
+                )
+                logTradeToCSV(pair: pair, strategy: strategy, profit: profit, fees: fees, tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
+                print("DEBUG: Executed single-exchange arbitrage for \(exchange)-\(pair): Profit=\(profit), Fees=\(fees)")
+                logAlert(event: "Executed single-exchange arbitrage for \(exchange)-\(pair): Profit=\(profit), Fees=\(fees)")
             }
         }
     }
 
-    static func executeEnhancedCrossExchangeArbitrage(pair: String, kucoinSpotPrice: Double, bybitSpotPrice: Double, strategy: String, kucoinSpotPrices: [Double], bybitSpotPrices: [Double], amount: Double, completion: @escaping (Bool) -> Void) {
-        Task {
-            let spread = abs(kucoinSpotPrice - bybitSpotPrice) / min(max(kucoinSpotPrice, 0.0001), max(bybitSpotPrice, 0.0001))
-            let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: "cross", spotPrice: kucoinSpotPrice, futuresPrice: bybitSpotPrice) ?? 0.0
-            saveHistoricalSpreadsToCSV(pair: pair, spread: spread, predictedSpreadChange: predictedSpread)
+    // FIX: Mark function as async to handle async calls properly
+    static func executeEnhancedCrossExchangeArbitrage(pair: String, kucoinSpotPrice: Double, bybitSpotPrice: Double, strategy: String, kucoinSpotPrices: [Double], bybitSpotPrices: [Double], amount: Double, completion: @escaping (Bool) -> Void) async {
+        let spread = abs(kucoinSpotPrice - bybitSpotPrice) / min(max(kucoinSpotPrice, 0.0001), max(bybitSpotPrice, 0.0001))
+        let predictedSpread = await fetchSpreadPrediction(pair: pair, exchange: "cross", spotPrice: kucoinSpotPrice, futuresPrice: bybitSpotPrice) ?? 0.0
+        saveHistoricalSpreadsToCSV(pair: pair, spread: spread, predictedSpreadChange: predictedSpread)
 
-            let minSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.001)
-            print("""
+        let minSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.001)
+        print("""
 TRADE CHECK: \(pair) (Cross-Exchange)
 Spread: \(spread) >= Threshold: \(minSpreadThreshold) -> \(spread >= minSpreadThreshold)
 """)
-            guard spread >= minSpreadThreshold else {
-                print("DEBUG: Spread too low for cross-exchange arbitrage: \(pair), Spread=\(spread)")
-                logAlert(event: "Spread too low for cross-exchange arbitrage: \(pair), Spread=\(spread)")
-                completion(false)
-                return
-            }
+        guard spread >= minSpreadThreshold else {
+            print("DEBUG: Spread too low for cross-exchange arbitrage: \(pair), Spread=\(spread)")
+            logAlert(event: "Spread too low for cross-exchange arbitrage: \(pair), Spread=\(spread)")
+            completion(false)
+            return
+        }
 
-            let kucoinLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "spot", tradeAmount: amount, price: kucoinSpotPrice)
-            let bybitLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "spot", tradeAmount: amount, price: bybitSpotPrice)
-            let minLiquidityThresholdValue = await MainActor.run { minLiquidityThreshold }
-            print("TRADE CHECK: \(pair) Liquidity - KuCoin: \(kucoinLiquidity ?? -1.0) >= \(minLiquidityThresholdValue), Bybit: \(bybitLiquidity ?? -1.0) >= \(minLiquidityThresholdValue)")
-            guard let kucoinLiquidity = kucoinLiquidity, let bybitLiquidity = bybitLiquidity,
-                  kucoinLiquidity >= minLiquidityThresholdValue, bybitLiquidity >= minLiquidityThresholdValue else {
-                print("DEBUG: Insufficient liquidity for cross-exchange arbitrage: \(pair)")
-                logAlert(event: "Insufficient liquidity for cross-exchange arbitrage: \(pair)")
-                completion(false)
-                return
-            }
+        let kucoinLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "spot", tradeAmount: amount, price: kucoinSpotPrice)
+        let bybitLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "spot", tradeAmount: amount, price: bybitSpotPrice)
+        let minLiquidityThresholdValue = await MainActor.run { minLiquidityThreshold }
+        print("TRADE CHECK: \(pair) Liquidity - KuCoin: \(kucoinLiquidity ?? -1.0) >= \(minLiquidityThresholdValue), Bybit: \(bybitLiquidity ?? -1.0) >= \(minLiquidityThresholdValue)")
+        guard let kucoinLiquidity = kucoinLiquidity, let bybitLiquidity = bybitLiquidity,
+              kucoinLiquidity >= minLiquidityThresholdValue, bybitLiquidity >= minLiquidityThresholdValue else {
+            print("DEBUG: Insufficient liquidity for cross-exchange arbitrage: \(pair)")
+            logAlert(event: "Insufficient liquidity for cross-exchange arbitrage: \(pair)")
+            completion(false)
+            return
+        }
 
-            let feeRate = kucoinTakerFee + bybitTakerFee
-            let fees = amount * feeRate * 2
-            let grossProfit = amount * spread
-            let profit = grossProfit - fees
-            let minProfitPercentage = await MainActor.run { spotMinProfitPercentage }
-            print("TRADE CHECK: \(pair) Profit: \(profit) > Min: \(minProfitPercentage * amount * min(kucoinSpotPrice, bybitSpotPrice))")
-            guard profit > minProfitPercentage * amount * min(kucoinSpotPrice, bybitSpotPrice) else {
-                print("DEBUG: Expected profit too low for cross-exchange arbitrage: \(pair), Profit=\(profit)")
-                logAlert(event: "Expected profit too low for cross-exchange arbitrage: \(pair), Profit=\(profit)")
-                completion(false)
-                return
-            }
+        let feeRate = kucoinTakerFee + bybitTakerFee
+        let fees = amount * feeRate * 2
+        let grossProfit = amount * spread
+        let profit = grossProfit - fees
+        let minProfitPercentage = await MainActor.run { spotMinProfitPercentage }
+        print("TRADE CHECK: \(pair) Profit: \(profit) > Min: \(minProfitPercentage * amount * min(kucoinSpotPrice, bybitSpotPrice))")
+        guard profit > minProfitPercentage * amount * min(kucoinSpotPrice, bybitSpotPrice) else {
+            print("DEBUG: Expected profit too low for cross-exchange arbitrage: \(pair), Profit=\(profit)")
+            logAlert(event: "Expected profit too low for cross-exchange arbitrage: \(pair), Profit=\(profit)")
+            completion(false)
+            return
+        }
 
-            let success = await executeScalpingTrade(
-                pair: pair,
-                exchange: kucoinSpotPrice < bybitSpotPrice ? "kucoin" : "bybit",
-                entryPrice: min(kucoinSpotPrice, bybitSpotPrice),
-                targetPrice: max(kucoinSpotPrice, bybitSpotPrice),
-                stopPrice: min(kucoinSpotPrice, bybitSpotPrice) * (1 - scalpStopLoss),
-                tradeAmount: amount,
-                maxActiveTrades: maxActiveSpotTrades
-            )
+        let success = await executeScalpingTrade(
+            pair: pair,
+            exchange: kucoinSpotPrice < bybitSpotPrice ? "kucoin" : "bybit",
+            entryPrice: min(kucoinSpotPrice, bybitSpotPrice),
+            targetPrice: max(kucoinSpotPrice, bybitSpotPrice),
+            stopPrice: min(kucoinSpotPrice, bybitSpotPrice) * (1 - scalpStopLoss),
+            tradeAmount: amount,
+            maxActiveTrades: maxActiveSpotTrades
+        )
 
-            if success {
-                print("ARBITRAGE TRIGGERED: Cross-Exchange \(pair) at \(Date())")
-                await MainActor.run {
-                    if kucoinSpotPrice < bybitSpotPrice {
-                        kucoinBalance += profit - fees
-                        bybitBalance -= amount * bybitTakerFee
-                    } else {
-                        bybitBalance += profit - fees
-                        kucoinBalance -= amount * kucoinTakerFee
-                    }
-                    updateTradeMetrics(
-                        pair: pair,
-                        profit: profit,
-                        fees: fees,
-                        isWin: profit > 0,
-                        dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
-                        totalProfit: &ExchangeWebSocket.totalProfit,
-                        totalFees: &ExchangeWebSocket.totalFees
-                    )
-                    logTradeToCSV(pair: pair, strategy: strategy, profit: profit, fees: fees, tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
-                    print("DEBUG: Executed cross-exchange arbitrage for \(pair): Profit=\(profit), Fees=\(fees)")
-                    logAlert(event: "Executed cross-exchange arbitrage for \(pair): Profit=\(profit), Fees=\(fees)")
-                    completion(true)
+        if success {
+            print("ARBITRAGE TRIGGERED: Cross-Exchange \(pair) at \(Date())")
+            await MainActor.run {
+                if kucoinSpotPrice < bybitSpotPrice {
+                    kucoinBalance += profit - fees
+                    bybitBalance -= amount * bybitTakerFee
+                } else {
+                    bybitBalance += profit - fees
+                    kucoinBalance -= amount * kucoinTakerFee
                 }
-            } else {
-                completion(false)
+                updateTradeMetrics(
+                    pair: pair,
+                    profit: profit,
+                    fees: fees,
+                    isWin: profit > 0,
+                    dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
+                    totalProfit: &ExchangeWebSocket.totalProfit,
+                    totalFees: &ExchangeWebSocket.totalFees
+                )
+                logTradeToCSV(pair: pair, strategy: strategy, profit: profit, fees: fees, tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
+                print("DEBUG: Executed cross-exchange arbitrage for \(pair): Profit=\(profit), Fees=\(fees)")
+                logAlert(event: "Executed cross-exchange arbitrage for \(pair): Profit=\(profit), Fees=\(fees)")
+                completion(true)
             }
+        } else {
+            completion(false)
         }
     }
 
@@ -529,6 +527,7 @@ BB Futures: \(bybitFuturesPrice)
 
                                         print("KuCoin Spot-to-Futures for \(pair): Spread: \(currentSpread), Threshold: \(feeAdjustedThreshold), ML: \(shouldTradeKucoin), MACD: \(macdConfirmed), EMA: \(emaConfirmed), Trend: \(trendConfirmed), Sentiment: \(sentimentConfirmed), Volume: \(volumeConfirmed), Imbalance: \(imbalanceConfirmed)")
 
+                                        // FIX: Use isEmpty property from BevaixOrderBook
                                         if (shouldTradeKucoin || currentSpread >= feeAdjustedThreshold) && !kucoinOrderBook.isEmpty && emaConfirmed && trendConfirmed && sentimentConfirmed && volumeConfirmed && imbalanceConfirmed {
                                             if let lastArbitrage = arbitrageExecuted[pair], lastArbitrage.0 && Date().timeIntervalSince(lastArbitrage.1) < tradeCooldown {
                                                 print("KuCoin Spot-to-Futures for \(pair): Skipped (Cooldown)")
@@ -537,7 +536,8 @@ BB Futures: \(bybitFuturesPrice)
                                                 let potentialLoss = kucoinArbitrageTradeAmount * kucoinSpotPrice * stopLossPercentage
                                                 if !(await ExchangeWebSocket.checkDailyLossLimit(exchange: "kucoin", pair: pair, potentialLoss: potentialLoss)) {
                                                     print("Initiating KuCoin Spot-to-Futures Arbitrage for \(pair): Amount: \(kucoinArbitrageTradeAmount)")
-                                                    executeSingleExchangeArbitrage(exchange: "kucoin", pair: pair, spotPrice: kucoinSpotPrice, futuresPrice: kucoinFuturesPrice, strategy: "Spot-to-Futures", kucoinSpotPrices: kucoinSpotPrices, bybitSpotPrices: [], tradeAmount: kucoinArbitrageTradeAmount)
+                                                    // FIX: Use async version
+                                                    await executeSingleExchangeArbitrage(exchange: "kucoin", pair: pair, spotPrice: kucoinSpotPrice, futuresPrice: kucoinFuturesPrice, strategy: "Spot-to-Futures", kucoinSpotPrices: kucoinSpotPrices, bybitSpotPrices: [], tradeAmount: kucoinArbitrageTradeAmount)
                                                     let spread = abs(kucoinSpotPrice - kucoinFuturesPrice)
                                                     let grossProfit = kucoinArbitrageTradeAmount * spread
                                                     let fees = kucoinArbitrageTradeAmount * (kucoinTakerFee + kucoinMakerFee) * 2
@@ -589,7 +589,8 @@ BB Futures: \(bybitFuturesPrice)
                                                 let potentialLoss = bybitArbitrageTradeAmount * bybitSpotPrice * stopLossPercentage
                                                 if !(await ExchangeWebSocket.checkDailyLossLimit(exchange: "bybit", pair: pair, potentialLoss: potentialLoss)) {
                                                     print("Initiating Bybit Spot-to-Futures Arbitrage for \(pair): Amount: \(bybitArbitrageTradeAmount)")
-                                                    executeSingleExchangeArbitrage(
+                                                    // FIX: Use async version
+                                                    await executeSingleExchangeArbitrage(
                                                         exchange: "bybit",
                                                         pair: pair,
                                                         spotPrice: bybitSpotPrice,
@@ -642,6 +643,7 @@ BB Futures: \(bybitFuturesPrice)
 
                                         print("Cross-Exchange Spot for \(pair): Spread: \(currentSpread), Threshold: \(feeAdjustedThreshold), ML: \(shouldTradeCross), MACD: \(macdConfirmed), EMA: \(emaConfirmed), Trend: \(trendConfirmed), Sentiment: \(sentimentConfirmed), Volume: \(volumeConfirmed), Imbalance: \(imbalanceConfirmed)")
 
+                                        // FIX: Use isEmpty property from BevaixOrderBook
                                         if (shouldTradeCross || currentSpread >= feeAdjustedThreshold) && !kucoinOrderBookStruct.isEmpty && !bybitOrderBook.isEmpty && emaConfirmed && macdConfirmed && trendConfirmed && sentimentConfirmed && volumeConfirmed && imbalanceConfirmed {
                                             if let lastCrossArbitrage = crossExchangeArbitrageExecuted[pair], lastCrossArbitrage.0 && Date().timeIntervalSince(lastCrossArbitrage.1) < tradeCooldown {
                                                 print("Cross-Exchange Spot for \(pair): Skipped (Cooldown)")
@@ -652,7 +654,8 @@ BB Futures: \(bybitFuturesPrice)
                                                 let bybitLossLimitOk = !(await ExchangeWebSocket.checkDailyLossLimit(exchange: "bybit", pair: pair, potentialLoss: potentialLoss))
                                                 if kucoinLossLimitOk && bybitLossLimitOk {
                                                     print("Initiating Cross-Exchange for \(pair): Amount: \(crossExchangeTradeAmount)")
-                                                    executeEnhancedCrossExchangeArbitrage(
+                                                    // FIX: Use async version
+                                                    await executeEnhancedCrossExchangeArbitrage(
                                                         pair: pair,
                                                         kucoinSpotPrice: kucoinSpotPrice,
                                                         bybitSpotPrice: bybitSpotPrice,
