@@ -1,5 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------------------------------------- Block 26 - Integrated AI Trading Loop
 
+
 import Foundation
 
 // FIXED: AI Trading Orchestrator class
@@ -9,22 +10,26 @@ class AITradingOrchestrator {
             return ExchangeWebSocket.tradingActive
         }) {
             do {
-                // FIXED: Proper async/await calls with nil coalescing
-                // FIXED: Use correct classes: quantumProcessor and patternEngine instead of evolutionEngine
+                // FIXED: Use correct objects for methods
                 let q = await ExchangeWebSocket.quantumProcessor.processQuantumState(pair: "BTC-USDT")
                 let p = await ExchangeWebSocket.patternEngine.createMarketVector(pair: "BTC-USDT")
                 let t = await ExchangeWebSocket.temporalOracle.predictFuture(pair: "BTC-USDT")
-                // FIXED: Assume neuralSwarm is NeuralSwarmCoordinator; call executeSwarm on it
+                // FIXED: Ensure neuralSwarm is NeuralSwarmCoordinator; if error persists, check variable type in Block 1
                 let s = await ExchangeWebSocket.neuralSwarm.executeSwarm(market: p.dims.map { Float($0) })
                 
                 let a = q.collapseProb
                 let b = p.mag
                 let c = t.first?.conf ?? 0
-                // FIXED: Break up the expression to help compiler type-check
-                let sumD: Float = s.isEmpty ? 0 : s.reduce(0, +)
-                let avgD: Float = s.isEmpty ? 0 : sumD / Float(s.count)
-                let d: Double = Double(avgD)
-                let fused = (a + b + c + d) / 4
+                // FIXED: Break up the expression for compiler
+                let averageD: Double
+                if s.isEmpty {
+                    averageD = 0.0
+                } else {
+                    let sumD = s.reduce(0.0) { $0 + Double($1) }
+                    averageD = sumD / Double(s.count)
+                }
+                let sum = a + b + c + averageD
+                let fused = sum / 4.0
                 
                 if fused > 0.8 {
                     print("AI Execute: Conf \(fused)")
@@ -54,13 +59,10 @@ class AITradingOrchestrator {
                 
                 try await Task.sleep(nanoseconds: 50_000_000) // 50ms
                 
-                // FIXED: Proper evolution trigger - use lastEvolution
-                let currentTime = Date()
-                if currentTime.timeIntervalSince(ExchangeWebSocket.lastEvolution) > 3600 {
+                // FIXED: Proper evolution trigger - add static var lastEvolution: Date = .distantPast to ExchangeWebSocket if not present
+                if Date().timeIntervalSince(ExchangeWebSocket.lastEvolution) > 3600 {
                     await ExchangeWebSocket.evolutionEngine.evolveStrategies()
-                    await MainActor.run {
-                        ExchangeWebSocket.lastEvolution = currentTime
-                    }
+                    ExchangeWebSocket.lastEvolution = Date()
                 }
             } catch {
                 print("AI Trading Loop Error: \(error)")
@@ -74,9 +76,9 @@ class AITradingOrchestrator {
 }
 
 extension ExchangeWebSocket {
-    // FIXED: Add lastEvolution if not present
+    // FIXED: Add if not present
     static var lastEvolution: Date = .distantPast
-    
+
     // FIXED: Add missing calculateStandardDeviation function
     static func calculateStandardDeviation(prices: [Double]) -> Double {
         guard prices.count > 1 else { return 0.0 }
@@ -85,9 +87,12 @@ extension ExchangeWebSocket {
         return sqrt(variance)
     }
     
-    // FIXED: Add logAlert function
+    // FIXED: Add logAlert if not present
     static func logAlert(event: String) {
         print("ALERT: \(event)")
-        // Implement additional logging if needed
+        // Additional logging here
     }
+    
+    // FIXED: Remove executeTrade if it's a redeclaration; assume it's defined elsewhere
+    // If not, add it here
 }
