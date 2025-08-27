@@ -1,7 +1,4 @@
-
 // --------------------------------------------------------- Block 25 - Self-Evolution & Learning System
-//--------------- Block 25 - Self-Evolution & Learning System
-// VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables
 //--------------- Block 25 - Self-Evolution & Learning System
 // VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities:
 // static var evolutionEngine: EvolutionEngine = EvolutionEngine()
@@ -91,17 +88,6 @@ struct MarketVector {
     let direction: Double
 }
 
-struct TemporalPrediction {
-    let predPrice: Double
-    let conf: Double
-    let horizon: Int
-    let prob: Double
-}
-
-enum AgentType: CaseIterable {
-    case arbitrage, momentum, meanReversion, scalping, pattern, sentiment
-}
-
 // FIXED: Single definition of QuantumProcessor class
 class QuantumProcessor {
     func processQuantumState(pair: String) async -> QuantumState {
@@ -130,15 +116,15 @@ class PatternEngine {
     }
 }
 
-// FIXED: Single definition of TemporalOracle class (not actor to fix nil comparison)
-class TemporalOracle {
+// FIXED: Change to actor to fix non-sendable error
+actor TemporalOracle {
     var predictions: [String: [TemporalPrediction]] = [:]
     
     func predictFuture(pair: String) async -> [TemporalPrediction] {
         let prediction = TemporalPrediction(
+            horizon: 300,
             predPrice: Double.random(in: 0.8...1.2),
             conf: Double.random(in: 0.5...1.0),
-            horizon: 300,
             prob: Double.random(in: 0.4...0.9)
         )
         predictions[pair] = [prediction]
@@ -212,14 +198,7 @@ class NeuralAgent {
 
 // Add these to ExchangeWebSocket extension
 extension ExchangeWebSocket {
-    // FIXED: Add missing AI engine instances
-    static var evolutionEngine: EvolutionEngine = EvolutionEngine()
-    static var quantumProcessor: QuantumProcessor = QuantumProcessor()
-    static var patternEngine: PatternEngine = PatternEngine()
-    static var temporalOracle: TemporalOracle = TemporalOracle()
-    static var neuralSwarm: NeuralSwarmCoordinator = NeuralSwarmCoordinator()
-    
-    // FIXED: Add missing signal calculation functions
+
     static func calculateArbitrageSignal(pair: String) -> Double {
         let kucoinPrice = kucoinCurrentPrice[pair] ?? 0.0
         let bybitPrice = bybitCurrentPrice[pair] ?? 0.0
@@ -347,4 +326,3 @@ extension ExchangeWebSocket {
         }
     }
 }
-
