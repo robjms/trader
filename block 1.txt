@@ -1,18 +1,34 @@
 //--------------- Block 1 - Core Data Structures and Utilities
-// VARIABLES TO ADD: Add isEmpty property to BevaixOrderBook struct
+// VARIABLES TO ADD: None - All variables included in this block
 
 @preconcurrency import Starscream
 import Foundation
 import SwiftDotenv
 import CryptoKit
 
+// FIXED: Add AgentType enum at the top to resolve "Cannot find type 'AgentType'" errors
+enum AgentType: String, CaseIterable {
+    case momentum, meanReversion, marketMaking, hft
+}
+
+// FIXED: Add single definitions of types to resolve ambiguous type lookup errors
+struct HyperdimensionalVector {
+    let dims: [Double]
+    let mag: Double
+    let ts: Date
+}
+
+struct TemporalPrediction {
+    let horizon: TimeInterval
+    let predPrice: Double
+    let conf: Double
+    let prob: Double
+}
+
 // BevaixOrderBook struct definition to avoid conflicts
 struct BevaixOrderBook {
     var bids: [(price: Double, quantity: Double)]
     var asks: [(price: Double, quantity: Double)]
-     var isEmpty: Bool {
-        return bids.isEmpty && asks.isEmpty
-    }
 }
 
 // Enhanced Structures for Advanced Trading
@@ -70,120 +86,6 @@ struct TradingOpportunity {
     let confidence: Double
     let timeHorizon: TimeInterval
 }
-
-// ADD THIS COMPLETE BLOCK RIGHT AFTER THE TradingOpportunity struct (around line 90)
-
-// Advanced AI Trading Structures - FIXES LINES 514-530 ERRORS
-// AI Trading Structures - Insert after TradingOpportunity struct (around line 90)
-
-    func similarity(to other: HyperdimensionalVector) -> Double {
-        guard dimensions == other.dimensions else { return 0.0 }
-        let dotProduct = zip(values, other.values).map(*).reduce(0, +)
-        let magnitude1 = sqrt(values.map { $0 * $0 }.reduce(0, +))
-        let magnitude2 = sqrt(other.values.map { $0 * $0 }.reduce(0, +))
-        return magnitude1 * magnitude2 > 0 ? dotProduct / (magnitude1 * magnitude2) : 0.0
-    }
-}
-
-
-struct TemporalOracle {
-    let predictions: [TemporalPrediction]
-    let accuracy: Double
-    let lastUpdate: Date
-    
-    init(predictions: [TemporalPrediction] = [], accuracy: Double = 0.5) {
-        self.predictions = predictions
-        self.accuracy = accuracy
-        self.lastUpdate = Date()
-    }
-    
-    func generatePrediction(price: Double, features: [String: Double]) -> TemporalPrediction {
-        let confidence = min(max(accuracy * Double.random(in: 0.8...1.2), 0.1), 0.9)
-        let priceChange = Double.random(in: -0.02...0.02)
-        let predictedPrice = price * (1 + priceChange)
-        
-        return TemporalPrediction(
-            predPrice: predictedPrice,
-            confidence: confidence,
-            horizon: 300,
-            features: features
-        )
-    }
-}
-
-    
-    func updatePerformance(newResult: Double) {
-        performance = performance * 0.9 + newResult * 0.1
-    }
-}
-
-struct EvolutionEngine {
-    var agents: [NeuralAgent]
-    let maxAgents: Int
-    
-    init(maxAgents: Int = 50) {
-        self.maxAgents = maxAgents
-        self.agents = []
-        
-        for agentType in [AgentType.arbitrage, .momentum, .meanReversion, .marketMaking, .hft] {
-            for _ in 0..<10 {
-                agents.append(NeuralAgent(type: agentType))
-            }
-        }
-    }
-    
-    mutating func evolve() {
-        agents.sort { $0.performance > $1.performance }
-        let survivors = agents.prefix(agents.count / 2)
-        var newGeneration = Array(survivors)
-        
-        while newGeneration.count < maxAgents {
-            let parent = survivors.randomElement()!
-            let newAgent = NeuralAgent(type: parent.agentType)
-            newAgent.performance = parent.performance * 0.9
-            newGeneration.append(newAgent)
-        }
-        
-        agents = newGeneration
-    }
-}
-
-struct OrderBookDepthCalculator {
-    static func calculateDepthFromArrays(bids: [[String]], asks: [[String]]) -> Double {
-        var totalDepth: Double = 0.0
-        
-        for bid in bids.prefix(10) {
-            if bid.count >= 2, let price = Double(bid[0]), let quantity = Double(bid[1]) {
-                totalDepth += price * quantity
-            }
-        }
-        
-        for ask in asks.prefix(10) {
-            if ask.count >= 2, let price = Double(ask[0]), let quantity = Double(ask[1]) {
-                totalDepth += price * quantity
-            }
-        }
-        
-        return totalDepth
-    }
-    
-    static func calculateDepthFromDoubleArrays(bids: [(Double, Double)], asks: [(Double, Double)]) -> Double {
-        var totalDepth: Double = 0.0
-        
-        for bid in bids.prefix(10) {
-            totalDepth += bid.0 * bid.1
-        }
-        
-        for ask in asks.prefix(10) {
-            totalDepth += ask.0 * ask.1
-        }
-        
-        return totalDepth
-    }
-}
-
-
-
 
 // Global Helper Methods for Type Conversion
 func getDouble(_ key: String, defaultValue: Double) -> Double {
@@ -381,6 +283,8 @@ func logAlert(event: String, completion: @escaping @Sendable () -> Void = {}) {
     }
 }
 
+
+
 // REPLACE YOUR EXISTING @MainActor class ExchangeWebSocket SECTION WITH THIS COMPLETE FIXED VERSION
 
 @MainActor
@@ -439,6 +343,8 @@ class ExchangeWebSocket {
     static var kucoinCurrentFuturesPrice: [String: Double] = [:]
     static var bybitCurrentPrice: [String: Double] = [:]
     static var bybitCurrentFuturesPrice: [String: Double] = [:]
+    
+    
     
     // Volume Storage
     static var kucoinSpotVolume: [String: [Double]] = [:]
@@ -620,6 +526,7 @@ class ExchangeWebSocket {
     static var patternEngine: EvolutionEngine = EvolutionEngine()
     static var temporalOracle: TemporalOracle = TemporalOracle()
     static var evolutionEngine: EvolutionEngine = EvolutionEngine()
+    
     
     // Helper for dynamic spread threshold
     static func adjustSpreadThreshold(pair: String, baseThreshold: Double) -> Double {
