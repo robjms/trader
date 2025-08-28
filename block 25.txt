@@ -1,11 +1,5 @@
 // --------------------------------------------------------- Block 25 - Self-Evolution & Learning System
-//--------------- Block 25 - Self-Evolution & Learning System
-// VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities:
-// static var evolutionEngine: EvolutionEngine = EvolutionEngine()
-// static var quantumProcessor: QuantumProcessor = QuantumProcessor()
-// static var patternEngine: PatternEngine = PatternEngine()
-// static var temporalOracle: TemporalOracle = TemporalOracle()
-// static var neuralSwarm: NeuralSwarmCoordinator = NeuralSwarmCoordinator()
+
 
 import Foundation
 
@@ -69,6 +63,10 @@ actor EvolutionEngine {
         
         print("DEBUG: Evolution generation \(gen) completed. Best fitness: \(pool.first?.fitness ?? 0)")
     }
+    
+    
+    
+    
     
     func getBestStrategy() -> EvolvableStrategy? {
         return pool.max(by: { $0.fitness < $1.fitness })
