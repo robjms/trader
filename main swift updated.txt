@@ -951,7 +951,7 @@ class ExchangeWebSocket {
             let rawPairs = await MainActor.run { environment["ACTIVE_PAIRS"] ?? "BTC-USDT,ETH-USDT" }
             print("DEBUG: Raw ACTIVE_PAIRS from .env: \(rawPairs)")
             tradingPairs = rawPairs.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-            print("DEBUG: Loaded tradingPairs: \(tradingPairs)")
+            print("🎯 LOADED \(tradingPairs.count) TRADING PAIRS: \(tradingPairs)")
             print("DEBUG: Number of pairs loaded: \(tradingPairs.count)")
 
             // Allocate capital proportionally
@@ -7222,17 +7222,27 @@ extension ExchangeWebSocket {
            for (index, pair) in tradingPairs.enumerated() {
                print("🔄 Fetching prices for \(pair) (\(index + 1)/\(tradingPairs.count))")
                
-               // Fetch all 4 price types concurrently
-               async let kucoinSpotTask = fetchKuCoinSpotPrice(pair: pair)
-               async let kucoinFuturesTask = fetchKuCoinFuturesPrice(pair: pair)
-               async let bybitSpotTask = fetchBybitSpotPrice(pair: pair)
-               async let bybitFuturesTask = fetchBybitFuturesPrice(pair: pair)
+               // Fetch all 4 price types and use the results
+               async let kucoinSpotPrice = fetchKuCoinSpotPrice(pair: pair)
+               async let kucoinFuturesPrice = fetchKuCoinFuturesPrice(pair: pair)
+               async let bybitSpotPrice = fetchBybitSpotPrice(pair: pair)
+               async let bybitFuturesPrice = fetchBybitFuturesPrice(pair: pair)
+
+               // Actually use the fetched prices
+               let fetchedKucoinSpot = await kucoinSpotPrice ?? 0.0
+               let fetchedKucoinFutures = await kucoinFuturesPrice ?? 0.0
+               let fetchedBybitSpot = await bybitSpotPrice ?? 0.0
+               let fetchedBybitFutures = await bybitFuturesPrice ?? 0.0
+
+               print("📊 Fetched prices for \(pair): KuCoin Spot=$\(fetchedKucoinSpot), Futures=$\(fetchedKucoinFutures), Bybit Spot=$\(fetchedBybitSpot), Futures=$\(fetchedBybitFutures)")
                
                // Wait for all to complete
-               await kucoinSpotTask
-               await kucoinFuturesTask
-               await bybitSpotTask
-               await bybitFuturesTask
+               // Wait for all to complete
+               let _ = await kucoinSpotPrice
+               let _ = await kucoinFuturesPrice
+               let _ = await bybitSpotPrice
+               let _ = await bybitFuturesPrice
+               
                
                await MainActor.run {
                    let kcSpot = kucoinCurrentPrice[pair] ?? 0.0
