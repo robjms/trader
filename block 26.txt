@@ -76,8 +76,7 @@ class AITradingOrchestrator {
 }
 
 extension ExchangeWebSocket {
-    // FIXED: Add if not present
-    static var lastEvolution: Date = .distantPast
+   
 
     // FIXED: Add missing calculateStandardDeviation function
     static func calculateStandardDeviation(prices: [Double]) -> Double {
@@ -93,6 +92,5 @@ extension ExchangeWebSocket {
         // Additional logging here
     }
     
-    // FIXED: Remove executeTrade if it's a redeclaration; assume it's defined elsewhere
-    // If not, add it here
 }
+
