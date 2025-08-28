@@ -4760,7 +4760,7 @@ extension ExchangeWebSocket {
     static func processMessageQueue() async {
         while true {
             let messages = await MainActor.run { () -> [(String, String)] in
-                let currentMessages = enhancedMessageQueue
+                let _ = enhancedMessageQueue
                 enhancedMessageQueue.removeAll()
                 return []            }
             
@@ -9213,7 +9213,7 @@ class AITradingOrchestrator {
                 // FIXED: Use correct objects for methods
                 let q = await ExchangeWebSocket.quantumProcessor.processQuantumState(pair: "BTC-USDT")
                 let p = await ExchangeWebSocket.patternEngine.createMarketVector(pair: "BTC-USDT")
-                let t = await ExchangeWebSocket.temporalOracle.predictFuture(pair: "BTC-USDT")
+                let _ = await ExchangeWebSocket.temporalOracle.predictFuture(pair: "BTC-USDT")
                 // FIXED: Ensure neuralSwarm is NeuralSwarmCoordinator; if error persists, check variable type in Block 1
                 let s: [Float] = []
                 
