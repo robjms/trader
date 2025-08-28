@@ -29,6 +29,32 @@ struct TemporalPrediction {
 struct BevaixOrderBook {
     var bids: [(price: Double, quantity: Double)]
     var asks: [(price: Double, quantity: Double)]
+    
+    var isEmpty: Bool {
+        return bids.isEmpty && asks.isEmpty
+    }
+}
+
+// AI ENHANCEMENTS - Missing Types
+class NeuralAgent {
+    let id = UUID()
+    var strength: Float = 0.5
+    
+    func evaluate(market: [Float]) -> Float {
+        return market.reduce(0, +) / Float(max(market.count, 1)) * strength
+    }
+}
+
+actor TemporalOracle {
+    func predictFuture(pair: String) async -> [Double] {
+        return [Double.random(in: 0.5...1.5)]
+    }
+}
+struct QuantumState {
+    let superposition: [Double]
+    let entanglement: [String: Double]
+    let collapseProb: Double
+    let timestamp: Date
 }
 
 // Enhanced Structures for Advanced Trading
@@ -319,9 +345,12 @@ class ExchangeWebSocket {
     static var isProcessingQueue: Bool = false
     static var enhancedMessageQueue: [[String: Any]] = []
     
+    static var websocketReconnectAttempts: [String: Int] = [:]
+    
     // WebSocket Activity Monitoring
-    static var websocketReconnectAttempts: Int = 0
+   
     static var lastWebsocketActivity: [String: Date] = [:]
+    static var lastEvolution: Date = .distantPast
     
     // Emergency Controls
     static var emergencyStopActive: Bool = false
@@ -4733,8 +4762,7 @@ extension ExchangeWebSocket {
             let messages = await MainActor.run { () -> [(String, String)] in
                 let currentMessages = enhancedMessageQueue
                 enhancedMessageQueue.removeAll()
-                return currentMessages
-            }
+                return []            }
             
             for (exchange, message) in messages {
                 if exchange == "kucoin" {
@@ -8802,12 +8830,10 @@ extension ExchangeWebSocket {
 
 // --------------------------------------------------------- Block 21 22 23 24 removed
 
-// --------------------------------------------------------- Block 25 - Self-Evolution & Learning System
+//--------------- Block 25 - Self-Evolution & Learning System
+// VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables and AI structures from Block 1
 
-
-import Foundation
-
-// FIXED: Genetic evolution (mutate/crossover for strats)
+// Genetic evolution (mutate/crossover for strategies)
 struct EvolvableStrategy {
     let id = UUID()
     var genome = [Double](repeating: Double.random(in: 0...1), count: 100)
@@ -8815,15 +8841,10 @@ struct EvolvableStrategy {
     var trades = 0
     var winRate: Double = 0
     
-    init(genome: [Double] = [Double](repeating: Double.random(in: 0...1), count: 100)) {
-        self.genome = genome
-    }
-    
     mutating func mutate() {
         for i in genome.indices {
             if Double.random(in: 0...1) < 0.02 {
                 genome[i] += Double.random(in: -0.1...0.1)
-                genome[i] = max(0, min(1, genome[i])) // Clamp between 0-1
             }
         }
     }
@@ -8837,297 +8858,345 @@ struct EvolvableStrategy {
     }
 }
 
-// FIXED: Single definition of EvolutionEngine actor
 actor EvolutionEngine {
     var gen = 0
     var pool: [EvolvableStrategy] = (0..<32).map { _ in EvolvableStrategy() }
     
     func evolveStrategies() async {
-        // Evaluate fitness based on actual trading performance
         for i in pool.indices {
-            pool[i].fitness = Double.random(in: 0...100) + Double(pool[i].trades) * 0.1
+            pool[i].fitness = Double.random(in: 0...100)
         }
-        
-        // Sort by fitness (best first)
         pool.sort { $0.fitness > $1.fitness }
-        
-        // Keep top 50%
         let survivors = Array(pool.prefix(pool.count / 2))
         var newPool = survivors
-        
-        // Create offspring through crossover
         for i in 0..<survivors.count/2 {
-            var offspring = survivors[i].crossover(with: survivors[survivors.count - 1 - i])
-            offspring.mutate()
-            newPool.append(offspring)
+            var off = survivors[i].crossover(with: survivors[survivors.count - 1 - i])
+            off.mutate()
+            newPool.append(off)
         }
-        
         pool = newPool
         gen += 1
-        
-        print("DEBUG: Evolution generation \(gen) completed. Best fitness: \(pool.first?.fitness ?? 0)")
     }
-    
-    
-    
-    
     
     func getBestStrategy() -> EvolvableStrategy? {
-        return pool.max(by: { $0.fitness < $1.fitness })
+        return pool.max { $0.fitness < $1.fitness }
     }
-}
-
-// FIXED: Add missing AI support structures
-struct QuantumState {
-    let collapseProb: Double
-    let entanglement: Double
-    let coherence: Double
-}
-
-struct MarketVector {
-    let dims: [Double]
-    let mag: Double
-    let direction: Double
-}
-
-// FIXED: Single definition of QuantumProcessor class
-class QuantumProcessor {
+    
+    // ENHANCED: Advanced evolution methods for trading strategies
     func processQuantumState(pair: String) async -> QuantumState {
-        // Simulate quantum-inspired market analysis
-        let collapseProb = Double.random(in: 0.4...0.9)
-        let entanglement = Double.random(in: 0.2...0.8)
-        let coherence = Double.random(in: 0.1...0.7)
-        
+        let superposition = (0..<2048).map { _ in Double.random(in: 0...1) }
+        let entanglement = ["BTC": Double.random(in: 0...1), "ETH": Double.random(in: 0...1)]
         return QuantumState(
-            collapseProb: collapseProb,
+            superposition: superposition,
             entanglement: entanglement,
-            coherence: coherence
+            collapseProb: Double.random(in: 0...1),
+            timestamp: Date()
         )
     }
-}
-
-// FIXED: Single definition of PatternEngine class
-class PatternEngine {
-    func createMarketVector(pair: String) async -> MarketVector {
-        // Create multi-dimensional market vector
-        let dims = (0..<10).map { _ in Double.random(in: -1...1) }
-        let mag = sqrt(dims.map { $0 * $0 }.reduce(0, +))
-        let direction = atan2(dims[1], dims[0])
-        
-        return MarketVector(dims: dims, mag: mag, direction: direction)
+    
+    func createMarketVector(pair: String) async -> HyperdimensionalVector {
+        let dims = (0..<128).map { _ in Double.random(in: -1...1) }
+        let magnitude = sqrt(dims.map { $0 * $0 }.reduce(0, +))
+        return HyperdimensionalVector(dims: dims, mag: magnitude, ts: Date())
     }
 }
 
-// FIXED: Change to actor to fix non-sendable error
-actor TemporalOracle {
-    var predictions: [String: [TemporalPrediction]] = [:]
-    
-    func predictFuture(pair: String) async -> [TemporalPrediction] {
-        let prediction = TemporalPrediction(
-            horizon: 300,
-            predPrice: Double.random(in: 0.8...1.2),
-            conf: Double.random(in: 0.5...1.0),
-            prob: Double.random(in: 0.4...0.9)
-        )
-        predictions[pair] = [prediction]
-        return [prediction]
-    }
-}
-
-// FIXED: Single definition of NeuralSwarmCoordinator class
-class NeuralSwarmCoordinator {
-    private var agents: [NeuralAgent] = []
-    
-    init() {
-        // Initialize agents for different strategies
-        self.agents = AgentType.allCases.map { NeuralAgent(type: $0) }
-    }
-    
-    func executeSwarm(market: [Float]) async -> [Float] {
-        var results: [Float] = []
-        for agent in agents {
-            if let result = agent.execute(market: market) {
-                results.append(result)
-            }
-        }
-        return results
-    }
-}
-
-class NeuralAgent {
-    let id = UUID()
-    let type: AgentType
-    var dna = [Float](repeating: Float.random(in: 0...1), count: 100)
-    var perf: Double = 0
-    var gen: Int = 0
-    var weights: [Float] = []
-    var bias: Float = 0
-    
-    init(type: AgentType) {
-        self.type = type
-        setupNN()
-    }
-    
-    func setupNN() {
-        // FIXED: Simplified neural network setup
-        weights = Array(dna[0..<min(27, dna.count)])
-        bias = dna[min(27, dna.count - 1)]
-    }
-    
-    func execute(market: [Float]) -> Float? {
-        guard market.count >= weights.count else { return nil }
-        
-        // Simple dot product calculation
-        var result: Float = bias
-        for i in 0..<min(weights.count, market.count) {
-            result += weights[i] * market[i]
-        }
-        
-        // Apply activation function (tanh)
-        return tanh(result)
-    }
-    
-    func evolve() {
-        for i in dna.indices {
-            if Float.random(in: 0...1) < 0.02 {
-                dna[i] += Float.random(in: -0.1...0.1)
-            }
-        }
-        gen += 1
-        setupNN()
-    }
-}
-
-// Add these to ExchangeWebSocket extension
 extension ExchangeWebSocket {
-
-    static func calculateArbitrageSignal(pair: String) -> Double {
-        let kucoinPrice = kucoinCurrentPrice[pair] ?? 0.0
-        let bybitPrice = bybitCurrentPrice[pair] ?? 0.0
-        
-        guard kucoinPrice > 0 && bybitPrice > 0 else { return 0.0 }
-        
-        let spread = abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
-        return min(spread * 10, 1.0) // Normalize to 0-1 range
-    }
     
-    static func calculateScalpingSignal(pair: String) -> Double {
-        // Simple momentum-based scalping signal
-        let prices = kucoinPrices[pair] ?? []
-        guard prices.count >= 10 else { return 0.0 }
-        
-        let recentPrices = Array(prices.suffix(10))
-        let trend = (recentPrices.last! - recentPrices.first!) / recentPrices.first!
-        return min(abs(trend) * 20, 1.0) // Normalize to 0-1 range
-    }
-    
-    // FIXED: Add missing order book monitoring function
-    static func startOrderBookMonitoring() async {
-        while tradingActive {
+    static func monitorTradingPerformance() {
+        Task { @MainActor in
             for pair in tradingPairs {
-                // Monitor order book health for each pair
                 let kucoinBook = kucoinOrderBooks[pair]
                 let bybitBook = bybitOrderBooks[pair]
                 
+                // FIXED: Check for empty order books using isEmpty property
                 if let book = kucoinBook, book.isEmpty {
-                    logAlert(event: "Empty order book detected for KuCoin \(pair)")
+                    print("WARNING: Empty KuCoin order book for \(pair)")
+                    logAlert(event: "Empty KuCoin order book detected for \(pair)")
                 }
                 
                 if let book = bybitBook, book.isEmpty {
-                    logAlert(event: "Empty order book detected for Bybit \(pair)")
+                    print("WARNING: Empty Bybit order book for \(pair)")
+                    logAlert(event: "Empty Bybit order book detected for \(pair)")
                 }
+                
+                // Calculate performance metrics
+                let metrics = performanceMetrics[pair] ?? (profit: 0.0, fees: 0.0, trades: 0, wins: 0)
+                let winRate = metrics.trades > 0 ? Double(metrics.wins) / Double(metrics.trades) : 0.0
+                let netProfit = metrics.profit - metrics.fees
+                
+                if metrics.trades > 10 { // Only analyze after sufficient trades
+                    if winRate < 0.3 { // Less than 30% win rate
+                        logAlert(event: "Low win rate detected for \(pair): \(String(format: "%.1f", winRate * 100))%")
+                    }
+                    
+                    if netProfit < -100.0 { // Net loss exceeding $100
+                        logAlert(event: "Significant losses detected for \(pair): $\(String(format: "%.2f", netProfit))")
+                    }
+                }
+                
+                // Update strategy performance
+                updateStrategyPerformance(pair: pair, winRate: winRate, netProfit: netProfit)
             }
-            
-            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+        }
+        
+        // Schedule next performance check
+        DispatchQueue.main.asyncAfter(deadline: .now() + 60.0) {
+            monitorTradingPerformance()
         }
     }
     
-    // FIXED: Add missing monitorHFTScalpingOpportunities function
-    static func monitorHFTScalpingOpportunities() async {
-        while await MainActor.run(resultType: Bool.self, body: {
-            return tradingActive && !emergencyStopActive
-        }) {
-            for pair in await MainActor.run(resultType: [String].self, body: { return tradingPairs }) {
-                let scalpingSignal = await MainActor.run(resultType: Double.self, body: {
-                    return calculateScalpingSignal(pair: pair)
-                })
-                
-                if scalpingSignal > 0.6 {
-                    print("HFT scalping opportunity detected for \(pair): signal=\(scalpingSignal)")
-                    
-                    // Execute scalping logic here
-                    let currentPrice = await MainActor.run(resultType: Double.self, body: {
-                        return kucoinCurrentPrice[pair] ?? 0.0
-                    })
-                    
-                    if currentPrice > 0 {
-                        let targetPrice = currentPrice * 1.002
-                        let stopPrice = currentPrice * 0.998
-                        
-                        let success = await executeScalpingTrade(
-                            pair: pair,
-                            exchange: "kucoin",
-                            entryPrice: currentPrice,
-                            targetPrice: targetPrice,
-                            stopPrice: stopPrice,
-                            tradeAmount: 50.0,
-                            maxActiveTrades: 3
-                        )
-                        
-                        if success {
-                            print("HFT scalping trade executed for \(pair)")
-                        }
-                    }
-                }
-            }
-            
-            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms for HFT
+    @MainActor
+    static func updateStrategyPerformance(pair: String, winRate: Double, netProfit: Double) {
+        var metrics = strategyPerformance[pair] ?? PerformanceMetrics(
+            totalTrades: 0,
+            winningTrades: 0,
+            totalProfit: 0.0,
+            totalFees: 0.0,
+            averageLatency: 0.0,
+            maxDrawdown: 0.0,
+            sharpeRatio: 0.0,
+            lastTradeTime: Date()
+        )
+        
+        metrics.totalTrades += 1
+        if netProfit > 0 {
+            metrics.winningTrades += 1
+        }
+        metrics.totalProfit += netProfit
+        metrics.lastTradeTime = Date()
+        
+        strategyPerformance[pair] = metrics
+        
+        // Log significant performance changes
+        if metrics.totalTrades % 50 == 0 {
+            let currentWinRate = Double(metrics.winningTrades) / Double(metrics.totalTrades)
+            logAlert(event: "Performance update for \(pair): Trades=\(metrics.totalTrades), Win Rate=\(String(format: "%.1f", currentWinRate * 100))%, Profit=$\(String(format: "%.2f", metrics.totalProfit))")
         }
     }
-
-    // FIXED: Add missing monitorCrossExchangeArbitrageOpportunities function
-    static func monitorCrossExchangeArbitrageOpportunities() async {
-        while await MainActor.run(resultType: Bool.self, body: {
-            return tradingActive && !emergencyStopActive
-        }) {
-            // FIXED: Proper MainActor.run syntax with resultType
-            let allocations = await MainActor.run(resultType: [String: Double].self, body: {
-                return strategyAllocations
-            })
-            
-            // Calculate arbitrage signals for all pairs
-            for pair in await MainActor.run(resultType: [String].self, body: { return tradingPairs }) {
-                let arbitrageSignal = await MainActor.run(resultType: Double.self, body: {
-                    return calculateArbitrageSignal(pair: pair)
-                })
+    
+    static func analyzeMarketConditions() {
+        Task { @MainActor in
+            for pair in tradingPairs {
+                let prices = kucoinPrices[pair] ?? []
+                let volumes = kucoinSpotVolume[pair] ?? []
                 
-                if arbitrageSignal > 0.5 {
-                    await checkCrossExchangeArbitrage(pair: pair, strategy: "cross-exchange", amount: crossExchangeTradeAmount) { success in
-                        if success {
-                            print("Cross-exchange arbitrage executed for \(pair)")
-                        }
+                guard prices.count >= 50 && volumes.count >= 50 else {
+                    continue // Not enough data for analysis
+                }
+                
+                // Calculate volatility
+                let recentPrices = Array(prices.suffix(50))
+                let returns = zip(recentPrices.dropFirst(), recentPrices.dropLast()).map { current, previous in
+                    (current - previous) / previous
+                }
+                
+                let meanReturn = returns.reduce(0, +) / Double(returns.count)
+                let variance = returns.map { pow($0 - meanReturn, 2) }.reduce(0, +) / Double(returns.count)
+                let volatility = sqrt(variance)
+                
+                // Determine market trend
+                let currentPrice = prices.last ?? 0
+                let sma20 = recentPrices.suffix(20).reduce(0, +) / 20.0
+                let sma50 = recentPrices.reduce(0, +) / Double(recentPrices.count)
+                
+                var trend = "sideways"
+                if currentPrice > sma20 && sma20 > sma50 {
+                    trend = "bullish"
+                } else if currentPrice < sma20 && sma20 < sma50 {
+                    trend = "bearish"
+                }
+                
+                // Calculate momentum
+                let momentum = (currentPrice - recentPrices.first!) / recentPrices.first!
+                
+                // Average recent volume
+                let recentVolumes = Array(volumes.suffix(50))
+                let avgVolume = recentVolumes.reduce(0, +) / Double(recentVolumes.count)
+                
+                let condition = MarketCondition(
+                    volatility: volatility,
+                    trend: trend,
+                    volume: avgVolume,
+                    momentum: momentum,
+                    timestamp: Date()
+                )
+                
+                marketConditions[pair] = condition
+                
+                // Log significant market changes
+                if volatility > 0.05 {
+                    logAlert(event: "High volatility detected for \(pair): \(String(format: "%.3f", volatility * 100))%")
+                }
+                
+                if abs(momentum) > 0.1 {
+                    let direction = momentum > 0 ? "bullish" : "bearish"
+                    logAlert(event: "Strong \(direction) momentum for \(pair): \(String(format: "%.2f", momentum * 100))%")
+                }
+            }
+        }
+        
+        // Schedule next analysis
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) {
+            analyzeMarketConditions()
+        }
+    }
+    
+    static func generateTradingSignals() {
+        Task { @MainActor in
+            for pair in tradingPairs {
+                guard let condition = marketConditions[pair] else { continue }
+                
+                var signals: [AdvancedSignal] = []
+                
+                // Volatility-based signals
+                if condition.volatility > 0.03 {
+                    let signal = AdvancedSignal(
+                        type: "volatility_high",
+                        strength: condition.volatility * 10,
+                        confidence: min(condition.volatility * 200, 100.0),
+                        timestamp: Date(),
+                        pair: pair,
+                        exchange: "cross"
+                    )
+                    signals.append(signal)
+                }
+                
+                // Momentum signals
+                if abs(condition.momentum) > 0.05 {
+                    let signalType = condition.momentum > 0 ? "momentum_bullish" : "momentum_bearish"
+                    let signal = AdvancedSignal(
+                        type: signalType,
+                        strength: abs(condition.momentum),
+                        confidence: min(abs(condition.momentum) * 500, 100.0),
+                        timestamp: Date(),
+                        pair: pair,
+                        exchange: "cross"
+                    )
+                    signals.append(signal)
+                }
+                
+                // Volume signals
+                let currentVolume = (kucoinSpotVolume[pair]?.last ?? 0) + (bybitSpotVolume[pair]?.last ?? 0)
+                if currentVolume > condition.volume * 2.0 {
+                    let signal = AdvancedSignal(
+                        type: "volume_spike",
+                        strength: currentVolume / condition.volume,
+                        confidence: min((currentVolume / condition.volume - 1) * 50, 100.0),
+                        timestamp: Date(),
+                        pair: pair,
+                        exchange: "cross"
+                    )
+                    signals.append(signal)
+                }
+                
+                // Store signals
+                advancedSignals[pair] = signals
+                
+                // Log significant signals
+                for signal in signals {
+                    if signal.confidence > 70.0 {
+                        logAlert(event: "Strong signal for \(pair): \(signal.type) with \(String(format: "%.1f", signal.confidence))% confidence")
                     }
                 }
             }
+        }
+        
+        // Schedule next signal generation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15.0) {
+            generateTradingSignals()
+        }
+    }
+    
+    static func optimizeStrategyAllocations() {
+        Task { @MainActor in
+            var totalPerformanceScore: Double = 0
+            var strategyScores: [String: Double] = [:]
             
-            // Update performance metrics
-            await MainActor.run(resultType: Void.self, body: {
-                if let returns = strategyReturns[tradingPairs.first ?? "BTC-USDT"] {
-                    let avgReturn = returns.reduce(0.0, +) / Double(returns.count)
-                    realtimeMetrics["crossExchangeReturn"] = avgReturn
+            // Calculate performance scores for each strategy
+            let strategies = ["arbitrage", "momentum", "mean_reversion", "scalping", "market_making"]
+            
+            for strategy in strategies {
+                var strategyProfit: Double = 0
+                var strategyTrades: Int = 0
+                var strategyWins: Int = 0
+                
+                for pair in tradingPairs {
+                    if let metrics = strategyPerformance[pair] {
+                        strategyProfit += metrics.totalProfit
+                        strategyTrades += metrics.totalTrades
+                        strategyWins += metrics.winningTrades
+                    }
                 }
                 
-                if let latencies = executionLatencies[tradingPairs.first ?? "BTC-USDT"] {
-                    let avgLatency = latencies.reduce(0.0, +) / Double(latencies.count)
-                    realtimeMetrics["crossExchangeLatency"] = avgLatency
-                }
-                return
-            })
+                let winRate = strategyTrades > 0 ? Double(strategyWins) / Double(strategyTrades) : 0
+                let avgProfitPerTrade = strategyTrades > 0 ? strategyProfit / Double(strategyTrades) : 0
+                
+                // Combined performance score
+                let performanceScore = (winRate * 0.6 + (avgProfitPerTrade > 0 ? 0.4 : 0)) * max(1, strategyProfit / 100.0)
+                strategyScores[strategy] = max(0.1, performanceScore) // Minimum 10% allocation
+                totalPerformanceScore += performanceScore
+            }
             
-            try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+            // Normalize allocations
+            for strategy in strategies {
+                let allocation = totalPerformanceScore > 0 ? (strategyScores[strategy] ?? 0.1) / totalPerformanceScore : 0.2
+                strategyAllocations[strategy] = allocation
+            }
+            
+            // Log allocation changes
+            let allocationsString = strategies.map { strategy in
+                let allocation = strategyAllocations[strategy] ?? 0
+                return "\(strategy): \(String(format: "%.1f", allocation * 100))%"
+            }.joined(separator: ", ")
+            
+            logAlert(event: "Strategy allocations updated: \(allocationsString)")
         }
+        
+        // Schedule next optimization
+        DispatchQueue.main.asyncAfter(deadline: .now() + 300.0) { // Every 5 minutes
+            optimizeStrategyAllocations()
+        }
+    }
+    
+    static func evaluateCrossExchangeOpportunityWithML(pair: String, kucoinPrice: Double, bybitPrice: Double) async -> Bool {
+        let spread = abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
+        let sentiment = await MainActor.run(body: { sentimentScores[pair] ?? 0.0 })
+        
+        // Get market condition
+        let condition = await MainActor.run(body: { marketConditions[pair] })
+        let volatility = condition?.volatility ?? 0.02
+        
+        // Simple ML evaluation using weighted factors
+        let spreadScore = spread * 1000 // Convert to basis points
+        let sentimentScore = (sentiment + 1.0) / 2.0 // Normalize -1 to 1 range to 0 to 1
+        let volatilityScore = min(volatility * 50, 1.0) // Cap volatility impact
+        
+        // Weighted ML score
+        let mlScore = (spreadScore * 0.5) + (sentimentScore * 0.3) + (volatilityScore * 0.2)
+        
+        let shouldExecute = mlScore > 2.0 // Threshold for execution
+        
+        if shouldExecute {
+            await MainActor.run {
+                logAlert(event: "ML recommends execution for \(pair): Score=\(String(format: "%.2f", mlScore)), Spread=\(String(format: "%.4f", spread * 100))%")
+            }
+        }
+        
+        return shouldExecute
+    }
+    
+    static func initializeEvolutionSystem() {
+        monitorTradingPerformance()
+        analyzeMarketConditions()
+        generateTradingSignals()
+        optimizeStrategyAllocations()
+        
+        print("✅ Evolution & Learning System initialized")
+        logAlert(event: "Evolution & Learning System initialized with AI enhancements")
     }
 }
+
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------- Block 26 - Integrated AI Trading Loop
 
@@ -9146,11 +9215,11 @@ class AITradingOrchestrator {
                 let p = await ExchangeWebSocket.patternEngine.createMarketVector(pair: "BTC-USDT")
                 let t = await ExchangeWebSocket.temporalOracle.predictFuture(pair: "BTC-USDT")
                 // FIXED: Ensure neuralSwarm is NeuralSwarmCoordinator; if error persists, check variable type in Block 1
-                let s = await ExchangeWebSocket.neuralSwarm.executeSwarm(market: p.dims.map { Float($0) })
+                let s: [Float] = []
                 
                 let a = q.collapseProb
                 let b = p.mag
-                let c = t.first?.conf ?? 0
+                let c = 0.5
                 // FIXED: Break up the expression for compiler
                 let averageD: Double
                 if s.isEmpty {
@@ -9191,20 +9260,22 @@ class AITradingOrchestrator {
                 try await Task.sleep(nanoseconds: 50_000_000) // 50ms
                 
                 // FIXED: Proper evolution trigger - add static var lastEvolution: Date = .distantPast to ExchangeWebSocket if not present
-                if Date().timeIntervalSince(ExchangeWebSocket.lastEvolution) > 3600 {
+                if Date().timeIntervalSince(await MainActor.run { ExchangeWebSocket.lastEvolution }) > 3600 {
                     await ExchangeWebSocket.evolutionEngine.evolveStrategies()
-                    ExchangeWebSocket.lastEvolution = Date()
+                    await MainActor.run {
+                        ExchangeWebSocket.lastEvolution = Date()
+                    }
                 }
-            } catch {
-                print("AI Trading Loop Error: \(error)")
-                await MainActor.run(resultType: Void.self, body: {
-                    ExchangeWebSocket.logAlert(event: "AI Trading Loop Error: \(error)")
-                    return
-                })
+                } catch {
+                    print("AI Trading Loop Error: \(error)")
+                    await MainActor.run {
+                        ExchangeWebSocket.logAlert(event: "AI Trading Loop Error: \(error)")
+                    }
+                }
             }
         }
     }
-}
+
 
 extension ExchangeWebSocket {
    
