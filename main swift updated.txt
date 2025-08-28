@@ -6777,6 +6777,8 @@ RunLoop.main.run()
 import Foundation
 
 extension ExchangeWebSocket {
+    
+    
     static func structureTradeData(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double) -> [String: Any] {
         let timestampFormatter = ISO8601DateFormatter()
         timestampFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -7364,6 +7366,242 @@ extension ExchangeWebSocket {
 // VARIABLES TO ADD: None required - uses existing ExchangeWebSocket variables
 
 extension ExchangeWebSocket {
+    
+    static func fetchBybitFuturesPrice(pair: String, completion: @escaping @Sendable (Double?) -> Void) {
+           let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+           let url = URL(string: "https://api.bybit.com/v5/market/tickers?category=linear&symbol=\(symbol)")!
+           var request = URLRequest(url: url)
+           request.httpMethod = "GET"
+           request.timeoutInterval = Double(getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20))
+
+           let startTime = Date()
+           let task = URLSession.shared.dataTask(with: request) { data, response, error in
+               let latency = Date().timeIntervalSince(startTime) * 1000
+               Task { @MainActor in
+                   lastLatency["bybit-futures-\(pair)"] = latency
+                   if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
+                       logAlert(event: "High latency detected for Bybit futures price fetch for \(pair): \(latency)ms")
+                   }
+               }
+
+               if let error = error {
+                   print("DEBUG: Failed to fetch Bybit futures price for \(pair): \(error.localizedDescription)")
+                   Task { @MainActor in
+                       logAlert(event: "Failed to fetch Bybit futures price for \(pair): \(error.localizedDescription)")
+                   }
+                   completion(nil)
+                   return
+               }
+
+               guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
+                     let data = data else {
+                   print("DEBUG: Invalid Bybit futures price response for \(pair)")
+                   Task { @MainActor in
+                       logAlert(event: "Invalid Bybit futures price response for \(pair)")
+                   }
+                   completion(nil)
+                   return
+               }
+
+               do {
+                   if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let result = json["result"] as? [String: Any],
+                      let list = result["list"] as? [[String: Any]],
+                      let ticker = list.first,
+                      let priceString = ticker["lastPrice"] as? String,
+                      let price = Double(priceString), price > 0 {
+                       
+                       Task { @MainActor in
+                           bybitCurrentFuturesPrice[pair] = price
+                           bybitFuturesPrices[pair, default: []].append(price)
+                           if bybitFuturesPrices[pair]!.count > getInt("PRICE_HISTORY_RETENTION", defaultValue: 1440) {
+                               bybitFuturesPrices[pair]?.removeFirst()
+                           }
+                           print("DEBUG: Fetched Bybit futures price for \(pair): \(price)")
+                       }
+                       completion(price)
+                   } else {
+                       print("DEBUG: Failed to parse Bybit futures price for \(pair)")
+                       Task { @MainActor in
+                           logAlert(event: "Failed to parse Bybit futures price for \(pair)")
+                       }
+                       completion(nil)
+                   }
+               } catch {
+                   print("DEBUG: Error parsing Bybit futures price JSON: \(error.localizedDescription)")
+                   Task { @MainActor in
+                       logAlert(event: "Error parsing Bybit futures price JSON: \(error.localizedDescription)")
+                   }
+                   completion(nil)
+               }
+           }
+           task.resume()
+       }
+   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    static func fetchBybitSpotPrice(pair: String, completion: @escaping @Sendable (Double?) -> Void) {
+            let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+            let url = URL(string: "https://api.bybit.com/v5/market/tickers?category=spot&symbol=\(symbol)")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            request.timeoutInterval = Double(getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20))
+
+            let startTime = Date()
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                let latency = Date().timeIntervalSince(startTime) * 1000
+                Task { @MainActor in
+                    lastLatency["bybit-spot-\(pair)"] = latency
+                    if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
+                        logAlert(event: "High latency detected for Bybit spot price fetch for \(pair): \(latency)ms")
+                    }
+                }
+
+                if let error = error {
+                    print("DEBUG: Failed to fetch Bybit spot price for \(pair): \(error.localizedDescription)")
+                    Task { @MainActor in
+                        logAlert(event: "Failed to fetch Bybit spot price for \(pair): \(error.localizedDescription)")
+                    }
+                    completion(nil)
+                    return
+                }
+
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
+                      let data = data else {
+                    print("DEBUG: Invalid Bybit spot price response for \(pair)")
+                    Task { @MainActor in
+                        logAlert(event: "Invalid Bybit spot price response for \(pair)")
+                    }
+                    completion(nil)
+                    return
+                }
+
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let result = json["result"] as? [String: Any],
+                       let list = result["list"] as? [[String: Any]],
+                       let ticker = list.first,
+                       let priceString = ticker["lastPrice"] as? String,
+                       let price = Double(priceString), price > 0 {
+                        
+                        Task { @MainActor in
+                            bybitCurrentPrice[pair] = price
+                            bybitPrices[pair, default: []].append(price)
+                            if bybitPrices[pair]!.count > getInt("PRICE_HISTORY_RETENTION", defaultValue: 1440) {
+                                bybitPrices[pair]?.removeFirst()
+                            }
+                            print("DEBUG: Fetched Bybit spot price for \(pair): \(price)")
+                        }
+                        completion(price)
+                    } else {
+                        print("DEBUG: Failed to parse Bybit spot price for \(pair)")
+                        Task { @MainActor in
+                            logAlert(event: "Failed to parse Bybit spot price for \(pair)")
+                        }
+                        completion(nil)
+                    }
+                } catch {
+                    print("DEBUG: Error parsing Bybit spot price JSON: \(error.localizedDescription)")
+                    Task { @MainActor in
+                        logAlert(event: "Error parsing Bybit spot price JSON: \(error.localizedDescription)")
+                    }
+                    completion(nil)
+                }
+            }
+            task.resume()
+        }
+    static func fetchKuCoinFuturesPrice(pair: String, completion: @escaping @Sendable (Double?) -> Void) {
+           guard hasValidKuCoinCredentials else {
+               print("DEBUG: Skipping KuCoin futures price fetch - invalid credentials")
+               completion(nil)
+               return
+           }
+           
+           let futuresSymbol = kucoinFuturesSymbols[pair] ?? {
+               let components = pair.components(separatedBy: "-")
+               if components.count == 2 {
+                   let base = components[0] == "BTC" ? "XBT" : components[0]
+                   return "\(base)\(components[1])M"
+               }
+               return "\(pair.replacingOccurrences(of: "-", with: ""))M"
+           }()
+           
+           let url = URL(string: "https://api-futures.kucoin.com/api/v1/ticker?symbol=\(futuresSymbol)")!
+           var request = URLRequest(url: url)
+           request.httpMethod = "GET"
+           request.timeoutInterval = Double(getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20))
+
+           let startTime = Date()
+           let task = URLSession.shared.dataTask(with: request) { data, response, error in
+               let latency = Date().timeIntervalSince(startTime) * 1000
+               Task { @MainActor in
+                   lastLatency["kucoin-futures-\(pair)"] = latency
+                   if latency > getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 300.0) {
+                       logAlert(event: "High latency detected for KuCoin futures price fetch for \(pair): \(latency)ms")
+                   }
+               }
+
+               if let error = error {
+                   print("DEBUG: Failed to fetch KuCoin futures price for \(pair): \(error.localizedDescription)")
+                   Task { @MainActor in
+                       logAlert(event: "Failed to fetch KuCoin futures price for \(pair): \(error.localizedDescription)")
+                   }
+                   completion(nil)
+                   return
+               }
+
+               guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
+                     let data = data else {
+                   print("DEBUG: Invalid KuCoin futures price response for \(pair)")
+                   Task { @MainActor in
+                       logAlert(event: "Invalid KuCoin futures price response for \(pair)")
+                   }
+                   completion(nil)
+                   return
+               }
+
+               do {
+                   if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let dataDict = json["data"] as? [String: Any],
+                      let priceString = dataDict["price"] as? String,
+                      let price = Double(priceString), price > 0 {
+                       
+                       Task { @MainActor in
+                           kucoinCurrentFuturesPrice[pair] = price
+                           kucoinFuturesPrices[pair, default: []].append(price)
+                           if kucoinFuturesPrices[pair]!.count > getInt("PRICE_HISTORY_RETENTION", defaultValue: 1440) {
+                               kucoinFuturesPrices[pair]?.removeFirst()
+                           }
+                           print("DEBUG: Fetched KuCoin futures price for \(pair): \(price)")
+                       }
+                       completion(price)
+                   } else {
+                       print("DEBUG: Failed to parse KuCoin futures price for \(pair)")
+                       Task { @MainActor in
+                           logAlert(event: "Failed to parse KuCoin futures price for \(pair)")
+                       }
+                       completion(nil)
+                   }
+               } catch {
+                   print("DEBUG: Error parsing KuCoin futures price JSON: \(error.localizedDescription)")
+                   Task { @MainActor in
+                       logAlert(event: "Error parsing KuCoin futures price JSON: \(error.localizedDescription)")
+                   }
+                   completion(nil)
+               }
+           }
+           task.resume()
+       }
+    
+    
+    
     static func executeSpotFuturesArbitrage(pair: String, kucoinSpotPrice: Double, kucoinFuturesPrice: Double, bybitSpotPrice: Double, bybitFuturesPrice: Double, amount: Double, completion: @escaping (Bool) -> Void) {
         Task {
             let minSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.002)
