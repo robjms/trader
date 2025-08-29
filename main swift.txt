@@ -1228,6 +1228,8 @@ class ExchangeWebSocket {
 }
 //-----------------------------------------------------------------------------------------------------------------------------Block 2 - Environment Setup and Logging
 
+//-----------------------------------------------------------------------------------------------------------------------------Block 2 - Environment Setup and Logging
+
 
 struct OrderBookEntry {
     let price: Double
@@ -1465,116 +1467,89 @@ struct AppConfig {
     }
 }
 
-func findProjectRoot(from directory: URL) -> URL? {
-    var currentDirectory = directory
-    while currentDirectory.path != "/" {
-        let packageFile = currentDirectory.appendingPathComponent("Package.swift")
-        if FileManager.default.fileExists(atPath: packageFile.path) {
-            return currentDirectory
-        }
-        currentDirectory = currentDirectory.deletingLastPathComponent()
-    }
-    return nil
-}
-
 func loadEnv() -> [String: String] {
     var env: [String: String] = [:]
     let fileManager = FileManager.default
     
-    let currentDirectory = fileManager.currentDirectoryPath
-    let currentEnvPath = URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
+    // FIXED: Use hardcoded correct path first
+    let correctEnvPath = "/Users/robertsteinegger/Desktop/BevaixBot/.env"
     
-    print("Current working directory: \(currentDirectory)")
-    print("Looking for .env file at: \(currentEnvPath)")
+    print("FIXED: Looking for .env file at HARDCODED path: \(correctEnvPath)")
     
-    if fileManager.fileExists(atPath: currentEnvPath) {
+    if fileManager.fileExists(atPath: correctEnvPath) {
         do {
-            let contents = try String(contentsOfFile: currentEnvPath, encoding: .utf8)
-            print("Successfully read .env file contents: \(contents)")
+            let contents = try String(contentsOfFile: correctEnvPath, encoding: .utf8)
+            print("SUCCESS: Read .env file from correct path")
             let lines = contents.components(separatedBy: .newlines)
             for line in lines {
                 let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                print("Processing line: '\(trimmed)'")
                 if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
                 let parts = trimmed.components(separatedBy: "=")
                 if parts.count >= 2 {
                     let key = parts[0].trimmingCharacters(in: .whitespaces)
                     let value = parts.dropFirst().joined(separator: "=").trimmingCharacters(in: .whitespaces)
-                    print("Parsed key: '\(key)', value: '\(value)'")
                     env[key] = value
-                } else {
-                    print("Skipping invalid line (expected key=value format): '\(trimmed)'")
-                    Task { @MainActor in
-                        logAlert(event: "Skipping invalid .env line: '\(trimmed)'")
-                    }
                 }
             }
+            print("SUCCESS: Loaded \(env.count) environment variables from correct path")
+            return env
         } catch {
-            print("Error loading .env file: \(error)")
+            print("ERROR: Failed to read .env file from correct path: \(error)")
             Task { @MainActor in
-                logAlert(event: "Error loading .env file: \(error)")
+                logAlert(event: "ERROR: Failed to read .env file from correct path: \(error)")
             }
         }
     } else {
-        print("Could not find .env file at path: \(currentEnvPath)")
+        print("ERROR: .env file not found at correct path: \(correctEnvPath)")
         Task { @MainActor in
-            logAlert(event: "Could not find .env file at path: \(currentEnvPath)")
-        }
-        
-        let binaryURL = URL(fileURLWithPath: CommandLine.arguments[0])
-        if let projectRoot = findProjectRoot(from: binaryURL.deletingLastPathComponent()) {
-            let rootEnvPath = projectRoot.appendingPathComponent(".env").path
-            print("Falling back to project root: \(projectRoot.path)")
-            print("Looking for .env file at: \(rootEnvPath)")
-            if fileManager.fileExists(atPath: rootEnvPath) {
-                do {
-                    let contents = try String(contentsOfFile: rootEnvPath, encoding: .utf8)
-                    print("Successfully read .env file contents: \(contents)")
-                    let lines = contents.components(separatedBy: .newlines)
-                    for line in lines {
-                        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                        print("Processing line: '\(trimmed)'")
-                        if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
-                        let parts = trimmed.components(separatedBy: "=")
-                        if parts.count >= 2 {
-                            let key = parts[0].trimmingCharacters(in: .whitespaces)
-                            let value = parts.dropFirst().joined(separator: "=").trimmingCharacters(in: .whitespaces)
-                            print("Parsed key: '\(key)', value: '\(value)'")
-                            env[key] = value
-                        } else {
-                            print("Skipping invalid line (expected key=value format): '\(trimmed)'")
-                            Task { @MainActor in
-                                logAlert(event: "Skipping invalid .env line: '\(trimmed)'")
-                            }
-                        }
-                    }
-                } catch {
-                    print("Error loading .env file: \(error)")
-                    Task { @MainActor in
-                        logAlert(event: "Error loading .env file: \(error)")
-                    }
-                }
-            } else {
-                print("Could not find .env file at fallback path: \(rootEnvPath)")
-                Task { @MainActor in
-                    logAlert(event: "Could not find .env file at fallback path: \(rootEnvPath)")
-                }
-            }
-        } else {
-            print("Could not locate project root for fallback .env loading")
-            Task { @MainActor in
-                logAlert(event: "Could not locate project root for fallback .env loading")
-            }
+            logAlert(event: "ERROR: .env file not found at correct path: \(correctEnvPath)")
         }
     }
     
-    print("DEBUG: Final loaded environment variables: \(env)")
+    // FALLBACK: Try current working directory as last resort
+    let currentDirectory = fileManager.currentDirectoryPath
+    let currentEnvPath = URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
+    
+    print("FALLBACK: Trying current directory: \(currentEnvPath)")
+    
+    if fileManager.fileExists(atPath: currentEnvPath) {
+        do {
+            let contents = try String(contentsOfFile: currentEnvPath, encoding: .utf8)
+            print("SUCCESS: Read .env file from current directory")
+            let lines = contents.components(separatedBy: .newlines)
+            for line in lines {
+                let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
+                let parts = trimmed.components(separatedBy: "=")
+                if parts.count >= 2 {
+                    let key = parts[0].trimmingCharacters(in: .whitespaces)
+                    let value = parts.dropFirst().joined(separator: "=").trimmingCharacters(in: .whitespaces)
+                    env[key] = value
+                }
+            }
+        } catch {
+            print("ERROR: Failed to read .env file from current directory: \(error)")
+            Task { @MainActor in
+                logAlert(event: "ERROR: Failed to read .env file from current directory: \(error)")
+            }
+        }
+    } else {
+        print("ERROR: No .env file found in either location")
+        Task { @MainActor in
+            logAlert(event: "ERROR: No .env file found in either location")
+        }
+    }
+    
+    print("FINAL: Loaded \(env.count) environment variables total")
     return env
 }
 
-
 //--------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
 
+
+//-------------------------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
+//--------------- Block 3 - Order Book and Liquidity Management
+// VARIABLES TO ADD: None - this block is complete
 
 //-------------------------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
 
@@ -1870,46 +1845,6 @@ extension ExchangeWebSocket {
         }.resume()
     }
 
-    // FIXED: Removed @MainActor from calculateDepthFromArrays functions to fix isolation issues
-    static func calculateDepthFromArrays(bids: [[String]], asks: [[String]]) -> Double {
-        var bidDepth: Double = 0.0
-        var askDepth: Double = 0.0
-        
-        for bid in bids.prefix(10) {
-            if let price = Double(bid[0]), let quantity = Double(bid[1]) {
-                bidDepth += price * quantity
-            }
-        }
-        
-        for ask in asks.prefix(10) {
-            if let price = Double(ask[0]), let quantity = Double(ask[1]) {
-                askDepth += price * quantity
-            }
-        }
-        
-        return bidDepth + askDepth
-    }
-    
-    // FIXED: Removed @MainActor from calculateDepthFromDoubleArrays function
-    static func calculateDepthFromDoubleArrays(bids: [[Double]], asks: [[Double]]) -> Double {
-        var bidDepth: Double = 0.0
-        var askDepth: Double = 0.0
-        
-        for bid in bids.prefix(10) {
-            if bid.count >= 2 {
-                bidDepth += bid[0] * bid[1]
-            }
-        }
-        
-        for ask in asks.prefix(10) {
-            if ask.count >= 2 {
-                askDepth += ask[0] * ask[1]
-            }
-        }
-        
-        return bidDepth + askDepth
-    }
-
     static func checkLiquidityAsync(exchange: String, pair: String, marketType: String, tradeAmount: Double, price: Double) async -> Double? {
         await withCheckedContinuation { continuation in
             checkLiquidity(exchange: exchange, pair: pair) { liquidity in
@@ -2047,8 +1982,6 @@ extension ExchangeWebSocket {
         return hasSufficientLevels && hasValidSpread
     }
 }
-
-
 
 //----------------------------------------------------------------------------------------------------------------------Block 4 - Technical Indicator Computations
 
@@ -2445,6 +2378,11 @@ extension ExchangeWebSocket {
 //--------------- Block 6 - Account Balance and API Initialization
 // VARIABLES TO ADD: Fixed MainActor isolation issues by using await MainActor.run for fallback balance access
 
+//--------------- Block 6 - Account Balance and API Initialization
+// VARIABLES TO ADD: None - this block is complete
+
+//-----------------------------------------------------------------------------------------------------------------------Block 6 - Account Balance and API Initialization
+
 extension ExchangeWebSocket {
     static func monitorFundingRateArbitrage() {
         Task {
@@ -2642,9 +2580,7 @@ extension ExchangeWebSocket {
                 logAlert(event: "Missing KuCoin API credentials")
             }
             Task { @MainActor in
-                // FIX: Access fallback balance within MainActor context
-                let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                completion(fallbackValue)
+                completion(kucoinFallbackBalance)
             }
             return
         }
@@ -2682,9 +2618,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Failed to fetch KuCoin balance: \(error.localizedDescription)")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
+                    completion(kucoinFallbackBalance)
                 }
                 return
             }
@@ -2695,9 +2629,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Invalid KuCoin balance response")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
+                    completion(kucoinFallbackBalance)
                 }
                 return
             }
@@ -2713,9 +2645,7 @@ extension ExchangeWebSocket {
                         logAlert(event: "Failed to parse KuCoin balance")
                     }
                     Task { @MainActor in
-                        // FIX: Access fallback balance within MainActor context
-                        let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                        completion(fallbackValue)
+                        completion(kucoinFallbackBalance)
                     }
                     return
                 }
@@ -2731,9 +2661,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Failed to parse JSON for KuCoin balance: \(error.localizedDescription)")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
+                    completion(kucoinFallbackBalance)
                 }
             }
         }.resume()
@@ -2747,9 +2675,7 @@ extension ExchangeWebSocket {
                 logAlert(event: "Missing Bybit API credentials")
             }
             Task { @MainActor in
-                // FIX: Access fallback balance within MainActor context
-                let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                completion(fallbackValue)
+                completion(bybitFallbackBalance)
             }
             return
         }
@@ -2787,9 +2713,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Failed to fetch Bybit balance: \(error.localizedDescription)")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
+                    completion(bybitFallbackBalance)
                 }
                 return
             }
@@ -2800,9 +2724,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Invalid Bybit balance response")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
+                    completion(bybitFallbackBalance)
                 }
                 return
             }
@@ -2821,9 +2743,7 @@ extension ExchangeWebSocket {
                         logAlert(event: "Failed to parse Bybit balance")
                     }
                     Task { @MainActor in
-                        // FIX: Access fallback balance within MainActor context
-                        let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                        completion(fallbackValue)
+                        completion(bybitFallbackBalance)
                     }
                     return
                 }
@@ -2839,15 +2759,21 @@ extension ExchangeWebSocket {
                     logAlert(event: "Failed to parse JSON for Bybit balance: \(error.localizedDescription)")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
+                    completion(bybitFallbackBalance)
                 }
             }
         }.resume()
     }
+    
+    // Missing helper functions that are called in the main function
+    static func dynamicTradeAmount(balance: Double, riskPercent: Double, volatility: Double) async -> Double {
+        let baseAmount = min(balance * riskPercent, balance * 0.6)
+        let volatilityAdjusted = baseAmount * (1.0 / (1.0 + volatility * 0.3))
+        return volatilityAdjusted
+    }
+    
+    
 }
-
 //-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
 
 
@@ -6658,6 +6584,10 @@ BB Futures: \(bybitFuturesPrice)
 
 //------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
 
+//--------------- Block 14 - Core Trading Loop Execution
+// VARIABLES TO ADD: None - this block is complete
+
+//------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
 
 import Foundation
 
@@ -6716,7 +6646,7 @@ extension ExchangeWebSocket {
                 strategy: strategy,
                 profit: netProfit,
                 fees: fees,
-                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv")
+                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv")
             )
             sendTradeToFlaskServer(strategy: strategy, pair: pair, exchange: exchange, spotPrice: price, futuresPrice: 0.0, tradeAmount: adjustedAmount, profit: netProfit)
         }
@@ -6759,19 +6689,213 @@ extension ExchangeWebSocket {
             try? await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
         }
     }
+    
+    // Add missing core trading functions
+    static func evaluateCrossExchangeOpportunityWithML(pair: String, kucoinPrice: Double, bybitPrice: Double, completion: @escaping @Sendable (Bool) -> Void) {
+        // Calculate basic spread
+        let spread = abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
+        let threshold = crossExchangeMinSpreadThreshold
+        
+        // Get sentiment score for ML component
+        let sentiment = sentimentScores[pair] ?? 0.0
+        
+        // Simple ML-inspired decision making
+        let mlScore = spread * 100 + sentiment * 0.5
+        let shouldTrade = spread > threshold && mlScore > 1.0
+        
+        if shouldTrade {
+            logAlert(event: "ML Opportunity detected for \(pair): Spread \(spread), Sentiment \(sentiment), Score \(mlScore)")
+        }
+        
+        completion(shouldTrade)
+    }
+    
+    // Enhanced arbitrage execution with proper simulation
+    static func executeSpotFuturesArbitrage(pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, spread: Double, strategy: String, completion: @escaping @Sendable (Bool) -> Void) {
+        // Validate minimum spread
+        guard spread > arbitrageMinSpreadThreshold else {
+            completion(false)
+            return
+        }
+        
+        // Calculate trade amount
+        let balance = exchange == "kucoin" ? kucoinBalance : bybitBalance
+        let tradeAmount = min(arbitrageTradeAmount, balance * 0.1) // Max 10% of balance per trade
+        
+        // Determine trade direction
+        let isSpotCheaper = spotPrice < futuresPrice
+        let buyPrice = isSpotCheaper ? spotPrice : futuresPrice
+        let sellPrice = isSpotCheaper ? futuresPrice : spotPrice
+        
+        // Calculate expected profit
+        let grossProfit = (sellPrice - buyPrice) / buyPrice * tradeAmount
+        let estimatedFees = tradeAmount * (exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee) * 2
+        let netProfit = grossProfit - estimatedFees
+        
+        // Execute simulated trade
+        Task { @MainActor in
+            // Update balance
+            if exchange == "kucoin" {
+                kucoinBalance += netProfit
+            } else {
+                bybitBalance += netProfit
+            }
+            
+            // Log trade execution
+            let dashboardJSONURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json")
+            updateTradeMetrics(
+                pair: pair,
+                profit: netProfit,
+                fees: estimatedFees,
+                isWin: netProfit > 0,
+                dashboardJSONURL: dashboardJSONURL,
+                totalProfit: &ExchangeWebSocket.totalProfit,
+                totalFees: &ExchangeWebSocket.totalFees
+            )
+            
+            logTradeToCSV(
+                pair: pair,
+                strategy: strategy,
+                profit: netProfit,
+                fees: estimatedFees,
+                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv")
+            )
+            
+            sendTradeToFlaskServer(
+                strategy: strategy,
+                pair: pair,
+                exchange: exchange,
+                spotPrice: spotPrice,
+                futuresPrice: futuresPrice,
+                tradeAmount: tradeAmount,
+                profit: netProfit
+            )
+            
+            // Record execution to prevent immediate re-execution
+            arbitrageExecuted[pair] = (true, Date())
+            
+            print("Executed \(strategy) for \(pair) on \(exchange): Profit \(netProfit), Spread \(spread)")
+            completion(netProfit > 0)
+        }
+    }
+    
+    // Enhanced trading opportunity scanner
+    static func scanTradingOpportunities() {
+        Task {
+            while true {
+                for pair in tradingPairs {
+                    let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
+                    let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
+                    let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
+                    let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
+                    
+                    // Skip if missing prices
+                    guard kucoinSpotPrice > 0, kucoinFuturesPrice > 0, bybitSpotPrice > 0, bybitFuturesPrice > 0 else {
+                        continue
+                    }
+                    
+                    // Check KuCoin spot-futures arbitrage
+                    let kucoinSpread = abs(kucoinSpotPrice - kucoinFuturesPrice) / min(kucoinSpotPrice, kucoinFuturesPrice)
+                    if kucoinSpread > arbitrageMinSpreadThreshold {
+                        // Check cooldown
+                        if let lastExecution = arbitrageExecuted[pair], Date().timeIntervalSince(lastExecution.1) < 300 {
+                            continue
+                        }
+                        
+                        executeSpotFuturesArbitrage(
+                            pair: pair,
+                            exchange: "kucoin",
+                            spotPrice: kucoinSpotPrice,
+                            futuresPrice: kucoinFuturesPrice,
+                            spread: kucoinSpread,
+                            strategy: "Spot-Futures Arbitrage"
+                        ) { success in
+                            if success {
+                                print("KuCoin arbitrage executed for \(pair)")
+                            }
+                        }
+                    }
+                    
+                    // Check Bybit spot-futures arbitrage
+                    let bybitSpread = abs(bybitSpotPrice - bybitFuturesPrice) / min(bybitSpotPrice, bybitFuturesPrice)
+                    if bybitSpread > arbitrageMinSpreadThreshold {
+                        // Check cooldown
+                        if let lastExecution = arbitrageExecuted[pair], Date().timeIntervalSince(lastExecution.1) < 300 {
+                            continue
+                        }
+                        
+                        executeSpotFuturesArbitrage(
+                            pair: pair,
+                            exchange: "bybit",
+                            spotPrice: bybitSpotPrice,
+                            futuresPrice: bybitFuturesPrice,
+                            spread: bybitSpread,
+                            strategy: "Spot-Futures Arbitrage"
+                        ) { success in
+                            if success {
+                                print("Bybit arbitrage executed for \(pair)")
+                            }
+                        }
+                    }
+                    
+                    // Check cross-exchange arbitrage
+                    let crossSpread = abs(kucoinSpotPrice - bybitSpotPrice) / min(kucoinSpotPrice, bybitSpotPrice)
+                    if crossSpread > crossExchangeMinSpreadThreshold {
+                        // Check cooldown
+                        if let lastExecution = crossExchangeArbitrageExecuted[pair], Date().timeIntervalSince(lastExecution.1) < crossExchangeCooldownSeconds {
+                            continue
+                        }
+                        
+                        evaluateCrossExchangeOpportunityWithML(
+                            pair: pair,
+                            kucoinPrice: kucoinSpotPrice,
+                            bybitPrice: bybitSpotPrice
+                        ) { shouldExecute in
+                            if shouldExecute {
+                                Task {
+                                    await checkCrossExchangeArbitrage(
+                                        pair: pair,
+                                        strategy: "Cross-Exchange ML",
+                                        amount: crossExchangeTradeAmount
+                                    ) { success in
+                                        if success {
+                                            print("Cross-exchange ML arbitrage executed for \(pair)")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                try? await Task.sleep(nanoseconds: UInt64(getDouble("OPPORTUNITY_SCAN_INTERVAL", defaultValue: 2.0) * 1_000_000_000))
+            }
+        }
+    }
 }
 
 // Main entry point
 DispatchQueue.main.async {
     ExchangeWebSocket.initializeParameters {
         ExchangeWebSocket.startTradingLoop()
+        ExchangeWebSocket.scanTradingOpportunities()
+        ExchangeWebSocket.monitorFundingRateArbitrage()
+        ExchangeWebSocket.monitorCrossExchangeArbitrage()
         ExchangeWebSocket.logDashboardMetrics()
+        
+        // Fetch initial balances
+        ExchangeWebSocket.fetchKucoinBalance { _ in
+            print("Initial KuCoin balance fetched")
+        }
+        ExchangeWebSocket.fetchBybitBalance { _ in
+            print("Initial Bybit balance fetched")
+        }
+        
+        print("🚀 BevaixBot fully initialized and trading!")
     }
 }
 
 RunLoop.main.run()
-
-
 
 //---------------------------------------------------------------------------------------------------------Block 15 - High-Frequency Trading Scalping
 
