@@ -29,6 +29,32 @@ struct TemporalPrediction {
 struct BevaixOrderBook {
     var bids: [(price: Double, quantity: Double)]
     var asks: [(price: Double, quantity: Double)]
+    
+    var isEmpty: Bool {
+        return bids.isEmpty && asks.isEmpty
+    }
+}
+
+// AI ENHANCEMENTS - Missing Types
+class NeuralAgent {
+    let id = UUID()
+    var strength: Float = 0.5
+    
+    func evaluate(market: [Float]) -> Float {
+        return market.reduce(0, +) / Float(max(market.count, 1)) * strength
+    }
+}
+
+actor TemporalOracle {
+    func predictFuture(pair: String) async -> [Double] {
+        return [Double.random(in: 0.5...1.5)]
+    }
+}
+struct QuantumState {
+    let superposition: [Double]
+    let entanglement: [String: Double]
+    let collapseProb: Double
+    let timestamp: Date
 }
 
 // Enhanced Structures for Advanced Trading
@@ -152,15 +178,30 @@ var environment: [String: String] = {
     do {
         let fileManager = FileManager.default
         let currentDirectory = fileManager.currentDirectoryPath
-        let envPath = URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
-        print("Loading .env from \(envPath)")
-        if fileManager.fileExists(atPath: envPath) {
-            print("Found .env file at \(envPath)")
-        } else {
-            print("No .env file found at \(envPath)")
-            Task { @MainActor in
-                logAlert(event: "No .env file found at \(envPath)")
+        print("DEBUG: Current working directory: \(currentDirectory)")
+        
+        // Try multiple possible .env locations
+        let possiblePaths = [
+            "/Users/robertsteinegger/Desktop/BevaixBot/.env",
+            URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
+        ]
+        var envPath: String?
+        for path in possiblePaths {
+            print("DEBUG: Checking for .env at: \(path)")
+            if fileManager.fileExists(atPath: path) {
+                envPath = path
+                print("DEBUG: Found .env file at \(path)")
+                break
             }
+        }
+        
+        guard let finalEnvPath = envPath else {
+            print("ERROR: Could not find .env file in any of these locations:")
+            possiblePaths.forEach { print("  - \($0)") }
+            Task { @MainActor in
+                logAlert(event: "Could not find .env file in expected locations")
+            }
+            return [:]
         }
         
         try Dotenv.configure()
@@ -209,27 +250,52 @@ var environment: [String: String] = {
             "SPREAD_RETENTION_HOURS", "ORDER_BOOK_IMBALANCE_FALLBACK",
             "LIQUIDITY_CHECK_FALLBACK", "MARKET_MAKING_SPREAD", "HFT_ORDER_TYPE"
         ]
-        for key in keys {
-            if let value = Dotenv[key] {
-                envDict[key] = value.stringValue
-            }
-        }
-        // Validate KuCoin API credentials
-        let requiredKuCoinKeys = ["KUCOIN_API_KEY", "KUCOIN_API_SECRET", "KUCOIN_API_PASSPHRASE"]
-        var missingKeys = [String]()
-        for key in requiredKuCoinKeys {
-            if envDict[key] == nil || envDict[key]!.isEmpty {
-                missingKeys.append(key)
-            }
-        }
-        if !missingKeys.isEmpty {
-            let missingMessage = "Missing or empty KuCoin API credentials: \(missingKeys.joined(separator: ", ")). Disabling KuCoin functionality."
-            print("WARNING: \(missingMessage)")
-            Task { @MainActor in
-                logAlert(event: missingMessage)
-            }
-            hasValidKuCoinCredentials = false // Disable KuCoin operations
-        }
+        // Read the .env file manually as fallback
+         do {
+             let contents = try String(contentsOfFile: finalEnvPath, encoding: .utf8)
+             print("DEBUG: Successfully read .env file contents")
+             let lines = contents.components(separatedBy: .newlines)
+             for line in lines {
+                 let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                 if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
+                 let parts = trimmed.components(separatedBy: "=")
+                 if parts.count >= 2 {
+                     let key = parts[0].trimmingCharacters(in: .whitespaces)
+                     let value = parts.dropFirst().joined(separator: "=").trimmingCharacters(in: .whitespaces)
+                     envDict[key] = value
+                 }
+             }
+         } catch {
+             print("ERROR: Failed to read .env file: \(error)")
+             Task { @MainActor in
+                 logAlert(event: "Failed to read .env file: \(error)")
+             }
+         }
+         
+         // Also try SwiftDotenv
+         for key in keys {
+             if envDict[key] == nil, let value = Dotenv[key] {
+                 envDict[key] = value.stringValue
+             }
+         }
+         
+         // Validate KuCoin API credentials
+         let requiredKuCoinKeys = ["KUCOIN_API_KEY", "KUCOIN_API_SECRET", "KUCOIN_API_PASSPHRASE"]
+         var missingKeys = [String]()
+         for key in requiredKuCoinKeys {
+             if envDict[key] == nil || envDict[key]!.isEmpty {
+                 missingKeys.append(key)
+             }
+         }
+         if !missingKeys.isEmpty {
+             let missingMessage = "Missing or empty KuCoin API credentials: \(missingKeys.joined(separator: ", ")). Disabling KuCoin functionality."
+             print("WARNING: \(missingMessage)")
+             Task { @MainActor in
+                 logAlert(event: missingMessage)
+             }
+             hasValidKuCoinCredentials = false
+         }
+         
         // Debug: Log all loaded environment variables
         print("DEBUG: Loaded environment variables: \(envDict)")
         print("Successfully loaded .env file using SwiftDotenv")
@@ -238,14 +304,17 @@ var environment: [String: String] = {
         print("DEBUG: BYBIT_API_KEY from env: \(envDict["BYBIT_API_KEY"] ?? "not found")")
         print("DEBUG: KUCOIN_API_KEY from env: \(envDict["KUCOIN_API_KEY"] ?? "not found")")
         return envDict
-    } catch {
-        print("Failed to load .env file: \(error)")
-        Task { @MainActor in
-            logAlert(event: "Failed to load .env file: \(error)")
-        }
-        return [:] // Return empty dictionary to allow bot to continue
-    }
-}()
+           } catch {
+               print("Failed to load .env file: \(error)")
+               Task { @MainActor in
+                   logAlert(event: "Failed to load .env file: \(error)")
+               }
+               return [:]
+           }
+       }()
+
+
+
 
 // Global Alert Logging Function
 func logAlert(event: String, completion: @escaping @Sendable () -> Void = {}) {
@@ -319,9 +388,12 @@ class ExchangeWebSocket {
     static var isProcessingQueue: Bool = false
     static var enhancedMessageQueue: [[String: Any]] = []
     
+    static var websocketReconnectAttempts: [String: Int] = [:]
+    
     // WebSocket Activity Monitoring
-    static var websocketReconnectAttempts: Int = 0
+   
     static var lastWebsocketActivity: [String: Date] = [:]
+    static var lastEvolution: Date = .distantPast
     
     // Emergency Controls
     static var emergencyStopActive: Bool = false
@@ -922,7 +994,7 @@ class ExchangeWebSocket {
             let rawPairs = await MainActor.run { environment["ACTIVE_PAIRS"] ?? "BTC-USDT,ETH-USDT" }
             print("DEBUG: Raw ACTIVE_PAIRS from .env: \(rawPairs)")
             tradingPairs = rawPairs.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-            print("DEBUG: Loaded tradingPairs: \(tradingPairs)")
+            print("🎯 LOADED \(tradingPairs.count) TRADING PAIRS: \(tradingPairs)")
             print("DEBUG: Number of pairs loaded: \(tradingPairs.count)")
 
             // Allocate capital proportionally
