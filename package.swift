@@ -1,0 +1,31 @@
+// Package.swift
+// swift-tools-version:6.0
+import PackageDescription
+
+let package = Package(
+    name: "BevaixBot",
+    platforms: [
+        .macOS(.v13) // Updated to macOS 13 for better Swift 6.0 support
+    ],
+    dependencies: [
+        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.8"),
+        .package(url: "https://github.com/thebarndog/swift-dotenv", from: "2.1.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0") // ADDED: Required for HMAC authentication
+    ],
+    targets: [
+        .executableTarget(
+            name: "BevaixBot",
+            dependencies: [
+                .product(name: "Starscream", package: "Starscream"),
+                .product(name: "SwiftDotenv", package: "swift-dotenv"),
+                .product(name: "Crypto", package: "swift-crypto") // ADDED: CryptoKit dependency
+            ],
+            path: "Sources/BevaixBot",
+            sources: ["main.swift"],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+                .define("SWIFT_PACKAGE") // Helps with some compatibility issues
+            ]
+        )
+    ]
+)
