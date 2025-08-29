@@ -659,101 +659,96 @@ extension ExchangeWebSocket {
 extension ExchangeWebSocket {
     @MainActor
     static func startRegularPriceFetching() {
-        print("DEBUG: Starting regular price fetching for all trading pairs")
-        logAlert(event: "Starting regular price fetching for all trading pairs")
-        
-        Task {
-            while tradingActive {
-                do {
-                    // Fetch prices for all pairs concurrently
-                    await withTaskGroup(of: Void.self) { group in
+            print("DEBUG: Starting regular price fetching for all trading pairs")
+            logAlert(event: "Starting regular price fetching for all trading pairs")
+            
+            Task {
+                while tradingActive {
+                    do {
+                        // Fetch prices for all pairs - FIXED VERSION (no async/await issues)
                         for pair in tradingPairs {
                             // KuCoin spot prices
-                            group.addTask {
-                                fetchKuCoinSpotPrice(pair: pair) { price in
-                                    if let price = price {
-                                        print("DEBUG: Fetched KuCoin spot price for \(pair): \(price)")
-                                    }
+                            fetchKuCoinSpotPrice(pair: pair) { price in
+                                if let price = price {
+                                    print("DEBUG: Fetched KuCoin spot price for \(pair): \(price)")
                                 }
                             }
                             
                             // KuCoin futures prices
-                            group.addTask {
-                                fetchKuCoinFuturesPrice(pair: pair) { price in
-                                    if let price = price {
-                                        print("DEBUG: Fetched KuCoin futures price for \(pair): \(price)")
-                                    }
+                            fetchKuCoinFuturesPrice(pair: pair) { price in
+                                if let price = price {
+                                    print("DEBUG: Fetched KuCoin futures price for \(pair): \(price)")
                                 }
                             }
                             
                             // Bybit spot prices
-                            group.addTask {
-                                fetchBybitSpotPrice(pair: pair) { price in
-                                    if let price = price {
-                                        print("DEBUG: Fetched Bybit spot price for \(pair): \(price)")
-                                    }
+                            fetchBybitSpotPrice(pair: pair) { price in
+                                if let price = price {
+                                    print("DEBUG: Fetched Bybit spot price for \(pair): \(price)")
                                 }
                             }
                             
                             // Bybit futures prices
-                            group.addTask {
-                                fetchBybitFuturesPrice(pair: pair) { price in
-                                    if let price = price {
-                                        print("DEBUG: Fetched Bybit futures price for \(pair): \(price)")
-                                    }
+                            fetchBybitFuturesPrice(pair: pair) { price in
+                                if let price = price {
+                                    print("DEBUG: Fetched Bybit futures price for \(pair): \(price)")
                                 }
                             }
+                            
+                            // Small delay between pairs to avoid API rate limits
+                            try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                         }
-                    }
-                    
-                    // Log progress every 10 cycles
-                    let currentTime = Date()
-                    if Int(currentTime.timeIntervalSince1970) % 30 == 0 {
-                        let totalPairs = tradingPairs.count
-                        let kucoinSpotPrices = kucoinCurrentPrice.count
-                        let kucoinFuturesPrices = kucoinCurrentFuturesPrice.count
-                        let bybitSpotPrices = bybitCurrentPrice.count
-                        let bybitFuturesPrices = bybitCurrentFuturesPrice.count
                         
-                        let status = "Price fetch status: KuCoin Spot(\(kucoinSpotPrices)/\(totalPairs)), KuCoin Futures(\(kucoinFuturesPrices)/\(totalPairs)), Bybit Spot(\(bybitSpotPrices)/\(totalPairs)), Bybit Futures(\(bybitFuturesPrices)/\(totalPairs))"
-                        print("DEBUG: \(status)")
-                        logAlert(event: status)
+                        // Log progress every 10 cycles
+                        let currentTime = Date()
+                        if Int(currentTime.timeIntervalSince1970) % 30 == 0 {
+                            let totalPairs = tradingPairs.count
+                            let kucoinSpotPrices = kucoinCurrentPrice.count
+                            let kucoinFuturesPrices = kucoinCurrentFuturesPrice.count
+                            let bybitSpotPrices = bybitCurrentPrice.count
+                            let bybitFuturesPrices = bybitCurrentFuturesPrice.count
+                            
+                            let status = "Price fetch status: KuCoin Spot(\(kucoinSpotPrices)/\(totalPairs)), KuCoin Futures(\(kucoinFuturesPrices)/\(totalPairs)), Bybit Spot(\(bybitSpotPrices)/\(totalPairs)), Bybit Futures(\(bybitFuturesPrices)/\(totalPairs))"
+                            print("DEBUG: \(status)")
+                            logAlert(event: status)
+                        }
+                        
+                        // Wait 3 seconds between price fetch cycles
+                        try await Task.sleep(nanoseconds: 3_000_000_000)
+                        
+                    } catch {
+                        print("DEBUG: Error in price fetching loop: \(error.localizedDescription)")
+                        logAlert(event: "Error in price fetching loop: \(error.localizedDescription)")
+                        
+                        // Wait 5 seconds before retrying on error
+                        try await Task.sleep(nanoseconds: 5_000_000_000)
                     }
-                    
-                    // Wait 3 seconds between price fetch cycles
-                    try await Task.sleep(nanoseconds: 3_000_000_000)
-                    
-                } catch {
-                    print("DEBUG: Error in price fetching loop: \(error.localizedDescription)")
-                    logAlert(event: "Error in price fetching loop: \(error.localizedDescription)")
-                    
-                    // Wait 5 seconds before retrying on error
-                    try await Task.sleep(nanoseconds: 5_000_000_000)
+                }
+            }
+        }
+        
+        @MainActor
+        static func logPairStatus() {
+            let totalPairs = tradingPairs.count
+            let activePairs = Set(kucoinCurrentPrice.keys).union(Set(bybitCurrentPrice.keys)).count
+            let statusMessage = "Trading pairs loaded: \(totalPairs), Active pairs with prices: \(activePairs)"
+            print("DEBUG: \(statusMessage)")
+            print("DEBUG: Active trading pairs: \(tradingPairs.joined(separator: ", "))")
+            logAlert(event: statusMessage)
+            
+            // Log which pairs are missing prices
+            for pair in tradingPairs {
+                let kucoinSpot = kucoinCurrentPrice[pair] != nil ? "✅" : "❌"
+                let kucoinFutures = kucoinCurrentFuturesPrice[pair] != nil ? "✅" : "❌"
+                let bybitSpot = bybitCurrentPrice[pair] != nil ? "✅" : "❌"
+                let bybitFutures = bybitCurrentFuturesPrice[pair] != nil ? "✅" : "❌"
+                
+                if kucoinSpot == "❌" || kucoinFutures == "❌" || bybitSpot == "❌" || bybitFutures == "❌" {
+                    let status = "\(pair): KC-Spot\(kucoinSpot) KC-Fut\(kucoinFutures) BB-Spot\(bybitSpot) BB-Fut\(bybitFutures)"
+                    print("DEBUG: Price status - \(status)")
                 }
             }
         }
     }
-    
-    @MainActor
-    static func logPairStatus() {
-        let totalPairs = tradingPairs.count
-        let activePairs = Set(kucoinCurrentPrice.keys).union(Set(bybitCurrentPrice.keys)).count
-        let statusMessage = "Trading pairs loaded: \(totalPairs), Active pairs with prices: \(activePairs)"
-        print("DEBUG: \(statusMessage)")
-        print("DEBUG: Active trading pairs: \(tradingPairs.joined(separator: ", "))")
-        logAlert(event: statusMessage)
-        
-        // Log which pairs are missing prices
-        for pair in tradingPairs {
-            let kucoinSpot = kucoinCurrentPrice[pair] != nil ? "✅" : "❌"
-            let kucoinFutures = kucoinCurrentFuturesPrice[pair] != nil ? "✅" : "❌"
-            let bybitSpot = bybitCurrentPrice[pair] != nil ? "✅" : "❌"
-            let bybitFutures = bybitCurrentFuturesPrice[pair] != nil ? "✅" : "❌"
-            
-            if kucoinSpot == "❌" || kucoinFutures == "❌" || bybitSpot == "❌" || bybitFutures == "❌" {
-                let status = "\(pair): KC-Spot\(kucoinSpot) KC-Fut\(kucoinFutures) BB-Spot\(bybitSpot) BB-Fut\(bybitFutures)"
-                print("DEBUG: Price status - \(status)")
-            }
-        }
-    }
-}
+
+
