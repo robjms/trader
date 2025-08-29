@@ -182,11 +182,9 @@ var environment: [String: String] = {
         
         // Try multiple possible .env locations
         let possiblePaths = [
-            URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path,
-            URL(fileURLWithPath: currentDirectory).deletingLastPathComponent().appendingPathComponent(".env").path,
-            "/Users/robertsteinegger/Desktop/BevaixBot/.env"
+            "/Users/robertsteinegger/Desktop/BevaixBot/.env",
+            URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
         ]
-        
         var envPath: String?
         for path in possiblePaths {
             print("DEBUG: Checking for .env at: \(path)")
