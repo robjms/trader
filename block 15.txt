@@ -1,10 +1,10 @@
 //---------------------------------------------------------------------------------------------------------Block 15 - High-Frequency Trading Scalping
 
-
-
 import Foundation
 
 extension ExchangeWebSocket {
+    
+    
     
     
     static func structureTradeData(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double) -> [String: Any] {
@@ -58,7 +58,6 @@ extension ExchangeWebSocket {
         }
     }
 
-    // FIX: Remove @Sendable from main actor-isolated synchronous static method
     static func attemptSend(attempt: Int, request: URLRequest, strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double, retries: Int) {
         let delay = pow(2.0, Double(attempt - 1))
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
@@ -148,7 +147,6 @@ extension ExchangeWebSocket {
         let timestampFormatter = ISO8601DateFormatter()
         timestampFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         let timestamp = timestampFormatter.string(from: Date())
-        // FIX: Safely unwrap optional with nil coalescing
         let predictedSpreadChangeValue = predictedSpreadChange ?? 0.0
         
         let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
@@ -352,238 +350,410 @@ extension ExchangeWebSocket {
     }
 
     static func fetchSpreadPrediction(pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, retryCount: Int = 0) async -> Double? {
-           let maxRetries = 3
-           guard retryCount < maxRetries else {
-               print("DEBUG: Max retries reached for spread prediction for \(pair) on \(exchange)")
-               Task { @MainActor in
-                   logAlert(event: "Max retries reached for spread prediction for \(pair) on \(exchange)")
-               }
-               return arbitrageMinSpreadThreshold
-           }
+        let maxRetries = 3
+        guard retryCount < maxRetries else {
+            print("DEBUG: Max retries reached for spread prediction for \(pair) on \(exchange)")
+            Task { @MainActor in
+                logAlert(event: "Max retries reached for spread prediction for \(pair) on \(exchange)")
+            }
+            return arbitrageMinSpreadThreshold
+        }
 
-           let url = URL(string: "http://127.0.0.1:5001/predict_spread")!
-           var request = URLRequest(url: url)
-           request.httpMethod = "POST"
-           request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-           request.timeoutInterval = 5.0
+        let url = URL(string: "http://127.0.0.1:5001/predict_spread")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 30.0
 
-           let payload: [String: Any] = [
-               "pair": pair,
-               "exchange": exchange,
-               "spot_price": spotPrice,
-               "futures_price": futuresPrice,
-               "kucoin_spot_rsi": calculateRSI(prices: kucoinPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0,
-               "bybit_spot_rsi": calculateRSI(prices: bybitPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0,
-               "kucoin_funding_rate": kucoinFundingRates[pair] ?? 0.0,
-               "bybit_funding_rate": bybitFundingRates[pair] ?? 0.0,
-               "sentiment_score": sentimentScores[pair] ?? 0.0
-           ]
+        let payload: [String: Any] = [
+            "pair": pair,
+            "exchange": exchange,
+            "spot_price": spotPrice,
+            "futures_price": futuresPrice,
+            "kucoin_spot_rsi": calculateRSI(prices: kucoinPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0,
+            "bybit_spot_rsi": calculateRSI(prices: bybitPrices[pair] ?? [], period: spotRsiPeriod) ?? 50.0,
+            "kucoin_funding_rate": kucoinFundingRates[pair] ?? 0.0,
+            "bybit_funding_rate": bybitFundingRates[pair] ?? 0.0,
+            "sentiment_score": sentimentScores[pair] ?? 0.0
+        ]
 
-           do {
-               let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
-               request.httpBody = jsonData
-           } catch {
-               print("DEBUG: Failed to serialize spread prediction payload for \(pair): \(error.localizedDescription)")
-               return arbitrageMinSpreadThreshold
-           }
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
+            request.httpBody = jsonData
+        } catch {
+            print("DEBUG: Failed to serialize spread prediction payload for \(pair): \(error.localizedDescription)")
+            Task { @MainActor in
+                logAlert(event: "Failed to serialize spread prediction payload for \(pair): \(error.localizedDescription)")
+            }
+            return arbitrageMinSpreadThreshold
+        }
 
-           do {
-               let (data, response) = try await URLSession.shared.data(for: request)
-               
-               guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                   print("DEBUG: ML server not available for \(pair), using fallback threshold")
-                   return arbitrageMinSpreadThreshold
-               }
+        var data: Data?
+        var response: URLResponse?
+        do {
+            (data, response) = try await URLSession.shared.data(for: request)
+            print("DEBUG: Fetch spread prediction response for \(pair): Status code \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+            if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                print("DEBUG: Fetch spread prediction response body: \(responseBody)")
+            }
+        } catch {
+            print("DEBUG: Failed to fetch spread prediction for \(pair): \(error.localizedDescription)")
+            Task { @MainActor in
+                logAlert(event: "Failed to fetch spread prediction for \(pair): \(error.localizedDescription)")
+            }
+            let delay = pow(2.0, Double(retryCount))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                return await fetchSpreadPrediction(pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, retryCount: retryCount + 1)
+            } catch {
+                print("DEBUG: Failed to sleep during retry for spread prediction: \(error.localizedDescription)")
+                return arbitrageMinSpreadThreshold
+            }
+        }
 
-               guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                     let predictedSpread = json["predicted_spread"] as? Double else {
-                   print("DEBUG: Failed to parse spread prediction for \(pair), using fallback")
-                   return arbitrageMinSpreadThreshold
-               }
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            print("DEBUG: Invalid spread prediction response for \(pair): Status code \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+            Task { @MainActor in
+                logAlert(event: "Invalid spread prediction response for \(pair)")
+            }
+            let delay = pow(2.0, Double(retryCount))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                return await fetchSpreadPrediction(pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, retryCount: retryCount + 1)
+            } catch {
+                print("DEBUG: Failed to sleep during retry for spread prediction: \(error.localizedDescription)")
+                return arbitrageMinSpreadThreshold
+            }
+        }
 
-               print("✅ ML prediction for \(pair): \(predictedSpread)")
-               return predictedSpread
-           } catch {
-               print("DEBUG: ML server connection failed for \(pair): \(error)")
-               return arbitrageMinSpreadThreshold
-           }
-       }
-    static func evaluateCrossExchangeOpportunityWithML(
-           pair: String,
-           kucoinPrice: Double,
-           bybitPrice: Double,
-           strategy: String,
-           completion: @escaping (Bool, Double) -> Void
-       ) async {
-           let spread = abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
-           
-           // Get ML prediction
-           let mlPrediction = await fetchSpreadPrediction(
-               pair: pair,
-               exchange: "cross",
-               spotPrice: kucoinPrice,
-               futuresPrice: bybitPrice
-           ) ?? 0.0
-           
-           // Enhanced decision logic with ML
-           let baseThreshold = crossExchangeMinSpreadThreshold
-           let mlAdjustedThreshold = baseThreshold * (1 - mlPrediction)
-           let shouldExecute = spread > mlAdjustedThreshold
-           
-           print("🤖 ML ANALYSIS for \(pair):")
-           print("   Current Spread: \(String(format: "%.6f", spread))")
-           print("   ML Prediction: \(String(format: "%.6f", mlPrediction))")
-           print("   Adjusted Threshold: \(String(format: "%.6f", mlAdjustedThreshold))")
-           print("   Decision: \(shouldExecute ? "EXECUTE" : "SKIP")")
-           
-           await MainActor.run {
-               logAlert(event: "🤖 ML DECISION: \(pair) - \(shouldExecute ? "EXECUTE" : "SKIP") (spread: \(String(format: "%.6f", spread)), ML: \(String(format: "%.6f", mlPrediction)))")
-           }
-           
-           completion(shouldExecute, spread)
-       }
+        guard let fetchedData = data,
+              let json = try? JSONSerialization.jsonObject(with: fetchedData) as? [String: Any],
+              let predictedSpread = json["predicted_spread"] as? Double else {
+            print("DEBUG: Failed to parse spread prediction for \(pair)")
+            Task { @MainActor in
+                logAlert(event: "Failed to parse spread prediction for \(pair)")
+            }
+            let delay = pow(2.0, Double(retryCount))
+            do {
+                try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                return await fetchSpreadPrediction(pair: pair, exchange: exchange, spotPrice: spotPrice, futuresPrice: futuresPrice, retryCount: retryCount + 1)
+            } catch {
+                print("DEBUG: Failed to sleep during retry for spread prediction: \(error.localizedDescription)")
+                return arbitrageMinSpreadThreshold
+            }
+        }
 
-       // Enhanced price fetching with error handling and logging
-       static func fetchAllPricesWithLogging() async {
-           await MainActor.run {
-               logAlert(event: "🔄 Fetching all prices for \(tradingPairs.count) pairs...")
-           }
-           
-           for (index, pair) in tradingPairs.enumerated() {
-               print("🔄 Fetching prices for \(pair) (\(index + 1)/\(tradingPairs.count))")
-               
-               // Fetch all 4 price types and use the results
-               async let kucoinSpotPrice = fetchKuCoinSpotPrice(pair: pair)
-               async let kucoinFuturesPrice = fetchKuCoinFuturesPrice(pair: pair)
-               async let bybitSpotPrice = fetchBybitSpotPrice(pair: pair)
-               async let bybitFuturesPrice = fetchBybitFuturesPrice(pair: pair)
+        print("DEBUG: Successfully fetched spread prediction for \(pair): \(predictedSpread)")
+        return predictedSpread
+    }
 
-               // Actually use the fetched prices
-               let fetchedKucoinSpot = await kucoinSpotPrice ?? 0.0
-               let fetchedKucoinFutures = await kucoinFuturesPrice ?? 0.0
-               let fetchedBybitSpot = await bybitSpotPrice ?? 0.0
-               let fetchedBybitFutures = await bybitFuturesPrice ?? 0.0
+    // FIXED: Add all missing price fetch functions with completion callbacks
+    static func fetchKuCoinSpotPrice(pair: String, completion: @escaping @Sendable (Double?) -> Void) {
+        let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+        guard let url = URL(string: "https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=\(symbol)") else {
+            print("DEBUG: Invalid URL for KuCoin spot price fetch: \(pair)")
+            Task { @MainActor in
+                logAlert(event: "Invalid URL for KuCoin spot price fetch: \(pair)")
+            }
+            completion(nil)
+            return
+        }
 
-               print("📊 Fetched prices for \(pair): KuCoin Spot=$\(fetchedKucoinSpot), Futures=$\(fetchedKucoinFutures), Bybit Spot=$\(fetchedBybitSpot), Futures=$\(fetchedBybitFutures)")
-               
-               // Wait for all to complete
-               // Wait for all to complete
-               let _ = await kucoinSpotPrice
-               let _ = await kucoinFuturesPrice
-               let _ = await bybitSpotPrice
-               let _ = await bybitFuturesPrice
-               
-               
-               await MainActor.run {
-                   let kcSpot = kucoinCurrentPrice[pair] ?? 0.0
-                   let kcFutures = kucoinCurrentFuturesPrice[pair] ?? 0.0
-                   let bbSpot = bybitCurrentPrice[pair] ?? 0.0
-                   let bbFutures = bybitCurrentFuturesPrice[pair] ?? 0.0
-                   
-                   let validPrices = (kcSpot > 0 ? 1 : 0) + (kcFutures > 0 ? 1 : 0) + (bbSpot > 0 ? 1 : 0) + (bbFutures > 0 ? 1 : 0)
-                   
-                   if validPrices > 0 {
-                       print("✅ \(pair): \(validPrices)/4 prices updated")
-                       logAlert(event: "✅ \(pair): \(validPrices)/4 prices active")
-                   } else {
-                       print("❌ \(pair): No prices updated")
-                       logAlert(event: "❌ \(pair): No prices received")
-                   }
-               }
-           }
-       }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10.0
 
-       // Enhanced trading monitoring with CSV output
-       static func startEnhancedTradingMonitor() {
-           print("🎯 Starting enhanced trading monitor...")
-           
-           Task {
-               while true {
-                   do {
-                       await fetchAllPricesWithLogging()
-                       
-                       await MainActor.run {
-                           let validPairCount = tradingPairs.filter { pair in
-                               let kcSpot = kucoinCurrentPrice[pair] ?? 0.0
-                               let bbSpot = bybitCurrentPrice[pair] ?? 0.0
-                               return kcSpot > 0 || bbSpot > 0
-                           }.count
-                           
-                           logAlert(event: "📊 Monitor cycle: \(validPairCount)/\(tradingPairs.count) pairs have prices")
-                           
-                           // Generate some sample spread data for testing
-                           for pair in tradingPairs.prefix(5) {
-                               let kcPrice = kucoinCurrentPrice[pair] ?? 0.0
-                               let bbPrice = bybitCurrentPrice[pair] ?? 0.0
-                               if kcPrice > 0 && bbPrice > 0 {
-                                   let spread = abs(kcPrice - bbPrice) / min(kcPrice, bbPrice)
-                                   saveHistoricalSpreadsToCSV(pair: pair, spread: spread, predictedSpreadChange: 0.0)
-                               }
-                           }
-                       }
-                       
-                       try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
-                   } catch {
-                       await MainActor.run {
-                           logAlert(event: "Trading monitor sleep interrupted: \(error)")
-                       }
-                   }
-               }
-           }
-       }
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("DEBUG: Failed to fetch KuCoin spot price for \(pair): \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to fetch KuCoin spot price for \(pair): \(error.localizedDescription)")
+                }
+                completion(nil)
+                return
+            }
 
-       // Test function to generate sample trades for CSV testing
-       @MainActor
-       static func generateTestTrade(pair: String) {
-           let strategies = ["Test_Arbitrage", "Test_Scalping", "Test_Cross_Exchange"]
-           let strategy = strategies.randomElement() ?? "Test"
-           let profit = Double.random(in: 0.10...2.50)
-           let fees = Double.random(in: 0.05...0.15)
-           
-           print("🧪 Generating test trade for \(pair): Strategy=\(strategy), Profit=$\(String(format: "%.4f", profit))")
-           
-           updateTradeMetrics(
-               pair: pair,
-               profit: profit,
-               fees: fees,
-               isWin: profit > fees,
-               dashboardJSONURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/dashboard.json"),
-               totalProfit: &ExchangeWebSocket.totalProfit,
-               totalFees: &ExchangeWebSocket.totalFees
-           )
-           
-           logTradeToCSV(
-               pair: pair,
-               strategy: strategy,
-               profit: profit,
-               fees: fees,
-               tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv")
-           )
-           
-           logAlert(event: "🧪 TEST TRADE: \(pair) - \(strategy) - P: $\(String(format: "%.4f", profit))")
-       }
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let dataDict = json["data"] as? [String: Any],
+                  let priceString = dataDict["price"] as? String,
+                  let price = Double(priceString) else {
+                print("DEBUG: Failed to parse KuCoin spot price for \(pair)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to parse KuCoin spot price for \(pair)")
+                }
+                completion(nil)
+                return
+            }
 
-       // Function to test CSV output
-       @MainActor
-       static func testCSVOutput() {
-           print("🧪 Testing CSV output functionality...")
-           logAlert(event: "🧪 Starting CSV output tests")
-           
-           // Test trade_log.csv
-           for pair in tradingPairs.prefix(3) {
-               generateTestTrade(pair: pair)
-           }
-           
-           // Test historical_spreads.csv
-           for pair in tradingPairs.prefix(3) {
-               let testSpread = Double.random(in: 0.001...0.01)
-               saveHistoricalSpreadsToCSV(pair: pair, spread: testSpread, predictedSpreadChange: 0.0)
-           }
-           
-           // Test alerts.csv
-           logAlert(event: "🧪 CSV test completed successfully")
-           
-           print("✅ CSV test sequence completed")
-       }
-   }
+            Task { @MainActor in
+                kucoinCurrentPrice[pair] = price
+                kucoinPrices[pair, default: []].append(price)
+                if kucoinPrices[pair]!.count > priceHistoryRetention {
+                    kucoinPrices[pair]?.removeFirst()
+                }
+                print("DEBUG: Successfully fetched KuCoin spot price for \(pair): \(price)")
+            }
+            completion(price)
+        }.resume()
+    }
 
+    static func fetchKuCoinFuturesPrice(pair: String, completion: @escaping @Sendable (Double?) -> Void) {
+        let futuresSymbol = kucoinFuturesSymbols[pair] ?? "\(pair.replacingOccurrences(of: "-USDT", with: ""))USDTM"
+        guard let url = URL(string: "https://api-futures.kucoin.com/api/v1/ticker?symbol=\(futuresSymbol)") else {
+            print("DEBUG: Invalid URL for KuCoin futures price fetch: \(pair)")
+            Task { @MainActor in
+                logAlert(event: "Invalid URL for KuCoin futures price fetch: \(pair)")
+            }
+            completion(nil)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10.0
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("DEBUG: Failed to fetch KuCoin futures price for \(pair): \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to fetch KuCoin futures price for \(pair): \(error.localizedDescription)")
+                }
+                completion(nil)
+                return
+            }
+
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let dataDict = json["data"] as? [String: Any],
+                  let priceString = dataDict["price"] as? String,
+                  let price = Double(priceString) else {
+                print("DEBUG: Failed to parse KuCoin futures price for \(pair)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to parse KuCoin futures price for \(pair)")
+                }
+                completion(nil)
+                return
+            }
+
+            Task { @MainActor in
+                kucoinCurrentFuturesPrice[pair] = price
+                kucoinFuturesPrices[pair, default: []].append(price)
+                if kucoinFuturesPrices[pair]!.count > priceHistoryRetention {
+                    kucoinFuturesPrices[pair]?.removeFirst()
+                }
+                print("DEBUG: Successfully fetched KuCoin futures price for \(pair): \(price)")
+            }
+            completion(price)
+        }.resume()
+    }
+
+    static func fetchBybitSpotPrice(pair: String, completion: @escaping @Sendable (Double?) -> Void) {
+        let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+        guard let url = URL(string: "https://api.bybit.com/v5/market/tickers?category=spot&symbol=\(symbol)") else {
+            print("DEBUG: Invalid URL for Bybit spot price fetch: \(pair)")
+            Task { @MainActor in
+                logAlert(event: "Invalid URL for Bybit spot price fetch: \(pair)")
+            }
+            completion(nil)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10.0
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("DEBUG: Failed to fetch Bybit spot price for \(pair): \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to fetch Bybit spot price for \(pair): \(error.localizedDescription)")
+                }
+                completion(nil)
+                return
+            }
+
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let result = json["result"] as? [String: Any],
+                  let list = result["list"] as? [[String: Any]],
+                  let firstTicker = list.first,
+                  let priceString = firstTicker["lastPrice"] as? String,
+                  let price = Double(priceString) else {
+                print("DEBUG: Failed to parse Bybit spot price for \(pair)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to parse Bybit spot price for \(pair)")
+                }
+                completion(nil)
+                return
+            }
+
+            Task { @MainActor in
+                bybitCurrentPrice[pair] = price
+                bybitPrices[pair, default: []].append(price)
+                if bybitPrices[pair]!.count > priceHistoryRetention {
+                    bybitPrices[pair]?.removeFirst()
+                }
+                print("DEBUG: Successfully fetched Bybit spot price for \(pair): \(price)")
+            }
+            completion(price)
+        }.resume()
+    }
+
+    static func fetchBybitFuturesPrice(pair: String, completion: @escaping @Sendable (Double?) -> Void) {
+        let symbol = pair.replacingOccurrences(of: "-USDT", with: "USDT")
+        guard let url = URL(string: "https://api.bybit.com/v5/market/tickers?category=linear&symbol=\(symbol)") else {
+            print("DEBUG: Invalid URL for Bybit futures price fetch: \(pair)")
+            Task { @MainActor in
+                logAlert(event: "Invalid URL for Bybit futures price fetch: \(pair)")
+            }
+            completion(nil)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10.0
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("DEBUG: Failed to fetch Bybit futures price for \(pair): \(error.localizedDescription)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to fetch Bybit futures price for \(pair): \(error.localizedDescription)")
+                }
+                completion(nil)
+                return
+            }
+
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let result = json["result"] as? [String: Any],
+                  let list = result["list"] as? [[String: Any]],
+                  let firstTicker = list.first,
+                  let priceString = firstTicker["lastPrice"] as? String,
+                  let price = Double(priceString) else {
+                print("DEBUG: Failed to parse Bybit futures price for \(pair)")
+                Task { @MainActor in
+                    logAlert(event: "Failed to parse Bybit futures price for \(pair)")
+                }
+                completion(nil)
+                return
+            }
+
+            Task { @MainActor in
+                bybitCurrentFuturesPrice[pair] = price
+                bybitFuturesPrices[pair, default: []].append(price)
+                if bybitFuturesPrices[pair]!.count > priceHistoryRetention {
+                    bybitFuturesPrices[pair]?.removeFirst()
+                }
+                print("DEBUG: Successfully fetched Bybit futures price for \(pair): \(price)")
+            }
+            completion(price)
+        }.resume()
+    }
+}
+
+
+// ADD THIS FUNCTION TO ExchangeWebSocket CLASS (AFTER THE PRICE FETCH FUNCTIONS IN BLOCK 15)
+
+extension ExchangeWebSocket {
+    @MainActor
+    static func startRegularPriceFetching() {
+        print("DEBUG: Starting regular price fetching for all trading pairs")
+        logAlert(event: "Starting regular price fetching for all trading pairs")
+        
+        Task {
+            while tradingActive {
+                do {
+                    // Fetch prices for all pairs concurrently
+                    await withTaskGroup(of: Void.self) { group in
+                        for pair in tradingPairs {
+                            // KuCoin spot prices
+                            group.addTask {
+                                fetchKuCoinSpotPrice(pair: pair) { price in
+                                    if let price = price {
+                                        print("DEBUG: Fetched KuCoin spot price for \(pair): \(price)")
+                                    }
+                                }
+                            }
+                            
+                            // KuCoin futures prices
+                            group.addTask {
+                                fetchKuCoinFuturesPrice(pair: pair) { price in
+                                    if let price = price {
+                                        print("DEBUG: Fetched KuCoin futures price for \(pair): \(price)")
+                                    }
+                                }
+                            }
+                            
+                            // Bybit spot prices
+                            group.addTask {
+                                fetchBybitSpotPrice(pair: pair) { price in
+                                    if let price = price {
+                                        print("DEBUG: Fetched Bybit spot price for \(pair): \(price)")
+                                    }
+                                }
+                            }
+                            
+                            // Bybit futures prices
+                            group.addTask {
+                                fetchBybitFuturesPrice(pair: pair) { price in
+                                    if let price = price {
+                                        print("DEBUG: Fetched Bybit futures price for \(pair): \(price)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Log progress every 10 cycles
+                    let currentTime = Date()
+                    if Int(currentTime.timeIntervalSince1970) % 30 == 0 {
+                        let totalPairs = tradingPairs.count
+                        let kucoinSpotPrices = kucoinCurrentPrice.count
+                        let kucoinFuturesPrices = kucoinCurrentFuturesPrice.count
+                        let bybitSpotPrices = bybitCurrentPrice.count
+                        let bybitFuturesPrices = bybitCurrentFuturesPrice.count
+                        
+                        let status = "Price fetch status: KuCoin Spot(\(kucoinSpotPrices)/\(totalPairs)), KuCoin Futures(\(kucoinFuturesPrices)/\(totalPairs)), Bybit Spot(\(bybitSpotPrices)/\(totalPairs)), Bybit Futures(\(bybitFuturesPrices)/\(totalPairs))"
+                        print("DEBUG: \(status)")
+                        logAlert(event: status)
+                    }
+                    
+                    // Wait 3 seconds between price fetch cycles
+                    try await Task.sleep(nanoseconds: 3_000_000_000)
+                    
+                } catch {
+                    print("DEBUG: Error in price fetching loop: \(error.localizedDescription)")
+                    logAlert(event: "Error in price fetching loop: \(error.localizedDescription)")
+                    
+                    // Wait 5 seconds before retrying on error
+                    try await Task.sleep(nanoseconds: 5_000_000_000)
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    static func logPairStatus() {
+        let totalPairs = tradingPairs.count
+        let activePairs = Set(kucoinCurrentPrice.keys).union(Set(bybitCurrentPrice.keys)).count
+        let statusMessage = "Trading pairs loaded: \(totalPairs), Active pairs with prices: \(activePairs)"
+        print("DEBUG: \(statusMessage)")
+        print("DEBUG: Active trading pairs: \(tradingPairs.joined(separator: ", "))")
+        logAlert(event: statusMessage)
+        
+        // Log which pairs are missing prices
+        for pair in tradingPairs {
+            let kucoinSpot = kucoinCurrentPrice[pair] != nil ? "✅" : "❌"
+            let kucoinFutures = kucoinCurrentFuturesPrice[pair] != nil ? "✅" : "❌"
+            let bybitSpot = bybitCurrentPrice[pair] != nil ? "✅" : "❌"
+            let bybitFutures = bybitCurrentFuturesPrice[pair] != nil ? "✅" : "❌"
+            
+            if kucoinSpot == "❌" || kucoinFutures == "❌" || bybitSpot == "❌" || bybitFutures == "❌" {
+                let status = "\(pair): KC-Spot\(kucoinSpot) KC-Fut\(kucoinFutures) BB-Spot\(bybitSpot) BB-Fut\(bybitFutures)"
+                print("DEBUG: Price status - \(status)")
+            }
+        }
+    }
+}
