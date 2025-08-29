@@ -1,7 +1,4 @@
 
-//-----------------------------------------------------------------------------------------------------------------------------Block 2 - Environment Setup and Logging
-
-
 struct OrderBookEntry {
     let price: Double
     let size: Double
