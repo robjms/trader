@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------------------------------------------------------------Block 2 - Environment Setup and Logging
+
 
 struct OrderBookEntry {
     let price: Double
@@ -341,4 +343,3 @@ func loadEnv() -> [String: String] {
     print("DEBUG: Final loaded environment variables: \(env)")
     return env
 }
-
