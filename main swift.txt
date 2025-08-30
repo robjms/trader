@@ -967,7 +967,6 @@ class ExchangeWebSocket {
             logAlert(event: "Failed to write dashboard.json: \(error.localizedDescription)")
         }
     }
-    
     // Dashboard metrics logging
     static func logDashboardMetrics() {
         Task { @MainActor in
