@@ -174,12 +174,14 @@ func getString(_ key: String, defaultValue: String) -> String {
 
 // Global Environment Variable Storage
 // Global Environment Variable Storage
+// Global Environment Variable Storage
 var hasValidKuCoinCredentials: Bool = true // New flag to track KuCoin credential validity
 var environment: [String: String] = {
     do {
         let fileManager = FileManager.default
-        let envPath = "/Users/robertsteinegger/Desktop/BevaixBot/.env"
-        print("Loading .env from HARDCODED path: \(envPath)")
+        let currentDirectory = fileManager.currentDirectoryPath
+        let envPath = URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
+        print("Loading .env from \(envPath)")
         if fileManager.fileExists(atPath: envPath) {
             print("Found .env file at \(envPath)")
         } else {
@@ -189,7 +191,7 @@ var environment: [String: String] = {
             }
         }
         
-        try Dotenv.configure(atPath: envPath)
+        try Dotenv.configure()
         var envDict: [String: String] = [:]
         let keys = [
             "ACTIVE_PAIRS", "BYBIT_API_KEY", "BYBIT_API_SECRET", "KUCOIN_API_KEY",
@@ -235,45 +237,48 @@ var environment: [String: String] = {
             "SPREAD_RETENTION_HOURS", "ORDER_BOOK_IMBALANCE_FALLBACK",
             "LIQUIDITY_CHECK_FALLBACK", "MARKET_MAKING_SPREAD", "HFT_ORDER_TYPE"
         ]
-         for key in keys {
-             if let value = Dotenv[key] {
-                 envDict[key] = value.stringValue
-             }
-         }
-         // Validate KuCoin API credentials
-         let requiredKuCoinKeys = ["KUCOIN_API_KEY", "KUCOIN_API_SECRET", "KUCOIN_API_PASSPHRASE"]
-         var missingKeys = [String]()
-         for key in requiredKuCoinKeys {
-             if envDict[key] == nil || envDict[key]!.isEmpty {
-                 missingKeys.append(key)
-             }
-         }
-         if !missingKeys.isEmpty {
-             let missingMessage = "Missing or empty KuCoin API credentials: \(missingKeys.joined(separator: ", ")). Disabling KuCoin functionality."
-             print("WARNING: \(missingMessage)")
-             Task { @MainActor in
-                 logAlert(event: missingMessage)
-             }
-             hasValidKuCoinCredentials = false // Disable KuCoin operations
-         }
-         // Debug: Log all loaded environment variables
-         print("DEBUG: Loaded environment variables: \(envDict)")
-         print("Successfully loaded .env file using SwiftDotenv")
-         print("SwiftDotenv version: \(Dotenv.version?.stringValue ?? "unknown")")
-         print("DEBUG: ACTIVE_PAIRS from env: \(envDict["ACTIVE_PAIRS"] ?? "not found")")
-         print("DEBUG: BYBIT_API_KEY from env: \(envDict["BYBIT_API_KEY"] ?? "not found")")
-         print("DEBUG: KUCOIN_API_KEY from env: \(envDict["KUCOIN_API_KEY"] ?? "not found")")
-         return envDict
-     } catch {
-         print("Failed to load .env file: \(error)")
-         Task { @MainActor in
-             logAlert(event: "Failed to load .env file: \(error)")
-         }
-         return [:] // Return empty dictionary to allow bot to continue
-     }
- }()
-
-
+        for key in keys {
+            if let value = Dotenv[key] {
+                let stringValue = value.stringValue
+                envDict[key] = stringValue
+                // FIXED: Also set in ProcessInfo so getDouble/getInt functions work
+                ProcessInfo.processInfo.setValue(stringValue, forKey: key)
+            }
+        }
+        // Validate KuCoin API credentials
+        let requiredKuCoinKeys = ["KUCOIN_API_KEY", "KUCOIN_API_SECRET", "KUCOIN_API_PASSPHRASE"]
+        var missingKeys = [String]()
+        for key in requiredKuCoinKeys {
+            if envDict[key] == nil || envDict[key]!.isEmpty {
+                missingKeys.append(key)
+            }
+        }
+        if !missingKeys.isEmpty {
+            let missingMessage = "Missing or empty KuCoin API credentials: \(missingKeys.joined(separator: ", ")). Disabling KuCoin functionality."
+            print("WARNING: \(missingMessage)")
+            Task { @MainActor in
+                logAlert(event: missingMessage)
+            }
+            hasValidKuCoinCredentials = false // Disable KuCoin operations
+        }
+        // Debug: Log all loaded environment variables
+        print("DEBUG: Loaded environment variables: \(envDict)")
+        print("Successfully loaded .env file using SwiftDotenv")
+        print("SwiftDotenv version: \(Dotenv.version?.stringValue ?? "unknown")")
+        print("DEBUG: ACTIVE_PAIRS from env: \(envDict["ACTIVE_PAIRS"] ?? "not found")")
+        print("DEBUG: BYBIT_API_KEY from env: \(envDict["BYBIT_API_KEY"] ?? "not found")")
+        print("DEBUG: KUCOIN_API_KEY from env: \(envDict["KUCOIN_API_KEY"] ?? "not found")")
+        print("DEBUG: BYBIT_FALLBACK_BALANCE from env: \(envDict["BYBIT_FALLBACK_BALANCE"] ?? "not found")")
+        print("DEBUG: KUCOIN_FALLBACK_BALANCE from env: \(envDict["KUCOIN_FALLBACK_BALANCE"] ?? "not found")")
+        return envDict
+    } catch {
+        print("Failed to load .env file: \(error)")
+        Task { @MainActor in
+            logAlert(event: "Failed to load .env file: \(error)")
+        }
+        return [:] // Return empty dictionary to allow bot to continue
+    }
+}()
 
 
 // Global Alert Logging Function
@@ -948,187 +953,192 @@ class ExchangeWebSocket {
         }
     }
 
-    // FIXED initializeParameters with proper async access
     static func initializeParameters(completion: @escaping () -> Void) {
-        Task { @MainActor in
-            let rawPairs = await MainActor.run { environment["ACTIVE_PAIRS"] ?? "BTC-USDT,ETH-USDT" }
-            print("DEBUG: Raw ACTIVE_PAIRS from .env: \(rawPairs)")
-            tradingPairs = rawPairs.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
-            print("🎯 LOADED \(tradingPairs.count) TRADING PAIRS: \(tradingPairs)")
-            print("DEBUG: Number of pairs loaded: \(tradingPairs.count)")
+        let rawPairs = environment["ACTIVE_PAIRS"] ?? "BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT"
+        print("DEBUG: Raw ACTIVE_PAIRS from .env: \(rawPairs)")
+        tradingPairs = rawPairs.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+        print("DEBUG: Loaded tradingPairs: \(tradingPairs)")
+        print("DEBUG: Number of pairs loaded: \(tradingPairs.count)")
 
-            // Allocate capital proportionally
-            let kucoinInitialBalance = getDouble("KUCOIN_FALLBACK_BALANCE", defaultValue: 500.0)
-            let bybitInitialBalance = getDouble("BYBIT_FALLBACK_BALANCE", defaultValue: 700.0)
-            kucoinBalance = kucoinInitialBalance
-            bybitBalance = bybitInitialBalance
-            
-            tradingPairs.forEach { pair in
-                let kucoinAllocation = kucoinInitialBalance / Double(tradingPairs.count)
-                let bybitAllocation = bybitInitialBalance / Double(tradingPairs.count)
-                kucoinBalances[pair] = kucoinAllocation
-                bybitBalances[pair] = bybitAllocation
-            }
+        // FIXED: Use proper fallback balance values from .env file
+        let kucoinInitialBalance = getDouble("KUCOIN_FALLBACK_BALANCE", defaultValue: 522.235326)
+        let bybitInitialBalance = getDouble("BYBIT_FALLBACK_BALANCE", defaultValue: 716.65266351)
+        kucoinBalance = kucoinInitialBalance
+        bybitBalance = bybitInitialBalance
+        kucoinFuturesBalance = kucoinInitialBalance  // FIXED: Initialize futures balance
+        bybitFuturesBalance = bybitInitialBalance    // FIXED: Initialize futures balance
+        
+        tradingPairs.forEach { pair in
+            let kucoinAllocation = kucoinInitialBalance / Double(tradingPairs.count)
+            let bybitAllocation = bybitInitialBalance / Double(tradingPairs.count)
+            kucoinBalances[pair] = kucoinAllocation
+            bybitBalances[pair] = bybitAllocation
+        }
 
-            fetchKuCoinFuturesSymbols {
-                Task { @MainActor in
-                    if kucoinFuturesSymbols.isEmpty {
-                        for pair in tradingPairs {
-                            let components = pair.components(separatedBy: "-")
-                            if components.count == 2 {
-                                let base = components[0]
-                                let quote = components[1]
-                                let adjustedBase = base == "BTC" ? "XBT" : base
-                                kucoinFuturesSymbols[pair] = "\(adjustedBase)\(quote)M"
-                            } else {
-                                print("DEBUG: Invalid trading pair format: \(pair)")
+        fetchKuCoinFuturesSymbols {
+            Task { @MainActor in
+                if kucoinFuturesSymbols.isEmpty {
+                    for pair in tradingPairs {
+                        let components = pair.components(separatedBy: "-")
+                        if components.count == 2 {
+                            let base = components[0]
+                            let quote = components[1]
+                            let adjustedBase = base == "BTC" ? "XBT" : base
+                            kucoinFuturesSymbols[pair] = "\(adjustedBase)\(quote)M"
+                        } else {
+                            print("DEBUG: Invalid trading pair format: \(pair)")
+                            Task { @MainActor in
                                 logAlert(event: "Invalid trading pair format: \(pair)")
                             }
                         }
                     }
-                    print("DEBUG: Initialized kucoinFuturesSymbols: \(kucoinFuturesSymbols)")
-                    
-                    // Initialize storage dictionaries for all pairs
-                    tradingPairs.forEach { pair in
-                        kucoinPrices[pair] = kucoinPrices[pair] ?? []
-                        kucoinFuturesPrices[pair] = kucoinFuturesPrices[pair] ?? []
-                        bybitPrices[pair] = bybitPrices[pair] ?? []
-                        bybitFuturesPrices[pair] = bybitFuturesPrices[pair] ?? []
-                        kucoinCurrentPrice[pair] = kucoinCurrentPrice[pair] ?? 0.0
-                        kucoinCurrentFuturesPrice[pair] = kucoinCurrentFuturesPrice[pair] ?? 0.0
-                        bybitCurrentPrice[pair] = bybitCurrentPrice[pair] ?? 0.0
-                        bybitCurrentFuturesPrice[pair] = bybitCurrentFuturesPrice[pair] ?? 0.0
-                        bybitPositions[pair] = bybitPositions[pair] ?? 0.0
-                        kucoinPositions[pair] = kucoinPositions[pair] ?? 0.0
-                        kucoinSpotVolume[pair] = kucoinSpotVolume[pair] ?? []
-                        kucoinFuturesVolume[pair] = kucoinFuturesVolume[pair] ?? []
-                        bybitSpotVolume[pair] = bybitSpotVolume[pair] ?? []
-                        bybitFuturesVolume[pair] = bybitFuturesVolume[pair] ?? []
-                        kucoinFuturesOrderBook[pair] = kucoinFuturesOrderBook[pair] ?? []
-                        bybitFuturesOrderBook[pair] = bybitFuturesOrderBook[pair] ?? []
-                        kucoinOrderBooks[pair] = kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
-                        bybitOrderBooks[pair] = bybitOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
-                        bybitFundingRateHistory[pair] = bybitFundingRateHistory[pair] ?? []
-                        kucoinFundingRateHistory[pair] = kucoinFundingRateHistory[pair] ?? []
-                        sentimentScores[pair] = sentimentScores[pair] ?? 0.0
-                        kucoinSpotEMA1Min[pair] = kucoinSpotEMA1Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
-                        kucoinSpotEMA5Min[pair] = kucoinSpotEMA5Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
-                        kucoinSpotEMA15Min[pair] = kucoinSpotEMA15Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
-                        bybitSpotEMA1Min[pair] = bybitSpotEMA1Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
-                        bybitSpotEMA5Min[pair] = bybitSpotEMA5Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
-                        bybitSpotEMA15Min[pair] = bybitSpotEMA15Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
-                        lastLatency[pair] = lastLatency[pair] ?? 0.0
-                        orderCancellationEvents[pair] = orderCancellationEvents[pair] ?? []
-                        varEstimates[pair] = varEstimates[pair] ?? 0.0
-                        kellySizes[pair] = kellySizes[pair] ?? 0.0
-                        performanceMetrics[pair] = performanceMetrics[pair] ?? (profit: 0.0, fees: 0.0, trades: 0, wins: 0)
-                        tradeMetrics[pair] = tradeMetrics[pair] ?? (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)
-                        kucoinOrderBookEvents[pair] = kucoinOrderBookEvents[pair] ?? []
-                        print("DEBUG: Initialized storage for pair: \(pair)")
-                    }
+                }
+                print("DEBUG: Initialized kucoinFuturesSymbols: \(kucoinFuturesSymbols)")
+                
+                // Initialize storage dictionaries for all pairs
+                tradingPairs.forEach { pair in
+                    kucoinPrices[pair] = kucoinPrices[pair] ?? []
+                    kucoinFuturesPrices[pair] = kucoinFuturesPrices[pair] ?? []
+                    bybitPrices[pair] = bybitPrices[pair] ?? []
+                    bybitFuturesPrices[pair] = bybitFuturesPrices[pair] ?? []
+                    kucoinCurrentPrice[pair] = kucoinCurrentPrice[pair] ?? 0.0
+                    kucoinCurrentFuturesPrice[pair] = kucoinCurrentFuturesPrice[pair] ?? 0.0
+                    bybitCurrentPrice[pair] = bybitCurrentPrice[pair] ?? 0.0
+                    bybitCurrentFuturesPrice[pair] = bybitCurrentFuturesPrice[pair] ?? 0.0
+                    bybitPositions[pair] = bybitPositions[pair] ?? 0.0
+                    kucoinPositions[pair] = kucoinPositions[pair] ?? 0.0
+                    kucoinSpotVolume[pair] = kucoinSpotVolume[pair] ?? []
+                    kucoinFuturesVolume[pair] = kucoinFuturesVolume[pair] ?? []
+                    bybitSpotVolume[pair] = bybitSpotVolume[pair] ?? []
+                    bybitFuturesVolume[pair] = bybitFuturesVolume[pair] ?? []
+                    kucoinFuturesOrderBook[pair] = kucoinFuturesOrderBook[pair] ?? []
+                    bybitFuturesOrderBook[pair] = bybitFuturesOrderBook[pair] ?? []
+                    kucoinOrderBooks[pair] = kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+                    bybitOrderBooks[pair] = bybitOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
+                    bybitFundingRateHistory[pair] = bybitFundingRateHistory[pair] ?? []
+                    kucoinFundingRateHistory[pair] = kucoinFundingRateHistory[pair] ?? []
+                    sentimentScores[pair] = sentimentScores[pair] ?? 0.0
+                    kucoinSpotEMA1Min[pair] = kucoinSpotEMA1Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
+                    kucoinSpotEMA5Min[pair] = kucoinSpotEMA5Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
+                    kucoinSpotEMA15Min[pair] = kucoinSpotEMA15Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
+                    bybitSpotEMA1Min[pair] = bybitSpotEMA1Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
+                    bybitSpotEMA5Min[pair] = bybitSpotEMA5Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
+                    bybitSpotEMA15Min[pair] = bybitSpotEMA15Min[pair] ?? (short: 0.0, medium: 0.0, long: 0.0)
+                    lastLatency[pair] = lastLatency[pair] ?? 0.0
+                    orderCancellationEvents[pair] = orderCancellationEvents[pair] ?? []
+                    varEstimates[pair] = varEstimates[pair] ?? 0.0
+                    kellySizes[pair] = kellySizes[pair] ?? 0.0
+                    performanceMetrics[pair] = performanceMetrics[pair] ?? (profit: 0.0, fees: 0.0, trades: 0, wins: 0)
+                    tradeMetrics[pair] = tradeMetrics[pair] ?? (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)
+                    kucoinOrderBookEvents[pair] = kucoinOrderBookEvents[pair] ?? []
+                    print("DEBUG: Initialized storage for pair: \(pair)")
+                }
 
-                    // Load other parameters
-                    liquidityDepthMultiplier = getDouble("LIQUIDITY_DEPTH_MULTIPLIER", defaultValue: 7.0)
-                    liquidityPriceImpactThreshold = getDouble("LIQUIDITY_PRICE_IMPACT_THRESHOLD", defaultValue: 0.005)
-                    orderBookPriceRange = getDouble("ORDER_BOOK_PRICE_RANGE", defaultValue: 0.005)
-                    orderBookImbalanceThreshold = getDouble("ORDER_BOOK_IMBALANCE_THRESHOLD", defaultValue: 1.5)
-                    minLiquidityThreshold = getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 500.0)
-                    maxOrderBookImbalance = getDouble("MAX_ORDER_BOOK_IMBALANCE", defaultValue: 20.0)
-                    volatilitySpikeThreshold = getDouble("VOLATILITY_SPIKE_THRESHOLD", defaultValue: 0.05)
-                    volatilitySpikeWindowMinutes = getInt("VOLATILITY_SPIKE_WINDOW_MINUTES", defaultValue: 5)
-                    volatilitySpikeCooldownSeconds = getInt("VOLATILITY_SPIKE_COOLDOWN_SECONDS", defaultValue: 900)
-                    volumeAnomalyMultiplier = getDouble("VOLUME_ANOMALY_MULTIPLIER", defaultValue: 5.0)
-                    volumeAnomalyWindowHours = getInt("VOLUME_ANOMALY_WINDOW_HOURS", defaultValue: 1)
-                    volumeAnomalyCooldownSeconds = getInt("VOLUME_ANOMALY_COOLDOWN_SECONDS", defaultValue: 1800)
-                    futuresTradeAmount = getDouble("FUTURES_TRADE_AMOUNT", defaultValue: 150.0)
-                    futuresMinProfitPercentage = getDouble("FUTURES_MIN_PROFIT_PERCENTAGE", defaultValue: 0.01)
-                    futuresStopLossPercentage = getDouble("FUTURES_STOP_LOSS_PERCENTAGE", defaultValue: 0.02)
-                    futuresTrailingStopPercentage = getDouble("FUTURES_TRAILING_STOP_PERCENTAGE", defaultValue: 0.01)
-                    futuresSpikeTrailingStopPercentage = getDouble("FUTURES_SPIKE_TRAILING_STOP_PERCENTAGE", defaultValue: 0.02)
-                    maxActiveFuturesTrades = getInt("MAX_ACTIVE_FUTURES_TRADES", defaultValue: 5)
-                    dailyLossLimitPercentage = getDouble("DAILY_LOSS_LIMIT_PERCENTAGE", defaultValue: 0.05)
-                    atrMultiplier = getDouble("ATR_MULTIPLIER", defaultValue: 1.5)
-                    arbitrageMinBalance = getDouble("ARBITRAGE_MIN_BALANCE", defaultValue: 300.0)
-                    arbitrageTradeAmount = getDouble("ARBITRAGE_TRADE_AMOUNT", defaultValue: 500.0)
-                    arbitrageMinSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.001)
-                    arbitrageHighSpreadThreshold = getDouble("ARBITRAGE_HIGH_SPREAD_THRESHOLD", defaultValue: 0.005)
-                    crossExchangeMinBalance = getDouble("CROSS_EXCHANGE_MIN_BALANCE", defaultValue: 500.0)
-                    crossExchangeTradeAmount = getDouble("CROSS_EXCHANGE_TRADE_AMOUNT", defaultValue: 150.0)
-                    crossExchangeMinSpreadThreshold = getDouble("CROSS_EXCHANGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.002)
-                    crossExchangeMinFundingRateThreshold = getDouble("CROSS_EXCHANGE_MIN_FUNDING_RATE_THRESHOLD", defaultValue: 0.00005)
-                    crossExchangeCooldownSeconds = getDouble("CROSS_EXCHANGE_COOLDOWN_SECONDS", defaultValue: 300)
-                    volatilityPauseSeconds = getDouble("VOLATILITY_PAUSE_SECONDS", defaultValue: 300)
-                    spotTradeAmount = getDouble("SPOT_TRADE_AMOUNT", defaultValue: 30.0)
-                    spotFeeRate = getDouble("SPOT_FEE_RATE", defaultValue: 0.001)
-                    spotMinProfitPercentage = getDouble("SPOT_MINUTE_PROFIT_PERCENTAGE", defaultValue: 0.004)
-                    spotStopLossPercentage = getDouble("SPOT_STOP_LOSS_PERCENTAGE", defaultValue: 0.02)
-                    spotTrailingStopPercentage = getDouble("SPOT_TRAILING_STOP_PERCENTAGE", defaultValue: 0.003)
-                    spotEmaShortPeriod = getInt("SPOT_EMA_SHORT_PERIOD", defaultValue: 3)
-                    spotEmaMediumPeriod = getInt("SPOT_EMA_MEDIUM_PERIOD", defaultValue: 6)
-                    spotEmaLongPeriod = getInt("SPOT_EMA_LONG_PERIOD", defaultValue: 20)
-                    spotRsiPeriod = getInt("SPOT_RSI_PERIOD", defaultValue: 14)
-                    spotRsiUpperThreshold = getDouble("SPOT_RSI_UPPER_THRESHOLD", defaultValue: 70.0)
-                    spotRsiLowerThreshold = getDouble("SPOT_RSI_LOWER_THRESHOLD", defaultValue: 30.0)
-                    maxActiveSpotTrades = getInt("MAX_ACTIVE_SPOT_TRADES", defaultValue: 2)
-                    futuresEmaShortPeriod = getInt("FUTURES_EMA_SHORT_PERIOD", defaultValue: 3)
-                    futuresEmaMediumPeriod = getInt("FUTURES_EMA_MEDIUM_PERIOD", defaultValue: 6)
-                    futuresEmaLongPeriod = getInt("FUTURES_EMA_LONG_PERIOD", defaultValue: 20)
-                    bybitFuturesFeeRate = getDouble("BYBIT_FUTURES_FEE_RATE", defaultValue: 0.0004)
-                    kucoinFuturesFeeRate = getDouble("KUCOIN_FUTURES_FEE_RATE", defaultValue: 0.0005)
-                    bybitFallbackBalance = getDouble("BYBIT_FALLBACK_BALANCE", defaultValue: 700.0)
-                    kucoinFallbackBalance = getDouble("KUCOIN_FALLBACK_BALANCE", defaultValue: 500.0)
-                    let envValue = await MainActor.run { environment }
-                    bybitRecvWindow = envValue["BYBIT_RECV_WINDOW"] ?? "5000"
-                    kucoinLeverage = envValue["KUCOIN_LEVERAGE"] ?? "1"
-                    bybitLeverage = envValue["BYBIT_LEVERAGE"] ?? "1"
-                    priceHistoryRetention = getInt("PRICE_HISTORY_RETENTION", defaultValue: 1440)
-                    websocketTimeoutSeconds = getInt("WEBSOCKET_TIMEOUT_SECONDS", defaultValue: 15)
-                    balanceFetchTimeout = getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20)
-                    maxFundingRate = getDouble("MAX_FUNDING_RATE", defaultValue: 0.001)
-                    macdShortPeriod = getInt("MACD_SHORT_PERIOD", defaultValue: 12)
-                    macdLongPeriod = getInt("MACD_LONG_PERIOD", defaultValue: 26)
-                    macdSignalPeriod = getInt("MACD_SIGNAL_PERIOD", defaultValue: 9)
-                    macdConfirmationThreshold = getDouble("MACD_CONFIRMATION_THRESHOLD", defaultValue: 0.0003)
-                    maxSlippage = getDouble("MAX_SLIPPAGE", defaultValue: 0.005)
-                    liquidityCheckInterval = getInt("LIQUIDITY_CHECK_INTERVAL", defaultValue: 15)
-                    minOrderbookRefreshRate = getInt("MIN_ORDERBOOK_REFRESH_RATE", defaultValue: 5)
-                    scalpEntryThreshold = getDouble("SCALP_ENTRY_THRESHOLD", defaultValue: 0.0006)
-                    scalpProfitTarget = getDouble("SCALP_PROFIT_TARGET", defaultValue: 0.0012)
-                    scalpStopLoss = getDouble("SCALP_STOP_LOSS", defaultValue: 0.0015)
-                    spoofingVolumeThreshold = getDouble("SPOOFING_VOLUME_THRESHOLD", defaultValue: 1.5)
-                    spoofingProfitTarget = getDouble("SPOOFING_PROFIT_TARGET", defaultValue: 0.008)
-                    slippageTradeAmount = getDouble("SLIPPAGE_TRADE_AMOUNT", defaultValue: 100.0)
-                    fundingMomentumThreshold = getDouble("FUNDING_MOMENTUM_THRESHOLD", defaultValue: 0.00008)
-                    latencySpikeThreshold = getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 80.0)
-                    hftCooldownSeconds = getDouble("HFT_COOLDOWN_SECONDS", defaultValue: 1.5)
-                    
-                    print("DEBUG: Initialized kucoinBalance: \(kucoinBalance), bybitBalance: \(bybitBalance)")
+                // Load other parameters
+                liquidityDepthMultiplier = getDouble("LIQUIDITY_DEPTH_MULTIPLIER", defaultValue: 7.0)
+                liquidityPriceImpactThreshold = getDouble("LIQUIDITY_PRICE_IMPACT_THRESHOLD", defaultValue: 0.005)
+                orderBookPriceRange = getDouble("ORDER_BOOK_PRICE_RANGE", defaultValue: 0.005)
+                orderBookImbalanceThreshold = getDouble("ORDER_BOOK_IMBALANCE_THRESHOLD", defaultValue: 1.5)
+                minLiquidityThreshold = getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 500.0)
+                maxOrderBookImbalance = getDouble("MAX_ORDER_BOOK_IMBALANCE", defaultValue: 20.0)
+                volatilitySpikeThreshold = getDouble("VOLATILITY_SPIKE_THRESHOLD", defaultValue: 0.05)
+                volatilitySpikeWindowMinutes = getInt("VOLATILITY_SPIKE_WINDOW_MINUTES", defaultValue: 5)
+                volatilitySpikeCooldownSeconds = getInt("VOLATILITY_SPIKE_COOLDOWN_SECONDS", defaultValue: 900)
+                volumeAnomalyMultiplier = getDouble("VOLUME_ANOMALY_MULTIPLIER", defaultValue: 5.0)
+                volumeAnomalyWindowHours = getInt("VOLUME_ANOMALY_WINDOW_HOURS", defaultValue: 1)
+                volumeAnomalyCooldownSeconds = getInt("VOLUME_ANOMALY_COOLDOWN_SECONDS", defaultValue: 1800)
+                futuresTradeAmount = getDouble("FUTURES_TRADE_AMOUNT", defaultValue: 600.0)  // FIXED: Use .env value
+                futuresMinProfitPercentage = getDouble("FUTURES_MIN_PROFIT_PERCENTAGE", defaultValue: 0.0010)  // FIXED: Use .env value
+                futuresStopLossPercentage = getDouble("FUTURES_STOP_LOSS_PERCENTAGE", defaultValue: 0.0020)
+                futuresTrailingStopPercentage = getDouble("FUTURES_TRAILING_STOP_PERCENTAGE", defaultValue: 0.0020)
+                futuresSpikeTrailingStopPercentage = getDouble("FUTURES_SPIKE_TRAILING_STOP_PERCENTAGE", defaultValue: 0.004)
+                maxActiveFuturesTrades = getInt("MAX_ACTIVE_FUTURES_TRADES", defaultValue: 30)  // FIXED: Use .env value
+                dailyLossLimitPercentage = getDouble("DAILY_LOSS_LIMIT_PERCENTAGE", defaultValue: 0.08)
+                atrMultiplier = getDouble("ATR_MULTIPLIER", defaultValue: 0.8)
+                arbitrageMinBalance = getDouble("ARBITRAGE_MIN_BALANCE", defaultValue: 20.0)
+                arbitrageTradeAmount = getDouble("ARBITRAGE_TRADE_AMOUNT", defaultValue: 500.0)
+                arbitrageMinSpreadThreshold = getDouble("ARBITRAGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.0030)
+                arbitrageHighSpreadThreshold = getDouble("ARBITRAGE_HIGH_SPREAD_THRESHOLD", defaultValue: 0.0035)
+                crossExchangeMinBalance = getDouble("CROSS_EXCHANGE_MIN_BALANCE", defaultValue: 300.0)
+                crossExchangeTradeAmount = getDouble("CROSS_EXCHANGE_TRADE_AMOUNT", defaultValue: 300.0)
+                crossExchangeMinSpreadThreshold = getDouble("CROSS_EXCHANGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.0020)
+                crossExchangeMinFundingRateThreshold = getDouble("CROSS_EXCHANGE_MIN_FUNDING_RATE_THRESHOLD", defaultValue: 0.0000005)
+                crossExchangeCooldownSeconds = getDouble("CROSS_EXCHANGE_COOLDOWN_SECONDS", defaultValue: 0.2)
+                volatilityPauseSeconds = getDouble("VOLATILITY_PAUSE_SECONDS", defaultValue: 300)
+                spotTradeAmount = getDouble("SPOT_TRADE_AMOUNT", defaultValue: 50.0)  // FIXED: Use .env value
+                spotFeeRate = getDouble("SPOT_FEE_RATE", defaultValue: 0.001)
+                spotMinProfitPercentage = getDouble("SPOT_MINUTE_PROFIT_PERCENTAGE", defaultValue: 0.0030)
+                spotStopLossPercentage = getDouble("SPOT_STOP_LOSS_PERCENTAGE", defaultValue: 0.0020)
+                spotTrailingStopPercentage = getDouble("SPOT_TRAILING_STOP_PERCENTAGE", defaultValue: 0.0010)
+                spotEmaShortPeriod = getInt("SPOT_EMA_SHORT_PERIOD", defaultValue: 5)
+                spotEmaMediumPeriod = getInt("SPOT_EMA_MEDIUM_PERIOD", defaultValue: 10)
+                spotEmaLongPeriod = getInt("SPOT_EMA_LONG_PERIOD", defaultValue: 20)
+                spotRsiPeriod = getInt("SPOT_RSI_PERIOD", defaultValue: 14)
+                spotRsiUpperThreshold = getDouble("SPOT_RSI_UPPER_THRESHOLD", defaultValue: 70.0)
+                spotRsiLowerThreshold = getDouble("SPOT_RSI_LOWER_THRESHOLD", defaultValue: 30.0)
+                maxActiveSpotTrades = getInt("MAX_ACTIVE_SPOT_TRADES", defaultValue: 20)
+                futuresEmaShortPeriod = getInt("FUTURES_EMA_SHORT_PERIOD", defaultValue: 5)
+                futuresEmaMediumPeriod = getInt("FUTURES_EMA_MEDIUM_PERIOD", defaultValue: 10)
+                futuresEmaLongPeriod = getInt("FUTURES_EMA_LONG_PERIOD", defaultValue: 20)
+                bybitFuturesFeeRate = getDouble("BYBIT_FUTURES_FEE_RATE", defaultValue: 0.0002)
+                kucoinFuturesFeeRate = getDouble("KUCOIN_FUTURES_FEE_RATE", defaultValue: 0.0002)
+                bybitFallbackBalance = getDouble("BYBIT_FALLBACK_BALANCE", defaultValue: 716.65266351)
+                kucoinFallbackBalance = getDouble("KUCOIN_FALLBACK_BALANCE", defaultValue: 522.235326)
+                bybitRecvWindow = environment["BYBIT_RECV_WINDOW"] ?? "5000"
+                kucoinLeverage = environment["KUCOIN_LEVERAGE"] ?? "6"
+                bybitLeverage = environment["BYBIT_LEVERAGE"] ?? "6"
+                priceHistoryRetention = getInt("PRICE_HISTORY_RETENTION", defaultValue: 2880)
+                websocketTimeoutSeconds = getInt("WEBSOCKET_TIMEOUT_SECONDS", defaultValue: 8)
+                balanceFetchTimeout = getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 12)
+                maxFundingRate = getDouble("MAX_FUNDING_RATE", defaultValue: 0.0005)
+                macdShortPeriod = getInt("MACD_SHORT_PERIOD", defaultValue: 8)
+                macdLongPeriod = getInt("MACD_LONG_PERIOD", defaultValue: 20)
+                macdSignalPeriod = getInt("MACD_SIGNAL_PERIOD", defaultValue: 6)
+                macdConfirmationThreshold = getDouble("MACD_CONFIRMATION_THRESHOLD", defaultValue: 0.0001)
+                maxSlippage = getDouble("MAX_SLIPPAGE", defaultValue: 0.005)
+                liquidityCheckInterval = getInt("LIQUIDITY_CHECK_INTERVAL", defaultValue: 30)
+                minOrderbookRefreshRate = getInt("MIN_ORDERBOOK_REFRESH_RATE", defaultValue: 1)
+                scalpEntryThreshold = getDouble("SCALP_ENTRY_THRESHOLD", defaultValue: 0.0006)
+                scalpProfitTarget = getDouble("SCALP_PROFIT_TARGET", defaultValue: 0.0040)
+                scalpStopLoss = getDouble("SCALP_STOP_LOSS", defaultValue: 0.0015)
+                spoofingVolumeThreshold = getDouble("SPOOFING_VOLUME_THRESHOLD", defaultValue: 1.5)
+                spoofingProfitTarget = getDouble("SPOOFING_PROFIT_TARGET", defaultValue: 0.008)
+                slippageTradeAmount = getDouble("SLIPPAGE_TRADE_AMOUNT", defaultValue: 100.0)
+                fundingMomentumThreshold = getDouble("FUNDING_MOMENTUM_THRESHOLD", defaultValue: 0.00008)
+                latencySpikeThreshold = getDouble("LATENCY_SPIKE_THRESHOLD", defaultValue: 500.0)
+                hftCooldownSeconds = getDouble("HFT_COOLDOWN_SECONDS", defaultValue: 1.5)
+                
+                print("DEBUG: Initialized balances - KuCoin: \(kucoinBalance), KuCoin Futures: \(kucoinFuturesBalance)")
+                print("DEBUG: Initialized balances - Bybit: \(bybitBalance), Bybit Futures: \(bybitFuturesBalance)")
+                print("DEBUG: Initialized futures trade amount: \(futuresTradeAmount)")
+                print("DEBUG: Initialized spot trade amount: \(spotTradeAmount)")
 
-                    // Fetch initial sentiment scores
-                    for pair in tradingPairs {
-                        fetchSentimentScore(pair: pair) { score in
-                            Task { @MainActor in
-                                sentimentScores[pair] = score ?? 0.0
-                                print("DEBUG: Initialized sentiment score for \(pair): \(sentimentScores[pair] ?? 0.0)")
-                            }
+                // Fetch initial sentiment scores
+                for pair in tradingPairs {
+                    fetchSentimentScore(pair: pair) { score in
+                        Task { @MainActor in
+                            sentimentScores[pair] = score ?? 0.0
+                            print("DEBUG: Initialized sentiment score for \(pair): \(sentimentScores[pair] ?? 0.0)")
                         }
                     }
+                }
 
-                    // Schedule periodic dashboard updates
-                    Task {
-                        while true {
-                            do {
-                                try await Task.sleep(nanoseconds: 10_000_000_000) // Every 10 seconds
-                                logDashboardMetrics()
-                            } catch {
-                                print("DEBUG: Dashboard update sleep interrupted: \(error.localizedDescription)")
+                // Schedule periodic dashboard updates
+                Task {
+                    while true {
+                        do {
+                            try await Task.sleep(nanoseconds: 10_000_000_000) // Every 10 seconds
+                            logDashboardMetrics()
+                        } catch {
+                            print("DEBUG: Dashboard update sleep interrupted: \(error.localizedDescription)")
+                            Task { @MainActor in
                                 logAlert(event: "Dashboard update sleep interrupted: \(error.localizedDescription)")
                             }
                         }
                     }
-
-                    completion()
                 }
+
+                completion()
             }
         }
     }
