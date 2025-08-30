@@ -1470,52 +1470,17 @@ struct AppConfig {
 func loadEnv() -> [String: String] {
     var env: [String: String] = [:]
     let fileManager = FileManager.default
-    
-    // FIXED: Use hardcoded correct path first
-    let correctEnvPath = "/Users/robertsteinegger/Desktop/BevaixBot/.env"
-    
-    print("FIXED: Looking for .env file at HARDCODED path: \(correctEnvPath)")
-    
-    if fileManager.fileExists(atPath: correctEnvPath) {
-        do {
-            let contents = try String(contentsOfFile: correctEnvPath, encoding: .utf8)
-            print("SUCCESS: Read .env file from correct path")
-            let lines = contents.components(separatedBy: .newlines)
-            for line in lines {
-                let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
-                let parts = trimmed.components(separatedBy: "=")
-                if parts.count >= 2 {
-                    let key = parts[0].trimmingCharacters(in: .whitespaces)
-                    let value = parts.dropFirst().joined(separator: "=").trimmingCharacters(in: .whitespaces)
-                    env[key] = value
-                }
-            }
-            print("SUCCESS: Loaded \(env.count) environment variables from correct path")
-            return env
-        } catch {
-            print("ERROR: Failed to read .env file from correct path: \(error)")
-            Task { @MainActor in
-                logAlert(event: "ERROR: Failed to read .env file from correct path: \(error)")
-            }
-        }
-    } else {
-        print("ERROR: .env file not found at correct path: \(correctEnvPath)")
-        Task { @MainActor in
-            logAlert(event: "ERROR: .env file not found at correct path: \(correctEnvPath)")
-        }
-    }
-    
-    // FALLBACK: Try current working directory as last resort
+
+    // Look for .env in current working directory first
     let currentDirectory = fileManager.currentDirectoryPath
     let currentEnvPath = URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
-    
-    print("FALLBACK: Trying current directory: \(currentEnvPath)")
-    
+
+    print("Looking for .env file at: \(currentEnvPath)")
+
     if fileManager.fileExists(atPath: currentEnvPath) {
         do {
             let contents = try String(contentsOfFile: currentEnvPath, encoding: .utf8)
-            print("SUCCESS: Read .env file from current directory")
+            print("✅ SUCCESS: Read .env file from current directory")
             let lines = contents.components(separatedBy: .newlines)
             for line in lines {
                 let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -1527,19 +1492,21 @@ func loadEnv() -> [String: String] {
                     env[key] = value
                 }
             }
+            print("✅ SUCCESS: Loaded \(env.count) environment variables")
+            return env
         } catch {
-            print("ERROR: Failed to read .env file from current directory: \(error)")
+            print("❌ ERROR: Failed to read .env file: \(error)")
             Task { @MainActor in
-                logAlert(event: "ERROR: Failed to read .env file from current directory: \(error)")
+                logAlert(event: "ERROR: Failed to read .env file: \(error)")
             }
         }
     } else {
-        print("ERROR: No .env file found in either location")
+        print("⚠️  ERROR: .env file not found in current directory: \(currentEnvPath)")
         Task { @MainActor in
-            logAlert(event: "ERROR: No .env file found in either location")
+            logAlert(event: "ERROR: .env file not found in current directory")
         }
     }
-    
+
     print("FINAL: Loaded \(env.count) environment variables total")
     return env
 }
@@ -1547,11 +1514,7 @@ func loadEnv() -> [String: String] {
 //--------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
 
 
-//-------------------------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
-//--------------- Block 3 - Order Book and Liquidity Management
-// VARIABLES TO ADD: None - this block is complete
 
-//-------------------------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
 
 extension ExchangeWebSocket {
     static func checkLiquidity(exchange: String, pair: String, completion: @escaping @Sendable (Double?) -> Void) {
@@ -2373,15 +2336,10 @@ extension ExchangeWebSocket {
 
 
 
-//-----------------------------------------------------------------------------------------------------------------------Block 6 - Account Balance and API Initialization
+
 
 //--------------- Block 6 - Account Balance and API Initialization
-// VARIABLES TO ADD: Fixed MainActor isolation issues by using await MainActor.run for fallback balance access
-
-//--------------- Block 6 - Account Balance and API Initialization
-// VARIABLES TO ADD: None - this block is complete
-
-//-----------------------------------------------------------------------------------------------------------------------Block 6 - Account Balance and API Initialization
+// VARIABLES TO ADD: All variables already exist in this block
 
 extension ExchangeWebSocket {
     static func monitorFundingRateArbitrage() {
@@ -2687,7 +2645,7 @@ extension ExchangeWebSocket {
         
         let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
         let recvWindow = bybitRecvWindow
-        let queryString = "api_key=\(apiKey)×tamp=\(timestamp)&recv_window=\(recvWindow)"
+        let queryString = "api_key=\(apiKey)&timestamp=\(timestamp)&recv_window=\(recvWindow)"
         let signature = HMAC<SHA256>.authenticationCode(for: queryString.data(using: .utf8)!, using: SymmetricKey(data: apiSecret.data(using: .utf8)!)).map { String(format: "%02x", $0) }.joined()
         
         request.addValue(apiKey, forHTTPHeaderField: "X-BAPI-API-KEY")
@@ -2764,16 +2722,9 @@ extension ExchangeWebSocket {
             }
         }.resume()
     }
-    
-    // Missing helper functions that are called in the main function
-    static func dynamicTradeAmount(balance: Double, riskPercent: Double, volatility: Double) async -> Double {
-        let baseAmount = min(balance * riskPercent, balance * 0.6)
-        let volatilityAdjusted = baseAmount * (1.0 / (1.0 + volatility * 0.3))
-        return volatilityAdjusted
-    }
-    
-    
 }
+
+
 //-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
 
 
@@ -8736,6 +8687,8 @@ extension ExchangeWebSocket {
 
 
 //-------------------------------------------------------------------------------------------------------------------------Block 20 - API Data Retrieval and Authentication
+//--------------- Block 20 - API Data Retrieval and Authentication
+// VARIABLES TO ADD: All variables already exist in other blocks
 
 import CryptoKit
 import Foundation
@@ -8750,66 +8703,19 @@ extension Data {
 
 // Extension for Block 20 API Interactions and Authentication
 extension ExchangeWebSocket {
-    static func fetchBalance(exchange: String) async {
-        let _ = getInt("BALANCE_FETCH_TIMEOUT", defaultValue: 20)
-        let maxRetries = getInt("API_MAX_RETRIES", defaultValue: 5)
-        var retries = 0
-
-        while retries < maxRetries {
-            let startTime = Date()
-            do {
-                if exchange == "kucoin" {
-                    let balance = try await fetchKuCoinBalance()
-                    await MainActor.run {
-                        kucoinLiveBalance = balance
-                        kucoinBalance = balance ?? kucoinFallbackBalance
-                        print("DEBUG: Fetched KuCoin balance: \(kucoinBalance) USDT")
-                    }
-                    break
-                } else if exchange == "bybit" {
-                    let balance = try await fetchBybitBalance()
-                    await MainActor.run {
-                        bybitLiveBalance = balance
-                        bybitBalance = balance ?? bybitFallbackBalance
-                        print("DEBUG: Fetched Bybit balance: \(bybitBalance) USDT")
-                    }
-                    break
-                }
-            } catch {
-                retries += 1
-                let latency = Date().timeIntervalSince(startTime) * 1000
-                await MainActor.run {
-                    logAlert(event: "Failed to fetch \(exchange) balance: \(error.localizedDescription), retry \(retries)/\(maxRetries), latency: \(latency)ms")
-                }
-                if retries == maxRetries {
-                    await MainActor.run {
-                        logAlert(event: "Max retries reached for \(exchange) balance fetch")
-                        if exchange == "kucoin" {
-                            kucoinBalance = kucoinFallbackBalance
-                        } else {
-                            bybitBalance = bybitFallbackBalance
-                        }
-                    }
-                }
-                try? await Task.sleep(nanoseconds: UInt64(1_000_000_000)) // 1-second delay
-            }
-        }
-    }
-
     static func fetchKuCoinBalance() async throws -> Double? {
-        // DEBUG: Log function start
         await MainActor.run {
-            logAlert(event: "🔴 DEBUG: fetchKuCoinBalance() function started")
-            logAlert(event: "🔴 DEBUG: KuCoin API Key exists: \(environment["KUCOIN_API_KEY"] != nil)")
-            logAlert(event: "🔴 DEBUG: KuCoin API Secret exists: \(environment["KUCOIN_API_SECRET"] != nil)")
-            logAlert(event: "🔴 DEBUG: KuCoin Passphrase exists: \(environment["KUCOIN_API_PASSPHRASE"] != nil)")
+            logAlert(event: "DEBUG: fetchKuCoinBalance() function started")
+            logAlert(event: "DEBUG: KuCoin API Key exists: \(environment["KUCOIN_API_KEY"] != nil)")
+            logAlert(event: "DEBUG: KuCoin API Secret exists: \(environment["KUCOIN_API_SECRET"] != nil)")
+            logAlert(event: "DEBUG: KuCoin Passphrase exists: \(environment["KUCOIN_API_PASSPHRASE"] != nil)")
         }
         
         guard let apiKey = environment["KUCOIN_API_KEY"],
               let apiSecret = environment["KUCOIN_API_SECRET"],
               let apiPassphrase = environment["KUCOIN_API_PASSPHRASE"] else {
             await MainActor.run {
-                logAlert(event: "🔴 ERROR: Missing KuCoin API credentials")
+                logAlert(event: "ERROR: Missing KuCoin API credentials")
             }
             throw NSError(domain: "KuCoinAPI", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing API credentials"])
         }
@@ -8826,7 +8732,7 @@ extension ExchangeWebSocket {
         let strToSign = timestamp + method + endpoint + body
         
         await MainActor.run {
-            logAlert(event: "🔴 DEBUG: KuCoin signing string: \(strToSign)")
+            logAlert(event: "DEBUG: KuCoin signing string: \(strToSign)")
         }
         
         let signature = strToSign.data(using: .utf8)!.hmac(key: apiSecret)
@@ -8843,26 +8749,26 @@ extension ExchangeWebSocket {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         await MainActor.run {
-            logAlert(event: "🔴 DEBUG: KuCoin request headers set, making API call...")
+            logAlert(event: "DEBUG: KuCoin request headers set, making API call...")
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             await MainActor.run {
-                logAlert(event: "🔴 ERROR: Non-HTTP response for KuCoin balance fetch")
+                logAlert(event: "ERROR: Non-HTTP response for KuCoin balance fetch")
             }
             throw NSError(domain: "KuCoinAPI", code: -1, userInfo: [NSLocalizedDescriptionKey: "Non-HTTP response"])
         }
         
         let responseBody = String(data: data, encoding: .utf8) ?? "Invalid data"
         await MainActor.run {
-            logAlert(event: "🔴 DEBUG: KuCoin response status: \(httpResponse.statusCode)")
-            logAlert(event: "🔴 DEBUG: KuCoin response: \(responseBody)")
+            logAlert(event: "DEBUG: KuCoin response status: \(httpResponse.statusCode)")
+            logAlert(event: "DEBUG: KuCoin response: \(responseBody)")
         }
         
         if httpResponse.statusCode != 200 {
             await MainActor.run {
-                logAlert(event: "🔴 ERROR: Invalid KuCoin response status \(httpResponse.statusCode): \(responseBody)")
+                logAlert(event: "ERROR: Invalid KuCoin response status \(httpResponse.statusCode): \(responseBody)")
             }
             throw NSError(domain: "KuCoinAPI", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode)"])
         }
@@ -8870,26 +8776,26 @@ extension ExchangeWebSocket {
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         guard let code = json?["code"] as? String else {
             await MainActor.run {
-                logAlert(event: "🔴 ERROR: KuCoin response missing code field")
+                logAlert(event: "ERROR: KuCoin response missing code field")
             }
             return nil
         }
         guard code == "200000" else {
             let errorMsg = json?["msg"] as? String ?? "Unknown error"
             await MainActor.run {
-                logAlert(event: "🔴 ERROR: KuCoin API error code \(code): \(errorMsg)")
+                logAlert(event: "ERROR: KuCoin API error code \(code): \(errorMsg)")
             }
             return nil
         }
         guard let dataJson = json?["data"] as? [[String: Any]] else {
             await MainActor.run {
-                logAlert(event: "🔴 ERROR: KuCoin response missing data array")
+                logAlert(event: "ERROR: KuCoin response missing data array")
             }
             return nil
         }
         
         await MainActor.run {
-            logAlert(event: "🔴 DEBUG: KuCoin found \(dataJson.count) accounts")
+            logAlert(event: "DEBUG: KuCoin found \(dataJson.count) accounts")
         }
         
         let balance = dataJson.reduce(0.0) { sum, account in
@@ -8903,29 +8809,28 @@ extension ExchangeWebSocket {
         
         if balance == 0.0 {
             await MainActor.run {
-                logAlert(event: "🔴 WARNING: KuCoin USDT trade account has zero balance")
+                logAlert(event: "WARNING: KuCoin USDT trade account has zero balance")
             }
         }
 
         await MainActor.run {
-            logAlert(event: "🔴 SUCCESS: KuCoin balance parsed: \(balance) USDT")
+            logAlert(event: "SUCCESS: KuCoin balance parsed: \(balance) USDT")
         }
 
         return balance
     }
 
     static func fetchBybitBalance() async throws -> Double? {
-        // DEBUG: Log function start
         await MainActor.run {
-            logAlert(event: "🔵 DEBUG: fetchBybitBalance() function started")
-            logAlert(event: "🔵 DEBUG: Bybit API Key exists: \(environment["BYBIT_API_KEY"] != nil)")
-            logAlert(event: "🔵 DEBUG: Bybit API Secret exists: \(environment["BYBIT_API_SECRET"] != nil)")
+            logAlert(event: "DEBUG: fetchBybitBalance() function started")
+            logAlert(event: "DEBUG: Bybit API Key exists: \(environment["BYBIT_API_KEY"] != nil)")
+            logAlert(event: "DEBUG: Bybit API Secret exists: \(environment["BYBIT_API_SECRET"] != nil)")
         }
         
         guard let apiKey = environment["BYBIT_API_KEY"],
               let apiSecret = environment["BYBIT_API_SECRET"] else {
             await MainActor.run {
-                logAlert(event: "🔵 ERROR: Missing Bybit API credentials")
+                logAlert(event: "ERROR: Missing Bybit API credentials")
             }
             throw NSError(domain: "BybitAPI", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing API credentials"])
         }
@@ -8941,7 +8846,7 @@ extension ExchangeWebSocket {
         let paramStr = timestamp + apiKey + recvWindow + queryString
         
         await MainActor.run {
-            logAlert(event: "🔵 DEBUG: Bybit signing string: \(paramStr)")
+            logAlert(event: "DEBUG: Bybit signing string: \(paramStr)")
         }
         
         let signature = paramStr.data(using: .utf8)!.hmac(key: apiSecret)
@@ -8953,26 +8858,26 @@ extension ExchangeWebSocket {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
         await MainActor.run {
-            logAlert(event: "🔵 DEBUG: Bybit request headers set, making API call...")
+            logAlert(event: "DEBUG: Bybit request headers set, making API call...")
         }
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             await MainActor.run {
-                logAlert(event: "🔵 ERROR: Non-HTTP response for Bybit balance fetch")
+                logAlert(event: "ERROR: Non-HTTP response for Bybit balance fetch")
             }
             throw NSError(domain: "BybitAPI", code: -1, userInfo: [NSLocalizedDescriptionKey: "Non-HTTP response"])
         }
         
         let responseBody = String(data: data, encoding: .utf8) ?? "Invalid data"
         await MainActor.run {
-            logAlert(event: "🔵 DEBUG: Bybit response status: \(httpResponse.statusCode)")
-            logAlert(event: "🔵 DEBUG: Bybit response: \(responseBody)")
+            logAlert(event: "DEBUG: Bybit response status: \(httpResponse.statusCode)")
+            logAlert(event: "DEBUG: Bybit response: \(responseBody)")
         }
         
         if httpResponse.statusCode != 200 {
             await MainActor.run {
-                logAlert(event: "🔵 ERROR: Invalid Bybit response status \(httpResponse.statusCode): \(responseBody)")
+                logAlert(event: "ERROR: Invalid Bybit response status \(httpResponse.statusCode): \(responseBody)")
             }
             throw NSError(domain: "BybitAPI", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode)"])
         }
@@ -8980,27 +8885,27 @@ extension ExchangeWebSocket {
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         guard let retCode = json?["retCode"] as? Int else {
             await MainActor.run {
-                logAlert(event: "🔵 ERROR: Bybit response missing retCode")
+                logAlert(event: "ERROR: Bybit response missing retCode")
             }
             return nil
         }
         guard retCode == 0 else {
             let retMsg = json?["retMsg"] as? String ?? "Unknown error"
             await MainActor.run {
-                logAlert(event: "🔵 ERROR: Bybit API error code \(retCode): \(retMsg)")
+                logAlert(event: "ERROR: Bybit API error code \(retCode): \(retMsg)")
             }
             return nil
         }
         guard let result = json?["result"] as? [String: Any],
               let list = result["list"] as? [[String: Any]] else {
             await MainActor.run {
-                logAlert(event: "🔵 ERROR: Bybit response missing result.list")
+                logAlert(event: "ERROR: Bybit response missing result.list")
             }
             return nil
         }
         
         await MainActor.run {
-            logAlert(event: "🔵 DEBUG: Bybit found \(list.count) accounts")
+            logAlert(event: "DEBUG: Bybit found \(list.count) accounts")
         }
         
         var balance = 0.0
@@ -9016,21 +8921,20 @@ extension ExchangeWebSocket {
         
         if balance == 0.0 {
             await MainActor.run {
-                logAlert(event: "🔵 WARNING: Bybit USDT account has zero balance")
+                logAlert(event: "WARNING: Bybit USDT account has zero balance")
             }
         }
 
         await MainActor.run {
-            logAlert(event: "🔵 SUCCESS: Bybit balance parsed: \(balance) USDT")
+            logAlert(event: "SUCCESS: Bybit balance parsed: \(balance) USDT")
         }
 
         return balance
     }
 
     static func fetchKuCoinOrderBook(pair: String, isFutures: Bool) async -> BevaixOrderBook? {
-        // DEBUG: Log function start
         await MainActor.run {
-            logAlert(event: "🟡 DEBUG: fetchKuCoinOrderBook() started for \(pair) (futures: \(isFutures))")
+            logAlert(event: "DEBUG: fetchKuCoinOrderBook() started for \(pair) (futures: \(isFutures))")
         }
         
         let symbol = isFutures ? pair.replacingOccurrences(of: "-", with: "") + "M" : pair
@@ -9043,12 +8947,12 @@ extension ExchangeWebSocket {
         let urlString = baseURL + endpoint
         
         await MainActor.run {
-            logAlert(event: "🟡 DEBUG: KuCoin orderbook URL: \(urlString)")
+            logAlert(event: "DEBUG: KuCoin orderbook URL: \(urlString)")
         }
         
         guard let url = URL(string: urlString) else {
             await MainActor.run {
-                logAlert(event: "🟡 ERROR: Invalid KuCoin orderbook URL: \(urlString)")
+                logAlert(event: "ERROR: Invalid KuCoin orderbook URL: \(urlString)")
             }
             return nil
         }
@@ -9062,7 +8966,7 @@ extension ExchangeWebSocket {
                   let apiSecret = environment["KUCOIN_API_SECRET"],
                   let apiPassphrase = environment["KUCOIN_API_PASSPHRASE"] else {
                 await MainActor.run {
-                    logAlert(event: "🟡 ERROR: Missing KuCoin API credentials for futures")
+                    logAlert(event: "ERROR: Missing KuCoin API credentials for futures")
                 }
                 return nil
             }
@@ -9086,34 +8990,34 @@ extension ExchangeWebSocket {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {
                 await MainActor.run {
-                    logAlert(event: "🟡 ERROR: Non-HTTP response for KuCoin orderbook \(pair)")
+                    logAlert(event: "ERROR: Non-HTTP response for KuCoin orderbook \(pair)")
                 }
                 return nil
             }
             let responseBody = String(data: data, encoding: .utf8) ?? "Invalid data"
             
             await MainActor.run {
-                logAlert(event: "🟡 DEBUG: KuCoin orderbook response status: \(httpResponse.statusCode)")
-                logAlert(event: "🟡 DEBUG: KuCoin orderbook response: \(responseBody)")
+                logAlert(event: "DEBUG: KuCoin orderbook response status: \(httpResponse.statusCode)")
+                logAlert(event: "DEBUG: KuCoin orderbook response: \(responseBody)")
             }
             
             if httpResponse.statusCode != 200 {
                 await MainActor.run {
-                    logAlert(event: "🟡 ERROR: Invalid KuCoin orderbook status \(httpResponse.statusCode) for \(pair): \(responseBody)")
+                    logAlert(event: "ERROR: Invalid KuCoin orderbook status \(httpResponse.statusCode) for \(pair): \(responseBody)")
                 }
                 return nil
             }
             let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
             guard let code = json?["code"] as? String else {
                 await MainActor.run {
-                    logAlert(event: "🟡 ERROR: KuCoin orderbook response missing code for \(pair)")
+                    logAlert(event: "ERROR: KuCoin orderbook response missing code for \(pair)")
                 }
                 return nil
             }
             guard code == "200000" else {
                 let errorMsg = json?["msg"] as? String ?? "Unknown error"
                 await MainActor.run {
-                    logAlert(event: "🟡 ERROR: KuCoin orderbook API error for \(pair) - code: \(code), msg: \(errorMsg)")
+                    logAlert(event: "ERROR: KuCoin orderbook API error for \(pair) - code: \(code), msg: \(errorMsg)")
                 }
                 return nil
             }
@@ -9121,13 +9025,13 @@ extension ExchangeWebSocket {
                   let bids = dataJson["bids"] as? [[String]],
                   let asks = dataJson["asks"] as? [[String]] else {
                 await MainActor.run {
-                    logAlert(event: "🟡 ERROR: KuCoin orderbook missing bids/asks for \(pair): \(responseBody)")
+                    logAlert(event: "ERROR: KuCoin orderbook missing bids/asks for \(pair): \(responseBody)")
                 }
                 return nil
             }
             
             await MainActor.run {
-                logAlert(event: "🟡 DEBUG: KuCoin orderbook raw bids: \(bids.count), asks: \(asks.count)")
+                logAlert(event: "DEBUG: KuCoin orderbook raw bids: \(bids.count), asks: \(asks.count)")
             }
             
             let parsedBids = bids.compactMap { arr -> (Double, Double)? in
@@ -9140,115 +9044,29 @@ extension ExchangeWebSocket {
             }
             
             await MainActor.run {
-                logAlert(event: "🟡 DEBUG: KuCoin orderbook parsed bids: \(parsedBids.count), asks: \(parsedAsks.count)")
+                logAlert(event: "DEBUG: KuCoin orderbook parsed bids: \(parsedBids.count), asks: \(parsedAsks.count)")
             }
             
             if parsedBids.isEmpty || parsedAsks.isEmpty {
                 await MainActor.run {
-                    logAlert(event: "🟡 ERROR: KuCoin orderbook empty after parsing for \(pair)")
+                    logAlert(event: "ERROR: KuCoin orderbook empty after parsing for \(pair)")
                 }
                 return nil
             }
             
             await MainActor.run {
-                logAlert(event: "🟡 SUCCESS: KuCoin orderbook parsed for \(pair)")
+                logAlert(event: "SUCCESS: KuCoin orderbook parsed for \(pair)")
             }
             
             return BevaixOrderBook(bids: parsedBids, asks: parsedAsks)
         } catch {
             await MainActor.run {
-                logAlert(event: "🟡 ERROR: Failed to fetch KuCoin orderbook for \(pair): \(error.localizedDescription)")
+                logAlert(event: "ERROR: Failed to fetch KuCoin orderbook for \(pair): \(error.localizedDescription)")
             }
             return nil
         }
     }
-
-    // CRITICAL: Adding missing monitorSystemPerformance function to fix error at line 8794
-    static func monitorSystemPerformance() {
-        Task {
-            while true {
-                await withTaskGroup(of: Void.self) { group in
-                    group.addTask {
-                        await MainActor.run {
-                            // Monitor CPU and memory usage
-                            let processInfo = ProcessInfo.processInfo
-                            let systemUptime = processInfo.systemUptime
-                            let physicalMemory = processInfo.physicalMemory
-                            
-                            // Calculate basic system metrics using existing variables
-                            cpuUsage = Double.random(in: 10...30) // Simplified CPU monitoring
-                            memoryUsage = Double(physicalMemory) / (1024 * 1024 * 1024) // GB
-                            
-                            // Monitor network latency using existing lastLatency variable
-                            let avgLatency = lastLatency.values.reduce(0, +) / Double(max(lastLatency.count, 1))
-                            networkLatency["average"] = avgLatency
-                            
-                            // Check for performance alerts using existing performanceAlerts array
-                            if cpuUsage > 80 {
-                                performanceAlerts.append("High CPU usage: \(String(format: "%.1f", cpuUsage))%")
-                                logAlert(event: "⚠️ High CPU usage detected: \(String(format: "%.1f", cpuUsage))%")
-                            }
-                            
-                            if avgLatency > 500 {
-                                performanceAlerts.append("High network latency: \(String(format: "%.1f", avgLatency))ms")
-                                logAlert(event: "⚠️ High network latency detected: \(String(format: "%.1f", avgLatency))ms")
-                            }
-                            
-                            // Update health status using existing healthStatus dictionary
-                            healthStatus["cpu"] = cpuUsage < 70 ? "healthy" : "warning"
-                            healthStatus["memory"] = memoryUsage < 32 ? "healthy" : "warning"
-                            healthStatus["network"] = avgLatency < 300 ? "healthy" : "warning"
-                            healthStatus["uptime"] = systemUptime > 3600 ? "healthy" : "starting"
-                            
-                            // Monitor trading performance using existing variables
-                            let totalTrades = performanceMetrics.values.reduce(0) { $0 + $1.trades }
-                            let totalProfit = performanceMetrics.values.reduce(0.0) { $0 + $1.profit }
-                            let activeConnections = "\(kucoinIsConnected ? "KuCoin" : "");\(bybitIsConnected ? "Bybit" : "")"
-                            
-                            // Log comprehensive system performance metrics
-                            let performanceLog = """
-                            System Performance Report [Comprehensive]:
-                            - CPU Usage: \(String(format: "%.1f", cpuUsage))%
-                            - Memory Usage: \(String(format: "%.1f", memoryUsage)) GB
-                            - Average Latency: \(String(format: "%.1f", avgLatency))ms
-                            - System Uptime: \(String(format: "%.1f", systemUptime / 3600)) hours
-                            - Trading Performance: \(totalTrades) trades, $\(String(format: "%.2f", totalProfit)) profit
-                            - Active Connections: \(activeConnections)
-                            - Health Status: \(healthStatus)
-                            - API Call Counts: \(apiCallCounts)
-                            - Error Counts: \(errorCounts)
-                            """
-                            print("DEBUG: \(performanceLog)")
-                            
-                            // Update additional performance tracking variables
-                            if !tradingPairs.isEmpty {
-                                lastDataUpdate["system_performance"] = Date()
-                            }
-                            
-                            // Clear old alerts (keep only last 10) using existing performanceAlerts
-                            if performanceAlerts.count > 10 {
-                                performanceAlerts = Array(performanceAlerts.suffix(10))
-                            }
-                            
-                            // Track API call efficiency
-                            let totalApiCalls = apiCallCounts.values.reduce(0, +)
-                            let totalErrors = errorCounts.values.reduce(0, +)
-                            let errorRate = totalApiCalls > 0 ? Double(totalErrors) / Double(totalApiCalls) : 0.0
-                            
-                            if errorRate > 0.1 { // More than 10% error rate
-                                logAlert(event: "⚠️ High API error rate detected: \(String(format: "%.1f", errorRate * 100))%")
-                            }
-                        }
-                    }
-                }
-                
-                // Monitor every 30 seconds
-                try? await Task.sleep(nanoseconds: 30_000_000_000)
-            }
-        }
-    }
 }
-
 
 // --------------------------------------------------------- Block 21 22 23 24 removed
 
