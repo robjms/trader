@@ -1,0 +1,386 @@
+{
+  "timestamp" : "2025-08-13T23:24:53Z",
+  "totalTrades" : 0,
+  "livePrices" : [
+    {
+      "kucoinSpot" : 0,
+      "bybitFutures" : 123327.3,
+      "kucoinFutures" : 123317.8,
+      "pair" : "BTC-USDT",
+      "bybitSpot" : 123297.10000000001
+    },
+    {
+      "bybitSpot" : 4752.0100000000002,
+      "pair" : "ETH-USDT",
+      "kucoinFutures" : 4751.6599999999999,
+      "kucoinSpot" : 0,
+      "bybitFutures" : 4751
+    },
+    {
+      "kucoinSpot" : 0,
+      "bybitFutures" : 201.63999999999999,
+      "pair" : "SOL-USDT",
+      "bybitSpot" : 201.62,
+      "kucoinFutures" : 201.654
+    },
+    {
+      "pair" : "LINK-USDT",
+      "kucoinFutures" : 23.925999999999998,
+      "bybitFutures" : 23.913,
+      "kucoinSpot" : 0,
+      "bybitSpot" : 23.914999999999999
+    },
+    {
+      "bybitSpot" : 0.00011959,
+      "kucoinSpot" : 0,
+      "bybitFutures" : 0,
+      "pair" : "FLOKI-USDT",
+      "kucoinFutures" : 0.000119629
+    },
+    {
+      "pair" : "TON-USDT",
+      "kucoinSpot" : 0,
+      "bybitSpot" : 3.5289999999999999,
+      "kucoinFutures" : 3.5314999999999999,
+      "bybitFutures" : 3.5289000000000001
+    },
+    {
+      "kucoinSpot" : 0,
+      "kucoinFutures" : 2.9940000000000002,
+      "bybitSpot" : 2.9929999999999999,
+      "bybitFutures" : 2.992,
+      "pair" : "NEAR-USDT"
+    },
+    {
+      "bybitFutures" : 0.56899999999999995,
+      "kucoinFutures" : 0.56930000000000003,
+      "kucoinSpot" : 0,
+      "pair" : "ARB-USDT",
+      "bybitSpot" : 0.56889999999999996
+    },
+    {
+      "bybitFutures" : 1.0362,
+      "kucoinFutures" : 1.0365,
+      "kucoinSpot" : 0,
+      "pair" : "WIF-USDT",
+      "bybitSpot" : 1.036
+    },
+    {
+      "pair" : "PEPE-USDT",
+      "bybitSpot" : 1.2359e-05,
+      "kucoinFutures" : 1.2354199999999999e-05,
+      "bybitFutures" : 0,
+      "kucoinSpot" : 0
+    },
+    {
+      "pair" : "BONK-USDT",
+      "bybitFutures" : 0,
+      "bybitSpot" : 2.7555999999999998e-05,
+      "kucoinSpot" : 0,
+      "kucoinFutures" : 0
+    },
+    {
+      "kucoinFutures" : 1.395e-05,
+      "bybitSpot" : 1.3953e-05,
+      "bybitFutures" : 0,
+      "pair" : "SHIB-USDT",
+      "kucoinSpot" : 0
+    },
+    {
+      "bybitFutures" : 3.2833999999999999,
+      "pair" : "XRP-USDT",
+      "kucoinSpot" : 0,
+      "kucoinFutures" : 3.2839499999999999,
+      "bybitSpot" : 3.2827000000000002
+    },
+    {
+      "bybitSpot" : 0.9133,
+      "pair" : "ADA-USDT",
+      "kucoinSpot" : 0,
+      "kucoinFutures" : 0.91330999999999996,
+      "bybitFutures" : 0.9133
+    },
+    {
+      "kucoinSpot" : 0,
+      "bybitFutures" : 0.24584,
+      "bybitSpot" : 0.24584,
+      "pair" : "DOGE-USDT",
+      "kucoinFutures" : 0.24579000000000001
+    },
+    {
+      "bybitFutures" : 25.559000000000001,
+      "kucoinSpot" : 0,
+      "pair" : "AVAX-USDT",
+      "bybitSpot" : 25.558,
+      "kucoinFutures" : 25.559999999999999
+    },
+    {
+      "bybitFutures" : 4.2882999999999996,
+      "pair" : "DOT-USDT",
+      "kucoinFutures" : 4.29,
+      "kucoinSpot" : 0,
+      "bybitSpot" : 4.2889999999999997
+    },
+    {
+      "pair" : "MATIC-USDT",
+      "bybitSpot" : 0,
+      "bybitFutures" : 0,
+      "kucoinSpot" : 0,
+      "kucoinFutures" : 0
+    },
+    {
+      "pair" : "SUI-USDT",
+      "kucoinFutures" : 4.0143000000000004,
+      "bybitSpot" : 4.0141,
+      "kucoinSpot" : 0,
+      "bybitFutures" : 4.0140900000000004
+    },
+    {
+      "kucoinSpot" : 0,
+      "pair" : "APT-USDT",
+      "bybitSpot" : 5.0449999999999999,
+      "bybitFutures" : 5.0439999999999996,
+      "kucoinFutures" : 5.048
+    },
+    {
+      "bybitFutures" : 16.219999999999999,
+      "pair" : "INJ-USDT",
+      "kucoinFutures" : 16.222999999999999,
+      "kucoinSpot" : 0,
+      "bybitSpot" : 16.221
+    },
+    {
+      "pair" : "OP-USDT",
+      "kucoinSpot" : 0,
+      "kucoinFutures" : 0.85980000000000001,
+      "bybitSpot" : 0.8599,
+      "bybitFutures" : 0.85960000000000003
+    }
+  ],
+  "kucoinBalance" : 619.44399475499995,
+  "bybitBalance" : 619.44399475500006,
+  "totalFees" : 0,
+  "totalProfit" : 0,
+  "perPairMetrics" : [
+    {
+      "fees" : 0,
+      "pair" : "BTC-USDT",
+      "profit" : 0,
+      "losses" : 0,
+      "trades" : 0,
+      "wins" : 0,
+      "winRate" : 0,
+      "sentiment" : 0.5
+    },
+    {
+      "winRate" : 0,
+      "wins" : 0,
+      "fees" : 0,
+      "losses" : 0,
+      "trades" : 0,
+      "pair" : "ETH-USDT",
+      "profit" : 0,
+      "sentiment" : 0.5
+    },
+    {
+      "winRate" : 0,
+      "profit" : 0,
+      "wins" : 0,
+      "sentiment" : 0.5,
+      "trades" : 0,
+      "pair" : "SOL-USDT",
+      "losses" : 0,
+      "fees" : 0
+    },
+    {
+      "sentiment" : 0.5,
+      "pair" : "LINK-USDT",
+      "losses" : 0,
+      "winRate" : 0,
+      "trades" : 0,
+      "wins" : 0,
+      "fees" : 0,
+      "profit" : 0
+    },
+    {
+      "profit" : 0,
+      "winRate" : 0,
+      "pair" : "FLOKI-USDT",
+      "trades" : 0,
+      "wins" : 0,
+      "losses" : 0,
+      "sentiment" : 0.5,
+      "fees" : 0
+    },
+    {
+      "sentiment" : 0.5,
+      "pair" : "TON-USDT",
+      "losses" : 0,
+      "trades" : 0,
+      "profit" : 0,
+      "winRate" : 0,
+      "fees" : 0,
+      "wins" : 0
+    },
+    {
+      "losses" : 0,
+      "sentiment" : 0.5,
+      "trades" : 0,
+      "pair" : "NEAR-USDT",
+      "wins" : 0,
+      "profit" : 0,
+      "winRate" : 0,
+      "fees" : 0
+    },
+    {
+      "pair" : "ARB-USDT",
+      "winRate" : 0,
+      "fees" : 0,
+      "trades" : 0,
+      "wins" : 0,
+      "losses" : 0,
+      "profit" : 0,
+      "sentiment" : 0.5
+    },
+    {
+      "pair" : "WIF-USDT",
+      "wins" : 0,
+      "trades" : 0,
+      "losses" : 0,
+      "winRate" : 0,
+      "fees" : 0,
+      "profit" : 0,
+      "sentiment" : 0.5
+    },
+    {
+      "profit" : 0,
+      "losses" : 0,
+      "winRate" : 0,
+      "fees" : 0,
+      "pair" : "PEPE-USDT",
+      "trades" : 0,
+      "sentiment" : 0.5,
+      "wins" : 0
+    },
+    {
+      "profit" : 0,
+      "winRate" : 0,
+      "fees" : 0,
+      "trades" : 0,
+      "sentiment" : 0.5,
+      "losses" : 0,
+      "wins" : 0,
+      "pair" : "BONK-USDT"
+    },
+    {
+      "pair" : "SHIB-USDT",
+      "wins" : 0,
+      "losses" : 0,
+      "winRate" : 0,
+      "profit" : 0,
+      "fees" : 0,
+      "trades" : 0,
+      "sentiment" : 0.5
+    },
+    {
+      "pair" : "XRP-USDT",
+      "wins" : 0,
+      "winRate" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "fees" : 0,
+      "losses" : 0,
+      "sentiment" : 0.5
+    },
+    {
+      "trades" : 0,
+      "pair" : "ADA-USDT",
+      "wins" : 0,
+      "losses" : 0,
+      "profit" : 0,
+      "fees" : 0,
+      "sentiment" : 0.5,
+      "winRate" : 0
+    },
+    {
+      "pair" : "DOGE-USDT",
+      "losses" : 0,
+      "trades" : 0,
+      "winRate" : 0,
+      "fees" : 0,
+      "sentiment" : 0.5,
+      "wins" : 0,
+      "profit" : 0
+    },
+    {
+      "wins" : 0,
+      "profit" : 0,
+      "pair" : "AVAX-USDT",
+      "fees" : 0,
+      "winRate" : 0,
+      "sentiment" : 0.5,
+      "trades" : 0,
+      "losses" : 0
+    },
+    {
+      "wins" : 0,
+      "fees" : 0,
+      "winRate" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "sentiment" : 0.5,
+      "pair" : "DOT-USDT",
+      "losses" : 0
+    },
+    {
+      "trades" : 0,
+      "wins" : 0,
+      "pair" : "MATIC-USDT",
+      "fees" : 0,
+      "profit" : 0,
+      "sentiment" : 0.5,
+      "losses" : 0,
+      "winRate" : 0
+    },
+    {
+      "profit" : 0,
+      "fees" : 0,
+      "losses" : 0,
+      "wins" : 0,
+      "winRate" : 0,
+      "sentiment" : 0.5,
+      "trades" : 0,
+      "pair" : "SUI-USDT"
+    },
+    {
+      "trades" : 0,
+      "pair" : "APT-USDT",
+      "winRate" : 0,
+      "sentiment" : 0.5,
+      "profit" : 0,
+      "wins" : 0,
+      "losses" : 0,
+      "fees" : 0
+    },
+    {
+      "profit" : 0,
+      "sentiment" : 0.5,
+      "losses" : 0,
+      "wins" : 0,
+      "winRate" : 0,
+      "trades" : 0,
+      "pair" : "INJ-USDT",
+      "fees" : 0
+    },
+    {
+      "losses" : 0,
+      "wins" : 0,
+      "pair" : "OP-USDT",
+      "profit" : 0,
+      "winRate" : 0,
+      "fees" : 0,
+      "trades" : 0,
+      "sentiment" : 0.5
+    }
+  ]
+}
