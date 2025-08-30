@@ -17,7 +17,7 @@ let package = Package(
             name: "BevaixBot",
             dependencies: [
                 .product(name: "Starscream", package: "Starscream"),
-                .product(name: "SwiftDotenv", package: "swift-dotenv"),
+               .product(name: "SwiftDotenv", package: "swift-dotenv"),
                 .product(name: "Crypto", package: "swift-crypto") // ADDED: CryptoKit dependency
             ],
             path: "Sources/BevaixBot",
