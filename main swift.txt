@@ -7649,7 +7649,7 @@ extension ExchangeWebSocket {
 
 
 
-			
+            
 //--------------------------------------------------------------------------------------------------------------Block 16 - Spot-Futures Arbitrage Execution
 //--------------- Block 16 - Spot-Futures Arbitrage Execution
 // VARIABLES TO ADD: None - All functions are properly referenced from existing declarations
@@ -9580,4 +9580,3 @@ extension ExchangeWebSocket {
     }
     
 }
-
