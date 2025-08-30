@@ -11,7 +11,8 @@ import traceback
 
 # Get project root (parent of Python directory)
 # FIXED: Get correct project root path
-PROJECT_ROOT = "/Users/robertsteinegger/Desktop/BevaixBot"  # Direct path to avoid confusion
+# FIXED: Direct path to project root
+PROJECT_ROOT = "/Users/robertsteinegger/Desktop/BevaixBot"
 ENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 
 print(f"Loading .env from: {ENV_PATH} at {datetime.now().strftime('%H:%M:%S')}")
@@ -20,7 +21,6 @@ if os.path.exists(ENV_PATH):
     print(f"✅ .env loaded successfully from {ENV_PATH}")
 else:
     print(f"❌ .env file not found at {ENV_PATH}")
-    # Fallback defaults to prevent crashes
 
     os.environ["ACTIVE_PAIRS"] = "BTC-USDT,ETH-USDT,ADA-USDT,BNB-USDT,DOT-USDT,SOL-USDT,XRP-USDT,LINK-USDT,MATIC-USDT,AVAX-USDT,ATOM-USDT,LTC-USDT,ALGO-USDT,SHIB-USDT,DOGE-USDT,TRX-USDT,XLM-USDT,UNI-USDT,AAVE-USDT,FTM-USDT,SAND-USDT,MANA-USDT"
     os.environ["BYBIT_API_KEY"] = ""
@@ -172,7 +172,7 @@ def api_new_dashboard():
             "ETH-USDT": {"kucoin_spot": 4423.10, "kucoin_futures": 0.0, "bybit_spot": 4425.80, "bybit_futures": 0.0},
             "SOL-USDT": {"kucoin_spot": 188.23, "kucoin_futures": 0.0, "bybit_spot": 188.45, "bybit_futures": 0.0},
             "XRP-USDT": {"kucoin_spot": 0.5234, "kucoin_futures": 0.0, "bybit_spot": 0.5236, "bybit_futures": 0.0},
-            "ADA-USDT": {"kucoin_spot": 0.3567, "kucoin_futures": 0.0, "bybit_spot": 0.3569, "bybit_futures": 0.0}
+            "ADA-USDT": {"kucoin_spot": 0.3567, "kucoin_futures": 30.0, "bybit_spot": 0.3569, "bybit_futures": 0.0}
         }
 
         # 7. BUILD RESPONSE
