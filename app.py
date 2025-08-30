@@ -10,7 +10,8 @@ import csv
 import traceback
 
 # Get project root (parent of Python directory)
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# FIXED: Get correct project root path
+PROJECT_ROOT = "/Users/robertsteinegger/Desktop/BevaixBot"  # Direct path to avoid confusion
 ENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 
 print(f"Loading .env from: {ENV_PATH} at {datetime.now().strftime('%H:%M:%S')}")
