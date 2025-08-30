@@ -935,7 +935,39 @@ class ExchangeWebSocket {
         }
         return nil
     }
-
+    // Add this function right after logDashboardMetrics function
+    @MainActor
+    static func writeDashboardJSON() {
+        let dashboardURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/dashboard.json")
+        
+        let dashboardData: [String: Any] = [
+            "timestamp": ISO8601DateFormatter().string(from: Date()),
+            "kucoinBalance": kucoinBalance,
+            "bybitBalance": bybitBalance,
+            "kucoinFuturesBalance": kucoinFuturesBalance,
+            "bybitFuturesBalance": bybitFuturesBalance,
+            "totalTrades": performanceMetrics.values.reduce(0) { $0 + $1.trades },
+            "totalProfit": performanceMetrics.values.reduce(0.0) { $0 + $1.profit },
+            "totalFees": performanceMetrics.values.reduce(0.0) { $0 + $1.fees },
+            "tradingPairs": tradingPairs,
+            "prices": [
+                "kucoin": kucoinCurrentPrice,
+                "bybit": bybitCurrentPrice,
+                "kucoinFutures": kucoinCurrentFuturesPrice,
+                "bybitFutures": bybitCurrentFuturesPrice
+            ]
+        ]
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: dashboardData, options: .prettyPrinted)
+            try jsonData.write(to: dashboardURL)
+            print("DEBUG: Updated dashboard.json with balances - KuCoin: \(kucoinBalance), Bybit: \(bybitBalance)")
+        } catch {
+            print("DEBUG: Failed to write dashboard.json: \(error.localizedDescription)")
+            logAlert(event: "Failed to write dashboard.json: \(error.localizedDescription)")
+        }
+    }
+    
     // Dashboard metrics logging
     static func logDashboardMetrics() {
         Task { @MainActor in
@@ -944,15 +976,19 @@ class ExchangeWebSocket {
             [\(timestamp)] Dashboard Metrics:
             KuCoin Balance: \(kucoinBalance) USDT
             Bybit Balance: \(bybitBalance) USDT
+            KuCoin Futures: \(kucoinFuturesBalance) USDT
+            Bybit Futures: \(bybitFuturesBalance) USDT
             Total Trades: \(performanceMetrics.values.reduce(0) { $0 + $1.trades })
             Total Profit: \(performanceMetrics.values.reduce(0.0) { $0 + $1.profit }) USDT
             Total Fees: \(performanceMetrics.values.reduce(0.0) { $0 + $1.fees }) USDT
             """
             print(metrics)
             logAlert(event: metrics)
+            writeDashboardJSON()
+       
         }
     }
-
+    
     static func initializeParameters(completion: @escaping () -> Void) {
         let rawPairs = environment["ACTIVE_PAIRS"] ?? "BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT"
         print("DEBUG: Raw ACTIVE_PAIRS from .env: \(rawPairs)")
