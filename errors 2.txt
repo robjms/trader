@@ -1,0 +1,101 @@
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:270:7 Type 'KuCoinSpotWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:272:9 Switch must be exhaustive
+
+Add missing case: '.peerClosed'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:310:7 Type 'KuCoinFuturesWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:312:9 Switch must be exhaustive
+
+Add missing case: '.peerClosed'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:350:7 Type 'BybitSpotWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:352:9 Switch must be exhaustive
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:390:7 Type 'BybitFuturesWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:392:9 Switch must be exhaustive
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:441:38 'BybitFuturesWebSocketDelegate' is ambiguous for type lookup in this context
+
+
+
+
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4115:7 Invalid redeclaration of 'BybitFuturesWebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4322:17 Cannot find 'websocketReconnectAttempts' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4323:17 Cannot find 'lastWebsocketActivity' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4343:25 Cannot find 'bybitWebSocket' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4373:57 Cannot find 'websocketReconnectAttempts' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4384:17 Cannot find 'websocketReconnectAttempts' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4410:17 Cannot find 'lastWebsocketActivity' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4676:64 Cannot find 'lastWebsocketActivity' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4688:63 Cannot find 'lastWebsocketActivity' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4741:39 Cannot find 'enhancedMessageQueue' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4742:17 Cannot find 'enhancedMessageQueue' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4941:13 Cannot find 'lastWebsocketActivity' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5008:24 Invalid redeclaration of 'kucoinDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5009:24 Invalid redeclaration of 'kucoinFuturesDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5010:24 Invalid redeclaration of 'bybitDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5011:46 'BybitFuturesWebSocketDelegate' is ambiguous for type lookup in this context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5014:17 Invalid redeclaration of 'connectKucoin()'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5044:34 Cannot assign value of type 'KucoinWebSocketDelegate' to type 'KuCoinSpotWebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5134:41 Cannot assign value of type 'KucoinFuturesWebSocketDelegate' to type 'KuCoinFuturesWebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5228:5 Declaration is only valid at file scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5229:5 Declaration is only valid at file scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5231:5 Declaration is only valid at file scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5240:5 Declaration is only valid at file scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5727:21 Cannot find 'updateDashboardData' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5741:18 Extensions must not contain stored properties
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5742:9 Expected 'func' keyword in instance method declaration
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5742:9 Invalid redeclaration of 'spotWs()'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5742:15 Consecutive declarations on a line must be separated by ';'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5742:15 Expected '(' in argument list of function declaration
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5742:15 Expected declaration
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5799:18 Extensions must not contain stored properties
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5800:9 Expected 'func' keyword in instance method declaration
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5800:9 Invalid redeclaration of 'futuresWs()'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5800:18 Consecutive declarations on a line must be separated by ';'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5800:18 Expected '(' in argument list of function declaration
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5800:18 Expected declaration
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5852:1 Extraneous '}' at top level
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7050:130 Value of type 'BevaixOrderBook' has no member 'isEmpty'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:9272:17 Cannot find 'updateDashboardData' in scope
