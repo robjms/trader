@@ -10,8 +10,6 @@ import csv
 import traceback
 
 # Get project root (parent of Python directory)
-# FIXED: Get correct project root path
-# FIXED: Direct path to project root
 PROJECT_ROOT = "/Users/robertsteinegger/Desktop/BevaixBot"
 ENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 
@@ -22,25 +20,13 @@ if os.path.exists(ENV_PATH):
 else:
     print(f"❌ .env file not found at {ENV_PATH}")
 
-    os.environ["ACTIVE_PAIRS"] = "BTC-USDT,ETH-USDT,ADA-USDT,BNB-USDT,DOT-USDT,SOL-USDT,XRP-USDT,LINK-USDT,MATIC-USDT,AVAX-USDT,ATOM-USDT,LTC-USDT,ALGO-USDT,SHIB-USDT,DOGE-USDT,TRX-USDT,XLM-USDT,UNI-USDT,AAVE-USDT,FTM-USDT,SAND-USDT,MANA-USDT"
-    os.environ["BYBIT_API_KEY"] = ""
-    os.environ["BYBIT_API_SECRET"] = ""
-    os.environ["KUCOIN_API_KEY"] = ""
-    os.environ["KUCOIN_API_SECRET"] = ""
-    os.environ["KUCOIN_API_PASSPHRASE"] = ""
-    print(f"⚠️ [Python] Using fallback defaults for environment variables")
-
-# Disable Flask's auto .env loading and suppress .env warnings
-os.environ.pop("ENV_FILE", None)
-os.environ.pop("FLASK_ENV", None)
-
 # Initialize Flask app
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# File paths (now relative to project root since we changed working directory)
+# File paths
 DASHBOARD_JSON_PATH = "dashboard.json"
 TRADE_LOG_PATH = os.path.join("Output", "trade_log.csv")
 ALERTS_CSV_PATH = os.path.join("Output", "alerts.csv")
@@ -68,22 +54,49 @@ def new_dashboard():
 
 @app.route('/api/new_dashboard')
 def api_new_dashboard():
-    logger.info(f"🔄 [Python] API called - returning real data at {datetime.now().strftime('%H:%M:%S')}")
+    logger.info(f"🔄 [Python] API called - returning REAL data at {datetime.now().strftime('%H:%M:%S')}")
     
     try:
-        # 1. LOAD REAL BALANCES
+        # 1. LOAD REAL BALANCES FROM DASHBOARD.JSON
         balances = {"kucoin": 0.0, "bybit": 0.0}
+        live_prices = {}
+        real_pairs = []
+        
         try:
             if os.path.exists(DASHBOARD_JSON_PATH):
                 with open(DASHBOARD_JSON_PATH, 'r') as f:
-                    data = json.load(f)
-                    balances['kucoin'] = float(data.get('kucoinBalance', 0.0))
-                    balances['bybit'] = float(data.get('bybitBalance', 0.0))
-                    logger.info(f"✅ [Python] Loaded balances: KuCoin=${balances['kucoin']:.2f}, Bybit=${balances['bybit']:.2f}")
+                    dashboard_data = json.load(f)
+                    
+                    # Get real balances
+                    balances['kucoin'] = float(dashboard_data.get('kucoinBalance', 0.0))
+                    balances['bybit'] = float(dashboard_data.get('bybitBalance', 0.0))
+                    
+                    # Get real prices and pairs
+                    if 'livePrices' in dashboard_data:
+                        for price_entry in dashboard_data['livePrices']:
+                            pair = price_entry.get('pair', '')
+                            if pair:
+                                real_pairs.append(pair)
+                                live_prices[pair] = {
+                                    "kucoin_spot": float(price_entry.get('kucoinSpot', 0.0)),
+                                    "kucoin_futures": float(price_entry.get('kucoinFutures', 0.0)),
+                                    "bybit_spot": float(price_entry.get('bybitSpot', 0.0)),
+                                    "bybit_futures": float(price_entry.get('bybitFutures', 0.0))
+                                }
+                    
+                    logger.info(f"✅ [Python] Loaded REAL data: KuCoin=${balances['kucoin']:.2f}, Bybit=${balances['bybit']:.2f}, Pairs={len(real_pairs)}")
+            else:
+                logger.warning(f"❌ [Python] dashboard.json not found at {DASHBOARD_JSON_PATH}")
         except Exception as e:
-            logger.error(f"Balance load error: {e}")
+            logger.error(f"❌ [Python] Error loading dashboard.json: {e}")
 
-        # 2. LOAD REAL TRADES
+        # 2. FALLBACK TO ENV PAIRS IF NO LIVE DATA
+        if not real_pairs:
+            env_pairs = os.getenv('ACTIVE_PAIRS', 'BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT')
+            real_pairs = [pair.strip() for pair in env_pairs.split(',')]
+            logger.warning(f"⚠️ [Python] Using fallback pairs from .env: {len(real_pairs)} pairs")
+
+        # 3. LOAD REAL TRADES
         trades = []
         try:
             if os.path.exists(TRADE_LOG_PATH):
@@ -102,14 +115,10 @@ def api_new_dashboard():
                             float(row.get('fees', 0.0))
                         ])
                     logger.info(f"✅ [Python] Loaded {len(trades)} real trades")
-                else:
-                    logger.info("Trade CSV is empty")
-            else:
-                logger.info("No trade CSV found")
         except Exception as e:
-            logger.error(f"Trade load error: {e}")
+            logger.error(f"❌ [Python] Error loading trades: {e}")
 
-        # 3. LOAD REAL ALERTS
+        # 4. LOAD REAL ALERTS
         alerts = []
         try:
             if os.path.exists(ALERTS_CSV_PATH):
@@ -120,12 +129,10 @@ def api_new_dashboard():
                             alerts.append([row[0], row[1]])
                 alerts = alerts[-15:] if alerts else []
                 logger.info(f"✅ [Python] Loaded {len(alerts)} real alerts")
-            else:
-                logger.info("No alerts CSV found")
         except Exception as e:
-            logger.error(f"Alert load error: {e}")
+            logger.error(f"❌ [Python] Error loading alerts: {e}")
 
-        # 4. CALCULATE METRICS
+        # 5. CALCULATE REAL METRICS
         total_profit = sum(float(trade[7]) for trade in trades) if trades else 0.0
         total_fees = sum(float(trade[8]) for trade in trades) if trades else 0.0
         total_trades = len(trades)
@@ -138,7 +145,7 @@ def api_new_dashboard():
             "win_rate": win_rate
         }
 
-        # 5. GENERATE PER-PAIR SUMMARY
+        # 6. GENERATE PER-PAIR SUMMARY FROM REAL DATA
         per_pair_summary = []
         if trades:
             pair_data = {}
@@ -156,7 +163,8 @@ def api_new_dashboard():
                 if profit > 0:
                     pair_data[pair]['wins'] += 1
             
-            for pair, data in pair_data.items():
+            for pair in real_pairs:  # Use all real pairs, not just traded ones
+                data = pair_data.get(pair, {'trades': 0, 'profit': 0.0, 'fees': 0.0, 'wins': 0})
                 win_rate_pair = (data['wins'] / data['trades'] * 100) if data['trades'] > 0 else 0.0
                 per_pair_summary.append({
                     "pair": pair,
@@ -166,27 +174,20 @@ def api_new_dashboard():
                     "fees": data['fees']
                 })
 
-        # 6. MOCK LIVE PRICES
-        prices = {
-            "BTC-USDT": {"kucoin_spot": 67234.50, "kucoin_futures": 0.0, "bybit_spot": 67236.80, "bybit_futures": 0.0},
-            "ETH-USDT": {"kucoin_spot": 4423.10, "kucoin_futures": 0.0, "bybit_spot": 4425.80, "bybit_futures": 0.0},
-            "SOL-USDT": {"kucoin_spot": 188.23, "kucoin_futures": 0.0, "bybit_spot": 188.45, "bybit_futures": 0.0},
-            "XRP-USDT": {"kucoin_spot": 0.5234, "kucoin_futures": 0.0, "bybit_spot": 0.5236, "bybit_futures": 0.0},
-            "ADA-USDT": {"kucoin_spot": 0.3567, "kucoin_futures": 30.0, "bybit_spot": 0.3569, "bybit_futures": 0.0}
-        }
-
-        # 7. BUILD RESPONSE
+        # 7. BUILD RESPONSE WITH REAL DATA
         response = {
             "timestamp": datetime.now().isoformat(),
-            "prices": prices,
-            "balances": balances,
+            "prices": live_prices,  # REAL PRICES FROM SWIFT BOT
+            "balances": balances,   # REAL BALANCES FROM SWIFT BOT
             "metrics": metrics,
             "trades": trades,
             "per_pair_summary": per_pair_summary,
-            "alerts": alerts
+            "alerts": alerts,
+            "active_pairs": real_pairs,  # REAL PAIRS FROM ENV
+            "data_source": "live" if live_prices else "fallback"
         }
 
-        logger.info(f"✅ [Python] API SUCCESS: {total_trades} trades, {len(alerts)} alerts, {len(prices)} prices at {datetime.now().strftime('%H:%M:%S')}")
+        logger.info(f"✅ [Python] API SUCCESS: {total_trades} trades, {len(alerts)} alerts, {len(live_prices)} live prices, {len(real_pairs)} pairs at {datetime.now().strftime('%H:%M:%S')}")
         return jsonify(response), 200
 
     except Exception as e:
@@ -201,7 +202,8 @@ def api_new_dashboard():
             "metrics": {"total_profit": 0.0, "total_fees": 0.0, "total_trades": 0, "win_rate": 0.0},
             "trades": [],
             "per_pair_summary": [],
-            "alerts": []
+            "alerts": [],
+            "data_source": "error"
         }), 200
 
 @app.route('/debug/status')
@@ -214,6 +216,7 @@ def debug_status():
         "alerts_csv_exists": os.path.exists(ALERTS_CSV_PATH),
         "dashboard_json_exists": os.path.exists(DASHBOARD_JSON_PATH),
         "env_file_exists": os.path.exists(".env"),
+        "active_pairs_env": os.getenv('ACTIVE_PAIRS', 'Not found'),
         "routes": [rule.rule for rule in app.url_map.iter_rules()]
     }
     return jsonify(status)
@@ -232,6 +235,7 @@ if __name__ == '__main__':
     logger.info(f"🚀 [Python] Starting Flask Server at {datetime.now().strftime('%H:%M:%S')}")
     logger.info(f"📁 [Python] Working directory: {os.getcwd()}")
     logger.info(f"📄 [Python] .env file exists: {os.path.exists('.env')}")
+    logger.info(f"💰 [Python] Active pairs from env: {os.getenv('ACTIVE_PAIRS', 'Not found')}")
     logger.info("📍 Routes available:")
     logger.info("   http://127.0.0.1:5001/new_dashboard")
     logger.info("   http://127.0.0.1:5001/api/new_dashboard")
