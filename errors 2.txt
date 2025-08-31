@@ -1,50 +1,87 @@
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:323:7 Type 'KuCoinSpotWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
 
+Candidate has non-matching type '(WebSocketEvent, WebSocket) -> ()'
+Add stubs for conformance
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:382:7 Type 'KuCoinFuturesWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
 
+Candidate has non-matching type '(WebSocketEvent, WebSocket) -> ()'
+Add stubs for conformance
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:443:7 Type 'BybitSpotWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
 
 Candidate has non-matching type '(WebSocketEvent, WebSocket) -> ()'
 Add stubs for conformance
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:500:7 Type 'BybitFuturesWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
 
+Candidate has non-matching type '(WebSocketEvent, WebSocket) -> ()'
+Add stubs for conformance
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:919:31 'BybitFuturesWebSocketDelegate' is ambiguous for type lookup in this context
 
+Found this candidate
+Found this candidate
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3174:13 Main actor-isolated static property 'kucoinToken' can not be mutated from a Sendable closure
 
+Mutation of this static property is only permitted within the actor
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3186:52 Main actor-isolated static property 'websocketTimeoutSeconds' can not be referenced from a Sendable closure
 
+Static property declared here
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3189:13 Main actor-isolated static property 'kucoinSocket' can not be mutated from a Sendable closure
 
+Mutation of this static property is only permitted within the actor
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3191:29 Instance will be immediately deallocated because property 'delegate' is 'weak'
 
+A strong reference is required to prevent the instance from being deallocated
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3291:25 Instance will be immediately deallocated because property 'delegate' is 'weak'
 
+A strong reference is required to prevent the instance from being deallocated
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3317:13 Main actor-isolated static property 'kucoinFuturesToken' can not be mutated from a Sendable closure
 
+Mutation of this static property is only permitted within the actor
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3328:52 Main actor-isolated static property 'websocketTimeoutSeconds' can not be referenced from a Sendable closure
 
+Static property declared here
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3331:13 Main actor-isolated static property 'kucoinFuturesSocket' can not be mutated from a Sendable closure
 
+Mutation of this static property is only permitted within the actor
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3333:29 Instance will be immediately deallocated because property 'delegate' is 'weak'
 
+A strong reference is required to prevent the instance from being deallocated
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3365:25 Instance will be immediately deallocated because property 'delegate' is 'weak'
 
+A strong reference is required to prevent the instance from being deallocated
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3375:17 Invalid redeclaration of 'fetchKuCoinWebSocketToken(completion:)'
 
+'fetchKuCoinWebSocketToken(completion:)' previously declared here
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3420:17 Invalid redeclaration of 'fetchKuCoinFuturesWebSocketToken(completion:)'
 
+'fetchKuCoinFuturesWebSocketToken(completion:)' previously declared here
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3556:17 Invalid redeclaration of 'updateDashboardJSON()'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4683:7 Invalid redeclaration of 'BybitFuturesWebSocketDelegate'
+'updateDashboardJSON()' previously declared here
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4322:59 Cannot assign value of type 'Date' to type '[String : Date]'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5602:24 Invalid redeclaration of 'kucoinDelegate'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4418:59 Cannot assign value of type 'Date' to type '[String : Date]'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5603:24 Invalid redeclaration of 'kucoinFuturesDelegate'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4580:59 Cannot assign value of type 'Date' to type '[String : Date]'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5605:46 'BybitFuturesWebSocketDelegate' is ambiguous for type lookup in this context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4707:7 Invalid redeclaration of 'BybitFuturesWebSocketDelegate'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5638:34 Cannot assign value of type 'KucoinWebSocketDelegate' to type 'KuCoinSpotWebSocketDelegate'
+'BybitFuturesWebSocketDelegate' previously declared here
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4723:59 Cannot assign value of type 'Date' to type '[String : Date]'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5728:41 Cannot assign value of type 'KucoinFuturesWebSocketDelegate' to type 'KuCoinFuturesWebSocketDelegate'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5634:24 Invalid redeclaration of 'kucoinDelegate'
+
+'kucoinDelegate' previously declared here
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5635:24 Invalid redeclaration of 'kucoinFuturesDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5637:46 'BybitFuturesWebSocketDelegate' is ambiguous for type lookup in this context
+
+Found this candidate
+Found this candidate
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5670:34 Cannot assign value of type 'KucoinWebSocketDelegate' to type 'KuCoinSpotWebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5769:41 Cannot assign value of type 'KucoinFuturesWebSocketDelegate' to type 'KuCoinFuturesWebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5884:45 Cannot assign value of type 'Date' to type '[String : Date]'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5952:45 Cannot assign value of type 'Date' to type '[String : Date]'
 
