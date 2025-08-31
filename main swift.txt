@@ -554,6 +554,8 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
     }
 }
 
+//----------------------------------------------------------------------------------------
+
 @MainActor
 class ExchangeWebSocket {
     // Starscream WebSockets
@@ -4297,11 +4299,7 @@ extension ExchangeWebSocket {
 //---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
 
 
-
-
-
-
-class KucoinWebSocketDelegate: WebSocketDelegate {
+class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
     private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.locale = Locale(identifier: "en_US")
@@ -4319,6 +4317,9 @@ class KucoinWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.kucoinIsConnected = true
             case .disconnected(let reason, let code):
                 print("KuCoin Spot WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.kucoinIsConnected = false
+            case .peerClosed:
+                print("KuCoin Spot WebSocket peer closed connection")
                 ExchangeWebSocket.kucoinIsConnected = false
             case .text(let string):
                 print("DEBUG: KuCoin Spot WebSocket received message: \(string)")
@@ -4354,7 +4355,7 @@ class KucoinWebSocketDelegate: WebSocketDelegate {
                             let pair = spotSymbol
                             ExchangeWebSocket.kucoinCurrentPrice[pair] = price
                             ExchangeWebSocket.kucoinPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.kucoinPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.kucoinPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.kucoinPrices[pair]!.removeFirst()
                             }
                             let volStr = dataDict["size"] as? String ?? dataDict["volume"] as? String
@@ -4367,7 +4368,7 @@ class KucoinWebSocketDelegate: WebSocketDelegate {
                                 }
                                 if let vol = vol {
                                     ExchangeWebSocket.kucoinSpotVolume[pair, default: []].append(vol)
-                                    if ExchangeWebSocket.kucoinSpotVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                    if ExchangeWebSocket.kucoinSpotVolume[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                         ExchangeWebSocket.kucoinSpotVolume[pair]!.removeFirst()
                                     }
                                 } else {
@@ -4390,7 +4391,7 @@ class KucoinWebSocketDelegate: WebSocketDelegate {
     }
 }
 
-class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
+class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
     private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.locale = Locale(identifier: "en_US")
@@ -4408,6 +4409,9 @@ class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.kucoinFuturesIsConnected = true
             case .disconnected(let reason, let code):
                 print("KuCoin Futures WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.kucoinFuturesIsConnected = false
+            case .peerClosed:
+                print("KuCoin Futures WebSocket peer closed connection")
                 ExchangeWebSocket.kucoinFuturesIsConnected = false
             case .text(let string):
                 print("DEBUG: KuCoin Futures WebSocket received message: \(string)")
@@ -4446,7 +4450,7 @@ class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
                             }
                             ExchangeWebSocket.kucoinCurrentFuturesPrice[pair] = price
                             ExchangeWebSocket.kucoinFuturesPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.kucoinFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.kucoinFuturesPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.kucoinFuturesPrices[pair]!.removeFirst()
                             }
                             let volStr = dataDict["volume"] as? String ?? dataDict["size"] as? String
@@ -4459,7 +4463,7 @@ class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
                                 }
                                 if let vol = vol {
                                     ExchangeWebSocket.kucoinFuturesVolume[pair, default: []].append(vol)
-                                    if ExchangeWebSocket.kucoinFuturesVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                    if ExchangeWebSocket.kucoinFuturesVolume[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                         ExchangeWebSocket.kucoinFuturesVolume[pair]!.removeFirst()
                                     }
                                 } else {
@@ -4545,7 +4549,7 @@ class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
     }
 }
 
-class BybitWebSocketDelegate: WebSocketDelegate {
+class BybitSpotWebSocketDelegate: WebSocketDelegate {
     private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.locale = Locale(identifier: "en_US")
@@ -4563,6 +4567,9 @@ class BybitWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.bybitIsConnected = true
             case .disconnected(let reason, let code):
                 print("Bybit Spot WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.bybitIsConnected = false
+            case .peerClosed:
+                print("Bybit Spot WebSocket peer closed connection")
                 ExchangeWebSocket.bybitIsConnected = false
             case .text(let string):
                 print("DEBUG: Bybit Spot WebSocket received message: \(string)")
@@ -4603,7 +4610,7 @@ class BybitWebSocketDelegate: WebSocketDelegate {
                             let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
                             ExchangeWebSocket.bybitCurrentPrice[pair] = price
                             ExchangeWebSocket.bybitPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.bybitPrices[pair]!.removeFirst()
                             }
                             let volStr = dataDict["volume24h"] as? String
@@ -4616,7 +4623,7 @@ class BybitWebSocketDelegate: WebSocketDelegate {
                                 }
                                 if let vol = vol {
                                     ExchangeWebSocket.bybitSpotVolume[pair, default: []].append(vol)
-                                    if ExchangeWebSocket.bybitSpotVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                    if ExchangeWebSocket.bybitSpotVolume[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                         ExchangeWebSocket.bybitSpotVolume[pair]!.removeFirst()
                                     }
                                 } else {
@@ -4661,7 +4668,7 @@ class BybitWebSocketDelegate: WebSocketDelegate {
                             let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
                             ExchangeWebSocket.bybitCurrentPrice[pair] = price
                             ExchangeWebSocket.bybitPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.bybitPrices[pair]!.removeFirst()
                             }
                             print("Updated Bybit spot price from trade for \(pair): \(price)")
@@ -4698,6 +4705,9 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.bybitFuturesIsConnected = true
             case .disconnected(let reason, let code):
                 print("Bybit Futures WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.bybitFuturesIsConnected = false
+            case .peerClosed:
+                print("Bybit Futures WebSocket peer closed connection")
                 ExchangeWebSocket.bybitFuturesIsConnected = false
             case .text(let string):
                 print("DEBUG: Bybit Futures WebSocket received message: \(string)")
@@ -4738,7 +4748,7 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                             let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
                             ExchangeWebSocket.bybitCurrentFuturesPrice[pair] = price
                             ExchangeWebSocket.bybitFuturesPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.bybitFuturesPrices[pair]!.removeFirst()
                             }
                             let volStr = dataDict["volume24h"] as? String
@@ -4751,7 +4761,7 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                                 }
                                 if let vol = vol {
                                     ExchangeWebSocket.bybitFuturesVolume[pair, default: []].append(vol)
-                                    if ExchangeWebSocket.bybitFuturesVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                    if ExchangeWebSocket.bybitFuturesVolume[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                         ExchangeWebSocket.bybitFuturesVolume[pair]!.removeFirst()
                                     }
                                 } else {
@@ -4831,7 +4841,7 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                             let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
                             ExchangeWebSocket.bybitCurrentFuturesPrice[pair] = price
                             ExchangeWebSocket.bybitFuturesPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.bybitFuturesPrices[pair]!.removeFirst()
                             }
                             print("Updated Bybit futures price from trade for \(pair): \(price)")
@@ -4849,9 +4859,6 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
         }
     }
 }
-
-
-
 
 //------------------------------------------------------------------------------------------------------------------------Block 10 - Bybit WebSocket Processing
 
@@ -5598,6 +5605,7 @@ extension ExchangeWebSocket {
 //-------------------------------------------------------------------------------------------------------------------------Block 11 - WebSocket Data Handling
 
 
+
 extension ExchangeWebSocket {
     private static var kucoinDelegate: KucoinWebSocketDelegate?
     private static var kucoinFuturesDelegate: KucoinFuturesWebSocketDelegate?
@@ -5608,9 +5616,7 @@ extension ExchangeWebSocket {
     static func connectKucoin() {
         guard hasValidKuCoinCredentials else {
             print("Skipping KuCoin WebSocket connection due to missing credentials")
-            Task { @MainActor in
-                logAlert(event: "Skipping KuCoin WebSocket connection due to missing credentials")
-            }
+            logAlert(event: "Skipping KuCoin WebSocket connection due to missing credentials")
             return
         }
         print("Attempting to connect to KuCoin WebSocket...")
@@ -5618,7 +5624,9 @@ extension ExchangeWebSocket {
             guard let token = token else {
                 print("Failed to fetch KuCoin WebSocket token, retrying in 5 seconds...")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    connectKucoin()
+                    Task { @MainActor in
+                        connectKucoin()
+                    }
                 }
                 return
             }
@@ -5644,6 +5652,8 @@ extension ExchangeWebSocket {
                     Task { @MainActor in
                         switch event {
                         case .connected(_):
+                            kucoinIsConnected = true
+                            lastWebsocketActivity = Date()
                             for (index, pair) in tradingPairs.enumerated() {
                                 // Fixed symbol formatting for KuCoin spot
                                 let formattedPair = pair.replacingOccurrences(of: "-", with: "")
@@ -5668,22 +5678,29 @@ extension ExchangeWebSocket {
                                     let pingMessage = "{\"id\": \"ping_\(Int(Date().timeIntervalSince1970))\", \"type\": \"ping\"}"
                                     ws?.write(string: pingMessage)
                                     print("Sent ping to KuCoin Spot WebSocket")
+                                    lastWebsocketActivity = Date()
                                 }
                             }
                         case .disconnected(_, _):
+                            kucoinIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                 connectKucoin()
                             }
                         case .error(_):
+                            kucoinIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                 connectKucoin()
                             }
                         case .text(let string):
+                            lastWebsocketActivity = Date()
                             if let data = string.data(using: .utf8),
                                let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                let type = json["type"] as? String, type == "welcome" {
                                 print("KuCoin Spot WebSocket subscription confirmed")
                             }
+                        case .peerClosed:
+                            kucoinIsConnected = false
+                            print("KuCoin WebSocket peer closed connection")
                         default:
                             break
                         }
@@ -5697,9 +5714,7 @@ extension ExchangeWebSocket {
     static func connectKucoinFutures() {
         guard hasValidKuCoinCredentials else {
             print("Skipping KuCoin Futures WebSocket connection due to missing credentials")
-            Task { @MainActor in
-                logAlert(event: "Skipping KuCoin Futures WebSocket connection due to missing credentials")
-            }
+            logAlert(event: "Skipping KuCoin Futures WebSocket connection due to missing credentials")
             return
         }
         print("Attempting to connect to KuCoin Futures WebSocket...")
@@ -5707,7 +5722,9 @@ extension ExchangeWebSocket {
             guard let token = token else {
                 print("Failed to fetch KuCoin Futures WebSocket token, retrying in 5 seconds...")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    connectKucoinFutures()
+                    Task { @MainActor in
+                        connectKucoinFutures()
+                    }
                 }
                 return
             }
@@ -5734,6 +5751,8 @@ extension ExchangeWebSocket {
                     Task { @MainActor in
                         switch event {
                         case .connected(_):
+                            kucoinFuturesIsConnected = true
+                            lastWebsocketActivity = Date()
                             for (index, pair) in tradingPairs.enumerated() {
                                 guard let futuresSymbol = kucoinFuturesSymbols[pair] else {
                                     print("No futures symbol found for pair: \(pair), skipping subscription")
@@ -5790,22 +5809,29 @@ extension ExchangeWebSocket {
                                     let pingMessage = "{\"id\": \"ping_\(Int(Date().timeIntervalSince1970))\", \"type\": \"ping\"}"
                                     ws?.write(string: pingMessage)
                                     print("Sent ping to KuCoin Futures WebSocket")
+                                    lastWebsocketActivity = Date()
                                 }
                             }
                         case .disconnected(_, _):
+                            kucoinFuturesIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                 connectKucoinFutures()
                             }
                         case .error(_):
+                            kucoinFuturesIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                 connectKucoinFutures()
                             }
                         case .text(let string):
+                            lastWebsocketActivity = Date()
                             if let data = string.data(using: .utf8),
                                let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                let type = json["type"] as? String, type == "welcome" {
                                 print("KuCoin Futures WebSocket subscription confirmed")
                             }
+                        case .peerClosed:
+                            kucoinFuturesIsConnected = false
+                            print("KuCoin Futures WebSocket peer closed connection")
                         default:
                             break
                         }
@@ -5818,6 +5844,8 @@ extension ExchangeWebSocket {
     @MainActor
     static func connectBybit() {
         print("Attempting to connect to Bybit WebSocket...")
+        
+        // Connect spot WebSocket
         bybitSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/spot")!))
         bybitDelegate = BybitWebSocketDelegate()
         bybitSocket?.delegate = bybitDelegate
@@ -5828,6 +5856,8 @@ extension ExchangeWebSocket {
             Task { @MainActor in
                 switch event {
                 case .connected(_):
+                    bybitIsConnected = true
+                    lastWebsocketActivity = Date()
                     for pair in tradingPairs {
                         // Fixed symbol formatting for Bybit
                         let symbol = pair.replacingOccurrences(of: "-", with: "")
@@ -5853,29 +5883,37 @@ extension ExchangeWebSocket {
                             let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
                             spotWs?.write(string: pingMessage)
                             print("Sent ping to Bybit Spot WebSocket")
+                            lastWebsocketActivity = Date()
                         }
                     }
                 case .disconnected(_, _):
+                    bybitIsConnected = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         connectBybit()
                     }
                 case .error(_):
+                    bybitIsConnected = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         connectBybit()
                     }
                 case .text(let string):
+                    lastWebsocketActivity = Date()
                     if let data = string.data(using: .utf8),
                        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                        let success = json["success"] as? Bool, success,
                        let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
                         print("Bybit Spot subscription confirmed")
                     }
+                case .peerClosed:
+                    bybitIsConnected = false
+                    print("Bybit Spot WebSocket peer closed connection")
                 default:
                     break
                 }
             }
         }
         
+        // Connect futures WebSocket
         bybitSpotSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/linear")!))
         bybitFuturesDelegate = BybitFuturesWebSocketDelegate()
         bybitSpotSocket?.delegate = bybitFuturesDelegate
@@ -5886,6 +5924,8 @@ extension ExchangeWebSocket {
             Task { @MainActor in
                 switch event {
                 case .connected(_):
+                    bybitFuturesIsConnected = true
+                    lastWebsocketActivity = Date()
                     for pair in tradingPairs {
                         // Fixed symbol formatting for Bybit futures
                         let symbol = pair.replacingOccurrences(of: "-", with: "")
@@ -5911,23 +5951,30 @@ extension ExchangeWebSocket {
                             let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
                             futuresWs?.write(string: pingMessage)
                             print("Sent ping to Bybit Futures WebSocket")
+                            lastWebsocketActivity = Date()
                         }
                     }
                 case .disconnected(_, _):
+                    bybitFuturesIsConnected = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         connectBybit()
                     }
                 case .error(_):
+                    bybitFuturesIsConnected = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         connectBybit()
                     }
                 case .text(let string):
+                    lastWebsocketActivity = Date()
                     if let data = string.data(using: .utf8),
                        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                        let success = json["success"] as? Bool, success,
                        let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
                         print("Bybit Futures subscription confirmed")
                     }
+                case .peerClosed:
+                    bybitFuturesIsConnected = false
+                    print("Bybit Futures WebSocket peer closed connection")
                 default:
                     break
                 }
@@ -5935,7 +5982,6 @@ extension ExchangeWebSocket {
         }
     }
 }
-
 
 //--------------------------------------------------------------------------------------------------------------------------Block 12 - Trading Loop Monitoring and Support
 
