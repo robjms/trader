@@ -1,3 +1,4 @@
+//--------------- Block 1 - Core Data Structures and Utilities
 // VARIABLES TO ADD: None - All variables included in this block
 
 @preconcurrency import Starscream
