@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
 
+// VARIABLES TO ADD: None - All variables are already in Block 1
 
 class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
     private static let numberFormatter: NumberFormatter = {
@@ -19,9 +20,6 @@ class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.kucoinIsConnected = true
             case .disconnected(let reason, let code):
                 print("KuCoin Spot WebSocket disconnected: \(reason), code: \(code)")
-                ExchangeWebSocket.kucoinIsConnected = false
-            case .peerClosed:
-                print("KuCoin Spot WebSocket peer closed connection")
                 ExchangeWebSocket.kucoinIsConnected = false
             case .text(let string):
                 print("DEBUG: KuCoin Spot WebSocket received message: \(string)")
@@ -79,6 +77,8 @@ class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
                             }
                             print("Updated KuCoin spot price for \(pair): \(price)")
                         }
+                    } else if type == "pong" {
+                        ExchangeWebSocket.lastHeartbeat["kucoin"] = Date()
                     }
                 }
             case .error(let error):
@@ -86,6 +86,9 @@ class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.kucoinIsConnected = false
             case .pong(_):
                 print("Received pong from KuCoin WebSocket")
+            case .peerClosed:
+                print("KuCoin WebSocket peer closed connection")
+                ExchangeWebSocket.kucoinIsConnected = false
             default:
                 break
             }
@@ -111,9 +114,6 @@ class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.kucoinFuturesIsConnected = true
             case .disconnected(let reason, let code):
                 print("KuCoin Futures WebSocket disconnected: \(reason), code: \(code)")
-                ExchangeWebSocket.kucoinFuturesIsConnected = false
-            case .peerClosed:
-                print("KuCoin Futures WebSocket peer closed connection")
                 ExchangeWebSocket.kucoinFuturesIsConnected = false
             case .text(let string):
                 print("DEBUG: KuCoin Futures WebSocket received message: \(string)")
@@ -244,6 +244,9 @@ class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.kucoinFuturesIsConnected = false
             case .pong(_):
                 print("Received pong from KuCoin Futures WebSocket")
+            case .peerClosed:
+                print("KuCoin Futures WebSocket peer closed connection")
+                ExchangeWebSocket.kucoinFuturesIsConnected = false
             default:
                 break
             }
@@ -269,9 +272,6 @@ class BybitSpotWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.bybitIsConnected = true
             case .disconnected(let reason, let code):
                 print("Bybit Spot WebSocket disconnected: \(reason), code: \(code)")
-                ExchangeWebSocket.bybitIsConnected = false
-            case .peerClosed:
-                print("Bybit Spot WebSocket peer closed connection")
                 ExchangeWebSocket.bybitIsConnected = false
             case .text(let string):
                 print("DEBUG: Bybit Spot WebSocket received message: \(string)")
@@ -382,6 +382,9 @@ class BybitSpotWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.bybitIsConnected = false
             case .pong(_):
                 print("Received pong from Bybit Spot WebSocket")
+            case .peerClosed:
+                print("Bybit Spot WebSocket peer closed connection")
+                ExchangeWebSocket.bybitIsConnected = false
             default:
                 break
             }
@@ -407,9 +410,6 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.bybitFuturesIsConnected = true
             case .disconnected(let reason, let code):
                 print("Bybit Futures WebSocket disconnected: \(reason), code: \(code)")
-                ExchangeWebSocket.bybitFuturesIsConnected = false
-            case .peerClosed:
-                print("Bybit Futures WebSocket peer closed connection")
                 ExchangeWebSocket.bybitFuturesIsConnected = false
             case .text(let string):
                 print("DEBUG: Bybit Futures WebSocket received message: \(string)")
@@ -555,6 +555,9 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.bybitFuturesIsConnected = false
             case .pong(_):
                 print("Received pong from Bybit Futures WebSocket")
+            case .peerClosed:
+                print("Bybit Futures WebSocket peer closed connection")
+                ExchangeWebSocket.bybitFuturesIsConnected = false
             default:
                 break
             }
