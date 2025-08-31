@@ -1,11 +1,7 @@
 //---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
 
 
-
-
-
-
-class KucoinWebSocketDelegate: WebSocketDelegate {
+class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
     private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.locale = Locale(identifier: "en_US")
@@ -23,6 +19,9 @@ class KucoinWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.kucoinIsConnected = true
             case .disconnected(let reason, let code):
                 print("KuCoin Spot WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.kucoinIsConnected = false
+            case .peerClosed:
+                print("KuCoin Spot WebSocket peer closed connection")
                 ExchangeWebSocket.kucoinIsConnected = false
             case .text(let string):
                 print("DEBUG: KuCoin Spot WebSocket received message: \(string)")
@@ -58,7 +57,7 @@ class KucoinWebSocketDelegate: WebSocketDelegate {
                             let pair = spotSymbol
                             ExchangeWebSocket.kucoinCurrentPrice[pair] = price
                             ExchangeWebSocket.kucoinPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.kucoinPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.kucoinPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.kucoinPrices[pair]!.removeFirst()
                             }
                             let volStr = dataDict["size"] as? String ?? dataDict["volume"] as? String
@@ -71,7 +70,7 @@ class KucoinWebSocketDelegate: WebSocketDelegate {
                                 }
                                 if let vol = vol {
                                     ExchangeWebSocket.kucoinSpotVolume[pair, default: []].append(vol)
-                                    if ExchangeWebSocket.kucoinSpotVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                    if ExchangeWebSocket.kucoinSpotVolume[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                         ExchangeWebSocket.kucoinSpotVolume[pair]!.removeFirst()
                                     }
                                 } else {
@@ -94,7 +93,7 @@ class KucoinWebSocketDelegate: WebSocketDelegate {
     }
 }
 
-class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
+class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
     private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.locale = Locale(identifier: "en_US")
@@ -112,6 +111,9 @@ class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.kucoinFuturesIsConnected = true
             case .disconnected(let reason, let code):
                 print("KuCoin Futures WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.kucoinFuturesIsConnected = false
+            case .peerClosed:
+                print("KuCoin Futures WebSocket peer closed connection")
                 ExchangeWebSocket.kucoinFuturesIsConnected = false
             case .text(let string):
                 print("DEBUG: KuCoin Futures WebSocket received message: \(string)")
@@ -150,7 +152,7 @@ class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
                             }
                             ExchangeWebSocket.kucoinCurrentFuturesPrice[pair] = price
                             ExchangeWebSocket.kucoinFuturesPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.kucoinFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.kucoinFuturesPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.kucoinFuturesPrices[pair]!.removeFirst()
                             }
                             let volStr = dataDict["volume"] as? String ?? dataDict["size"] as? String
@@ -163,7 +165,7 @@ class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
                                 }
                                 if let vol = vol {
                                     ExchangeWebSocket.kucoinFuturesVolume[pair, default: []].append(vol)
-                                    if ExchangeWebSocket.kucoinFuturesVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                    if ExchangeWebSocket.kucoinFuturesVolume[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                         ExchangeWebSocket.kucoinFuturesVolume[pair]!.removeFirst()
                                     }
                                 } else {
@@ -249,7 +251,7 @@ class KucoinFuturesWebSocketDelegate: WebSocketDelegate {
     }
 }
 
-class BybitWebSocketDelegate: WebSocketDelegate {
+class BybitSpotWebSocketDelegate: WebSocketDelegate {
     private static let numberFormatter: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.locale = Locale(identifier: "en_US")
@@ -267,6 +269,9 @@ class BybitWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.bybitIsConnected = true
             case .disconnected(let reason, let code):
                 print("Bybit Spot WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.bybitIsConnected = false
+            case .peerClosed:
+                print("Bybit Spot WebSocket peer closed connection")
                 ExchangeWebSocket.bybitIsConnected = false
             case .text(let string):
                 print("DEBUG: Bybit Spot WebSocket received message: \(string)")
@@ -307,7 +312,7 @@ class BybitWebSocketDelegate: WebSocketDelegate {
                             let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
                             ExchangeWebSocket.bybitCurrentPrice[pair] = price
                             ExchangeWebSocket.bybitPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.bybitPrices[pair]!.removeFirst()
                             }
                             let volStr = dataDict["volume24h"] as? String
@@ -320,7 +325,7 @@ class BybitWebSocketDelegate: WebSocketDelegate {
                                 }
                                 if let vol = vol {
                                     ExchangeWebSocket.bybitSpotVolume[pair, default: []].append(vol)
-                                    if ExchangeWebSocket.bybitSpotVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                    if ExchangeWebSocket.bybitSpotVolume[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                         ExchangeWebSocket.bybitSpotVolume[pair]!.removeFirst()
                                     }
                                 } else {
@@ -365,7 +370,7 @@ class BybitWebSocketDelegate: WebSocketDelegate {
                             let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
                             ExchangeWebSocket.bybitCurrentPrice[pair] = price
                             ExchangeWebSocket.bybitPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.bybitPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.bybitPrices[pair]!.removeFirst()
                             }
                             print("Updated Bybit spot price from trade for \(pair): \(price)")
@@ -402,6 +407,9 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                 ExchangeWebSocket.bybitFuturesIsConnected = true
             case .disconnected(let reason, let code):
                 print("Bybit Futures WebSocket disconnected: \(reason), code: \(code)")
+                ExchangeWebSocket.bybitFuturesIsConnected = false
+            case .peerClosed:
+                print("Bybit Futures WebSocket peer closed connection")
                 ExchangeWebSocket.bybitFuturesIsConnected = false
             case .text(let string):
                 print("DEBUG: Bybit Futures WebSocket received message: \(string)")
@@ -442,7 +450,7 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                             let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
                             ExchangeWebSocket.bybitCurrentFuturesPrice[pair] = price
                             ExchangeWebSocket.bybitFuturesPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.bybitFuturesPrices[pair]!.removeFirst()
                             }
                             let volStr = dataDict["volume24h"] as? String
@@ -455,7 +463,7 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                                 }
                                 if let vol = vol {
                                     ExchangeWebSocket.bybitFuturesVolume[pair, default: []].append(vol)
-                                    if ExchangeWebSocket.bybitFuturesVolume[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                                    if ExchangeWebSocket.bybitFuturesVolume[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                         ExchangeWebSocket.bybitFuturesVolume[pair]!.removeFirst()
                                     }
                                 } else {
@@ -535,7 +543,7 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
                             let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
                             ExchangeWebSocket.bybitCurrentFuturesPrice[pair] = price
                             ExchangeWebSocket.bybitFuturesPrices[pair, default: []].append(price)
-                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(AppConfig.environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
+                            if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > (Int(environment["PRICE_HISTORY_RETENTION"] ?? "1440") ?? 1440) {
                                 ExchangeWebSocket.bybitFuturesPrices[pair]!.removeFirst()
                             }
                             print("Updated Bybit futures price from trade for \(pair): \(price)")
@@ -553,4 +561,3 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
         }
     }
 }
-
