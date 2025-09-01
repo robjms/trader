@@ -1,89 +1,1037 @@
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 09:57:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 09:57:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 09:58:14
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 09:58:14
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 09:58:14] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 09:58:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 09:58:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 09:58:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 09:59:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 09:59:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 09:59:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 09:59:54
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 09:59:54
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 09:59:54] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:00:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:00:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:00:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:01:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:01:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:01:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:02:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:02:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:02:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:03:15
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:03:15
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:03:15] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:werkzeug: * Detected change in '/Users/robertsteinegger/Desktop/BevaixBot/Python/app.py', reloading
-INFO:werkzeug: * Restarting with watchdog (fsevents)
-Loading .env from: /Users/robertsteinegger/Desktop/BevaixBot/.env at 10:03:17
+PAIR	KUCOIN SPOT	KUCOIN FUTURES	BYBIT SPOT	BYBIT FUTURES	SPREAD %	AI SIGNAL	QUANTUM SCORE	ACTION
+ADA-USDT	$0.00	$0.00	$0.83	$0.83	0.000%	WAIT	66.9%	Waiting
+APT-USDT	$0.00	$0.00	$4.32	$4.31	0.000%	WAIT	65.8%	Waiting
+ARB-USDT	$0.00	$0.00	$0.50	$0.50	0.000%	WAIT	14.3%	Waiting
+AVAX-USDT	$0.00	$0.00	$23.96	$23.96	0.000%	WAIT	77.2%	Waiting
+BONK-USDT	$0.00	$0.00	$0.00	$0.00	0.000%	WAIT	81.6%	Waiting
+BTC-USDT	$0.00	$0.00	$108694.90	$108654.90	0.000%	WAIT	31.0%	Waiting
+DOGE-USDT	$0.00	$0.00	$0.22	$0.22	0.000%	WAIT	94.7%	Waiting
+DOT-USDT	$0.00	$0.00	$3.79	$3.79	0.000%	WAIT	48.2%	Waiting
+ETH-USDT	$0.00	$0.00	$4407.16	$4405.27	0.000%	WAIT	62.9%	Waiting
+FLOKI-USDT	$0.00	$0.00	$0.00	$0.00	0.000%	WAIT	93.7%	Waiting
+INJ-USDT	$0.00	$0.00	$12.82	$12.82	0.000%	WAIT	96.2%	Waiting
+LINK-USDT	$0.00	$0.00	$23.44	$23.43	0.000%	WAIT	8.1%	Waiting
+NEAR-USDT	$0.00	$0.00	$2.40	$2.40	0.000%	WAIT	14.4%	Waiting
+OP-USDT	$0.00	$0.00	$0.71	$0.71	0.000%	WAIT	27.3%	Waiting
+PEPE-USDT	$0.00	$0.00	$0.00	$0.00	0.000%	WAIT	82.1%	Waiting
+SHIB-USDT	$0.00	$0.00	$0.00	$0.00	0.000%	WAIT	78.3%	Waiting
+SOL-USDT	$0.00	$0.00	$199.34	$199.26	0.000%	WAIT	55.2%	Waiting
+SUI-USDT	$0.00	$0.00	$3.29	$3.29	0.000%	WAIT	56.7%	Waiting
+TON-USDT	$0.00	$0.00	$3.13	$3.13	0.000%	WAIT	41.7%	Waiting
+WIF-USDT	$0.00	$0.00	$0.79	$0.79	0.000%	WAIT	19.6%	Waiting
+XRP-USDT	$0.00	$0.00	$2.79	$2.79	0.000%	WAIT	28.6%	Waiting
+
+
+Alerts:
+✅ 12:21:22 - Market sentiment shift: Fear to greed transition detected
+🔔 12:21:22 - No .env file found at /Users/robertsteinegger/Desktop/BevaixBot/Python/.env
+🔔 12:21:22 - Failed to load .env file: environmentFileIsMissing
+🔔 12:21:22 - No .env file found at /Users/robertsteinegger/Desktop/BevaixBot/Python/.env
+🔔 12:21:22 - Failed to load .env file: environmentFileIsMissing
+🔔 12:21:22 - No .env file found at /Users/robertsteinegger/Desktop/BevaixBot/Python/.env
+🔔 12:21:22 - ERROR: .env file not found in current directory
+🔔 12:21:22 - Failed to load .env file: environmentFileIsMissing
+🔔 12:21:22 - No .env file found at /Users/robertsteinegger/Desktop/BevaixBot/Python/.env
+🔔 12:21:22 - ERROR: .env file not found in current directory
+🔔 12:21:22 - ERROR: .env file not found in current directory
+🔔 12:21:17 - No .env file found at /Users/robertsteinegger/Desktop/BevaixBot/Python/.env
+🔔 12:21:17 - Failed to load .env file: environmentFileIsMissing
+🔔 12:21:17 - No .env file found at /Users/robertsteinegger/Desktop/BevaixBot/Python/.env
+🔔 12:21:17 - Failed to load .env file: environmentFileIsMissing
+🔔 12:21:17 - No .env file found at /Users/robertsteinegger/Desktop/BevaixBot/Python/.env
+🔔 12:21:17 - ERROR: .env file not found in current directory
+🔔 12:21:17 - Failed to load .env file: environmentFileIsMissing
+🔔 12:21:17 - No .env file found at /Users/robertsteinegger/Desktop/BevaixBot/Python/.env
+
+
+Flask server output:
+
+C(base) iMac:python robertsteinegger$ python app.py
+🔍 Loading .env from: /Users/robertsteinegger/Desktop/BevaixBot/.env at 12:21:00
 ✅ .env loaded successfully from /Users/robertsteinegger/Desktop/BevaixBot/.env
-INFO:__main__:🚀 [Python] Starting Flask Server at 10:03:17
-INFO:__main__:📁 [Python] Working directory: /Users/robertsteinegger/Desktop/BevaixBot/Python
-INFO:__main__:📄 [Python] .env file exists: False
-INFO:__main__:💰 [Python] Active pairs from env: BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT
+INFO:__main__:🚀 [Flask] Starting BevaixBot Dashboard Server at 12:21:00
+INFO:__main__:📁 [Flask] Project root: /Users/robertsteinegger/Desktop/BevaixBot
+INFO:__main__:📄 [Flask] Dashboard JSON: /Users/robertsteinegger/Desktop/BevaixBot/dashboard.json
+INFO:__main__:📊 [Flask] Trade log: /Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv
+INFO:__main__:🚨 [Flask] Alerts CSV: /Users/robertsteinegger/Desktop/BevaixBot/Output/alerts.csv
 INFO:__main__:📍 Routes available:
 INFO:__main__:   http://127.0.0.1:5001/new_dashboard
 INFO:__main__:   http://127.0.0.1:5001/api/new_dashboard
 INFO:__main__:   http://127.0.0.1:5001/sentiment
 INFO:__main__:   http://127.0.0.1:5001/debug/status
-INFO:__main__:   http://127.0.0.1:5001/debug/api
+INFO:__main__:   http://127.0.0.1:5001/debug/dashboard-raw
+ * Serving Flask app 'app'
+ * Debug mode: on
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5001
+INFO:werkzeug:Press CTRL+C to quit
+INFO:werkzeug: * Restarting with watchdog (fsevents)
+🔍 Loading .env from: /Users/robertsteinegger/Desktop/BevaixBot/.env at 12:21:00
+✅ .env loaded successfully from /Users/robertsteinegger/Desktop/BevaixBot/.env
+INFO:__main__:🚀 [Flask] Starting BevaixBot Dashboard Server at 12:21:00
+INFO:__main__:📁 [Flask] Project root: /Users/robertsteinegger/Desktop/BevaixBot
+INFO:__main__:📄 [Flask] Dashboard JSON: /Users/robertsteinegger/Desktop/BevaixBot/dashboard.json
+INFO:__main__:📊 [Flask] Trade log: /Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv
+INFO:__main__:🚨 [Flask] Alerts CSV: /Users/robertsteinegger/Desktop/BevaixBot/Output/alerts.csv
+INFO:__main__:📍 Routes available:
+INFO:__main__:   http://127.0.0.1:5001/new_dashboard
+INFO:__main__:   http://127.0.0.1:5001/api/new_dashboard
+INFO:__main__:   http://127.0.0.1:5001/sentiment
+INFO:__main__:   http://127.0.0.1:5001/debug/status
+INFO:__main__:   http://127.0.0.1:5001/debug/dashboard-raw
 WARNING:werkzeug: * Debugger is active!
 INFO:werkzeug: * Debugger PIN: 787-441-244
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:03:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:03:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:03:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:04:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:04:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:04:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:05:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:05:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:05:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:06:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:06:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:06:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:07:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:07:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:07:49] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called - returning REAL data at 10:08:49
-WARNING:__main__:❌ [Python] dashboard.json not found at dashboard.json
-WARNING:__main__:⚠️ [Python] Using fallback pairs from .env: 22 pairs
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 0 alerts, 0 live prices, 22 pairs at 10:08:49
-INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 10:08:49] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 12:21:02
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 12:21:02
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 12:21:02] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 12:21:04
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 12:21:04
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 12:21:04] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 12:21:07
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 12:21:07
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 12:21:07] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 12:21:12
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 12:21:12
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 12:21:12] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 12:21:17
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 12:21:17
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 12:21:17] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 12:21:22
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 12:21:22
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 12:21:22] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 12:21:27
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 12:21:27
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 12:21:27] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 12:21:32
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 12:21:32
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 12:21:32] "GET /api/new_dashboard HTTP/1.1" 200 -
+^C(base) iMac:python robertsteinegger$ 
+ 
+
+Terminal output:
+
+vironment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7074
+✅ [Bybit Futures] Updated price for ETH-USDT: $4402.13
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4999
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21676
+Environment variable OPPORTUNITY_SCAN_INTERVAL not found or empty
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21663
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2308e-05
+✅ [Bybit Spot] Updated price for ETH-USDT: $4403.96
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.765e-06
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2875
+✅ [Bybit Spot] Updated price for SOL-USDT: $199.38
+✅ [Bybit Spot] Updated price for AVAX-USDT: $23.902
+✅ [Bybit Futures] Updated price for BTC-USDT: $108620.9
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.31
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.1128e-05
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7886
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.791
+✅ [Bybit Spot] Updated price for APT-USDT: $4.31
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.786
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.7902
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8272
+✅ [Bybit Spot] Updated price for TON-USDT: $3.132
+Environment variable API_MAX_RETRIES not found or empty
+Environment variable API_TIMEOUT_SECONDS not found or empty
+✅ [Bybit Futures] Updated price for APT-USDT: $4.309
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.13e-05
+✅ [Bybit Futures] Updated price for BTC-USDT: $108621.0
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108650.3
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4403.96
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.415
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.13e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4999
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7886
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: Bybit spot prices count for SOL-USDT: 234
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: Bybit spot prices count for FLOKI-USDT: 96
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: Bybit spot prices count for BTC-USDT: 305
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108650.3
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Bybit spot prices count for ETH-USDT: 380
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4403.96
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Bybit spot prices count for AVAX-USDT: 126
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: Bybit spot prices count for NEAR-USDT: 85
+DEBUG: Bybit spot prices count for TON-USDT: 116
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: Bybit spot prices count for SUI-USDT: 127
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: Bybit spot prices count for SHIB-USDT: 89
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: Bybit spot prices count for ADA-USDT: 110
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Bybit spot prices count for LINK-USDT: 151
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: Bybit spot prices count for WIF-USDT: 129
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: Bybit spot prices count for XRP-USDT: 205
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7886
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Bybit spot prices count for INJ-USDT: 139
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Bybit spot prices count for DOT-USDT: 109
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Bybit spot prices count for PEPE-USDT: 118
+DEBUG: Bybit spot prices count for ARB-USDT: 103
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4999
+DEBUG: Bybit spot prices count for DOGE-USDT: 94
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.415
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.13e-05
+DEBUG: Bybit spot prices count for BONK-USDT: 158
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Bybit spot prices count for OP-USDT: 77
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+DEBUG: Bybit spot prices count for APT-USDT: 125
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7072
+✅ [Bybit Futures] Updated price for BTC-USDT: $108620.9
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7888
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7887
+Environment variable LATENCY_SPIKE_THRESHOLD not found or empty
+Invalid order book response for kucoin-ARB-USDT-futures
+ALERT: Invalid order book response for kucoin-ARB-USDT-futures
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.415
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.393
+✅ [Bybit Futures] Updated price for ETH-USDT: $4402.3
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21664
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7074
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108650.3
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4403.96
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.415
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.13e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4999
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7887
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: Bybit spot prices count for ETH-USDT: 380
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: Bybit spot prices count for BTC-USDT: 305
+DEBUG: Bybit spot prices count for TON-USDT: 116
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108650.3
+DEBUG: Bybit spot prices count for SOL-USDT: 234
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Bybit spot prices count for AVAX-USDT: 126
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Bybit spot prices count for NEAR-USDT: 86
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: Bybit spot prices count for ADA-USDT: 110
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Bybit spot prices count for WIF-USDT: 129
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: Bybit spot prices count for ARB-USDT: 103
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4999
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: Bybit spot prices count for SHIB-USDT: 89
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Bybit spot prices count for INJ-USDT: 139
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: Bybit spot prices count for SUI-USDT: 127
+DEBUG: Bybit spot prices count for DOGE-USDT: 94
+DEBUG: Bybit spot prices count for FLOKI-USDT: 96
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for OP-USDT: 78
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: Bybit spot prices count for LINK-USDT: 152
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.415
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: Bybit spot prices count for XRP-USDT: 207
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7887
+DEBUG: Bybit spot prices count for DOT-USDT: 109
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.13e-05
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Bybit spot prices count for BONK-USDT: 158
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Bybit spot prices count for PEPE-USDT: 118
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4403.96
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Bybit spot prices count for APT-USDT: 125
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4999
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7873
+✅ [Bybit Spot] Updated price for ETH-USDT: $4403.96
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.765e-06
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2875
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2308e-05
+✅ [Bybit Spot] Updated price for AVAX-USDT: $23.902
+✅ [Bybit Spot] Updated price for SOL-USDT: $199.38
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.786
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.7902
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8272
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.791
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7887
+✅ [Bybit Spot] Updated price for APT-USDT: $4.31
+✅ [Bybit Spot] Updated price for TON-USDT: $3.132
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.1128e-05
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.13e-05
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7888
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.286
+✅ [Bybit Spot] Updated price for BTC-USDT: $108650.3
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108650.3
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4403.96
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.415
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.13e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4999
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: Bybit spot prices count for BTC-USDT: 306
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108650.3
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: Bybit spot prices count for ETH-USDT: 381
+DEBUG: Bybit spot prices count for SOL-USDT: 235
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Bybit spot prices count for FLOKI-USDT: 97
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.13e-05
+DEBUG: Bybit spot prices count for SHIB-USDT: 90
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Bybit spot prices count for WIF-USDT: 130
+DEBUG: Bybit spot prices count for AVAX-USDT: 127
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4403.96
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for OP-USDT: 78
+DEBUG: Bybit spot prices count for XRP-USDT: 209
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: Bybit spot prices count for LINK-USDT: 152
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.415
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Bybit spot prices count for BONK-USDT: 159
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Bybit spot prices count for INJ-USDT: 140
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Bybit spot prices count for PEPE-USDT: 119
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Bybit spot prices count for DOT-USDT: 110
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Bybit spot prices count for NEAR-USDT: 86
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: Bybit spot prices count for ARB-USDT: 104
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4999
+DEBUG: Bybit spot prices count for DOGE-USDT: 94
+DEBUG: Bybit spot prices count for TON-USDT: 117
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Bybit spot prices count for APT-USDT: 126
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Bybit spot prices count for SUI-USDT: 128
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: Bybit spot prices count for ADA-USDT: 111
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.415
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.42
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.393
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.2861
+✅ [Bybit Futures] Updated price for INJ-USDT: $12.788
+✅ [Bybit Spot] Updated price for BTC-USDT: $108650.9
+✅ [Bybit Futures] Updated price for BTC-USDT: $108621.0
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4999
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108650.9
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4403.96
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.13e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4999
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: Bybit spot prices count for ARB-USDT: 105
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: Bybit spot prices count for FLOKI-USDT: 97
+DEBUG: Bybit spot prices count for TON-USDT: 117
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Bybit spot prices count for NEAR-USDT: 87
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Bybit spot prices count for BTC-USDT: 307
+DEBUG: Bybit spot prices count for PEPE-USDT: 119
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Bybit spot prices count for APT-USDT: 126
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: Bybit spot prices count for XRP-USDT: 209
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Bybit spot prices count for AVAX-USDT: 127
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Bybit spot prices count for SUI-USDT: 128
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: Bybit spot prices count for ETH-USDT: 381
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4403.96
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: Bybit spot prices count for SHIB-USDT: 90
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: Bybit spot prices count for DOGE-USDT: 94
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: Bybit spot prices count for DOT-USDT: 110
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4999
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Bybit spot prices count for INJ-USDT: 140
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.13e-05
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for OP-USDT: 78
+DEBUG: Bybit spot prices count for LINK-USDT: 154
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: Bybit spot prices count for ADA-USDT: 111
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Bybit spot prices count for BONK-USDT: 159
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: Bybit spot prices count for WIF-USDT: 130
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Bybit spot prices count for SOL-USDT: 235
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108650.9
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Futures] Updated price for BTC-USDT: $108623.0
+✅ [Bybit Spot] Updated price for BTC-USDT: $108650.9
+✅ [Bybit Spot] Updated price for BTC-USDT: $108655.2
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.08
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.08
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.26
+✅ [Bybit Futures] Updated price for DOT-USDT: $3.7893
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.34
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.133e-05
+Environment variable OPPORTUNITY_SCAN_INTERVAL not found or empty
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.5
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.5
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.765e-06
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2308e-05
+✅ [Bybit Spot] Updated price for SOL-USDT: $199.38
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.5003
+✅ [Bybit Spot] Updated price for BTC-USDT: $108657.6
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.786
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.791
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7888
+✅ [Bybit Spot] Updated price for APT-USDT: $4.31
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8272
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.1128e-05
+✅ [Bybit Futures] Updated price for ETH-USDT: $4402.69
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.2864
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21666
+✅ [Bybit Futures] Updated price for BTC-USDT: $108628.1
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.66
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.133e-05
+✅ [Bybit Spot] Updated price for BTC-USDT: $108657.6
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21667
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.42
+Environment variable API_MAX_RETRIES not found or empty
+DEBUG: Max retries reached, using cached depth for kucoin-ARB-USDT-futures: 0.0
+ALERT: Max retries reached for order book fetch: kucoin-ARB-USDT-futures
+ALERT: Updated order book for kucoin-ARB-USDT-futures
+Environment variable API_MAX_RETRIES not found or empty
+Environment variable API_TIMEOUT_SECONDS not found or empty
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108657.6
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4404.66
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.133e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.5003
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: Bybit spot prices count for BTC-USDT: 311
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108657.6
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: Bybit spot prices count for ARB-USDT: 106
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.5003
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: Bybit spot prices count for TON-USDT: 117
+DEBUG: Bybit spot prices count for NEAR-USDT: 87
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: Bybit spot prices count for BONK-USDT: 160
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: Bybit spot prices count for ETH-USDT: 388
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4404.66
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: Bybit spot prices count for ADA-USDT: 112
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Bybit spot prices count for AVAX-USDT: 127
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Bybit spot prices count for INJ-USDT: 141
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Bybit spot prices count for XRP-USDT: 210
+DEBUG: Bybit spot prices count for SHIB-USDT: 91
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Bybit spot prices count for APT-USDT: 127
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for OP-USDT: 78
+DEBUG: Bybit spot prices count for DOGE-USDT: 94
+DEBUG: Bybit spot prices count for FLOKI-USDT: 99
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.133e-05
+DEBUG: Bybit spot prices count for WIF-USDT: 130
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Bybit spot prices count for PEPE-USDT: 120
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Bybit spot prices count for LINK-USDT: 155
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Bybit spot prices count for SOL-USDT: 236
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Bybit spot prices count for DOT-USDT: 111
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Bybit spot prices count for SUI-USDT: 128
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.393
+Environment variable LATENCY_SPIKE_THRESHOLD not found or empty
+DEBUG: Bybit order book depth for ARB-USDT-spot: 126338.38936599999
+ALERT: Updated order book for bybit-ARB-USDT-spot
+Environment variable API_MAX_RETRIES not found or empty
+Environment variable API_TIMEOUT_SECONDS not found or empty
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7074
+Environment variable LATENCY_SPIKE_THRESHOLD not found or empty
+DEBUG: Bybit order book depth for ARB-USDT-futures: 579009.57761
+ALERT: Updated order book for bybit-ARB-USDT-futures
+Environment variable API_MAX_RETRIES not found or empty
+Environment variable API_TIMEOUT_SECONDS not found or empty
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.5003
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108657.6
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4404.66
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.133e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.5003
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: Bybit spot prices count for TON-USDT: 117
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: Bybit spot prices count for ETH-USDT: 388
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4404.66
+DEBUG: Bybit spot prices count for FLOKI-USDT: 99
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: Bybit spot prices count for DOGE-USDT: 94
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Bybit spot prices count for NEAR-USDT: 88
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Bybit spot prices count for SOL-USDT: 236
+DEBUG: Bybit spot prices count for APT-USDT: 127
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Bybit spot prices count for ADA-USDT: 112
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: Bybit spot prices count for WIF-USDT: 130
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: Bybit spot prices count for DOT-USDT: 111
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Bybit spot prices count for ARB-USDT: 107
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Bybit spot prices count for PEPE-USDT: 120
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: Bybit spot prices count for SUI-USDT: 128
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Bybit spot prices count for INJ-USDT: 141
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: Bybit spot prices count for XRP-USDT: 210
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.5003
+DEBUG: Bybit spot prices count for LINK-USDT: 155
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.133e-05
+DEBUG: Bybit spot prices count for SHIB-USDT: 91
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Bybit spot prices count for AVAX-USDT: 127
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Bybit spot prices count for BTC-USDT: 311
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108657.6
+DEBUG: Bybit spot prices count for BONK-USDT: 160
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Bybit spot prices count for OP-USDT: 79
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7872
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2875
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.66
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.765e-06
+✅ [Bybit Spot] Updated price for AVAX-USDT: $23.902
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2308e-05
+✅ [Bybit Spot] Updated price for SOL-USDT: $199.38
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.791
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.1128e-05
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7888
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.786
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8272
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.7902
+✅ [Bybit Spot] Updated price for APT-USDT: $4.31
+✅ [Bybit Spot] Updated price for TON-USDT: $3.132
+Environment variable LATENCY_SPIKE_THRESHOLD not found or empty
+High latency detected for order book fetch: 350.5079746246338ms
+ALERT: High latency detected for order book fetch: 350.5079746246338ms
+Invalid order book response for kucoin-WIF-USDT-spot
+ALERT: Invalid order book response for kucoin-WIF-USDT-spot
+✅ [Bybit Futures] Updated price for BTC-USDT: $108628.7
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.133e-05
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.66
+✅ [Bybit Futures] Updated price for ETH-USDT: $4402.7
+✅ [Bybit Spot] Updated price for BTC-USDT: $108657.6
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.42
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7071
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.393
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108657.6
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4404.66
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.133e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.5003
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: Bybit spot prices count for BTC-USDT: 312
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108657.6
+DEBUG: Bybit spot prices count for TON-USDT: 118
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: Bybit spot prices count for FLOKI-USDT: 100
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: Bybit spot prices count for BONK-USDT: 161
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Bybit spot prices count for PEPE-USDT: 121
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.765e-06
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Bybit spot prices count for DOGE-USDT: 94
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: Bybit spot prices count for WIF-USDT: 131
+DEBUG: Bybit spot prices count for SHIB-USDT: 92
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Bybit spot prices count for AVAX-USDT: 128
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Bybit spot prices count for INJ-USDT: 142
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: Bybit spot prices count for DOT-USDT: 112
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Bybit spot prices count for APT-USDT: 128
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for OP-USDT: 79
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Bybit spot prices count for ADA-USDT: 113
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.133e-05
+DEBUG: Bybit spot prices count for SOL-USDT: 237
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.38
+DEBUG: Bybit spot prices count for ETH-USDT: 390
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4404.66
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.132
+DEBUG: Bybit spot prices count for SUI-USDT: 129
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2875
+DEBUG: Bybit spot prices count for NEAR-USDT: 89
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Bybit spot prices count for ARB-USDT: 107
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.5003
+DEBUG: Bybit spot prices count for LINK-USDT: 156
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Bybit spot prices count for XRP-USDT: 211
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Spot] Updated price for TON-USDT: $3.132
+✅ [Bybit Futures] Updated price for BTC-USDT: $108628.6
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7074
+✅ [Bybit Spot] Updated price for SOL-USDT: $199.39
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.5003
+✅ [Bybit Spot] Updated price for BTC-USDT: $108657.9
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.768e-06
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.768e-06
+✅ [Bybit Futures] Updated price for BTC-USDT: $108628.7
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2879
+✅ [Bybit Spot] Updated price for TON-USDT: $3.131
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108657.9
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4404.66
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.39
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.133e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.131
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.5003
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.768e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2879
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: Bybit spot prices count for BTC-USDT: 313
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108657.9
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: Bybit spot prices count for SOL-USDT: 238
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: Bybit spot prices count for TON-USDT: 120
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=199.39
+DEBUG: Bybit spot prices count for FLOKI-USDT: 100
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: Bybit spot prices count for ARB-USDT: 108
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: Bybit spot prices count for NEAR-USDT: 89
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: Bybit spot prices count for DOGE-USDT: 94
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.131
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.133e-05
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Bybit spot prices count for LINK-USDT: 156
+DEBUG: Bybit spot prices count for ETH-USDT: 390
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4404.66
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Bybit spot prices count for INJ-USDT: 142
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: Bybit spot prices count for BONK-USDT: 161
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1128e-05
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Bybit spot prices count for AVAX-USDT: 128
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: Bybit spot prices count for SUI-USDT: 130
+DEBUG: Bybit spot prices count for APT-USDT: 128
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.5003
+DEBUG: Bybit spot prices count for ADA-USDT: 113
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.786
+DEBUG: Bybit spot prices count for SHIB-USDT: 92
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Bybit spot prices count for PEPE-USDT: 123
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.768e-06
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.902
+DEBUG: Bybit spot prices count for DOT-USDT: 112
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2879
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.31
+DEBUG: Bybit spot prices count for XRP-USDT: 211
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.42
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8272
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: Bybit spot prices count for WIF-USDT: 131
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7902
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21676
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.791
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7888
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2308e-05
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for OP-USDT: 80
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.7074
+Environment variable ARBITRAGE_CHECK_INTERVAL_SECONDS not found or empty
+✅ [Bybit Spot] Updated price for AVAX-USDT: $23.902
+✅ [Bybit Spot] Updated price for SOL-USDT: $199.39
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2879
+✅ [Bybit Spot] Updated price for ETH-USDT: $4404.66
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.768e-06
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2308e-05
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8272
+✅ [Bybit Spot] Updated price for APT-USDT: $4.31
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.1128e-05
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.7902
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7888
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.786
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.791
+✅ [Bybit Futures] Updated price for APT-USDT: $4.31
+Environment variable OPPORTUNITY_SCAN_INTERVAL not found or empty
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.133e-05
+✅ [Bybit Futures] Updated price for ETH-USDT: $4402.69
+✅ [Bybit Spot] Updated price for BTC-USDT: $108657.9
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.3
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.42
+^C
+
+
