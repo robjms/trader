@@ -1209,27 +1209,7 @@ class ExchangeWebSocket {
             logAlert(event: "Failed to write dashboard.json: \(error.localizedDescription)")
         }
     }
-    // Dashboard metrics logging
-    static func logDashboardMetrics() {
-        Task { @MainActor in
-            let timestamp = ISO8601DateFormatter().string(from: Date())
-            let metrics = """
-            [\(timestamp)] Dashboard Metrics:
-            KuCoin Balance: \(kucoinBalance) USDT
-            Bybit Balance: \(bybitBalance) USDT
-            KuCoin Futures: \(kucoinFuturesBalance) USDT
-            Bybit Futures: \(bybitFuturesBalance) USDT
-            Total Trades: \(performanceMetrics.values.reduce(0) { $0 + $1.trades })
-            Total Profit: \(performanceMetrics.values.reduce(0.0) { $0 + $1.profit }) USDT
-            Total Fees: \(performanceMetrics.values.reduce(0.0) { $0 + $1.fees }) USDT
-            """
-            print(metrics)
-            logAlert(event: metrics)
-            writeDashboardJSON()
-       
-        }
-    }
-    
+
     static func initializeParameters(completion: @escaping () -> Void) {
         let rawPairs = environment["ACTIVE_PAIRS"] ?? "BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT"
         print("DEBUG: Raw ACTIVE_PAIRS from .env: \(rawPairs)")
@@ -3082,67 +3062,111 @@ extension ExchangeWebSocket {
         }
     }
 
+    // FIXED: Dashboard JSON Generation - Add this function to ExchangeWebSocket class
+
     static func updateDashboardJSON() {
+        Task { @MainActor in
+            // FIXED: Write dashboard.json to the correct location where Flask can find it
+            let dashboardPath = "/Users/robertsteinegger/Desktop/BevaixBot/dashboard.json"
+            
+            // Collect LIVE price data from WebSocket feeds
+            var livePrices: [String: [String: Double]] = [:]
+            
+            for pair in tradingPairs {
+                var pairPrices: [String: Double] = [:]
+                
+                // Get current live prices (not fallback values)
+                let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
+                let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
+                let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
+                let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
+                
+                // Only include pairs with live data (price > 0)
+                if kucoinSpotPrice > 0 || bybitSpotPrice > 0 {
+                    pairPrices["kucoin_spot"] = kucoinSpotPrice
+                    pairPrices["kucoin_futures"] = kucoinFuturesPrice
+                    pairPrices["bybit_spot"] = bybitSpotPrice
+                    pairPrices["bybit_futures"] = bybitFuturesPrice
+                    livePrices[pair] = pairPrices
+                }
+            }
+            
+            // Calculate real metrics from actual data
+            let totalTrades = performanceMetrics.values.reduce(0) { $0 + $1.trades }
+            let totalProfit = performanceMetrics.values.reduce(0.0) { $0 + $1.profit }
+            let totalFees = performanceMetrics.values.reduce(0.0) { $0 + $1.fees }
+            let winningTrades = performanceMetrics.values.reduce(0) { $0 + $1.wins }
+            let winRate = totalTrades > 0 ? Double(winningTrades) / Double(totalTrades) * 100.0 : 0.0
+            
+            // Build comprehensive dashboard data
+            let dashboardData: [String: Any] = [
+                "timestamp": ISO8601DateFormatter().string(from: Date()),
+                "kucoinBalance": kucoinBalance,
+                "bybitBalance": bybitBalance,
+                "kucoinFuturesBalance": kucoinFuturesBalance,
+                "bybitFuturesBalance": bybitFuturesBalance,
+                "livePrices": livePrices,
+                "totalTrades": totalTrades,
+                "totalProfit": totalProfit,
+                "totalFees": totalFees,
+                "winRate": winRate,
+                "activePairs": tradingPairs.count,
+                "connectedExchanges": [
+                    "kucoin": kucoinIsConnected,
+                    "kucoin_futures": kucoinFuturesIsConnected,
+                    "bybit": bybitIsConnected,
+                    "bybit_futures": bybitFuturesIsConnected
+                ],
+                "tradingActive": tradingActive,
+                "dailyLoss": dailyLoss
+            ]
+            
+            // Write JSON file
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: dashboardData, options: .prettyPrinted)
+                try jsonData.write(to: URL(fileURLWithPath: dashboardPath))
+                
+                print("✅ Updated dashboard.json with live data: \(livePrices.count) pairs, \(totalTrades) trades")
+                logAlert(event: "✅ Dashboard updated: \(livePrices.count) pairs, $\(String(format: "%.2f", totalProfit)) profit")
+                
+            } catch {
+                print("❌ Failed to write dashboard.json: \(error)")
+                logAlert(event: "❌ Failed to write dashboard.json: \(error)")
+            }
+        }
+    }
+
+    // FIXED: Enhanced dashboard metrics with real-time updates
+    static func logDashboardMetrics() {
         Task { @MainActor in
             let timestamp = ISO8601DateFormatter().string(from: Date())
             
-            // Build live prices array for all 22 pairs
-            var livePricesArray: [[String: Any]] = []
-            
+            // Count active price feeds
+            var activePairCount = 0
             for pair in tradingPairs {
-                let priceEntry: [String: Any] = [
-                    "pair": pair,
-                    "kucoinSpot": kucoinCurrentPrice[pair] ?? 0.0,
-                    "kucoinFutures": kucoinCurrentFuturesPrice[pair] ?? 0.0,
-                    "bybitSpot": bybitCurrentPrice[pair] ?? 0.0,
-                    "bybitFutures": bybitCurrentFuturesPrice[pair] ?? 0.0
-                ]
-                livePricesArray.append(priceEntry)
+                if (kucoinCurrentPrice[pair] ?? 0.0) > 0 || (bybitCurrentPrice[pair] ?? 0.0) > 0 {
+                    activePairCount += 1
+                }
             }
             
-            // Build per-pair metrics
-            var perPairMetricsArray: [[String: Any]] = []
-            for pair in tradingPairs {
-                let metrics = tradeMetrics[pair] ?? (wins: 0, losses: 0, totalProfit: 0.0, totalFees: 0.0)
-                let totalTrades = metrics.wins + metrics.losses
-                let winRate = totalTrades > 0 ? Double(metrics.wins) / Double(totalTrades) * 100 : 0.0
-                
-                let pairMetric: [String: Any] = [
-                    "pair": pair,
-                    "trades": totalTrades,
-                    "wins": metrics.wins,
-                    "losses": metrics.losses,
-                    "profit": metrics.totalProfit,
-                    "fees": metrics.totalFees,
-                    "winRate": winRate,
-                    "sentiment": sentimentScores[pair] ?? 0.0
-                ]
-                perPairMetricsArray.append(pairMetric)
-            }
+            let metrics = """
+            [\(timestamp)] Dashboard Metrics:
+            KuCoin Balance: \(kucoinBalance) USDT
+            Bybit Balance: \(bybitBalance) USDT
+            KuCoin Futures: \(kucoinFuturesBalance) USDT
+            Bybit Futures: \(bybitFuturesBalance) USDT
+            Total Trades: \(performanceMetrics.values.reduce(0) { $0 + $1.trades })
+            Total Profit: \(performanceMetrics.values.reduce(0.0) { $0 + $1.profit }) USDT
+            Total Fees: \(performanceMetrics.values.reduce(0.0) { $0 + $1.fees }) USDT
+            Active Price Feeds: \(activePairCount)/\(tradingPairs.count)
+            WebSocket Status: KC=\(kucoinIsConnected), KCF=\(kucoinFuturesIsConnected), BB=\(bybitIsConnected), BBF=\(bybitFuturesIsConnected)
+            """
             
-            // Build complete dashboard data
-            let dashboardData: [String: Any] = [
-                "timestamp": timestamp,
-                "kucoinBalance": kucoinBalance,
-                "bybitBalance": bybitBalance,
-                "totalTrades": tradeMetrics.values.reduce(0) { $0 + $1.wins + $1.losses },
-                "totalProfit": tradeMetrics.values.reduce(0.0) { $0 + $1.totalProfit },
-                "totalFees": tradeMetrics.values.reduce(0.0) { $0 + $1.totalFees },
-                "livePrices": livePricesArray,
-                "perPairMetrics": perPairMetricsArray
-            ]
+            print(metrics)
+            logAlert(event: metrics)
             
-            // Write to dashboard.json
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: dashboardData, options: .prettyPrinted)
-                let dashboardURL = URL(fileURLWithPath: "dashboard.json")
-                try jsonData.write(to: dashboardURL)
-                
-                print("✅ [Dashboard] Updated dashboard.json with live data for \(tradingPairs.count) pairs")
-            } catch {
-                print("❌ [Dashboard] Failed to write dashboard.json: \(error)")
-                logAlert(event: "❌ Failed to write dashboard.json: \(error)")
-            }
+            // FIXED: Update dashboard JSON with every metric update
+            updateDashboardJSON()
         }
     }
 
@@ -9929,3 +9953,4 @@ extension ExchangeWebSocket {
     }
     
 }
+
