@@ -112,8 +112,8 @@ Let me work with the existing environment loading code I can see from your main.
 Complete Environment Loading Fix - All Functionality Preserved
 Code 
 
-
-The code has been added. This is now in main.swift see link
+======================================================================================================
+The code has been added. here are the errors:
 
 Here are the errors: 
 
@@ -134,3 +134,639 @@ Here are the errors:
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10355:11 Call can throw, but it is not marked with 'try' and the error is not handled
 
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10415:7 'catch' block is unreachable because no errors are thrown in 'do' block
+
+
+flask server:
+
+^C(base) iMac:python robertsteinegger$ python app.py
+🔍 Loading .env from: /Users/robertsteinegger/Desktop/BevaixBot/.env at 13:06:47
+✅ .env loaded successfully from /Users/robertsteinegger/Desktop/BevaixBot/.env
+INFO:__main__:🚀 [Flask] Starting BevaixBot Dashboard Server at 13:06:47
+INFO:__main__:📁 [Flask] Project root: /Users/robertsteinegger/Desktop/BevaixBot
+INFO:__main__:📄 [Flask] Dashboard JSON: /Users/robertsteinegger/Desktop/BevaixBot/dashboard.json
+INFO:__main__:📊 [Flask] Trade log: /Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv
+INFO:__main__:🚨 [Flask] Alerts CSV: /Users/robertsteinegger/Desktop/BevaixBot/Output/alerts.csv
+INFO:__main__:📍 Routes available:
+INFO:__main__:   http://127.0.0.1:5001/new_dashboard
+INFO:__main__:   http://127.0.0.1:5001/api/new_dashboard
+INFO:__main__:   http://127.0.0.1:5001/sentiment
+INFO:__main__:   http://127.0.0.1:5001/debug/status
+INFO:__main__:   http://127.0.0.1:5001/debug/dashboard-raw
+ * Serving Flask app 'app'
+ * Debug mode: on
+INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5001
+INFO:werkzeug:Press CTRL+C to quit
+INFO:werkzeug: * Restarting with watchdog (fsevents)
+🔍 Loading .env from: /Users/robertsteinegger/Desktop/BevaixBot/.env at 13:06:47
+✅ .env loaded successfully from /Users/robertsteinegger/Desktop/BevaixBot/.env
+INFO:__main__:🚀 [Flask] Starting BevaixBot Dashboard Server at 13:06:47
+INFO:__main__:📁 [Flask] Project root: /Users/robertsteinegger/Desktop/BevaixBot
+INFO:__main__:📄 [Flask] Dashboard JSON: /Users/robertsteinegger/Desktop/BevaixBot/dashboard.json
+INFO:__main__:📊 [Flask] Trade log: /Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv
+INFO:__main__:🚨 [Flask] Alerts CSV: /Users/robertsteinegger/Desktop/BevaixBot/Output/alerts.csv
+INFO:__main__:📍 Routes available:
+INFO:__main__:   http://127.0.0.1:5001/new_dashboard
+INFO:__main__:   http://127.0.0.1:5001/api/new_dashboard
+INFO:__main__:   http://127.0.0.1:5001/sentiment
+INFO:__main__:   http://127.0.0.1:5001/debug/status
+INFO:__main__:   http://127.0.0.1:5001/debug/dashboard-raw
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 787-441-244
+INFO:__main__:🔄 [Dashboard API] Called at 13:07:04
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:07:04
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:04] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for BTC-USDT: 0.1
+INFO:__main__:📈 Sentiment request for ETH-USDT: 0.1
+INFO:__main__:📈 Sentiment request for SOL-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for LINK-USDT: 0.1
+INFO:__main__:📈 Sentiment request for FLOKI-USDT: 0.1
+INFO:__main__:📈 Sentiment request for TON-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for NEAR-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for ARB-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for SHIB-USDT: 0.1
+INFO:__main__:📈 Sentiment request for PEPE-USDT: 0.1
+INFO:__main__:📈 Sentiment request for BONK-USDT: 0.1
+INFO:__main__:📈 Sentiment request for WIF-USDT: 0.1
+INFO:__main__:📈 Sentiment request for XRP-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for ADA-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for DOGE-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for DOT-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for MATIC-USDT: 0.1
+INFO:__main__:📈 Sentiment request for APT-USDT: 0.1
+INFO:__main__:📈 Sentiment request for SUI-USDT: 0.1
+INFO:__main__:📈 Sentiment request for INJ-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for OP-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:📈 Sentiment request for AVAX-USDT: 0.1
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:07:32] "POST /sentiment HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:08:04
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:08:04
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:08:04] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:08:51
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:08:51
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:08:51] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:08:54] "GET /new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:08:54
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:08:54
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:08:54] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:08:54] "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:08:54] "GET /apple-touch-icon.png HTTP/1.1" 404 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:08:54] "GET /favicon.ico HTTP/1.1" 404 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:08:59
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:08:59
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:08:59] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:04
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:04
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:04] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:04
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:04
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:04] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:09
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:09
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:09] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:14
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:14
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:14] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:19
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:19
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:19] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:24
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:24
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:24] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:29
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:29
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:29] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:34] "GET /new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:34
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:34
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:34] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:35] "GET /new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:35
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:35
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:35] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:40
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:40
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:40] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:45
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:45
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:45] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:50
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:50
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:50] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:09:55
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:09:55
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:09:55] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:10:00
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:10:00
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:10:00] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:10:04
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:10:04
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:10:04] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:10:05
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:10:05
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:10:05] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:10:10
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:10:10
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:10:10] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:10:15
+INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
+INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
+INFO:__main__:✅ [Dashboard] Loaded 15 real alerts
+INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 15 alerts, 21 live prices at 13:10:15
+INFO:werkzeug:127.0.0.1 - - [01/Sep/2025 13:10:15] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Dashboard API] Called at 13:10:20
+
+
+previuos terminal output:
+
+dated price for SOL-USDT: $199.98
+✅ [Bybit Spot] Updated price for BTC-USDT: $108991.3
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7739
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.99
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.6
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.61
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2743
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.08
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.273
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.08
+✅ [Bybit Spot] Updated price for AVAX-USDT: $23.857
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.98
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8216
+✅ [Bybit Spot] Updated price for TON-USDT: $3.134
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.79
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.813
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7742
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.6
+DEBUG: Max retries reached, using cached depth for kucoin-BTC-USDT-futures: 0.0
+ALERT: Max retries reached for order book fetch: kucoin-BTC-USDT-futures
+ALERT: Updated order book for kucoin-BTC-USDT-futures
+DEBUG: Bybit order book depth for BTC-USDT-spot: 333681.65349000006
+ALERT: Updated order book for bybit-BTC-USDT-spot
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.286
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21684
+✅ [Bybit Futures] Updated price for BTC-USDT: $108952.4
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.61
+DEBUG: Bybit order book depth for BTC-USDT-futures: 1310372.7781
+ALERT: Updated order book for bybit-BTC-USDT-futures
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7738
+Invalid order book response for kucoin-ETH-USDT-spot
+ALERT: Invalid order book response for kucoin-ETH-USDT-spot
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.08
+✅ [Bybit Spot] Updated price for AVAX-USDT: $23.857
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.813
+✅ [Bybit Spot] Updated price for TON-USDT: $3.134
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8216
+✅ [Bybit Spot] Updated price for BTC-USDT: $108991.3
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.286
+✅ [Bybit Futures] Updated price for BTC-USDT: $108952.5
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21687
+✅ [Bybit Futures] Updated price for WIF-USDT: $0.7879
+✅ [Bybit Futures] Updated price for WIF-USDT: $0.7878
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.394
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.08
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2743
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7742
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.79
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8213
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.286
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.7877
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.7877
+✅ [Bybit Futures] Updated price for WIF-USDT: $0.7875
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108991.3
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4407.68
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=200.08
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.286
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.144e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.134
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.394
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4993
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7877
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.738e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1156e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2304e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7742
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8216
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21687
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.857
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.79
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2743
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.287
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.813
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.708
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: Bybit spot prices count for SOL-USDT: 2430
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: Bybit spot prices count for NEAR-USDT: 827
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.394
+DEBUG: Bybit spot prices count for ETH-USDT: 2880
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4407.68
+DEBUG: Bybit spot prices count for BTC-USDT: 2880
+DEBUG: Bybit spot prices count for LINK-USDT: 1405
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Bybit spot prices count for PEPE-USDT: 1198
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.738e-06
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: Bybit spot prices count for ADA-USDT: 1216
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: Bybit spot prices count for XRP-USDT: 1891
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7742
+DEBUG: Bybit spot prices count for FLOKI-USDT: 862
+DEBUG: Bybit spot prices count for DOGE-USDT: 779
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Bybit spot prices count for APT-USDT: 977
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.287
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Bybit spot prices count for INJ-USDT: 1308
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.813
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.286
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: Bybit spot prices count for TON-USDT: 983
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.134
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.144e-05
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21687
+DEBUG: Bybit spot prices count for WIF-USDT: 1033
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7877
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=200.08
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for OP-USDT: 796
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: Bybit spot prices count for ARB-USDT: 1154
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4993
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: Bybit spot prices count for BONK-USDT: 1126
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1156e-05
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8216
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108991.3
+DEBUG: Bybit spot prices count for SHIB-USDT: 852
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: Bybit spot prices count for SUI-USDT: 1469
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2743
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.708
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2304e-05
+DEBUG: Bybit spot prices count for AVAX-USDT: 1148
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.857
+DEBUG: Bybit spot prices count for DOT-USDT: 1026
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.79
+✅ [Bybit Spot] Updated price for TON-USDT: $3.133
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.09
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7736
+✅ [Bybit Spot] Updated price for BTC-USDT: $108991.9
+✅ [Bybit Spot] Updated price for APT-USDT: $4.287
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.09
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.738e-06
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.79
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.1156e-05
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.813
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7742
+✅ [Bybit Futures] Updated price for BTC-USDT: $108952.4
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.144e-05
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7735
+Invalid order book response for kucoin-ETH-USDT-spot
+ALERT: Invalid order book response for kucoin-ETH-USDT-spot
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.99
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8211
+✅ [Bybit Futures] Updated price for DOT-USDT: $3.7889
+Sent ping to KuCoin Spot WebSocket
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4993
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7736
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.738e-06
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2743
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.09
+✅ [Bybit Spot] Updated price for AVAX-USDT: $23.857
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7742
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.813
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.79
+✅ [Bybit Spot] Updated price for TON-USDT: $3.133
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8216
+✅ [Bybit Spot] Updated price for APT-USDT: $4.287
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.7877
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.144e-05
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7077
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21678
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8213
+✅ [Bybit Futures] Updated price for LINK-USDT: $23.278
+✅ [Bybit Futures] Updated price for ETH-USDT: $4406.0
+✅ [Bybit Spot] Updated price for BTC-USDT: $108991.9
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.286
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.394
+✅ [Bybit Futures] Updated price for ETH-USDT: $4406.03
+[2025-09-01T12:26:20Z] Dashboard Metrics:
+KuCoin Balance: 522.235326 USDT
+Bybit Balance: 716.65266351 USDT
+KuCoin Futures: 522.235326 USDT
+Bybit Futures: 716.65266351 USDT
+Total Trades: 0
+Total Profit: 0.0 USDT
+Total Fees: 0.0 USDT
+Active Price Feeds: 21/22
+WebSocket Status: KC=true, KCF=false, BB=true, BBF=true
+ALERT: [2025-09-01T12:26:20Z] Dashboard Metrics:
+KuCoin Balance: 522.235326 USDT
+Bybit Balance: 716.65266351 USDT
+KuCoin Futures: 522.235326 USDT
+Bybit Futures: 716.65266351 USDT
+Total Trades: 0
+Total Profit: 0.0 USDT
+Total Fees: 0.0 USDT
+Active Price Feeds: 21/22
+WebSocket Status: KC=true, KCF=false, BB=true, BBF=true
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [Bybit Spot] Updated price for OP-USDT: $0.708
+✅ [Bybit Futures] Updated price for ETH-USDT: $4406.01
+✅ [Bybit Futures] Updated price for AVAX-USDT: $23.849
+✅ [Bybit Futures] Updated price for SOL-USDT: $200.0
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.393
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.09
+✅ [Bybit Spot] Updated price for AVAX-USDT: $23.857
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2743
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.79
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.7876
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21679
+✅ [Bybit Futures] Updated price for AVAX-USDT: $23.848
+✅ [Bybit Spot] Updated price for BTC-USDT: $108991.9
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.99
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.68
+✅ [Bybit Futures] Updated price for NEAR-USDT: $2.393
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7748
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21687
+✅ [Bybit Futures] Updated price for ARB-USDT: $0.499
+Invalid order book response for kucoin-ETH-USDT-spot
+ALERT: Invalid order book response for kucoin-ETH-USDT-spot
+✅ [Bybit Futures] Updated price for ETH-USDT: $4406.0
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.67
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.67
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.63
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.59
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.59
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.08
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21687
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.288
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.51
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.46
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.73
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21686
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2305e-05
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21676
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2304e-05
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.97
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.39
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.39
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.61
+✅ [Bybit Spot] Updated price for APT-USDT: $4.287
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8212
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.08
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.39
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.738e-06
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2743
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7748
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.813
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8216
+✅ [Bybit Spot] Updated price for BTC-USDT: $108991.9
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.792
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.98
+✅ [Bybit Spot] Updated price for BTC-USDT: $108991.9
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.97
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.6
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.36
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.98
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.61
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.07
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.6
+✅ [Bybit Futures] Updated price for BTC-USDT: $108952.5
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.07
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.738e-06
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.36
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.813
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7737
+✅ [Bybit Futures] Updated price for ETH-USDT: $4405.61
+DEBUG: Max retries reached, using cached depth for kucoin-ETH-USDT-spot: 0.0
+ALERT: Max retries reached for order book fetch: kucoin-ETH-USDT-spot
+ALERT: Updated order book for kucoin-ETH-USDT-spot
+DEBUG: Invalid prices for funding rate arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108991.9
+DEBUG: Invalid prices for funding rate arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4407.36
+DEBUG: Invalid prices for funding rate arbitrage - SOL-USDT: KuCoin=0.0, Bybit=200.07
+DEBUG: Invalid prices for funding rate arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.288
+DEBUG: Invalid prices for funding rate arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.144e-05
+DEBUG: Invalid prices for funding rate arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.133
+DEBUG: Invalid prices for funding rate arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for funding rate arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4993
+DEBUG: Invalid prices for funding rate arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7876
+DEBUG: Invalid prices for funding rate arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.738e-06
+DEBUG: Invalid prices for funding rate arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1156e-05
+DEBUG: Invalid prices for funding rate arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2304e-05
+DEBUG: Invalid prices for funding rate arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7748
+DEBUG: Invalid prices for funding rate arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8216
+DEBUG: Invalid prices for funding rate arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21686
+DEBUG: Invalid prices for funding rate arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.857
+DEBUG: Invalid prices for funding rate arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.792
+DEBUG: Invalid prices for funding rate arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for funding rate arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2743
+DEBUG: Invalid prices for funding rate arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.287
+DEBUG: Invalid prices for funding rate arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.813
+DEBUG: Invalid prices for funding rate arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.708
+DEBUG: KuCoin spot prices count for BTC-USDT: 0
+DEBUG: KuCoin spot prices count for LINK-USDT: 0
+DEBUG: Bybit spot prices count for BTC-USDT: 2880
+DEBUG: Invalid prices for cross-exchange arbitrage - BTC-USDT: KuCoin=0.0, Bybit=108991.9
+DEBUG: KuCoin spot prices count for FLOKI-USDT: 0
+DEBUG: KuCoin spot prices count for TON-USDT: 0
+DEBUG: KuCoin spot prices count for SOL-USDT: 0
+DEBUG: KuCoin spot prices count for ETH-USDT: 0
+DEBUG: KuCoin spot prices count for ARB-USDT: 0
+DEBUG: Bybit spot prices count for LINK-USDT: 1407
+DEBUG: Bybit spot prices count for TON-USDT: 985
+DEBUG: Bybit spot prices count for SOL-USDT: 2438
+DEBUG: Invalid prices for cross-exchange arbitrage - SOL-USDT: KuCoin=0.0, Bybit=200.07
+DEBUG: KuCoin spot prices count for NEAR-USDT: 0
+DEBUG: KuCoin spot prices count for BONK-USDT: 0
+DEBUG: Bybit spot prices count for NEAR-USDT: 829
+DEBUG: Invalid prices for cross-exchange arbitrage - NEAR-USDT: KuCoin=0.0, Bybit=2.393
+DEBUG: Invalid prices for cross-exchange arbitrage - LINK-USDT: KuCoin=0.0, Bybit=23.288
+DEBUG: KuCoin spot prices count for SHIB-USDT: 0
+DEBUG: KuCoin spot prices count for XRP-USDT: 0
+DEBUG: Bybit spot prices count for SHIB-USDT: 854
+DEBUG: KuCoin spot prices count for WIF-USDT: 0
+DEBUG: Bybit spot prices count for ARB-USDT: 1155
+DEBUG: KuCoin spot prices count for ADA-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - ARB-USDT: KuCoin=0.0, Bybit=0.4993
+DEBUG: Bybit spot prices count for ADA-USDT: 1218
+DEBUG: Invalid prices for cross-exchange arbitrage - TON-USDT: KuCoin=0.0, Bybit=3.133
+DEBUG: KuCoin spot prices count for PEPE-USDT: 0
+DEBUG: Bybit spot prices count for PEPE-USDT: 1202
+DEBUG: Bybit spot prices count for FLOKI-USDT: 864
+DEBUG: KuCoin spot prices count for SUI-USDT: 0
+DEBUG: Bybit spot prices count for WIF-USDT: 1035
+DEBUG: Invalid prices for cross-exchange arbitrage - WIF-USDT: KuCoin=0.0, Bybit=0.7876
+DEBUG: KuCoin spot prices count for AVAX-USDT: 0
+DEBUG: KuCoin spot prices count for DOGE-USDT: 0
+DEBUG: Bybit spot prices count for DOGE-USDT: 782
+DEBUG: Invalid prices for cross-exchange arbitrage - DOGE-USDT: KuCoin=0.0, Bybit=0.21686
+DEBUG: KuCoin spot prices count for MATIC-USDT: 0
+DEBUG: Bybit spot prices count for BONK-USDT: 1127
+DEBUG: Invalid prices for cross-exchange arbitrage - BONK-USDT: KuCoin=0.0, Bybit=2.1156e-05
+DEBUG: Invalid prices for cross-exchange arbitrage - FLOKI-USDT: KuCoin=0.0, Bybit=9.144e-05
+DEBUG: Bybit spot prices count for SUI-USDT: 1472
+DEBUG: Invalid prices for cross-exchange arbitrage - SUI-USDT: KuCoin=0.0, Bybit=3.2743
+DEBUG: Bybit spot prices count for XRP-USDT: 1895
+DEBUG: Invalid prices for cross-exchange arbitrage - ADA-USDT: KuCoin=0.0, Bybit=0.8216
+DEBUG: KuCoin spot prices count for APT-USDT: 0
+DEBUG: Bybit spot prices count for APT-USDT: 980
+DEBUG: Invalid prices for cross-exchange arbitrage - APT-USDT: KuCoin=0.0, Bybit=4.287
+DEBUG: Bybit spot prices count for ETH-USDT: 2880
+DEBUG: Invalid prices for cross-exchange arbitrage - SHIB-USDT: KuCoin=0.0, Bybit=1.2304e-05
+DEBUG: KuCoin spot prices count for OP-USDT: 0
+DEBUG: Bybit spot prices count for OP-USDT: 797
+DEBUG: Invalid prices for cross-exchange arbitrage - OP-USDT: KuCoin=0.0, Bybit=0.708
+DEBUG: KuCoin spot prices count for DOT-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - XRP-USDT: KuCoin=0.0, Bybit=2.7748
+DEBUG: Bybit spot prices count for AVAX-USDT: 1150
+DEBUG: Invalid prices for cross-exchange arbitrage - AVAX-USDT: KuCoin=0.0, Bybit=23.857
+DEBUG: Invalid prices for cross-exchange arbitrage - ETH-USDT: KuCoin=0.0, Bybit=4407.36
+DEBUG: Bybit spot prices count for MATIC-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - PEPE-USDT: KuCoin=0.0, Bybit=9.738e-06
+DEBUG: Bybit spot prices count for DOT-USDT: 1030
+DEBUG: KuCoin spot prices count for INJ-USDT: 0
+DEBUG: Invalid prices for cross-exchange arbitrage - MATIC-USDT: KuCoin=0.0, Bybit=0.0
+DEBUG: Invalid prices for cross-exchange arbitrage - DOT-USDT: KuCoin=0.0, Bybit=3.792
+DEBUG: Bybit spot prices count for INJ-USDT: 1312
+DEBUG: Invalid prices for cross-exchange arbitrage - INJ-USDT: KuCoin=0.0, Bybit=12.813
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.286
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7735
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.06
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.35
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.285
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.96
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.31
+Invalid order book response for kucoin-ETH-USDT-futures
+ALERT: Invalid order book response for kucoin-ETH-USDT-futures
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21678
+✅ [Bybit Spot] Updated price for ETH-USDT: $4407.31
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.2743
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.06
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2304e-05
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.95
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.7748
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8216
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.813
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.144e-05
+✅ [Bybit Spot] Updated price for BTC-USDT: $108991.9
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.821
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.7734
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21677
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.285
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21686
+
+
+
+
+
+
