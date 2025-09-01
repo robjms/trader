@@ -1,0 +1,190 @@
+
+# API Keys
+KUCOIN_API_KEY=
+KUCOIN_API_SECRET=
+KUCOIN_API_PASSPHRASE
+BYBIT_API_KEY
+BYBIT_API_SECRET
+MEXC_API_KEY=
+MEXC_API_SECRET=
+KRAKEN_API_KEY=
+KRAKEN_API_SECRET=
+
+SIMULATION_TRADE_LOGGING=true
+
+# Active Pairs
+ACTIVE_PAIRS=BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT
+
+# Spread Retention
+SPREAD_RETENTION_HOURS=24
+
+# --------------------------
+# 🚀 AGGRESSIVE RISK PROFILE
+# --------------------------
+
+# Futures Trading Parameters
+FUTURES_TRADE_AMOUNT=600.0
+FUTURES_MIN_PROFIT_PERCENTAGE=0.0010  # Increased from 0.0005 to 0.0010 to ensure $0.60 profit per trade, covering $0.24 fees + $0.36 margin for slippage/funding
+FUTURES_TRAILING_STOP_PERCENTAGE=0.0020  # Increased from 0.0015 to 0.0020 to allow more room for price movement
+FUTURES_STOP_LOSS_PERCENTAGE=0.0020  # Increased from 0.0015 to 0.0020 to align with trailing stop
+FUTURES_SPIKE_TRAILING_STOP_PERCENTAGE=0.004  # Increased from 0.003 to 0.004 to protect against larger spikes
+MAX_ACTIVE_FUTURES_TRADES=30  # Reduced from 50 to 30 to lower exposure
+ATR_MULTIPLIER=0.8  # Increased from 0.6 to 0.8 to make ATR-based decisions more sensitive to volatility
+PRICE_REVERSAL_THRESHOLD=0.0010  # Increased from 0.0008 to 0.0010 to require stronger reversals
+PRICE_REVERSAL_WINDOW_MINUTES=2  # Increased from 1 to 2 minutes for more reliable signals
+FUTURES_EMA_SHORT_PERIOD=5
+FUTURES_EMA_MEDIUM_PERIOD=10
+FUTURES_EMA_LONG_PERIOD=20
+MACD_CONFIRMATION_THRESHOLD=0.0001  # Increased from 0.00005 to 0.0001 for stronger MACD signals
+
+# Single-Exchange Arbitrage
+ARBITRAGE_MIN_BALANCE=20.0
+ARBITRAGE_TRADE_AMOUNT=500.0
+ARBITRAGE_MIN_SPREAD_THRESHOLD=0.0030  # Increased from 0.0020 to 0.0025 to cover KuCoin fees (0.002) + margin
+ARBITRAGE_HIGH_SPREAD_THRESHOLD=0.0035  # Increased from 0.0030 to 0.0035 for higher profit
+ARBITRAGE_COOLDOWN_SECONDS=0.2  # Increased from 0.1 to 0.2 to reduce over-trading
+MIN_FUNDING_RATE_THRESHOLD=0.0000003  # Increased from 0.0000001 to 0.0000003 to avoid high funding cost trades
+MAX_FUNDING_RATE=0.0005  # Increased from 0.0003 to 0.0005 to allow slightly higher funding rates
+
+# Cross-Exchange Arbitrage
+CROSS_EXCHANGE_MIN_SPREAD_THRESHOLD=0.0020  # Adjusted to 0.0020 to cover fees (0.0014) + margin
+CROSS_EXCHANGE_TRADE_AMOUNT=300.0
+CROSS_EXCHANGE_COOLDOWN_SECONDS=0.2  # Increased from 0.1 to 0.2 to reduce over-trading
+CROSS_EXCHANGE_MIN_BALANCE=300.0
+CROSS_EXCHANGE_MIN_FUNDING_RATE_THRESHOLD=0.0000005  # Increased from 0.0000003 to 0.0000005 to avoid high funding cost trades
+HFT_SPREAD_THRESHOLD=0.0012  # Increased from 0.0008 to 0.0012 to ensure profitability
+HFT_TRADE_AMOUNT=60.0
+
+# HFT-Specific Parameters
+SCALP_ENTRY_THRESHOLD=0.0006  # Increased from 0.0004 to 0.0006 for stronger entry signals
+SCALP_PROFIT_TARGET=0.0040  # Increased from 0.0008 to 0.0012 to ensure profitability
+SCALP_STOP_LOSS=0.0015  # Increased from 0.0012 to 0.0015 to align with profit target
+SPOOFING_VOLUME_THRESHOLD=1.5  # Increased from 1.0 to 1.5 for more significant spoofing detection
+SPOOFING_PROFIT_TARGET=0.008  # Increased from 0.007 to 0.008 to target higher profits
+SLIPPAGE_DEPTH_THRESHOLD=0.5  # Increased from 0.3 to 0.5 to require deeper liquidity
+SLIPPAGE_TRADE_AMOUNT=100.0  # Increased from 80.0 to 100.0 for larger trades with better liquidity
+FUNDING_MOMENTUM_THRESHOLD=0.00008  # Increased from 0.00005 to 0.00008 for stronger momentum signals
+LATENCY_SPIKE_THRESHOLD=500.0  # Increased from 80.0 to 200.0 to reduce false positives
+MACD_SHORT_PERIOD=8
+MACD_LONG_PERIOD=20
+MACD_SIGNAL_PERIOD=6
+HFT_COOLDOWN_SECONDS=1.5  # Increased from 1.0 to 1.5 to reduce over-trading
+
+# Risk Management
+DAILY_LOSS_LIMIT_PERCENTAGE=0.08  # Reduced from 0.12 to 0.08 to tighten risk control
+
+# Liquidity/Volatility Safeguards
+LIQUIDITY_DEPTH_MULTIPLIER=0.2  # Increased from 0.15 to 0.2 to require deeper liquidity
+LIQUIDITY_PRICE_IMPACT_THRESHOLD=0.008  # Reduced from 0.010 to 0.008 to avoid high price impact
+LIQUIDITY_CHECK_INTERVAL=30  # Check liquidity every 30 seconds
+VOLATILITY_SPIKE_THRESHOLD=0.20  # Increased from 0.10 to 0.15 to reduce pauses
+VOLATILITY_SPIKE_WINDOW_MINUTES=1
+VOLATILITY_SPIKE_COOLDOWN_SECONDS=60  # Increased from 30 to 60 to wait longer after volatility spikes
+VOLATILITY_PAUSE_SECONDS=300  # Pause trading for 5 minutes after volatility spike
+VOLUME_ANOMALY_MULTIPLIER=1.5  # Increased from 1.0 to 1.5 for more significant anomaly detection
+VOLUME_ANOMALY_WINDOW_HOURS=1
+VOLUME_ANOMALY_COOLDOWN_SECONDS=120  # Increased from 90 to 120 to wait longer after volume anomalies
+MIN_LIQUIDITY_THRESHOLD=20.0  # Increased from 15.0 to 20.0 to ensure better liquidity
+MAX_ORDER_BOOK_IMBALANCE=20.0  # Increased from 8.0 to 20.0 to allow higher imbalances
+ORDER_BOOK_IMBALANCE_THRESHOLD=3.0  # Threshold for imbalance checks
+ORDER_BOOK_PRICE_RANGE=0.0010
+ORDER_BOOK_IMBALANCE_FALLBACK=1.5  # Increased from 1.2 to 1.5 for stricter fallback
+LIQUIDITY_CHECK_FALLBACK=true
+VOLUME_SPIKE_THRESHOLD=1.5  # Threshold for volume spikes
+LARGE_ORDER_SIZE=10000.0  # Size for large order detection
+VWAP_PERIOD=60  # Period for VWAP calculation
+VOLATILITY_THRESHOLD=0.06      # FIX: Increased from 0.02 to 0.03 for more trade opportunities
+
+
+# Added missing variables
+ORDER_IMBALANCE_THRESHOLD=10.0
+MARKET_MAKING_SPREAD=0.002
+LIQUIDITY_DEPTH_THRESHOLD=0.2
+TRAILING_PROFIT_PERCENT=0.04
+
+# Fee Optimization
+BYBIT_FUTURES_FEE_RATE=0.0002
+KUCOIN_FUTURES_FEE_RATE=0.0002
+SPOT_FEE_RATE=0.001
+BYBIT_MAKER_FEE=0.0001
+BYBIT_TAKER_FEE=0.0004
+KUCOIN_MAKER_FEE=0.001
+KUCOIN_TAKER_FEE=0.001
+API_MAX_RETRIES=5
+
+# Enhanced Trading Parameters
+MARKET_MAKING_SPREAD=0.002
+MARKET_MAKING_ORDER_SIZE=25.0
+MOMENTUM_THRESHOLD=0.005
+MEAN_REVERSION_THRESHOLD=0.003
+MAX_CONSECUTIVE_LOSSES=5
+DEBUG_MODE=true
+SENTIMENT_DRIVEN_TRADING=true
+ADAPTIVE_POSITION_SIZING=true
+
+# Add these missing variables to your .env file
+API_TIMEOUT_SECONDS=10.0
+API_MAX_RETRIES=3
+ARBITRAGE_CHECK_INTERVAL_SECONDS=5.0
+OPPORTUNITY_SCAN_INTERVAL=30
+
+# Fallback & Technicals
+BYBIT_FALLBACK_BALANCE=716.65266351
+KUCOIN_FALLBACK_BALANCE=522.235326
+SLIPPAGE_TARGET_UP_MULTIPLIER=1.003
+SLIPPAGE_TARGET_DOWN_MULTIPLIER=0.997
+SLIPPAGE_PERCENTAGE=0.003  # Increased from 0.002 to 0.003 to account for market volatility
+MAX_SLIPPAGE=0.005  # Maximum 0.5% slippage
+LATENCY_TARGET_UP_MULTIPLIER=1.002
+LATENCY_TARGET_DOWN_MULTIPLIER=0.998
+WEBSOCKET_TIMEOUT_SECONDS=8
+BALANCE_FETCH_TIMEOUT=12
+BYBIT_RECV_WINDOW=5000
+KUCOIN_LEVERAGE=6
+BYBIT_LEVERAGE=6
+PRICE_HISTORY_RETENTION=2880  # Increased from 1440 to 2880 (48 hours) to collect more data
+MIN_PRICE_DATA_POINTS=14  # Increased from 1 to 14 to ensure enough data for RSI/MACD calculations
+MIN_ORDERBOOK_REFRESH_RATE=1  # Refresh order book every 1 second
+VOLUME_ANOMALY_THRESHOLD=1.5  # Increased from 1.0 to 1.5 to align with anomaly multiplier
+ATR_FALLBACK_PERCENTAGE=0.005  # Increased from 0.004 to 0.005 for more conservative ATR fallback
+VOLUME_TRACKING_VALUE=200.0  # Increased from 150.0 to 200.0 for larger volume tracking
+FUNDING_RATE_COST_MULTIPLIER=0.05  # Increased from 0.03 to 0.05 to account for higher funding costs
+TRADE_HOLD_DURATION_MINUTES=3  # Reduced from 5 to 3 to exit trades faster
+KELLY_CREDIT_RATIO=2.0  # Kelly criterion ratio
+
+# Spot Trading Parameters
+SPOT_TRADE_AMOUNT=50.0  # Increased from 30.0 to 50.0 for larger trades
+SPOT_MIN_PROFIT_PERCENTAGE=0.0030  # Increased from 0.0002 to 0.0030 to ensure $0.15 profit per trade, covering $0.10 fees
+SPOT_STOP_LOSS_PERCENTAGE=0.0020  # Increased from 0.0012 to 0.0020 to align with profit target
+SPOT_TRAILING_STOP_PERCENTAGE=0.0010  # Increased from 0.0004 to 0.0010 for more room
+SPOT_EMA_SHORT_PERIOD=5
+SPOT_EMA_MEDIUM_PERIOD=10
+SPOT_EMA_LONG_PERIOD=20
+SPOT_RSI_PERIOD=14  # Increased from 10 to 14 for more standard RSI calculation
+SPOT_RSI_UPPER_THRESHOLD=70.0  # Increased from 65.0 to 70.0 for stricter overbought condition
+SPOT_RSI_LOWER_THRESHOLD=30.0  # Decreased from 35.0 to 30.0 for stricter oversold condition
+MAX_ACTIVE_SPOT_TRADES=20  # Reduced from 30 to 20 to lower exposure
+
+# Default Prices for Trading Pairs
+DEFAULT_PRICE_BTC_USDT=65000.0
+DEFAULT_PRICE_ETH_USDT=3500.0
+DEFAULT_PRICE_LINK_USDT=10.0
+DEFAULT_PRICE_FLOKI_USDT=0.0001
+DEFAULT_PRICE_ADA_USDT=0.4
+DEFAULT_PRICE_SOL_USDT=150.0
+DEFAULT_PRICE_TON_USDT=5.0
+DEFAULT_PRICE_AVAX_USDT=25.0
+DEFAULT_PRICE_BONK_USDT=0.00001
+DEFAULT_PRICE_PEPE_USDT=0.00001
+DEFAULT_PRICE_APT_USDT=5.0
+DEFAULT_PRICE_SUI_USDT=1.0
+DEFAULT_PRICE_WIF_USDT=2.0
+DEFAULT_PRICE_XRP_USDT=0.5
+DEFAULT_PRICE_MATIC_USDT=0.5
+DEFAULT_PRICE_OP_USDT=1.5
+DEFAULT_PRICE_DOGE_USDT=0.15
+
+
+# Trade Execution Parameters
+SIMULATION_TRADE_LOGGING=true
+TRADE_EXECUTION_COOLDOWN_SECONDS=0.05  # Increased from 0.03 to 0.05 to reduce over-trading
