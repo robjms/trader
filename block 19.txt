@@ -1,7 +1,4 @@
 
-//--------------------------------------------------------------------------------------------------------------Block 19 - Machine Learning Prediction Engine
-
-
 import Foundation // Added for String.Encoding and other Foundation types
 
 
@@ -231,28 +228,6 @@ extension ExchangeWebSocket {
         }
     }
 
-    static func evaluateFundingRateMomentum(pair: String, kucoinFundingRate: Double, bybitFundingRate: Double) async {
-        let fundingMomentumThreshold = getDouble("FUNDING_MOMENTUM_THRESHOLD", defaultValue: 0.00008)
-        let tradeAmount = getDouble("FUTURES_TRADE_AMOUNT", defaultValue: 150.0)
-        let kucoinFuturesPrice = await MainActor.run(body: { kucoinCurrentFuturesPrice[pair] }) ?? 0.0
-        let bybitFuturesPrice = await MainActor.run(body: { bybitCurrentFuturesPrice[pair] }) ?? 0.0
-
-        if kucoinFundingRate > fundingMomentumThreshold && kucoinFuturesPrice > 0 {
-            let tradeAmount = min(tradeAmount, kucoinBalance)
-            if tradeAmount > 0 && kucoinBalance >= tradeAmount {
-                print("INFO: KuCoin Funding Rate Momentum Trade for \(pair): Long, Amount: \(tradeAmount), Funding Rate: \(kucoinFundingRate)")
-                kucoinBalance -= tradeAmount * kucoinFuturesPrice * futuresStopLossPercentage
-            }
-        }
-
-        if bybitFundingRate > fundingMomentumThreshold && bybitFuturesPrice > 0 {
-            let tradeAmount = min(tradeAmount, bybitBalance)
-            if tradeAmount > 0 && bybitBalance >= tradeAmount {
-                print("INFO: Bybit Funding Rate Momentum Trade for \(pair): Long, Amount: \(tradeAmount), Target Profit: \(spoofingProfitTarget)")
-                bybitBalance += tradeAmount * spoofingProfitTarget
-            }
-        }
-    }
 
     static func spoofLiquidity(pair: String, kucoinOrderBook: [[String: Any]], bybitOrderBook: [[String: Any]]) async {
         let spoofingVolumeThreshold = getDouble("SPOOFING_VOLUME_THRESHOLD", defaultValue: 1.5)
@@ -339,4 +314,3 @@ extension ExchangeWebSocket {
         }.resume()
     }
 }
-
