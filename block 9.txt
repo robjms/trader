@@ -1,4 +1,5 @@
 //---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
+//---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
 
 // NOTE: Delegate classes are defined elsewhere in the codebase to prevent duplicates
 // This block contains only the WebSocket message processing logic
