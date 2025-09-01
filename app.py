@@ -9,11 +9,11 @@ import pandas as pd
 import csv
 import traceback
 
-# Get project root (parent of Python directory)
+# FIXED: Correct project root and file paths
 PROJECT_ROOT = "/Users/robertsteinegger/Desktop/BevaixBot"
 ENV_PATH = os.path.join(PROJECT_ROOT, ".env")
 
-print(f"Loading .env from: {ENV_PATH} at {datetime.now().strftime('%H:%M:%S')}")
+print(f"🔍 Loading .env from: {ENV_PATH} at {datetime.now().strftime('%H:%M:%S')}")
 if os.path.exists(ENV_PATH):
     load_dotenv(ENV_PATH)
     print(f"✅ .env loaded successfully from {ENV_PATH}")
@@ -22,18 +22,17 @@ else:
 
 # Initialize Flask app
 app = Flask(__name__, template_folder='templates', static_folder='static')
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# File paths
-DASHBOARD_JSON_PATH = "dashboard.json"
-TRADE_LOG_PATH = os.path.join("Output", "trade_log.csv")
-ALERTS_CSV_PATH = os.path.join("Output", "alerts.csv")
+# FIXED: Correct file paths that match Swift bot output
+DASHBOARD_JSON_PATH = os.path.join(PROJECT_ROOT, "dashboard.json")
+TRADE_LOG_PATH = os.path.join(PROJECT_ROOT, "Output", "trade_log.csv")
+ALERTS_CSV_PATH = os.path.join(PROJECT_ROOT, "Output", "alerts.csv")
 
 @app.route('/')
 def home():
-    return "BevaixBot Flask Server is Running!"
+    return "BevaixBot Flask Server is Running! ✅"
 
 @app.route('/sentiment', methods=['POST'])
 def sentiment():
@@ -41,8 +40,9 @@ def sentiment():
     try:
         data = request.get_json()
         pair = data.get('pair', 'BTC-USDT')
-        # Return mock sentiment score
-        sentiment_score = 0.1  # Neutral to slightly positive
+        # Return neutral sentiment score for testing
+        sentiment_score = 0.1
+        logger.info(f"📈 Sentiment request for {pair}: {sentiment_score}")
         return jsonify({"sentiment_score": sentiment_score}), 200
     except Exception as e:
         logger.error(f"Sentiment error: {e}")
@@ -54,49 +54,35 @@ def new_dashboard():
 
 @app.route('/api/new_dashboard')
 def api_new_dashboard():
-    logger.info(f"🔄 [Python] API called - returning REAL data at {datetime.now().strftime('%H:%M:%S')}")
+    logger.info(f"🔄 [Dashboard API] Called at {datetime.now().strftime('%H:%M:%S')}")
     
     try:
-        # 1. LOAD REAL BALANCES FROM DASHBOARD.JSON
-        balances = {"kucoin": 0.0, "bybit": 0.0}
+        # 1. LOAD LIVE DATA from Swift bot's dashboard.json
+        dashboard_data = {}
         live_prices = {}
-        real_pairs = []
+        balances = {"kucoin": 0.0, "bybit": 0.0}
         
         try:
             if os.path.exists(DASHBOARD_JSON_PATH):
                 with open(DASHBOARD_JSON_PATH, 'r') as f:
                     dashboard_data = json.load(f)
                     
-                    # Get real balances
-                    balances['kucoin'] = float(dashboard_data.get('kucoinBalance', 0.0))
-                    balances['bybit'] = float(dashboard_data.get('bybitBalance', 0.0))
-                    
-                    # Get real prices and pairs
-                    if 'livePrices' in dashboard_data:
-                        for price_entry in dashboard_data['livePrices']:
-                            pair = price_entry.get('pair', '')
-                            if pair:
-                                real_pairs.append(pair)
-                                live_prices[pair] = {
-                                    "kucoin_spot": float(price_entry.get('kucoinSpot', 0.0)),
-                                    "kucoin_futures": float(price_entry.get('kucoinFutures', 0.0)),
-                                    "bybit_spot": float(price_entry.get('bybitSpot', 0.0)),
-                                    "bybit_futures": float(price_entry.get('bybitFutures', 0.0))
-                                }
-                    
-                    logger.info(f"✅ [Python] Loaded REAL data: KuCoin=${balances['kucoin']:.2f}, Bybit=${balances['bybit']:.2f}, Pairs={len(real_pairs)}")
+                balances = {
+                    'kucoin': float(dashboard_data.get('kucoinBalance', 0.0)),
+                    'bybit': float(dashboard_data.get('bybitBalance', 0.0))
+                }
+                
+                # Extract live prices
+                live_prices = dashboard_data.get('livePrices', {})
+                
+                logger.info(f"✅ [Dashboard] Loaded live data: {len(live_prices)} pairs, KuCoin=${balances['kucoin']:.2f}, Bybit=${balances['bybit']:.2f}")
             else:
-                logger.warning(f"❌ [Python] dashboard.json not found at {DASHBOARD_JSON_PATH}")
+                logger.warning(f"⚠️ [Dashboard] dashboard.json not found at {DASHBOARD_JSON_PATH}")
+                
         except Exception as e:
-            logger.error(f"❌ [Python] Error loading dashboard.json: {e}")
+            logger.error(f"❌ [Dashboard] Error loading dashboard.json: {e}")
 
-        # 2. FALLBACK TO ENV PAIRS IF NO LIVE DATA
-        if not real_pairs:
-            env_pairs = os.getenv('ACTIVE_PAIRS', 'BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT')
-            real_pairs = [pair.strip() for pair in env_pairs.split(',')]
-            logger.warning(f"⚠️ [Python] Using fallback pairs from .env: {len(real_pairs)} pairs")
-
-        # 3. LOAD REAL TRADES
+        # 2. LOAD REAL TRADES from trade_log.csv
         trades = []
         try:
             if os.path.exists(TRADE_LOG_PATH):
@@ -114,11 +100,16 @@ def api_new_dashboard():
                             float(row.get('profit', 0.0)),
                             float(row.get('fees', 0.0))
                         ])
-                    logger.info(f"✅ [Python] Loaded {len(trades)} real trades")
+                    logger.info(f"✅ [Dashboard] Loaded {len(trades)} real trades")
+                else:
+                    logger.info("ℹ️ [Dashboard] Trade CSV is empty")
+            else:
+                logger.info(f"ℹ️ [Dashboard] No trade CSV found at {TRADE_LOG_PATH}")
+                
         except Exception as e:
-            logger.error(f"❌ [Python] Error loading trades: {e}")
+            logger.error(f"❌ [Dashboard] Trade load error: {e}")
 
-        # 4. LOAD REAL ALERTS
+        # 3. LOAD REAL ALERTS from alerts.csv
         alerts = []
         try:
             if os.path.exists(ALERTS_CSV_PATH):
@@ -128,11 +119,14 @@ def api_new_dashboard():
                         if len(row) >= 2:
                             alerts.append([row[0], row[1]])
                 alerts = alerts[-15:] if alerts else []
-                logger.info(f"✅ [Python] Loaded {len(alerts)} real alerts")
+                logger.info(f"✅ [Dashboard] Loaded {len(alerts)} real alerts")
+            else:
+                logger.info(f"ℹ️ [Dashboard] No alerts CSV found at {ALERTS_CSV_PATH}")
+                
         except Exception as e:
-            logger.error(f"❌ [Python] Error loading alerts: {e}")
+            logger.error(f"❌ [Dashboard] Alert load error: {e}")
 
-        # 5. CALCULATE REAL METRICS
+        # 4. CALCULATE REAL METRICS
         total_profit = sum(float(trade[7]) for trade in trades) if trades else 0.0
         total_fees = sum(float(trade[8]) for trade in trades) if trades else 0.0
         total_trades = len(trades)
@@ -145,7 +139,7 @@ def api_new_dashboard():
             "win_rate": win_rate
         }
 
-        # 6. GENERATE PER-PAIR SUMMARY FROM REAL DATA
+        # 5. BUILD PER-PAIR SUMMARY
         per_pair_summary = []
         if trades:
             pair_data = {}
@@ -163,8 +157,7 @@ def api_new_dashboard():
                 if profit > 0:
                     pair_data[pair]['wins'] += 1
             
-            for pair in real_pairs:  # Use all real pairs, not just traded ones
-                data = pair_data.get(pair, {'trades': 0, 'profit': 0.0, 'fees': 0.0, 'wins': 0})
+            for pair, data in pair_data.items():
                 win_rate_pair = (data['wins'] / data['trades'] * 100) if data['trades'] > 0 else 0.0
                 per_pair_summary.append({
                     "pair": pair,
@@ -174,24 +167,37 @@ def api_new_dashboard():
                     "fees": data['fees']
                 })
 
-        # 7. BUILD RESPONSE WITH REAL DATA
+        # 6. FORMAT LIVE PRICES for dashboard (use live_prices from Swift bot)
+        formatted_prices = {}
+        if live_prices:
+            formatted_prices = live_prices
+        else:
+            # Only show fallback message, don't create fake data
+            logger.warning("⚠️ [Dashboard] No live price data available from Swift bot")
+
+        # 7. BUILD FINAL RESPONSE
         response = {
             "timestamp": datetime.now().isoformat(),
-            "prices": live_prices,  # REAL PRICES FROM SWIFT BOT
-            "balances": balances,   # REAL BALANCES FROM SWIFT BOT
+            "prices": formatted_prices,
+            "balances": balances,
             "metrics": metrics,
             "trades": trades,
             "per_pair_summary": per_pair_summary,
             "alerts": alerts,
-            "active_pairs": real_pairs,  # REAL PAIRS FROM ENV
-            "data_source": "live" if live_prices else "fallback"
+            "status": {
+                "dashboard_json_exists": os.path.exists(DASHBOARD_JSON_PATH),
+                "trade_log_exists": os.path.exists(TRADE_LOG_PATH),
+                "alerts_csv_exists": os.path.exists(ALERTS_CSV_PATH),
+                "live_pairs_count": len(formatted_prices),
+                "total_pairs": len(os.environ.get('ACTIVE_PAIRS', '').split(','))
+            }
         }
 
-        logger.info(f"✅ [Python] API SUCCESS: {total_trades} trades, {len(alerts)} alerts, {len(live_prices)} live prices, {len(real_pairs)} pairs at {datetime.now().strftime('%H:%M:%S')}")
+        logger.info(f"✅ [Dashboard] API SUCCESS: {total_trades} trades, {len(alerts)} alerts, {len(formatted_prices)} live prices at {datetime.now().strftime('%H:%M:%S')}")
         return jsonify(response), 200
 
     except Exception as e:
-        logger.error(f"❌ [Python] API ERROR: {str(e)} at {datetime.now().strftime('%H:%M:%S')}")
+        logger.error(f"❌ [Dashboard] API ERROR: {str(e)} at {datetime.now().strftime('%H:%M:%S')}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         
         return jsonify({
@@ -203,44 +209,48 @@ def api_new_dashboard():
             "trades": [],
             "per_pair_summary": [],
             "alerts": [],
-            "data_source": "error"
+            "status": {"error": True}
         }), 200
 
 @app.route('/debug/status')
 def debug_status():
-    """Debug endpoint"""
+    """Debug endpoint to check file paths and status"""
     status = {
         "server_time": datetime.now().isoformat(),
-        "current_dir": os.getcwd(),
+        "project_root": PROJECT_ROOT,
+        "dashboard_json_path": DASHBOARD_JSON_PATH,
+        "dashboard_json_exists": os.path.exists(DASHBOARD_JSON_PATH),
         "trade_log_exists": os.path.exists(TRADE_LOG_PATH),
         "alerts_csv_exists": os.path.exists(ALERTS_CSV_PATH),
-        "dashboard_json_exists": os.path.exists(DASHBOARD_JSON_PATH),
-        "env_file_exists": os.path.exists(".env"),
-        "active_pairs_env": os.getenv('ACTIVE_PAIRS', 'Not found'),
-        "routes": [rule.rule for rule in app.url_map.iter_rules()]
+        "env_file_exists": os.path.exists(ENV_PATH),
+        "active_pairs": os.environ.get('ACTIVE_PAIRS', 'Not found'),
     }
     return jsonify(status)
 
-@app.route('/debug/api')
-def debug_api():
-    """Test API directly"""
+@app.route('/debug/dashboard-raw')
+def debug_dashboard_raw():
+    """Debug endpoint to see raw dashboard.json content"""
     try:
-        response_data, status_code = api_new_dashboard()
-        data = response_data.get_json()
-        return f"<pre>{json.dumps(data, indent=2)}</pre>"
+        if os.path.exists(DASHBOARD_JSON_PATH):
+            with open(DASHBOARD_JSON_PATH, 'r') as f:
+                data = json.load(f)
+            return f"<pre>{json.dumps(data, indent=2)}</pre>"
+        else:
+            return f"<pre>dashboard.json not found at: {DASHBOARD_JSON_PATH}</pre>"
     except Exception as e:
-        return f"<pre>Debug Error: {str(e)} at {datetime.now().strftime('%H:%M:%S')}</pre>"
+        return f"<pre>Error reading dashboard.json: {str(e)}</pre>"
 
 if __name__ == '__main__':
-    logger.info(f"🚀 [Python] Starting Flask Server at {datetime.now().strftime('%H:%M:%S')}")
-    logger.info(f"📁 [Python] Working directory: {os.getcwd()}")
-    logger.info(f"📄 [Python] .env file exists: {os.path.exists('.env')}")
-    logger.info(f"💰 [Python] Active pairs from env: {os.getenv('ACTIVE_PAIRS', 'Not found')}")
+    logger.info(f"🚀 [Flask] Starting BevaixBot Dashboard Server at {datetime.now().strftime('%H:%M:%S')}")
+    logger.info(f"📁 [Flask] Project root: {PROJECT_ROOT}")
+    logger.info(f"📄 [Flask] Dashboard JSON: {DASHBOARD_JSON_PATH}")
+    logger.info(f"📊 [Flask] Trade log: {TRADE_LOG_PATH}")
+    logger.info(f"🚨 [Flask] Alerts CSV: {ALERTS_CSV_PATH}")
     logger.info("📍 Routes available:")
     logger.info("   http://127.0.0.1:5001/new_dashboard")
     logger.info("   http://127.0.0.1:5001/api/new_dashboard")
     logger.info("   http://127.0.0.1:5001/sentiment")
     logger.info("   http://127.0.0.1:5001/debug/status")
-    logger.info("   http://127.0.0.1:5001/debug/api")
+    logger.info("   http://127.0.0.1:5001/debug/dashboard-raw")
     
     app.run(host='127.0.0.1', port=5001, debug=True)
