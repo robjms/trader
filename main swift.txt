@@ -320,8 +320,8 @@ func logAlert(event: String, completion: @escaping @Sendable () -> Void = {}) {
 
 // ADD THESE 4 COMPLETE CLASSES BEFORE @MainActor class ExchangeWebSocket {
 
-class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
-    func didReceive(event: WebSocketEvent, client: WebSocket) {
+class KuCoinSpotWebSocketDelegate: NSObject, WebSocketDelegate {
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
         switch event {
         case .connected(let headers):
             print("✅ [KuCoin Spot] WebSocket connected: \(headers)")
@@ -379,8 +379,8 @@ class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
     }
 }
 
-class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
-    func didReceive(event: WebSocketEvent, client: WebSocket) {
+class KuCoinFuturesWebSocketDelegate: NSObject, WebSocketDelegate {
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
         switch event {
         case .connected(let headers):
             print("✅ [KuCoin Futures] WebSocket connected: \(headers)")
@@ -440,8 +440,8 @@ class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
     }
 }
 
-class BybitSpotWebSocketDelegate: WebSocketDelegate {
-    func didReceive(event: WebSocketEvent, client: WebSocket) {
+class BybitSpotWebSocketDelegate: NSObject, WebSocketDelegate {
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
         switch event {
         case .connected(let headers):
             print("✅ [Bybit Spot] WebSocket connected: \(headers)")
@@ -497,8 +497,8 @@ class BybitSpotWebSocketDelegate: WebSocketDelegate {
     }
 }
 
-class BybitFuturesWebSocketDelegate: WebSocketDelegate {
-    func didReceive(event: WebSocketEvent, client: WebSocket) {
+class BybitFuturesWebSocketDelegate: NSObject, WebSocketDelegate {
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
         switch event {
         case .connected(let headers):
             print("✅ [Bybit Futures] WebSocket connected: \(headers)")
@@ -553,7 +553,6 @@ class BybitFuturesWebSocketDelegate: WebSocketDelegate {
         }
     }
 }
-
 //----------------------------------------------------------------------------------------
 
 @MainActor
