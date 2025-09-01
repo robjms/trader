@@ -916,9 +916,9 @@ class ExchangeWebSocket {
     
     
     static var kucoinDelegate: KuCoinSpotWebSocketDelegate?
-    static var kucoinFuturesDelegate: KuCoinFuturesWebSocketDelegate?
+
     static var bybitDelegate: BybitFuturesWebSocketDelegate?
-    static var bybitSpotDelegate: BybitSpotWebSocketDelegate?
+   
     
     // New variables for performance optimization
     static var lastPriceUpdate: [String: (price: Double, timestamp: Date)] = [:]
@@ -4360,7 +4360,7 @@ extension ExchangeWebSocket {
               let bids = dataDict["b"] as? [[String]] else { return }
         
         let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
-        var orderBookEntries: [(price: Double, quantity: Double)] = []
+        var _: [(price: Double, quantity: Double)] = []
         
         // Process asks and bids into BevaixOrderBook format
         let bidBook = bids.compactMap { bid -> (price: Double, quantity: Double)? in
