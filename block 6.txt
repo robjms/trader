@@ -1,6 +1,5 @@
-
-//-----------------------------------------------------------------------------------------------------------------------Block 6 - Account Balance and API Initialization
-
+//------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
+// VARIABLES TO ADD: All variables already exist in this block
 
 extension ExchangeWebSocket {
     static func monitorFundingRateArbitrage() {
@@ -199,9 +198,7 @@ extension ExchangeWebSocket {
                 logAlert(event: "Missing KuCoin API credentials")
             }
             Task { @MainActor in
-                // FIX: Access fallback balance within MainActor context
-                let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                completion(fallbackValue)
+                completion(kucoinFallbackBalance)
             }
             return
         }
@@ -239,9 +236,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Failed to fetch KuCoin balance: \(error.localizedDescription)")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
+                    completion(kucoinFallbackBalance)
                 }
                 return
             }
@@ -252,9 +247,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Invalid KuCoin balance response")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
+                    completion(kucoinFallbackBalance)
                 }
                 return
             }
@@ -270,9 +263,7 @@ extension ExchangeWebSocket {
                         logAlert(event: "Failed to parse KuCoin balance")
                     }
                     Task { @MainActor in
-                        // FIX: Access fallback balance within MainActor context
-                        let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                        completion(fallbackValue)
+                        completion(kucoinFallbackBalance)
                     }
                     return
                 }
@@ -288,9 +279,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Failed to parse JSON for KuCoin balance: \(error.localizedDescription)")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { kucoinFallbackBalance }
-                    completion(fallbackValue)
+                    completion(kucoinFallbackBalance)
                 }
             }
         }.resume()
@@ -304,9 +293,7 @@ extension ExchangeWebSocket {
                 logAlert(event: "Missing Bybit API credentials")
             }
             Task { @MainActor in
-                // FIX: Access fallback balance within MainActor context
-                let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                completion(fallbackValue)
+                completion(bybitFallbackBalance)
             }
             return
         }
@@ -318,7 +305,7 @@ extension ExchangeWebSocket {
         
         let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
         let recvWindow = bybitRecvWindow
-        let queryString = "api_key=\(apiKey)×tamp=\(timestamp)&recv_window=\(recvWindow)"
+        let queryString = "api_key=\(apiKey)&timestamp=\(timestamp)&recv_window=\(recvWindow)"
         let signature = HMAC<SHA256>.authenticationCode(for: queryString.data(using: .utf8)!, using: SymmetricKey(data: apiSecret.data(using: .utf8)!)).map { String(format: "%02x", $0) }.joined()
         
         request.addValue(apiKey, forHTTPHeaderField: "X-BAPI-API-KEY")
@@ -344,9 +331,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Failed to fetch Bybit balance: \(error.localizedDescription)")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
+                    completion(bybitFallbackBalance)
                 }
                 return
             }
@@ -357,9 +342,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Invalid Bybit balance response")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
+                    completion(bybitFallbackBalance)
                 }
                 return
             }
@@ -378,9 +361,7 @@ extension ExchangeWebSocket {
                         logAlert(event: "Failed to parse Bybit balance")
                     }
                     Task { @MainActor in
-                        // FIX: Access fallback balance within MainActor context
-                        let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                        completion(fallbackValue)
+                        completion(bybitFallbackBalance)
                     }
                     return
                 }
@@ -396,9 +377,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "Failed to parse JSON for Bybit balance: \(error.localizedDescription)")
                 }
                 Task { @MainActor in
-                    // FIX: Access fallback balance within MainActor context
-                    let fallbackValue = await MainActor.run { bybitFallbackBalance }
-                    completion(fallbackValue)
+                    completion(bybitFallbackBalance)
                 }
             }
         }.resume()
