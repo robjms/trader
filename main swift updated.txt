@@ -2467,7 +2467,11 @@ extension ExchangeWebSocket {
 
 
 
+
+
 //------------------------------------------------------------------------------------------------------------------------------Block 5 - Risk Assessment and Management
+// VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities: static var totalProfit: Double = 0.0, static var totalFees: Double = 0.0, static var totalBalance: Double = 0.0
+
 
 
 
@@ -2746,102 +2750,118 @@ extension ExchangeWebSocket {
             "futures_price": futuresPrice,
             "trade_amount": tradeAmount,
             "profit": profit,
+            "fees": 0.0, // Placeholder
             "timestamp": ISO8601DateFormatter().string(from: Date())
         ]
         
-        guard let url = URL(string: "http://127.0.0.1:5000/log_trade") else { return }
+        guard let url = URL(string: "http://127.0.0.1:5001/trade") else { return }
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
         do {
-            let jsonData = try JSONSerialization.data(withJSONObject: payload)
-            request.httpBody = jsonData
-            
-            URLSession.shared.dataTask(with: request) { _, response, error in
-                if let error = error {
-                    print("Failed to send trade to Flask server: \(error)")
-                } else {
-                    print("✅ Sent trade data to Flask server for ML analysis")
-                }
-            }.resume()
+            request.httpBody = try JSONSerialization.data(withJSONObject: payload)
         } catch {
-            print("Failed to serialize trade data for Flask server: \(error)")
+            print("Failed to serialize trade payload: \(error)")
+            return
         }
-    }
-
-    static func evaluateFundingRateMomentum(pair: String, kucoinFundingRate: Double, bybitFundingRate: Double) async {
-        await MainActor.run {
-            let fundingDifference = abs(kucoinFundingRate - bybitFundingRate)
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Failed to send trade to Flask: \(error)")
+                return
+            }
             
-            if fundingDifference > fundingMomentumThreshold {
-                let betterExchange = kucoinFundingRate < bybitFundingRate ? "kucoin" : "bybit"
-                let worseExchange = kucoinFundingRate < bybitFundingRate ? "bybit" : "kucoin"
-                
-                logAlert(event: "Funding rate momentum detected for \(pair): \(betterExchange) (\(kucoinFundingRate < bybitFundingRate ? kucoinFundingRate : bybitFundingRate)) vs \(worseExchange) (\(kucoinFundingRate < bybitFundingRate ? bybitFundingRate : kucoinFundingRate))")
-                
-                // Consider funding rate arbitrage opportunity
-                if fundingDifference > crossExchangeMinFundingRateThreshold {
-                    print("🔥 FUNDING ARBITRAGE OPPORTUNITY: \(pair) - \(betterExchange) has \(fundingDifference * 100)% better funding rate")
-                }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                print("Trade sent to Flask successfully")
+            } else {
+                print("Failed to send trade to Flask: Invalid response")
             }
         }
+        task.resume()
     }
 
-    // CRITICAL ENHANCEMENT FUNCTIONS - These improve profitability significantly:
-
-    static func detectOrderBookSpoofing(exchange: String, pair: String, orderBook: BevaixOrderBook) -> Bool {
-        // Detect unusual order patterns that might indicate spoofing
-        guard !orderBook.bids.isEmpty && !orderBook.asks.isEmpty else { return false }
+    static func checkLiquidityAsync(exchange: String, pair: String, marketType: String, tradeAmount: Double, price: Double) async -> Double? {
+        let orderBook: BevaixOrderBook?
         
-        let bidSizes = orderBook.bids.map { $0.quantity }
-        let askSizes = orderBook.asks.map { $0.quantity }
-        
-        // Look for abnormally large orders compared to average
-        let avgBidSize = bidSizes.reduce(0, +) / Double(bidSizes.count)
-        let avgAskSize = askSizes.reduce(0, +) / Double(askSizes.count)
-        
-        let largeBids = bidSizes.filter { $0 > avgBidSize * spoofingVolumeThreshold }
-        let largeAsks = askSizes.filter { $0 > avgAskSize * spoofingVolumeThreshold }
-        
-        let spoofingDetected = largeBids.count >= 2 || largeAsks.count >= 2
-        
-        if spoofingDetected {
-            Task { @MainActor in
-                logAlert(event: "🔍 Potential spoofing detected for \(exchange)-\(pair): Large bids=\(largeBids.count), Large asks=\(largeAsks.count)")
-            }
-        }
-        
-        return spoofingDetected
-    }
-
-    static func calculateSlippageImpact(exchange: String, pair: String, tradeAmount: Double, side: String) -> Double {
-        let orderBook = exchange == "kucoin" ? kucoinOrderBooks[pair] : bybitOrderBooks[pair]
-        guard let book = orderBook, !book.bids.isEmpty && !book.asks.isEmpty else { return maxSlippage }
-        
-        let orders = side == "buy" ? book.asks : book.bids
-        var remainingAmount = tradeAmount
-        var totalCost = 0.0
-        var slippage = 0.0
-        
-        for order in orders {
-            if remainingAmount <= 0 { break }
-            
-            let fillAmount = min(remainingAmount, order.quantity)
-            totalCost += fillAmount * order.price
-            remainingAmount -= fillAmount
-        }
-        
-        if remainingAmount > 0 {
-            // Not enough liquidity
-            slippage = maxSlippage
+        if marketType == "spot" {
+            orderBook = exchange == "kucoin" ? kucoinOrderBooks[pair] : bybitOrderBooks[pair]
         } else {
-            let avgPrice = totalCost / tradeAmount
-            let bestPrice = side == "buy" ? orders.first!.price : orders.first!.price
-            slippage = abs(avgPrice - bestPrice) / bestPrice
+            orderBook = exchange == "kucoin" ? kucoinOrderBooks[pair] : bybitOrderBooks[pair] // Use spot for futures as placeholder
         }
         
-        return min(slippage, maxSlippage)
+        guard let book = orderBook, !book.isEmpty else {
+            print("No order book data for \(exchange)-\(pair)-\(marketType)")
+            return nil
+        }
+        
+        var cumulativeVolume = 0.0
+        var weightedPrice = 0.0
+        let levels = book.asks.sorted { $0.price < $1.price } // Assume buy side for simplicity
+        
+        for level in levels {
+            let available = level.quantity
+            let take = min(tradeAmount - cumulativeVolume, available)
+            weightedPrice += take * level.price
+            cumulativeVolume += take
+            
+            if cumulativeVolume >= tradeAmount {
+                break
+            }
+        }
+        
+        if cumulativeVolume < tradeAmount {
+            print("Insufficient liquidity for \(exchange)-\(pair)-\(marketType): Needed \(tradeAmount), available \(cumulativeVolume)")
+            return nil
+        }
+        
+        let avgPrice = weightedPrice / cumulativeVolume
+        let bestPrice = levels.first!.price
+        let slippage = abs(avgPrice - bestPrice) / bestPrice
+        
+        return slippage
+    }
+
+    static func checkLiquidity(exchange: String, pair: String, marketType: String, tradeAmount: Double, price: Double) -> Double? {
+        let orderBook: BevaixOrderBook?
+        
+        if marketType == "spot" {
+            orderBook = exchange == "kucoin" ? kucoinOrderBooks[pair] : bybitOrderBooks[pair]
+        } else {
+            orderBook = exchange == "kucoin" ? kucoinOrderBooks[pair] : bybitOrderBooks[pair] // Use spot for futures as placeholder
+        }
+        
+        guard let book = orderBook, !book.isEmpty else {
+            print("No order book data for \(exchange)-\(pair)-\(marketType)")
+            return nil
+        }
+        
+        var cumulativeVolume = 0.0
+        var weightedPrice = 0.0
+        let levels = book.asks.sorted { $0.price < $1.price } // Assume buy side for simplicity
+        
+        for level in levels {
+            let available = level.quantity
+            let take = min(tradeAmount - cumulativeVolume, available)
+            weightedPrice += take * level.price
+            cumulativeVolume += take
+            
+            if cumulativeVolume >= tradeAmount {
+                break
+            }
+        }
+        
+        if cumulativeVolume < tradeAmount {
+            print("Insufficient liquidity for \(exchange)-\(pair)-\(marketType): Needed \(tradeAmount), available \(cumulativeVolume)")
+            return nil
+        }
+        
+        let avgPrice = weightedPrice / cumulativeVolume
+        let bestPrice = levels.first!.price
+        let slippage = abs(avgPrice - bestPrice) / bestPrice
+        
+        return slippage
     }
 
     static func optimizeOrderSizing(exchange: String, pair: String, baseAmount: Double) -> Double {
@@ -2849,8 +2869,8 @@ extension ExchangeWebSocket {
         guard let book = orderBook, !book.bids.isEmpty && !book.asks.isEmpty else { return baseAmount }
         
         // Calculate optimal size based on order book depth
-        let bidDepth = book.bids.prefix(5).reduce(0) { $0 + $1.quantity }
-        let askDepth = book.asks.prefix(5).reduce(0) { $0 + $1.quantity }
+        let bidDepth = book.bids.prefix(5).reduce(0.0) { $0 + $1.quantity }
+        let askDepth = book.asks.prefix(5).reduce(0.0) { $0 + $1.quantity }
         let avgDepth = (bidDepth + askDepth) / 2
         
         // Limit trade size to a fraction of available depth
@@ -2889,7 +2909,7 @@ extension ExchangeWebSocket {
             let key = "\(exchange)-\(pair)-depth"
             if let lastSizes = lastPriceUpdate[key] {
                 let bidChange = abs(topBidSize - lastSizes.price) / lastSizes.price
-                let askChange = abs(topAskSize - (lastSizes.timestamp.timeIntervalSince1970)) / lastSizes.timestamp.timeIntervalSince1970
+                let askChange = abs(topAskSize - lastSizes.timestamp.timeIntervalSince1970) / lastSizes.timestamp.timeIntervalSince1970
                 
                 if bidChange > 0.5 || askChange > 0.5 {
                     logAlert(event: "📊 Significant depth change for \(exchange)-\(pair): Bid change \(bidChange * 100)%, Ask change \(askChange * 100)%")
@@ -2927,7 +2947,8 @@ extension ExchangeWebSocket {
                 logAlert(event: "📈 Market regime change detected for \(pair): \(regimeType) - Volatility changed by \(volatilityChange * 100)%")
                 return true
             }
-       
+            return false
+       // error is on the line below
         }
     
         return false
@@ -3151,6 +3172,9 @@ extension ExchangeWebSocket {
         bybitSocket?.connect()
     }
 }
+
+
+
 
 
 
