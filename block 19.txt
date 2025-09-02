@@ -1,4 +1,7 @@
 
+//--------------------------------------------------------------------------------------------------------------Block 19 - Machine Learning Prediction Engine
+
+
 import Foundation // Added for String.Encoding and other Foundation types
 
 
@@ -117,7 +120,9 @@ extension ExchangeWebSocket {
                 print("INFO: \(exchange.capitalized) HFT Trade for \(pair): Type: Scalp, Amount: \(tradeAmount) USDT, Entry: \(entryPrice), Exit: \(exitPrice), Gross Profit: \(grossProfit), Fees: \(fees), Net Profit: \(netProfit), Running P/L: \(runningProfitLossLocal), Balance: \(balanceLocal)")
                 
                 await MainActor.run(body: { hftLastTradeTime["\(exchange)_\(pair)"] = (exchange, Date()) })
-                ExchangeWebSocket.sendTradeToFlaskServer(
+                
+                // Call the sendTradeToFlaskServer function that should be defined elsewhere
+                ExchangeWebSocket.logTradeToFlaskServer(
                     strategy: "HFT-Scalp",
                     pair: pair,
                     exchange: exchange,
@@ -228,6 +233,8 @@ extension ExchangeWebSocket {
         }
     }
 
+    // REMOVED: evaluateFundingRateMomentum function - this should be defined elsewhere to avoid redeclaration
+    // If you need this function specifically in this block, rename it to something unique like evaluateFundingRateMomentumML
 
     static func spoofLiquidity(pair: String, kucoinOrderBook: [[String: Any]], bybitOrderBook: [[String: Any]]) async {
         let spoofingVolumeThreshold = getDouble("SPOOFING_VOLUME_THRESHOLD", defaultValue: 1.5)
@@ -271,7 +278,10 @@ extension ExchangeWebSocket {
         return Date().timeIntervalSince(start) * 1000
     }
 
-    static func sendTradeToFlaskServer(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double) {
+    // REMOVED: sendTradeToFlaskServer function - this should be defined elsewhere to avoid redeclaration
+    // If you need this function specifically in this block, rename it to something unique like logTradeToFlaskServerML
+    
+    static func logTradeToFlaskServer(strategy: String, pair: String, exchange: String, spotPrice: Double, futuresPrice: Double, tradeAmount: Double, profit: Double) {
         let flaskUrl = URL(string: environment["FLASK_SERVER_URL"] ?? "http://localhost:5001/log_trade")!
         var request = URLRequest(url: flaskUrl)
         request.httpMethod = "POST"
@@ -312,5 +322,101 @@ extension ExchangeWebSocket {
                 }
             }
         }.resume()
+    }
+
+    // Additional ML-specific functions for this block
+    static func evaluateMLSignals(pair: String, prices: [Double], volumes: [Double]) async -> Double {
+        guard prices.count >= 50, volumes.count >= 50 else { return 0.0 }
+        
+        let recentPrices = Array(prices.suffix(50))
+        let recentVolumes = Array(volumes.suffix(50))
+        
+        // Calculate momentum
+        let priceChange = (recentPrices.last! - recentPrices.first!) / recentPrices.first!
+        
+        // Calculate volume momentum
+        let avgVolume = recentVolumes.reduce(0, +) / Double(recentVolumes.count)
+        let currentVolume = recentVolumes.last!
+        let volumeRatio = currentVolume / avgVolume
+        
+        // Calculate volatility
+        let returns = zip(recentPrices.dropFirst(), recentPrices.dropLast()).map { (current, previous) in
+            (current - previous) / previous
+        }
+        let volatility = sqrt(returns.map { pow($0, 2) }.reduce(0, +) / Double(returns.count))
+        
+        // Combine signals
+        let momentumSignal = priceChange * 10 // Scale momentum
+        let volumeSignal = min(volumeRatio - 1, 1.0) // Cap volume signal
+        let volatilityPenalty = min(volatility * 5, 0.5) // Penalty for high volatility
+        
+        let mlScore = momentumSignal + volumeSignal - volatilityPenalty
+        
+        print("DEBUG: ML Signal for \(pair) - Momentum: \(momentumSignal), Volume: \(volumeSignal), Volatility: -\(volatilityPenalty), Score: \(mlScore)")
+        
+        return mlScore
+    }
+
+    static func predictPriceDirection(pair: String, features: [String: Double]) async -> (direction: String, confidence: Double) {
+        // Simple ML prediction based on technical indicators
+        let momentum = features["momentum"] ?? 0.0
+        let rsi = features["rsi"] ?? 50.0
+        let volume = features["volume"] ?? 1.0
+        let volatility = features["volatility"] ?? 0.02
+        
+        var bullishScore: Double = 0.0
+        var bearishScore: Double = 0.0
+        
+        // Momentum signals
+        if momentum > 0.01 { bullishScore += 0.3 }
+        else if momentum < -0.01 { bearishScore += 0.3 }
+        
+        // RSI signals
+        if rsi < 30 { bullishScore += 0.2 } // Oversold
+        else if rsi > 70 { bearishScore += 0.2 } // Overbought
+        
+        // Volume confirmation
+        if volume > 1.2 {
+            if momentum > 0 { bullishScore += 0.1 }
+            else if momentum < 0 { bearishScore += 0.1 }
+        }
+        
+        // Volatility adjustment
+        let volatilityPenalty = min(volatility * 2, 0.2)
+        bullishScore -= volatilityPenalty
+        bearishScore -= volatilityPenalty
+        
+        let direction = bullishScore > bearishScore ? "bullish" : "bearish"
+        let confidence = abs(bullishScore - bearishScore)
+        
+        print("DEBUG: ML Prediction for \(pair) - Direction: \(direction), Confidence: \(String(format: "%.2f", confidence))")
+        
+        return (direction: direction, confidence: min(confidence, 1.0))
+    }
+
+    static func updateMLModel(pair: String, actualOutcome: Double, predictedOutcome: Double) async {
+        let error = abs(actualOutcome - predictedOutcome)
+        let accuracy = max(0, 1.0 - error)
+        
+        // Update model performance tracking
+        await MainActor.run {
+            if var prediction = mlPredictions[pair] {
+                // Update running accuracy
+                let newAccuracy = (prediction.confidence + accuracy) / 2.0
+                prediction.confidence = newAccuracy
+                prediction.timestamp = Date()
+                mlPredictions[pair] = prediction
+            } else {
+                mlPredictions[pair] = MLPrediction(
+                    prediction: predictedOutcome,
+                    confidence: accuracy,
+                    features: [:],
+                    timestamp: Date(),
+                    model: "SimpleML"
+                )
+            }
+        }
+        
+        print("DEBUG: Updated ML model for \(pair) - Error: \(String(format: "%.4f", error)), Accuracy: \(String(format: "%.2f", accuracy * 100))%")
     }
 }
