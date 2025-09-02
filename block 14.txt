@@ -1,3 +1,4 @@
+
 //---------------------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution - FIXED
 
 import Foundation
@@ -120,10 +121,10 @@ extension ExchangeWebSocket {
                     }
                 }
                 
-                // ENHANCED: Portfolio-level risk management
-                await assessPortfolioRisk()
-                await updateRiskMetrics()
-                await monitorDataQuality()
+                // FIXED: Removed await from non-async functions (Lines 7600, 7601, 7602)
+                assessPortfolioRisk()
+                updateRiskMetrics()
+                monitorDataQuality()
                 
                 try await Task.sleep(nanoseconds: 250_000_000) // 250ms scan interval
             } catch {
