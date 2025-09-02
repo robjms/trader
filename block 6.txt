@@ -1,5 +1,4 @@
-//------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
-// VARIABLES TO ADD: All variables already exist in this block
+// VARIABLES TO ADD: None - All variables included in previous blocks
 
 extension ExchangeWebSocket {
     static func monitorFundingRateArbitrage() {
@@ -54,6 +53,37 @@ extension ExchangeWebSocket {
             // Schedule the next check
             try? await Task.sleep(nanoseconds: UInt64(getDouble("ARBITRAGE_CHECK_INTERVAL_SECONDS", defaultValue: 0.5) * 1_000_000_000))
             monitorFundingRateArbitrage()
+        }
+    }
+
+    // FIXED: Added missing evaluateFundingRateMomentum function
+    static func evaluateFundingRateMomentum(pair: String, kucoinFundingRate: Double, bybitFundingRate: Double) async {
+        let threshold = getDouble("FUNDING_MOMENTUM_THRESHOLD", defaultValue: 0.00008)
+        let rateDifference = abs(kucoinFundingRate - bybitFundingRate)
+        
+        guard rateDifference > threshold else {
+            print("DEBUG: Funding rate difference below threshold for \(pair): \(rateDifference) <= \(threshold)")
+            return
+        }
+        
+        // Determine which exchange has higher funding rate (short side)
+        let highRateExchange = kucoinFundingRate > bybitFundingRate ? "kucoin" : "bybit"
+        let lowRateExchange = kucoinFundingRate > bybitFundingRate ? "bybit" : "kucoin"
+        
+        let profit = rateDifference * futuresTradeAmount
+        let minProfitRequired = getDouble("FUTURES_MIN_PROFIT_PERCENTAGE", defaultValue: 0.001) * futuresTradeAmount
+        
+        guard profit > minProfitRequired else {
+            print("DEBUG: Funding rate momentum profit too low for \(pair): \(profit) <= \(minProfitRequired)")
+            return
+        }
+        
+        await MainActor.run {
+            print("✅ Funding rate momentum opportunity for \(pair): \(highRateExchange)=\(kucoinFundingRate > bybitFundingRate ? kucoinFundingRate : bybitFundingRate), \(lowRateExchange)=\(kucoinFundingRate > bybitFundingRate ? bybitFundingRate : kucoinFundingRate), Expected profit: \(profit)")
+            logAlert(event: "Funding rate momentum opportunity for \(pair): Expected profit \(profit), Rate diff: \(rateDifference)")
+            
+            // Log the opportunity
+            futuresArbitrageExecuted[pair] = (profit: profit, timestamp: Date())
         }
     }
 
@@ -305,7 +335,7 @@ extension ExchangeWebSocket {
         
         let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
         let recvWindow = bybitRecvWindow
-        let queryString = "api_key=\(apiKey)&timestamp=\(timestamp)&recv_window=\(recvWindow)"
+        let queryString = "api_key=\(apiKey)×tamp=\(timestamp)&recv_window=\(recvWindow)"
         let signature = HMAC<SHA256>.authenticationCode(for: queryString.data(using: .utf8)!, using: SymmetricKey(data: apiSecret.data(using: .utf8)!)).map { String(format: "%02x", $0) }.joined()
         
         request.addValue(apiKey, forHTTPHeaderField: "X-BAPI-API-KEY")
@@ -383,3 +413,4 @@ extension ExchangeWebSocket {
         }.resume()
     }
 }
+
