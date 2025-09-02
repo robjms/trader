@@ -69,12 +69,11 @@ struct AdvancedSignal {
 
 struct MLPrediction {
     let prediction: Double
-    let confidence: Double
+    var confidence: Double
     let features: [String: Double]
-    let timestamp: Date
+    var timestamp: Date  // ← CHANGE: from 'let' to 'var'
     let model: String
 }
-
 struct PerformanceMetrics {
     var totalTrades: Int
     var winningTrades: Int
@@ -109,7 +108,7 @@ struct TradingOpportunity {
     let strategy: String
     let expectedProfit: Double
     let riskLevel: Double
-    let confidence: Double
+    var confidence: Double
     let timeHorizon: TimeInterval
 }
 
@@ -2928,11 +2927,18 @@ extension ExchangeWebSocket {
                 logAlert(event: "📈 Market regime change detected for \(pair): \(regimeType) - Volatility changed by \(volatilityChange * 100)%")
                 return true
             }
+       
         }
-        
+    
         return false
     }
 
+    
+    
+    
+    
+    
+    
     static func calculateVolatilityFromPrices(_ prices: [Double]) -> Double {
         guard prices.count > 1 else { return 0.0 }
         
@@ -7596,10 +7602,10 @@ extension ExchangeWebSocket {
                     }
                 }
                 
-                // ENHANCED: Portfolio-level risk management
-                await assessPortfolioRisk()
-                await updateRiskMetrics()
-                await monitorDataQuality()
+                // FIXED: Removed await from non-async functions (Lines 7600, 7601, 7602)
+                assessPortfolioRisk()
+                updateRiskMetrics()
+                monitorDataQuality()
                 
                 try await Task.sleep(nanoseconds: 250_000_000) // 250ms scan interval
             } catch {
@@ -8231,6 +8237,7 @@ DispatchQueue.main.async {
 }
 
 RunLoop.main.run()
+
 //---------------------------------------------------------------------------------------------------------Block 15 - High-Frequency Trading Scalping
 
 import Foundation
