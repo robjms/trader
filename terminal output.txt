@@ -1,0 +1,369 @@
+(base) Roberts-iMac-2:Python robertsteinegger$ swift run BevaixBot
+Building for debugging...
+[1/1] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'BevaixBot' complete! (0.21s)
+🔍 Primary: Loading .env from /Users/robertsteinegger/Desktop/BevaixBot/.env
+✅ Found .env file at /Users/robertsteinegger/Desktop/BevaixBot/.env
+✅ SwiftDotenv configured successfully
+SwiftDotenv version: unknown
+✅ Successfully loaded .env file using SwiftDotenv
+DEBUG: Loaded environment variables: ["WEBSOCKET_TIMEOUT_SECONDS": "8", "PRICE_HISTORY_RETENTION": "2880  # Increased from 1440 to 2880 (48 hours) to collect more data", "HFT_COOLDOWN_SECONDS": "1.5  # Increased from 1.0 to 1.5 to reduce over-trading", "SCALP_ENTRY_THRESHOLD": "0.0006  # Increased from 0.0004 to 0.0006 for stronger entry signals", "MAX_ACTIVE_FUTURES_TRADES": "30  # Reduced from 50 to 30 to lower exposure", "SLIPPAGE_PERCENTAGE": "0.003  # Increased from 0.002 to 0.003 to account for market volatility", "KUCOIN_API_SECRET": "6f3c878f-dc1c-4f05-871b-1aa161b17b7b", "SPOT_RSI_PERIOD": "14  # Increased from 10 to 14 for more standard RSI calculation", "ORDER_BOOK_IMBALANCE_THRESHOLD": "3.0  # Threshold for imbalance checks", "CROSS_EXCHANGE_MIN_BALANCE": "300.0", "VOLUME_ANOMALY_MULTIPLIER": "1.5  # Increased from 1.0 to 1.5 for more significant anomaly detection", "ATR_MULTIPLIER": "0.8  # Increased from 0.6 to 0.8 to make ATR-based decisions more sensitive to volatility", "SPOT_TRAILING_STOP_PERCENTAGE": "0.0010  # Increased from 0.0004 to 0.0010 for more room", "MAX_SLIPPAGE": "0.005  # Maximum 0.5% slippage", "SPOT_EMA_LONG_PERIOD": "20", "ORDER_BOOK_PRICE_RANGE": "0.001", "KUCOIN_FUTURES_FEE_RATE": "0.0002", "PRICE_REVERSAL_THRESHOLD": "0.0010  # Increased from 0.0008 to 0.0010 to require stronger reversals", "VOLUME_TRACKING_VALUE": "200.0  # Increased from 150.0 to 200.0 for larger volume tracking", "SPOT_FEE_RATE": "0.001", "FUTURES_EMA_SHORT_PERIOD": "5", "BYBIT_API_KEY": "c5HePA9t71x6bqzU3b", "FUTURES_STOP_LOSS_PERCENTAGE": "0.0020  # Increased from 0.0015 to 0.0020 to align with trailing stop", "ARBITRAGE_HIGH_SPREAD_THRESHOLD": "0.0035  # Increased from 0.0030 to 0.0035 for higher profit", "CROSS_EXCHANGE_TRADE_AMOUNT": "300.0", "SCALP_PROFIT_TARGET": "0.0040  # Increased from 0.0008 to 0.0012 to ensure profitability", "SCALP_STOP_LOSS": "0.0015  # Increased from 0.0012 to 0.0015 to align with profit target", "SPOOFING_PROFIT_TARGET": "0.008  # Increased from 0.007 to 0.008 to target higher profits", "LIQUIDITY_CHECK_FALLBACK": "true", "FUTURES_TRADE_AMOUNT": "600.0", "KUCOIN_FALLBACK_BALANCE": "522.235326", "MACD_CONFIRMATION_THRESHOLD": "0.0001  # Increased from 0.00005 to 0.0001 for stronger MACD signals", "BYBIT_FUTURES_FEE_RATE": "0.0002", "VOLUME_ANOMALY_WINDOW_HOURS": "1", "CROSS_EXCHANGE_MIN_FUNDING_RATE_THRESHOLD": "0.0000005  # Increased from 0.0000003 to 0.0000005 to avoid high funding cost trades", "VOLATILITY_PAUSE_SECONDS": "300  # Pause trading for 5 minutes after volatility spike", "SPOT_EMA_SHORT_PERIOD": "5", "MIN_ORDERBOOK_REFRESH_RATE": "1  # Refresh order book every 1 second", "KUCOIN_API_PASSPHRASE": "Roryjames2006", "SLIPPAGE_TRADE_AMOUNT": "100.0  # Increased from 80.0 to 100.0 for larger trades with better liquidity", "MACD_LONG_PERIOD": "20", "BYBIT_API_SECRET": "V8mHjEcI2aXwwPLrWxmCDcgGZnqoHapPgsGg", "ATR_FALLBACK_PERCENTAGE": "0.005  # Increased from 0.004 to 0.005 for more conservative ATR fallback", "HFT_SPREAD_THRESHOLD": "0.0012  # Increased from 0.0008 to 0.0012 to ensure profitability", "MACD_SHORT_PERIOD": "8", "FUNDING_RATE_COST_MULTIPLIER": "0.05  # Increased from 0.03 to 0.05 to account for higher funding costs", "FUTURES_MIN_PROFIT_PERCENTAGE": "0.0010  # Increased from 0.0005 to 0.0010 to ensure $0.60 profit per trade, covering $0.24 fees + $0.36 margin for slippage/funding", "MAX_ACTIVE_SPOT_TRADES": "20  # Reduced from 30 to 20 to lower exposure", "KUCOIN_API_KEY": "689a70f51cad950001b734ab", "BYBIT_FALLBACK_BALANCE": "716.65266351", "VOLUME_ANOMALY_COOLDOWN_SECONDS": "120  # Increased from 90 to 120 to wait longer after volume anomalies", "BALANCE_FETCH_TIMEOUT": "12", "VOLATILITY_SPIKE_THRESHOLD": "0.20  # Increased from 0.10 to 0.15 to reduce pauses", "FUTURES_TRAILING_STOP_PERCENTAGE": "0.0020  # Increased from 0.0015 to 0.0020 to allow more room for price movement", "LIQUIDITY_CHECK_INTERVAL": "30  # Check liquidity every 30 seconds", "FUTURES_EMA_LONG_PERIOD": "20", "CROSS_EXCHANGE_COOLDOWN_SECONDS": "0.2  # Increased from 0.1 to 0.2 to reduce over-trading", "CROSS_EXCHANGE_MIN_SPREAD_THRESHOLD": "0.0020  # Adjusted to 0.0020 to cover fees (0.0014) + margin", "MAX_FUNDING_RATE": "0.0005  # Increased from 0.0003 to 0.0005 to allow slightly higher funding rates", "SPOOFING_VOLUME_THRESHOLD": "1.5  # Increased from 1.0 to 1.5 for more significant spoofing detection", "PRICE_REVERSAL_WINDOW_MINUTES": "2  # Increased from 1 to 2 minutes for more reliable signals", "MAX_ORDER_BOOK_IMBALANCE": "20.0  # Increased from 8.0 to 20.0 to allow higher imbalances", "MIN_LIQUIDITY_THRESHOLD": "20.0  # Increased from 15.0 to 20.0 to ensure better liquidity", "LATENCY_SPIKE_THRESHOLD": "500.0  # Increased from 80.0 to 200.0 to reduce false positives", "ARBITRAGE_MIN_SPREAD_THRESHOLD": "0.0030  # Increased from 0.0020 to 0.0025 to cover KuCoin fees (0.002) + margin", "VOLATILITY_SPIKE_COOLDOWN_SECONDS": "60  # Increased from 30 to 60 to wait longer after volatility spikes", "SPOT_EMA_MEDIUM_PERIOD": "10", "KUCOIN_LEVERAGE": "6", "ACTIVE_PAIRS": "BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT", "TRADE_HOLD_DURATION_MINUTES": "3  # Reduced from 5 to 3 to exit trades faster", "HFT_TRADE_AMOUNT": "60.0", "SPOT_TRADE_AMOUNT": "50.0  # Increased from 30.0 to 50.0 for larger trades", "FUTURES_EMA_MEDIUM_PERIOD": "10", "SLIPPAGE_DEPTH_THRESHOLD": "0.5  # Increased from 0.3 to 0.5 to require deeper liquidity", "BYBIT_LEVERAGE": "6", "DAILY_LOSS_LIMIT_PERCENTAGE": "0.08  # Reduced from 0.12 to 0.08 to tighten risk control", "ARBITRAGE_MIN_BALANCE": "20.0", "SPOT_RSI_LOWER_THRESHOLD": "30.0  # Decreased from 35.0 to 30.0 for stricter oversold condition", "SPREAD_RETENTION_HOURS": "24", "VOLATILITY_SPIKE_WINDOW_MINUTES": "1", "SPOT_STOP_LOSS_PERCENTAGE": "0.0020  # Increased from 0.0012 to 0.0020 to align with profit target", "MIN_PRICE_DATA_POINTS": "14  # Increased from 1 to 14 to ensure enough data for RSI/MACD calculations", "VOLUME_ANOMALY_THRESHOLD": "1.5  # Increased from 1.0 to 1.5 to align with anomaly multiplier", "ORDER_BOOK_IMBALANCE_FALLBACK": "1.5  # Increased from 1.2 to 1.5 for stricter fallback", "ARBITRAGE_TRADE_AMOUNT": "500.0", "FUNDING_MOMENTUM_THRESHOLD": "0.00008  # Increased from 0.00005 to 0.00008 for stronger momentum signals", "MACD_SIGNAL_PERIOD": "6", "SIMULATION_TRADE_LOGGING": "true", "SPOT_RSI_UPPER_THRESHOLD": "70.0  # Increased from 65.0 to 70.0 for stricter overbought condition", "MARKET_MAKING_SPREAD": "0.002", "LIQUIDITY_PRICE_IMPACT_THRESHOLD": "0.008  # Reduced from 0.010 to 0.008 to avoid high price impact"]
+DEBUG: ACTIVE_PAIRS from env: BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT
+DEBUG: BYBIT_API_KEY from env: c5HePA9t71x6bqzU3b
+DEBUG: KUCOIN_API_KEY from env: 689a70f51cad950001b734ab
+✅ Loaded 91 environment variables
+DEBUG: Raw ACTIVE_PAIRS from .env: BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT
+DEBUG: Loaded tradingPairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "LINK-USDT", "FLOKI-USDT", "TON-USDT", "NEAR-USDT", "ARB-USDT", "WIF-USDT", "PEPE-USDT", "BONK-USDT", "SHIB-USDT", "XRP-USDT", "ADA-USDT", "DOGE-USDT", "AVAX-USDT", "DOT-USDT", "MATIC-USDT", "SUI-USDT", "APT-USDT", "INJ-USDT", "OP-USDT"]
+DEBUG: Number of pairs loaded: 22
+DEBUG: Initialized kucoinFuturesSymbols: ["SHIB-USDT": "SHIBUSDTM", "SUI-USDT": "SUIUSDTM", "BONK-USDT": "BONKUSDTM", "DOT-USDT": "DOTUSDTM", "ADA-USDT": "ADAUSDTM", "AVAX-USDT": "AVAXUSDTM", "LINK-USDT": "LINKUSDTM", "MATIC-USDT": "MATICUSDTM", "XRP-USDT": "XRPUSDTM", "OP-USDT": "OPUSDTM", "NEAR-USDT": "NEARUSDTM", "ETH-USDT": "ETHUSDTM", "WIF-USDT": "WIFUSDTM", "APT-USDT": "APTUSDTM", "FLOKI-USDT": "FLOKIUSDTM", "INJ-USDT": "INJUSDTM", "ARB-USDT": "ARBUSDTM", "PEPE-USDT": "PEPEUSDTM", "BTC-USDT": "XBTUSDTM", "TON-USDT": "TONUSDTM", "SOL-USDT": "SOLUSDTM", "DOGE-USDT": "DOGEUSDTM"]
+DEBUG: Initialized kucoinFuturesSymbols: ["SHIB-USDT": "SHIBUSDTM", "SUI-USDT": "SUIUSDTM", "BONK-USDT": "BONKUSDTM", "DOT-USDT": "DOTUSDTM", "ADA-USDT": "ADAUSDTM", "AVAX-USDT": "AVAXUSDTM", "LINK-USDT": "LINKUSDTM", "MATIC-USDT": "MATICUSDTM", "XRP-USDT": "XRPUSDTM", "OP-USDT": "OPUSDTM", "NEAR-USDT": "NEARUSDTM", "ETH-USDT": "ETHUSDTM", "WIF-USDT": "WIFUSDTM", "APT-USDT": "APTUSDTM", "FLOKI-USDT": "FLOKIUSDTM", "INJ-USDT": "INJUSDTM", "ARB-USDT": "ARBUSDTM", "PEPE-USDT": "PEPEUSDTM", "BTC-USDT": "XBTUSDTM", "TON-USDT": "TONUSDTM", "SOL-USDT": "SOLUSDTM", "DOGE-USDT": "DOGEUSDTM"]
+DEBUG: Initialized storage for pair: BTC-USDT
+DEBUG: Initialized storage for pair: ETH-USDT
+DEBUG: Initialized storage for pair: SOL-USDT
+DEBUG: Initialized storage for pair: LINK-USDT
+DEBUG: Initialized storage for pair: FLOKI-USDT
+DEBUG: Initialized storage for pair: TON-USDT
+DEBUG: Initialized storage for pair: NEAR-USDT
+DEBUG: Initialized storage for pair: ARB-USDT
+DEBUG: Initialized storage for pair: WIF-USDT
+DEBUG: Initialized storage for pair: PEPE-USDT
+DEBUG: Initialized storage for pair: BONK-USDT
+DEBUG: Initialized storage for pair: SHIB-USDT
+DEBUG: Initialized storage for pair: XRP-USDT
+DEBUG: Initialized storage for pair: ADA-USDT
+DEBUG: Initialized storage for pair: DOGE-USDT
+DEBUG: Initialized storage for pair: AVAX-USDT
+DEBUG: Initialized storage for pair: DOT-USDT
+DEBUG: Initialized storage for pair: MATIC-USDT
+DEBUG: Initialized storage for pair: SUI-USDT
+DEBUG: Initialized storage for pair: APT-USDT
+DEBUG: Initialized storage for pair: INJ-USDT
+DEBUG: Initialized storage for pair: OP-USDT
+Environment variable SPOT_MINUTE_PROFIT_PERCENTAGE not found or empty
+DEBUG: Initialized balances - KuCoin: 522.235326, KuCoin Futures: 522.235326
+DEBUG: Initialized balances - Bybit: 716.65266351, Bybit Futures: 716.65266351
+DEBUG: Initialized futures trade amount: 600.0
+DEBUG: Initialized spot trade amount: 50.0
+Attempting to connect to KuCoin WebSocket...
+Attempting to connect to Bybit WebSocket...
+[2025-09-03T10:12:08Z] Dashboard Metrics:
+KuCoin Balance: 522.235326 USDT
+Bybit Balance: 716.65266351 USDT
+KuCoin Futures: 522.235326 USDT
+Bybit Futures: 716.65266351 USDT
+Total Trades: 0
+Total Profit: 0.0 USDT
+Total Fees: 0.0 USDT
+Active Price Feeds: 0/22
+WebSocket Status: KC=false, KCF=false, BB=false, BBF=false
+ALERT: [2025-09-03T10:12:08Z] Dashboard Metrics:
+KuCoin Balance: 522.235326 USDT
+Bybit Balance: 716.65266351 USDT
+KuCoin Futures: 522.235326 USDT
+Bybit Futures: 716.65266351 USDT
+Total Trades: 0
+Total Profit: 0.0 USDT
+Total Fees: 0.0 USDT
+Active Price Feeds: 0/22
+WebSocket Status: KC=false, KCF=false, BB=false, BBF=false
+✅ Updated dashboard.json with live data: 0 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 0 pairs, $0.00 profit
+DEBUG: Fetched sentiment score for BTC-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for BTC-USDT: 0.1
+DEBUG: Initialized sentiment score for BTC-USDT: 0.1
+DEBUG: Fetched sentiment score for ETH-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for ETH-USDT: 0.1
+DEBUG: Initialized sentiment score for ETH-USDT: 0.1
+DEBUG: Fetched sentiment score for SOL-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for SOL-USDT: 0.1
+DEBUG: Initialized sentiment score for SOL-USDT: 0.1
+DEBUG: Fetched sentiment score for LINK-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for LINK-USDT: 0.1
+DEBUG: Initialized sentiment score for LINK-USDT: 0.1
+DEBUG: Fetched sentiment score for FLOKI-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for FLOKI-USDT: 0.1
+DEBUG: Initialized sentiment score for FLOKI-USDT: 0.1
+DEBUG: Fetched sentiment score for TON-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for TON-USDT: 0.1
+DEBUG: Initialized sentiment score for TON-USDT: 0.1
+DEBUG: Fetched sentiment score for NEAR-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for NEAR-USDT: 0.1
+DEBUG: Initialized sentiment score for NEAR-USDT: 0.1
+DEBUG: Fetched sentiment score for ARB-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for ARB-USDT: 0.1
+DEBUG: Initialized sentiment score for ARB-USDT: 0.1
+DEBUG: Fetched sentiment score for WIF-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for WIF-USDT: 0.1
+DEBUG: Initialized sentiment score for WIF-USDT: 0.1
+DEBUG: Fetched sentiment score for PEPE-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for PEPE-USDT: 0.1
+DEBUG: Initialized sentiment score for PEPE-USDT: 0.1
+DEBUG: Fetched sentiment score for BONK-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for BONK-USDT: 0.1
+DEBUG: Initialized sentiment score for BONK-USDT: 0.1
+DEBUG: Fetched sentiment score for SHIB-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for SHIB-USDT: 0.1
+DEBUG: Initialized sentiment score for SHIB-USDT: 0.1
+DEBUG: Fetched sentiment score for XRP-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for XRP-USDT: 0.1
+DEBUG: Initialized sentiment score for XRP-USDT: 0.1
+DEBUG: Fetched sentiment score for ADA-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for ADA-USDT: 0.1
+DEBUG: Initialized sentiment score for ADA-USDT: 0.1
+DEBUG: Fetched sentiment score for DOGE-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for DOGE-USDT: 0.1
+DEBUG: Initialized sentiment score for DOGE-USDT: 0.1
+DEBUG: Fetched sentiment score for AVAX-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for AVAX-USDT: 0.1
+DEBUG: Initialized sentiment score for AVAX-USDT: 0.1
+DEBUG: Fetched sentiment score for DOT-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for DOT-USDT: 0.1
+DEBUG: Initialized sentiment score for DOT-USDT: 0.1
+DEBUG: Fetched sentiment score for MATIC-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for MATIC-USDT: 0.1
+DEBUG: Initialized sentiment score for MATIC-USDT: 0.1
+DEBUG: Fetched sentiment score for SUI-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for SUI-USDT: 0.1
+DEBUG: Initialized sentiment score for SUI-USDT: 0.1
+DEBUG: Fetched sentiment score for APT-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for APT-USDT: 0.1
+DEBUG: Initialized sentiment score for APT-USDT: 0.1
+DEBUG: Fetched sentiment score for INJ-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for INJ-USDT: 0.1
+DEBUG: Initialized sentiment score for INJ-USDT: 0.1
+DEBUG: Fetched sentiment score for OP-USDT: 0.1
+ALERT: 🟢 SUCCESS: Fetched sentiment score for OP-USDT: 0.1
+DEBUG: Initialized sentiment score for OP-USDT: 0.1
+DEBUG: Fetched KuCoin WebSocket token: 2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ5qcNlfeS6w1qlrkwDprvQFqXeF7fEbO09iYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEGq7kaxx1H6I6_Y2TBBbWEsJBvJHl5Vs9Y=.KG0MN_48CHQRfdmIFirWjw==
+DEBUG: KuCoin WebSocket connected for token: 2neAiuYvAU61ZDXANAGAsiL4-iAExhsBXZxftpOeh_55i3Ysy2q2LEsEWU64mdzUOPusi34M_wGoSf7iNyEWJ5qcNlfeS6w1qlrkwDprvQFqXeF7fEbO09iYB9J6i9GjsxUuhPw3Blq6rhZlGykT3Vp1phUafnulOOpts-MEmEGq7kaxx1H6I6_Y2TBBbWEsJBvJHl5Vs9Y=.KG0MN_48CHQRfdmIFirWjw==
+Invalid order book response for kucoin-BTC-USDT-spot
+ALERT: Invalid order book response for kucoin-BTC-USDT-spot
+✅ [Bybit Spot] WebSocket connected: ["Connection": "upgrade", "Sec-WebSocket-Accept": "bt+TWEqkZ8LXiv+JJr81nlMgH24=", "X-Amz-Cf-Pop": "ZRH52-P1", "X-Cache": "Miss from cloudfront", "Date": "Wed, 03 Sep 2025 10:12:09 GMT", "Via": "1.1 b0b28ec8da60bdc40e5fb6dc8ad8eae8.cloudfront.net (CloudFront)", "Upgrade": "websocket", "X-Amz-Cf-Id": "EvBhb0PFv9X0aWSa0LlQ55wuV4x3-4QbtaLM2BbxJJqmKfWL0kRz_A=="]
+ALERT: ✅ Bybit Spot WebSocket connected
+Subscribed to Bybit spot topics: tickers.BTCUSDT, orderbook.50.BTCUSDT, publicTrade.BTCUSDT for pair: BTC-USDT
+Subscribed to Bybit spot topics: tickers.ETHUSDT, orderbook.50.ETHUSDT, publicTrade.ETHUSDT for pair: ETH-USDT
+Subscribed to Bybit spot topics: tickers.SOLUSDT, orderbook.50.SOLUSDT, publicTrade.SOLUSDT for pair: SOL-USDT
+Subscribed to Bybit spot topics: tickers.LINKUSDT, orderbook.50.LINKUSDT, publicTrade.LINKUSDT for pair: LINK-USDT
+Subscribed to Bybit spot topics: tickers.FLOKIUSDT, orderbook.50.FLOKIUSDT, publicTrade.FLOKIUSDT for pair: FLOKI-USDT
+Subscribed to Bybit spot topics: tickers.TONUSDT, orderbook.50.TONUSDT, publicTrade.TONUSDT for pair: TON-USDT
+Subscribed to Bybit spot topics: tickers.NEARUSDT, orderbook.50.NEARUSDT, publicTrade.NEARUSDT for pair: NEAR-USDT
+Subscribed to Bybit spot topics: tickers.ARBUSDT, orderbook.50.ARBUSDT, publicTrade.ARBUSDT for pair: ARB-USDT
+Subscribed to Bybit spot topics: tickers.WIFUSDT, orderbook.50.WIFUSDT, publicTrade.WIFUSDT for pair: WIF-USDT
+Subscribed to Bybit spot topics: tickers.PEPEUSDT, orderbook.50.PEPEUSDT, publicTrade.PEPEUSDT for pair: PEPE-USDT
+Subscribed to Bybit spot topics: tickers.BONKUSDT, orderbook.50.BONKUSDT, publicTrade.BONKUSDT for pair: BONK-USDT
+Subscribed to Bybit spot topics: tickers.SHIBUSDT, orderbook.50.SHIBUSDT, publicTrade.SHIBUSDT for pair: SHIB-USDT
+Subscribed to Bybit spot topics: tickers.XRPUSDT, orderbook.50.XRPUSDT, publicTrade.XRPUSDT for pair: XRP-USDT
+Subscribed to Bybit spot topics: tickers.ADAUSDT, orderbook.50.ADAUSDT, publicTrade.ADAUSDT for pair: ADA-USDT
+Subscribed to Bybit spot topics: tickers.DOGEUSDT, orderbook.50.DOGEUSDT, publicTrade.DOGEUSDT for pair: DOGE-USDT
+Subscribed to Bybit spot topics: tickers.AVAXUSDT, orderbook.50.AVAXUSDT, publicTrade.AVAXUSDT for pair: AVAX-USDT
+Subscribed to Bybit spot topics: tickers.DOTUSDT, orderbook.50.DOTUSDT, publicTrade.DOTUSDT for pair: DOT-USDT
+Subscribed to Bybit spot topics: tickers.MATICUSDT, orderbook.50.MATICUSDT, publicTrade.MATICUSDT for pair: MATIC-USDT
+Subscribed to Bybit spot topics: tickers.SUIUSDT, orderbook.50.SUIUSDT, publicTrade.SUIUSDT for pair: SUI-USDT
+Subscribed to Bybit spot topics: tickers.APTUSDT, orderbook.50.APTUSDT, publicTrade.APTUSDT for pair: APT-USDT
+Subscribed to Bybit spot topics: tickers.INJUSDT, orderbook.50.INJUSDT, publicTrade.INJUSDT for pair: INJ-USDT
+Subscribed to Bybit spot topics: tickers.OPUSDT, orderbook.50.OPUSDT, publicTrade.OPUSDT for pair: OP-USDT
+✅ [Bybit Futures] WebSocket connected: ["Sec-WebSocket-Accept": "9LI8twumN8vxPHU1KHDLt1YYa/M=", "Date": "Wed, 03 Sep 2025 10:12:09 GMT", "X-Amz-Cf-Pop": "ZRH52-P1", "Via": "1.1 3e12e656267276c5b1cf72e129a2193e.cloudfront.net (CloudFront)", "X-Cache": "Miss from cloudfront", "Upgrade": "websocket", "X-Amz-Cf-Id": "T3I_Lwys3F5JKUsnz_8Lzc4oDw7w5w6FV21e9igsnb9Y_EDDnjPNTQ==", "Connection": "upgrade"]
+ALERT: ✅ Bybit Futures WebSocket connected
+Subscribed to Bybit futures topics: tickers.BTCUSDT, orderbook.50.BTCUSDT, publicTrade.BTCUSDT for pair: BTC-USDT
+Subscribed to Bybit futures topics: tickers.ETHUSDT, orderbook.50.ETHUSDT, publicTrade.ETHUSDT for pair: ETH-USDT
+Subscribed to Bybit futures topics: tickers.SOLUSDT, orderbook.50.SOLUSDT, publicTrade.SOLUSDT for pair: SOL-USDT
+Subscribed to Bybit futures topics: tickers.LINKUSDT, orderbook.50.LINKUSDT, publicTrade.LINKUSDT for pair: LINK-USDT
+Subscribed to Bybit futures topics: tickers.FLOKIUSDT, orderbook.50.FLOKIUSDT, publicTrade.FLOKIUSDT for pair: FLOKI-USDT
+Subscribed to Bybit futures topics: tickers.TONUSDT, orderbook.50.TONUSDT, publicTrade.TONUSDT for pair: TON-USDT
+Subscribed to Bybit futures topics: tickers.NEARUSDT, orderbook.50.NEARUSDT, publicTrade.NEARUSDT for pair: NEAR-USDT
+Subscribed to Bybit futures topics: tickers.ARBUSDT, orderbook.50.ARBUSDT, publicTrade.ARBUSDT for pair: ARB-USDT
+Subscribed to Bybit futures topics: tickers.WIFUSDT, orderbook.50.WIFUSDT, publicTrade.WIFUSDT for pair: WIF-USDT
+Subscribed to Bybit futures topics: tickers.PEPEUSDT, orderbook.50.PEPEUSDT, publicTrade.PEPEUSDT for pair: PEPE-USDT
+Subscribed to Bybit futures topics: tickers.BONKUSDT, orderbook.50.BONKUSDT, publicTrade.BONKUSDT for pair: BONK-USDT
+Subscribed to Bybit futures topics: tickers.SHIBUSDT, orderbook.50.SHIBUSDT, publicTrade.SHIBUSDT for pair: SHIB-USDT
+Subscribed to Bybit futures topics: tickers.XRPUSDT, orderbook.50.XRPUSDT, publicTrade.XRPUSDT for pair: XRP-USDT
+Subscribed to Bybit futures topics: tickers.ADAUSDT, orderbook.50.ADAUSDT, publicTrade.ADAUSDT for pair: ADA-USDT
+Subscribed to Bybit futures topics: tickers.DOGEUSDT, orderbook.50.DOGEUSDT, publicTrade.DOGEUSDT for pair: DOGE-USDT
+Subscribed to Bybit futures topics: tickers.AVAXUSDT, orderbook.50.AVAXUSDT, publicTrade.AVAXUSDT for pair: AVAX-USDT
+Subscribed to Bybit futures topics: tickers.DOTUSDT, orderbook.50.DOTUSDT, publicTrade.DOTUSDT for pair: DOT-USDT
+Subscribed to Bybit futures topics: tickers.MATICUSDT, orderbook.50.MATICUSDT, publicTrade.MATICUSDT for pair: MATIC-USDT
+Subscribed to Bybit futures topics: tickers.SUIUSDT, orderbook.50.SUIUSDT, publicTrade.SUIUSDT for pair: SUI-USDT
+Subscribed to Bybit futures topics: tickers.APTUSDT, orderbook.50.APTUSDT, publicTrade.APTUSDT for pair: APT-USDT
+Subscribed to Bybit futures topics: tickers.INJUSDT, orderbook.50.INJUSDT, publicTrade.INJUSDT for pair: INJ-USDT
+Subscribed to Bybit futures topics: tickers.OPUSDT, orderbook.50.OPUSDT, publicTrade.OPUSDT for pair: OP-USDT
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for BTC-USDT: $111276.3
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.34
+✅ [Bybit Futures] Updated price for BTC-USDT: $111235.1
+✅ [Bybit Futures] Updated price for BTC-USDT: $111234.6
+✅ [Bybit Futures] Updated price for ETH-USDT: $4347.85
+✅ [Bybit Futures] Updated price for ETH-USDT: $4347.79
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.407
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.123e-05
+✅ [Bybit Futures] Updated price for SOL-USDT: $209.1
+✅ [Bybit Futures] Updated price for LINK-USDT: $23.4
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for TON-USDT: $3.143
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.445
+✅ [Bybit Futures] Updated price for TON-USDT: $3.1412
+✅ [Bybit Futures] Updated price for TON-USDT: $3.1411
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4983
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.798
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.769e-06
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.0345e-05
+✅ [Bybit Futures] Updated price for NEAR-USDT: $2.443
+✅ [Bybit Futures] Updated price for ARB-USDT: $0.498
+✅ [Bybit Futures] Updated price for WIF-USDT: $0.7975
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2398e-05
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8431
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.8417
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8326
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21616
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for AVAX-USDT: $25.008
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8323
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8324
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.834
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3381
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21606
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21607
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21605
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for APT-USDT: $4.301
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for INJ-USDT: $13.113
+✅ [Bybit Futures] Updated price for AVAX-USDT: $24.999
+✅ [Bybit Futures] Updated price for DOT-USDT: $3.8323
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7145
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4983
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2398e-05
+✅ [Bybit Spot] Updated price for AVAX-USDT: $25.008
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.34
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3381
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.769e-06
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.3371
+✅ [Bybit Futures] Updated price for APT-USDT: $4.298
+✅ [Bybit Futures] Updated price for INJ-USDT: $13.108
+✅ [Bybit Futures] Updated price for INJ-USDT: $13.106
+✅ [Bybit Futures] Updated price for INJ-USDT: $13.105
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7139
+✅ [Bybit Spot] Updated price for INJ-USDT: $13.113
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.834
+✅ [Bybit Spot] Updated price for TON-USDT: $3.143
+✅ [Bybit Spot] Updated price for APT-USDT: $4.301
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.0345e-05
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8431
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.798
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8431
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8432
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8431
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.123e-05
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8323
+✅ [Bybit Futures] Updated price for ARB-USDT: $0.4981
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21607
+✅ [KuCoin Spot] WebSocket connected: ["Via": "1.1 73fab694c671d121d79ee37697f418ec.cloudfront.net (CloudFront)", "Date": "Wed, 03 Sep 2025 10:12:10 GMT", "X-Amz-Cf-Id": "vYSkTm_TW_a7KOGYh_XuQ5NQHDvLqONI9gzOwTGMLt864g-AQdR5fw==", "X-Amz-Cf-Pop": "ZRH55-P2", "X-Cache": "Miss from cloudfront", "Sec-WebSocket-Accept": "QL+PWXjbGYYGluU8kK0dizjKXR4=", "Connection": "upgrade", "Upgrade": "websocket"]
+ALERT: ✅ KuCoin Spot WebSocket connected
+Subscribed to KuCoin spot topic: /market/ticker:BTCUSDT for pair: BTC-USDT
+Subscribed to KuCoin spot topic: /market/ticker:ETHUSDT for pair: ETH-USDT
+Subscribed to KuCoin spot topic: /market/ticker:SOLUSDT for pair: SOL-USDT
+Subscribed to KuCoin spot topic: /market/ticker:LINKUSDT for pair: LINK-USDT
+Subscribed to KuCoin spot topic: /market/ticker:FLOKIUSDT for pair: FLOKI-USDT
+Subscribed to KuCoin spot topic: /market/ticker:TONUSDT for pair: TON-USDT
+Subscribed to KuCoin spot topic: /market/ticker:NEARUSDT for pair: NEAR-USDT
+Subscribed to KuCoin spot topic: /market/ticker:ARBUSDT for pair: ARB-USDT
+Subscribed to KuCoin spot topic: /market/ticker:WIFUSDT for pair: WIF-USDT
+Subscribed to KuCoin spot topic: /market/ticker:PEPEUSDT for pair: PEPE-USDT
+Subscribed to KuCoin spot topic: /market/ticker:BONKUSDT for pair: BONK-USDT
+Subscribed to KuCoin spot topic: /market/ticker:SHIBUSDT for pair: SHIB-USDT
+Subscribed to KuCoin spot topic: /market/ticker:XRPUSDT for pair: XRP-USDT
+Subscribed to KuCoin spot topic: /market/ticker:ADAUSDT for pair: ADA-USDT
+Subscribed to KuCoin spot topic: /market/ticker:DOGEUSDT for pair: DOGE-USDT
+Subscribed to KuCoin spot topic: /market/ticker:AVAXUSDT for pair: AVAX-USDT
+Subscribed to KuCoin spot topic: /market/ticker:DOTUSDT for pair: DOT-USDT
+Subscribed to KuCoin spot topic: /market/ticker:MATICUSDT for pair: MATIC-USDT
+Subscribed to KuCoin spot topic: /market/ticker:SUIUSDT for pair: SUI-USDT
+Subscribed to KuCoin spot topic: /market/ticker:APTUSDT for pair: APT-USDT
+Subscribed to KuCoin spot topic: /market/ticker:INJUSDT for pair: INJ-USDT
+Subscribed to KuCoin spot topic: /market/ticker:OPUSDT for pair: OP-USDT
+KuCoin Spot WebSocket subscription confirmed
+✅ [Bybit Spot] Updated price for BTC-USDT: $111276.3
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.407
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.445
+✅ [Bybit Futures] Updated price for LINK-USDT: $23.401
+✅ [Bybit Futures] Updated price for ETH-USDT: $4347.78
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4983
+✅ [Bybit Futures] Updated price for ETH-USDT: $4347.79
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8431
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3382
+✅ [Bybit Futures] Updated price for AVAX-USDT: $24.997
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.34
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.769e-06
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3382
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8326
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.834
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8431
+✅ [Bybit Spot] Updated price for APT-USDT: $4.301
+✅ [Bybit Spot] Updated price for INJ-USDT: $13.113
+✅ [Bybit Spot] Updated price for TON-USDT: $3.143
+✅ [Bybit Futures] Updated price for AVAX-USDT: $24.996
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.445
+Invalid order book response for kucoin-BTC-USDT-spot
+ALERT: Invalid order book response for kucoin-BTC-USDT-spot
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.337
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+✅ [Bybit Spot] Updated price for BTC-USDT: $111276.4
+✅ [Bybit Futures] Updated price for SOL-USDT: $209.11
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+✅ [Bybit Spot] Updated price for AVAX-USDT: $25.003
+✅ [Bybit Spot] Updated price for BTC-USDT: $111276.3
+✅ [Bybit Spot] Updated price for APT-USDT: $4.302
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.769e-06
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.34
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2398e-05
+✅ [Bybit Spot] Updated price for AVAX-USDT: $25.003
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+✅ [Bybit Spot] Updated price for INJ-USDT: $13.113
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.0345e-05
+✅ [Bybit Spot] Updated price for APT-USDT: $4.302
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.123e-05
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.407
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.411
+✅ [Bybit Futures] Updated price for ETH-USDT: $4347.78
+✅ [Bybit Spot] Updated price for SOL-USDT: $209.19
+✅ [Bybit Futures] Updated price for LINK-USDT: $23.402
+✅ [Bybit Spot] Updated price for AVAX-USDT: $25.005
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.35
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.35
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.35
+✅ [Bybit Spot] Updated price for APT-USDT: $4.302
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.35
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.35
+✅ [Bybit Spot] Updated price for LINK-USDT: $23.413
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.35
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.35
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.37
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.39
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.43
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.51
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.6
+✅ [Bybit Futures] Updated price for LINK-USDT: $23.405
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.67
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.71
+✅ [Bybit Spot] Updated price for ETH-USDT: $4349.71
