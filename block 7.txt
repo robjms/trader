@@ -2,487 +2,484 @@
 
 
 
-//-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
-//--------------- Block 7 - WebSocket Connection Management
-
 extension ExchangeWebSocket {
-    
-    static func subscribeToKuCoinFuturesPrices(pairs: [String]) {
-        Task { @MainActor in
-            guard kucoinFuturesIsConnected, let socket = kucoinFuturesSocket else {
-                print("❌ [WebSocket] KuCoin Futures not connected, cannot subscribe to prices")
-                logAlert(event: "❌ KuCoin Futures not connected, cannot subscribe to prices")
-                return
-            }
-            
-            let symbols = pairs.compactMap { pair in
-                return kucoinFuturesSymbols[pair]
-            }
-            
-            let subscribeMessage: [String: Any] = [
-                "id": Int.random(in: 1...999999),
-                "type": "subscribe",
-                "topic": "/contractMarket/ticker:\(symbols.joined(separator: ","))",
-                "privateChannel": false,
-                "response": true
-            ]
-            
-
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    socket.write(string: jsonString)
-                    print("✅ [WebSocket] Subscribed to KuCoin Futures prices for \(pairs.count) pairs")
-                    logAlert(event: "✅ Subscribed to KuCoin Futures prices for \(pairs.count) pairs")
-                }
-            } catch {
-                print("❌ [WebSocket] Failed to subscribe to KuCoin Futures prices: \(error)")
-                logAlert(event: "❌ Failed to subscribe to KuCoin Futures prices: \(error)")
-            }
-        }
-    }
-    
-    static func subscribeToBybitFuturesPrices(pairs: [String]) {
-        Task { @MainActor in
-            guard bybitIsConnected, let socket = bybitSocket else {
-                print("❌ [WebSocket] Bybit Futures not connected, cannot subscribe to prices")
-                logAlert(event: "❌ Bybit Futures not connected, cannot subscribe to prices")
-                return
-            }
-            
-            let symbols = pairs.map { $0.replacingOccurrences(of: "-", with: "") }
-            let topics = symbols.map { "tickers.\($0)" }
-            
-            let subscribeMessage: [String: Any] = [
-                "op": "subscribe",
-                "args": topics
-            ]
-            
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    socket.write(string: jsonString)
-                    print("✅ [WebSocket] Subscribed to Bybit Futures prices for \(pairs.count) pairs")
-                    logAlert(event: "✅ Subscribed to Bybit Futures prices for \(pairs.count) pairs")
-                }
-            } catch {
-                print("❌ [WebSocket] Failed to subscribe to Bybit Futures prices: \(error)")
-                logAlert(event: "❌ Failed to subscribe to Bybit Futures prices: \(error)")
-            }
-        }
-    }
-
-    // FIXED: Dashboard JSON Generation - Add this function to ExchangeWebSocket class
-
-    static func updateDashboardJSON() {
-        Task { @MainActor in
-            // FIXED: Write dashboard.json to the correct location where Flask can find it
-            let dashboardPath = "/Users/robertsteinegger/Desktop/BevaixBot/dashboard.json"
-            
-            // Collect LIVE price data from WebSocket feeds
-            var livePrices: [String: [String: Double]] = [:]
-            
-            for pair in tradingPairs {
-                var pairPrices: [String: Double] = [:]
-                
-                // Get current live prices (not fallback values)
-                let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
-                let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
-                let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
-                let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
-                
-                // Only include pairs with live data (price > 0)
-                if kucoinSpotPrice > 0 || bybitSpotPrice > 0 {
-                    pairPrices["kucoin_spot"] = kucoinSpotPrice
-                    pairPrices["kucoin_futures"] = kucoinFuturesPrice
-                    pairPrices["bybit_spot"] = bybitSpotPrice
-                    pairPrices["bybit_futures"] = bybitFuturesPrice
-                    livePrices[pair] = pairPrices
-                }
-            }
-            
-            // Calculate real metrics from actual data
-            let totalTrades = performanceMetrics.values.reduce(0) { $0 + $1.trades }
-            let totalProfit = performanceMetrics.values.reduce(0.0) { $0 + $1.profit }
-            let totalFees = performanceMetrics.values.reduce(0.0) { $0 + $1.fees }
-            let winningTrades = performanceMetrics.values.reduce(0) { $0 + $1.wins }
-            let winRate = totalTrades > 0 ? Double(winningTrades) / Double(totalTrades) * 100.0 : 0.0
-            
-            // Build comprehensive dashboard data
-            let dashboardData: [String: Any] = [
-                "timestamp": ISO8601DateFormatter().string(from: Date()),
-                "kucoinBalance": kucoinBalance,
-                "bybitBalance": bybitBalance,
-                "kucoinFuturesBalance": kucoinFuturesBalance,
-                "bybitFuturesBalance": bybitFuturesBalance,
-                "livePrices": livePrices,
-                "totalTrades": totalTrades,
-                "totalProfit": totalProfit,
-                "totalFees": totalFees,
-                "winRate": winRate,
-                "activePairs": tradingPairs.count,
-                "connectedExchanges": [
-                    "kucoin": kucoinIsConnected,
-                    "kucoin_futures": kucoinFuturesIsConnected,
-                    "bybit": bybitIsConnected,
-                    "bybit_futures": bybitFuturesIsConnected
-                ],
-                "tradingActive": tradingActive,
-                "dailyLoss": dailyLoss
-            ]
-            
-            // Write JSON file
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: dashboardData, options: .prettyPrinted)
-                try jsonData.write(to: URL(fileURLWithPath: dashboardPath))
-                
-                print("✅ Updated dashboard.json with live data: \(livePrices.count) pairs, \(totalTrades) trades")
-                logAlert(event: "✅ Dashboard updated: \(livePrices.count) pairs, $\(String(format: "%.2f", totalProfit)) profit")
-                
-            } catch {
-                print("❌ Failed to write dashboard.json: \(error)")
-                logAlert(event: "❌ Failed to write dashboard.json: \(error)")
-            }
-        }
-    }
-
-    // FIXED: Enhanced dashboard metrics with real-time updates
-    static func logDashboardMetrics() {
-        Task { @MainActor in
-            let timestamp = ISO8601DateFormatter().string(from: Date())
-            
-            // Count active price feeds
-            var activePairCount = 0
-            for pair in tradingPairs {
-                if (kucoinCurrentPrice[pair] ?? 0.0) > 0 || (bybitCurrentPrice[pair] ?? 0.0) > 0 {
-                    activePairCount += 1
-                }
-            }
-            
-            let metrics = """
-            [\(timestamp)] Dashboard Metrics:
-            KuCoin Balance: \(kucoinBalance) USDT
-            Bybit Balance: \(bybitBalance) USDT
-            KuCoin Futures: \(kucoinFuturesBalance) USDT
-            Bybit Futures: \(bybitFuturesBalance) USDT
-            Total Trades: \(performanceMetrics.values.reduce(0) { $0 + $1.trades })
-            Total Profit: \(performanceMetrics.values.reduce(0.0) { $0 + $1.profit }) USDT
-            Total Fees: \(performanceMetrics.values.reduce(0.0) { $0 + $1.fees }) USDT
-            Active Price Feeds: \(activePairCount)/\(tradingPairs.count)
-            WebSocket Status: KC=\(kucoinIsConnected), KCF=\(kucoinFuturesIsConnected), BB=\(bybitIsConnected), BBF=\(bybitFuturesIsConnected)
-            """
-            
-            print(metrics)
-            logAlert(event: metrics)
-            
-            // FIXED: Update dashboard JSON with every metric update
-            updateDashboardJSON()
-        }
-    }
-
-    static func connectKuCoinSpotWebSocket() {
-        print("🔄 [WebSocket] Connecting to KuCoin Spot WebSocket...")
         
-        Task { @MainActor in
-            logAlert(event: "🔄 Connecting to KuCoin Spot WebSocket...")
-        }
-        
-        // First get connection token
-        fetchKuCoinWebSocketToken { token in
+        static func subscribeToKuCoinFuturesPrices(pairs: [String]) {
             Task { @MainActor in
-                guard let websocketToken = token else {
-                    print("❌ [WebSocket] Failed to get KuCoin WebSocket token")
-                    logAlert(event: "❌ Failed to get KuCoin WebSocket token")
+                guard kucoinFuturesIsConnected, let socket = kucoinFuturesSocket else {
+                    print("❌ [WebSocket] KuCoin Futures not connected, cannot subscribe to prices")
+                    logAlert(event: "❌ KuCoin Futures not connected, cannot subscribe to prices")
                     return
                 }
                 
-                kucoinToken = websocketToken
+                let symbols = pairs.compactMap { pair in
+                    return kucoinFuturesSymbols[pair]
+                }
                 
-                // Connect to WebSocket
-                guard let url = URL(string: "wss://ws-api-spot.kucoin.com/?token=\(websocketToken)") else {
-                    print("❌ [WebSocket] Invalid KuCoin WebSocket URL")
-                    logAlert(event: "❌ Invalid KuCoin WebSocket URL")
+                let subscribeMessage: [String: Any] = [
+                    "id": Int.random(in: 1...999999),
+                    "type": "subscribe",
+                    "topic": "/contractMarket/ticker:\(symbols.joined(separator: ","))",
+                    "privateChannel": false,
+                    "response": true
+                ]
+                
+
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {
+                        socket.write(string: jsonString)
+                        print("✅ [WebSocket] Subscribed to KuCoin Futures prices for \(pairs.count) pairs")
+                        logAlert(event: "✅ Subscribed to KuCoin Futures prices for \(pairs.count) pairs")
+                    }
+                } catch {
+                    print("❌ [WebSocket] Failed to subscribe to KuCoin Futures prices: \(error)")
+                    logAlert(event: "❌ Failed to subscribe to KuCoin Futures prices: \(error)")
+                }
+            }
+        }
+        
+        static func subscribeToBybitFuturesPrices(pairs: [String]) {
+            Task { @MainActor in
+                guard bybitIsConnected, let socket = bybitSocket else {
+                    print("❌ [WebSocket] Bybit Futures not connected, cannot subscribe to prices")
+                    logAlert(event: "❌ Bybit Futures not connected, cannot subscribe to prices")
                     return
                 }
                 
-                var request = URLRequest(url: url)
-                request.timeoutInterval = TimeInterval(websocketTimeoutSeconds)
+                let symbols = pairs.map { $0.replacingOccurrences(of: "-", with: "") }
+                let topics = symbols.map { "tickers.\($0)" }
                 
-                let socket = WebSocket(request: request)
-                kucoinSocket = socket
-                socket.connect()
+                let subscribeMessage: [String: Any] = [
+                    "op": "subscribe",
+                    "args": topics
+                ]
                 
-                print("🔄 [WebSocket] KuCoin Spot WebSocket connection initiated")
-                logAlert(event: "🔄 KuCoin Spot WebSocket connection initiated")
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {
+                        socket.write(string: jsonString)
+                        print("✅ [WebSocket] Subscribed to Bybit Futures prices for \(pairs.count) pairs")
+                        logAlert(event: "✅ Subscribed to Bybit Futures prices for \(pairs.count) pairs")
+                    }
+                } catch {
+                    print("❌ [WebSocket] Failed to subscribe to Bybit Futures prices: \(error)")
+                    logAlert(event: "❌ Failed to subscribe to Bybit Futures prices: \(error)")
+                }
             }
         }
-    }
 
-    static func fetchKuCoinWebSocketToken(completion: @escaping @Sendable (String?) -> Void) {
-        guard let url = URL(string: "https://api.kucoin.com/api/v1/bullet-public") else {
-            print("❌ [API] Invalid KuCoin token URL")
-            completion(nil)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.timeoutInterval = TimeInterval(balanceFetchTimeout)
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ [API] Failed to get KuCoin WebSocket token: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                  let data = data,
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let responseData = json["data"] as? [String: Any],
-                  let token = responseData["token"] as? String else {
-                print("❌ [API] Invalid KuCoin WebSocket token response")
-                completion(nil)
-                return
-            }
-            
-            print("✅ [API] Successfully obtained KuCoin WebSocket token")
-            completion(token)
-        }
-        task.resume()
-    }
+        // FIXED: Dashboard JSON Generation - Add this function to ExchangeWebSocket class
 
-    static func fetchKuCoinFuturesWebSocketToken(completion: @escaping @Sendable (String?) -> Void) {
-        guard let url = URL(string: "https://api-futures.kucoin.com/api/v1/bullet-public") else {
-            print("❌ [API] Invalid KuCoin Futures token URL")
-            completion(nil)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.timeoutInterval = TimeInterval(balanceFetchTimeout)
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("❌ [API] Failed to get KuCoin Futures WebSocket token: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-            
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
-                  let data = data,
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let responseData = json["data"] as? [String: Any],
-                  let token = responseData["token"] as? String else {
-                print("❌ [API] Invalid KuCoin Futures WebSocket token response")
-                completion(nil)
-                return
-            }
-            
-            print("✅ [API] Successfully obtained KuCoin Futures WebSocket token")
-            completion(token)
-        }
-        task.resume()
-    }
-
-    static func connectBybitSpotWebSocket() {
-        print("🔄 [WebSocket] Connecting to Bybit Spot WebSocket...")
-        
-        Task { @MainActor in
-            logAlert(event: "🔄 Connecting to Bybit Spot WebSocket...")
-        }
-        
-        guard let url = URL(string: "wss://stream.bybit.com/v5/public/spot") else {
-            print("❌ [WebSocket] Invalid Bybit Spot WebSocket URL")
+        static func updateDashboardJSON() {
             Task { @MainActor in
-                logAlert(event: "❌ Invalid Bybit Spot WebSocket URL")
-            }
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.timeoutInterval = TimeInterval(websocketTimeoutSeconds)
-        
-        let socket = WebSocket(request: request)
-        bybitSpotSocket = socket
-        socket.connect()
-        
-        print("🔄 [WebSocket] Bybit Spot WebSocket connection initiated")
-        Task { @MainActor in
-            logAlert(event: "🔄 Bybit Spot WebSocket connection initiated")
-        }
-    }
-
-    static func connectKuCoinFuturesWebSocket() {
-        print("🔄 [WebSocket] Connecting to KuCoin Futures WebSocket...")
-        
-        Task { @MainActor in
-            logAlert(event: "🔄 Connecting to KuCoin Futures WebSocket...")
-        }
-        
-        fetchKuCoinFuturesWebSocketToken { token in
-            Task { @MainActor in
-                guard let websocketToken = token else {
-                    print("❌ [WebSocket] Failed to get KuCoin Futures WebSocket token")
-                    logAlert(event: "❌ Failed to get KuCoin Futures WebSocket token")
-                    return
-                }
+                // FIXED: Write dashboard.json to the correct location where Flask can find it
+                let dashboardPath = "/Users/robertsteinegger/Desktop/BevaixBot/dashboard.json"
                 
-                kucoinFuturesToken = websocketToken
+                // Collect LIVE price data from WebSocket feeds
+                var livePrices: [String: [String: Double]] = [:]
                 
-                guard let url = URL(string: "wss://ws-api-futures.kucoin.com/?token=\(websocketToken)") else {
-                    print("❌ [WebSocket] Invalid KuCoin Futures WebSocket URL")
-                    logAlert(event: "❌ Invalid KuCoin Futures WebSocket URL")
-                    return
-                }
-                
-                var request = URLRequest(url: url)
-                request.timeoutInterval = TimeInterval(websocketTimeoutSeconds)
-                
-                let socket = WebSocket(request: request)
-                kucoinFuturesSocket = socket
-                socket.connect()
-                
-                print("🔄 [WebSocket] KuCoin Futures WebSocket connection initiated")
-                logAlert(event: "🔄 KuCoin Futures WebSocket connection initiated")
-            }
-        }
-    }
-
-    static func connectBybitFuturesWebSocket() {
-        print("🔄 [WebSocket] Connecting to Bybit Futures WebSocket...")
-        
-        Task { @MainActor in
-            logAlert(event: "🔄 Connecting to Bybit Futures WebSocket...")
-        }
-        
-        guard let url = URL(string: "wss://stream.bybit.com/v5/public/linear") else {
-            print("❌ [WebSocket] Invalid Bybit Futures WebSocket URL")
-            Task { @MainActor in
-                logAlert(event: "❌ Invalid Bybit Futures WebSocket URL")
-            }
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.timeoutInterval = TimeInterval(websocketTimeoutSeconds)
-        
-        let socket = WebSocket(request: request)
-        bybitSocket = socket
-        socket.connect()
-        
-        print("🔄 [WebSocket] Bybit Futures WebSocket connection initiated")
-        Task { @MainActor in
-            logAlert(event: "🔄 Bybit Futures WebSocket connection initiated")
-        }
-    }
-
-    static func subscribeToAllPriceFeeds() {
-        Task { @MainActor in
-            let pairs = tradingPairs
-            logAlert(event: "🔄 Subscribing to price feeds for \(pairs.count) pairs: \(pairs.joined(separator: ", "))")
-            
-            // Subscribe to KuCoin Spot
-            subscribeToKuCoinSpotPrices(pairs: pairs)
-            
-            // Subscribe to KuCoin Futures
-            subscribeToKuCoinFuturesPrices(pairs: pairs)
-            
-            // Subscribe to Bybit Spot
-            subscribeToBybitSpotPrices(pairs: pairs)
-            
-            // Subscribe to Bybit Futures
-            subscribeToBybitFuturesPrices(pairs: pairs)
-        }
-    }
-
-    static func subscribeToKuCoinSpotPrices(pairs: [String]) {
-        Task { @MainActor in
-            guard kucoinIsConnected, let socket = kucoinSocket else {
-                print("❌ [WebSocket] KuCoin Spot not connected, cannot subscribe to prices")
-                logAlert(event: "❌ KuCoin Spot not connected, cannot subscribe to prices")
-                return
-            }
-            
-            let symbols = pairs.map { $0.replacingOccurrences(of: "-", with: "") }
-            let subscribeMessage: [String: Any] = [
-                "id": Int.random(in: 1...999999),
-                "type": "subscribe",
-                "topic": "/market/ticker:\(symbols.joined(separator: ","))",
-                "privateChannel": false,
-                "response": true
-            ]
-            
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    socket.write(string: jsonString)
-                    print("✅ [WebSocket] Subscribed to KuCoin Spot prices for \(pairs.count) pairs")
-                    logAlert(event: "✅ Subscribed to KuCoin Spot prices for \(pairs.count) pairs")
-                }
-            } catch {
-                print("❌ [WebSocket] Failed to subscribe to KuCoin Spot prices: \(error)")
-                logAlert(event: "❌ Failed to subscribe to KuCoin Spot prices: \(error)")
-            }
-        }
-    }
-
-    static func subscribeToBybitSpotPrices(pairs: [String]) {
-        Task { @MainActor in
-            guard bybitFuturesIsConnected, let socket = bybitSpotSocket else {
-                print("❌ [WebSocket] Bybit Spot not connected, cannot subscribe to prices")
-                logAlert(event: "❌ Bybit Spot not connected, cannot subscribe to prices")
-                return
-            }
-            
-            let symbols = pairs.map { $0.replacingOccurrences(of: "-", with: "") }
-            let topics = symbols.map { "tickers.\($0)" }
-            
-            let subscribeMessage: [String: Any] = [
-                "op": "subscribe",
-                "args": topics
-            ]
-            
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    socket.write(string: jsonString)
-                    print("✅ [WebSocket] Subscribed to Bybit Spot prices for \(pairs.count) pairs")
-                    logAlert(event: "✅ Subscribed to Bybit Spot prices for \(pairs.count) pairs")
-                }
-            } catch {
-                print("❌ [WebSocket] Failed to subscribe to Bybit Spot prices: \(error)")
-                logAlert(event: "❌ Failed to subscribe to Bybit Spot prices: \(error)")
-            }
-        }
-    }
-
-    static func initializeAllWebSocketConnections() {
-        Task { @MainActor in
-            logAlert(event: "🚀 Initializing all WebSocket connections...")
-            
-            // Connect to all exchanges
-            connectKuCoinSpotWebSocket()
-            connectBybitSpotWebSocket()
-            connectKuCoinFuturesWebSocket()
-            connectBybitFuturesWebSocket()
-            
-            // Wait for connections to establish
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                subscribeToAllPriceFeeds()
-                
-                // Start periodic dashboard updates
-                Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
-                    Task { @MainActor in
-                        updateDashboardJSON()
+                for pair in tradingPairs {
+                    var pairPrices: [String: Double] = [:]
+                    
+                    // Get current live prices (not fallback values)
+                    let kucoinSpotPrice = kucoinCurrentPrice[pair] ?? 0.0
+                    let kucoinFuturesPrice = kucoinCurrentFuturesPrice[pair] ?? 0.0
+                    let bybitSpotPrice = bybitCurrentPrice[pair] ?? 0.0
+                    let bybitFuturesPrice = bybitCurrentFuturesPrice[pair] ?? 0.0
+                    
+                    // Only include pairs with live data (price > 0)
+                    if kucoinSpotPrice > 0 || bybitSpotPrice > 0 {
+                        pairPrices["kucoin_spot"] = kucoinSpotPrice
+                        pairPrices["kucoin_futures"] = kucoinFuturesPrice
+                        pairPrices["bybit_spot"] = bybitSpotPrice
+                        pairPrices["bybit_futures"] = bybitFuturesPrice
+                        livePrices[pair] = pairPrices
                     }
                 }
                 
+                // Calculate real metrics from actual data
+                let totalTrades = performanceMetrics.values.reduce(0) { $0 + $1.trades }
+                let totalProfit = performanceMetrics.values.reduce(0.0) { $0 + $1.profit }
+                let totalFees = performanceMetrics.values.reduce(0.0) { $0 + $1.fees }
+                let winningTrades = performanceMetrics.values.reduce(0) { $0 + $1.wins }
+                let winRate = totalTrades > 0 ? Double(winningTrades) / Double(totalTrades) * 100.0 : 0.0
+                
+                // Build comprehensive dashboard data
+                let dashboardData: [String: Any] = [
+                    "timestamp": ISO8601DateFormatter().string(from: Date()),
+                    "kucoinBalance": kucoinBalance,
+                    "bybitBalance": bybitBalance,
+                    "kucoinFuturesBalance": kucoinFuturesBalance,
+                    "bybitFuturesBalance": bybitFuturesBalance,
+                    "livePrices": livePrices,
+                    "totalTrades": totalTrades,
+                    "totalProfit": totalProfit,
+                    "totalFees": totalFees,
+                    "winRate": winRate,
+                    "activePairs": tradingPairs.count,
+                    "connectedExchanges": [
+                        "kucoin": kucoinIsConnected,
+                        "kucoin_futures": kucoinFuturesIsConnected,
+                        "bybit": bybitIsConnected,
+                        "bybit_futures": bybitFuturesIsConnected
+                    ],
+                    "tradingActive": tradingActive,
+                    "dailyLoss": dailyLoss
+                ]
+                
+                // Write JSON file
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: dashboardData, options: .prettyPrinted)
+                    try jsonData.write(to: URL(fileURLWithPath: dashboardPath))
+                    
+                    print("✅ Updated dashboard.json with live data: \(livePrices.count) pairs, \(totalTrades) trades")
+                    logAlert(event: "✅ Dashboard updated: \(livePrices.count) pairs, $\(String(format: "%.2f", totalProfit)) profit")
+                    
+                } catch {
+                    print("❌ Failed to write dashboard.json: \(error)")
+                    logAlert(event: "❌ Failed to write dashboard.json: \(error)")
+                }
+            }
+        }
+
+        // FIXED: Enhanced dashboard metrics with real-time updates
+        static func logDashboardMetrics() {
+            Task { @MainActor in
+                let timestamp = ISO8601DateFormatter().string(from: Date())
+                
+                // Count active price feeds
+                var activePairCount = 0
+                for pair in tradingPairs {
+                    if (kucoinCurrentPrice[pair] ?? 0.0) > 0 || (bybitCurrentPrice[pair] ?? 0.0) > 0 {
+                        activePairCount += 1
+                    }
+                }
+                
+                let metrics = """
+                [\(timestamp)] Dashboard Metrics:
+                KuCoin Balance: \(kucoinBalance) USDT
+                Bybit Balance: \(bybitBalance) USDT
+                KuCoin Futures: \(kucoinFuturesBalance) USDT
+                Bybit Futures: \(bybitFuturesBalance) USDT
+                Total Trades: \(performanceMetrics.values.reduce(0) { $0 + $1.trades })
+                Total Profit: \(performanceMetrics.values.reduce(0.0) { $0 + $1.profit }) USDT
+                Total Fees: \(performanceMetrics.values.reduce(0.0) { $0 + $1.fees }) USDT
+                Active Price Feeds: \(activePairCount)/\(tradingPairs.count)
+                WebSocket Status: KC=\(kucoinIsConnected), KCF=\(kucoinFuturesIsConnected), BB=\(bybitIsConnected), BBF=\(bybitFuturesIsConnected)
+                """
+                
+                print(metrics)
+                logAlert(event: metrics)
+                
+                // FIXED: Update dashboard JSON with every metric update
+                updateDashboardJSON()
+            }
+        }
+
+        static func connectKuCoinSpotWebSocket() {
+            print("🔄 [WebSocket] Connecting to KuCoin Spot WebSocket...")
+            
+            Task { @MainActor in
+                logAlert(event: "🔄 Connecting to KuCoin Spot WebSocket...")
+            }
+            
+            // First get connection token
+            fetchKuCoinWebSocketToken { token in
                 Task { @MainActor in
-                    logAlert(event: "✅ All WebSocket connections and subscriptions initialized")
+                    guard let websocketToken = token else {
+                        print("❌ [WebSocket] Failed to get KuCoin WebSocket token")
+                        logAlert(event: "❌ Failed to get KuCoin WebSocket token")
+                        return
+                    }
+                    
+                    kucoinToken = websocketToken
+                    
+                    // Connect to WebSocket
+                    guard let url = URL(string: "wss://ws-api-spot.kucoin.com/?token=\(websocketToken)") else {
+                        print("❌ [WebSocket] Invalid KuCoin WebSocket URL")
+                        logAlert(event: "❌ Invalid KuCoin WebSocket URL")
+                        return
+                    }
+                    
+                    var request = URLRequest(url: url)
+                    request.timeoutInterval = TimeInterval(websocketTimeoutSeconds)
+                    
+                    let socket = WebSocket(request: request)
+                    kucoinSocket = socket
+                    socket.connect()
+                    
+                    print("🔄 [WebSocket] KuCoin Spot WebSocket connection initiated")
+                    logAlert(event: "🔄 KuCoin Spot WebSocket connection initiated")
+                }
+            }
+        }
+
+        static func fetchKuCoinWebSocketToken(completion: @escaping @Sendable (String?) -> Void) {
+            guard let url = URL(string: "https://api.kucoin.com/api/v1/bullet-public") else {
+                print("❌ [API] Invalid KuCoin token URL")
+                completion(nil)
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.timeoutInterval = TimeInterval(balanceFetchTimeout)
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("❌ [API] Failed to get KuCoin WebSocket token: \(error.localizedDescription)")
+                    completion(nil)
+                    return
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
+                      let data = data,
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let responseData = json["data"] as? [String: Any],
+                      let token = responseData["token"] as? String else {
+                    print("❌ [API] Invalid KuCoin WebSocket token response")
+                    completion(nil)
+                    return
+                }
+                
+                print("✅ [API] Successfully obtained KuCoin WebSocket token")
+                completion(token)
+            }
+            task.resume()
+        }
+
+        static func fetchKuCoinFuturesWebSocketToken(completion: @escaping @Sendable (String?) -> Void) {
+            guard let url = URL(string: "https://api-futures.kucoin.com/api/v1/bullet-public") else {
+                print("❌ [API] Invalid KuCoin Futures token URL")
+                completion(nil)
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.timeoutInterval = TimeInterval(balanceFetchTimeout)
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("❌ [API] Failed to get KuCoin Futures WebSocket token: \(error.localizedDescription)")
+                    completion(nil)
+                    return
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
+                      let data = data,
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let responseData = json["data"] as? [String: Any],
+                      let token = responseData["token"] as? String else {
+                    print("❌ [API] Invalid KuCoin Futures WebSocket token response")
+                    completion(nil)
+                    return
+                }
+                
+                print("✅ [API] Successfully obtained KuCoin Futures WebSocket token")
+                completion(token)
+            }
+            task.resume()
+        }
+
+        static func connectBybitSpotWebSocket() {
+            print("🔄 [WebSocket] Connecting to Bybit Spot WebSocket...")
+            
+            Task { @MainActor in
+                logAlert(event: "🔄 Connecting to Bybit Spot WebSocket...")
+            }
+            
+            guard let url = URL(string: "wss://stream.bybit.com/v5/public/spot") else {
+                print("❌ [WebSocket] Invalid Bybit Spot WebSocket URL")
+                Task { @MainActor in
+                    logAlert(event: "❌ Invalid Bybit Spot WebSocket URL")
+                }
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.timeoutInterval = TimeInterval(websocketTimeoutSeconds)
+            
+            let socket = WebSocket(request: request)
+            bybitSpotSocket = socket
+            socket.connect()
+            
+            print("🔄 [WebSocket] Bybit Spot WebSocket connection initiated")
+            Task { @MainActor in
+                logAlert(event: "🔄 Bybit Spot WebSocket connection initiated")
+            }
+        }
+
+        static func connectKuCoinFuturesWebSocket() {
+            print("🔄 [WebSocket] Connecting to KuCoin Futures WebSocket...")
+            
+            Task { @MainActor in
+                logAlert(event: "🔄 Connecting to KuCoin Futures WebSocket...")
+            }
+            
+            fetchKuCoinFuturesWebSocketToken { token in
+                Task { @MainActor in
+                    guard let websocketToken = token else {
+                        print("❌ [WebSocket] Failed to get KuCoin Futures WebSocket token")
+                        logAlert(event: "❌ Failed to get KuCoin Futures WebSocket token")
+                        return
+                    }
+                    
+                    kucoinFuturesToken = websocketToken
+                    
+                    guard let url = URL(string: "wss://ws-api-futures.kucoin.com/?token=\(websocketToken)") else {
+                        print("❌ [WebSocket] Invalid KuCoin Futures WebSocket URL")
+                        logAlert(event: "❌ Invalid KuCoin Futures WebSocket URL")
+                        return
+                    }
+                    
+                    var request = URLRequest(url: url)
+                    request.timeoutInterval = TimeInterval(websocketTimeoutSeconds)
+                    
+                    let socket = WebSocket(request: request)
+                    kucoinFuturesSocket = socket
+                    socket.connect()
+                    
+                    print("🔄 [WebSocket] KuCoin Futures WebSocket connection initiated")
+                    logAlert(event: "🔄 KuCoin Futures WebSocket connection initiated")
+                }
+            }
+        }
+
+        static func connectBybitFuturesWebSocket() {
+            print("🔄 [WebSocket] Connecting to Bybit Futures WebSocket...")
+            
+            Task { @MainActor in
+                logAlert(event: "🔄 Connecting to Bybit Futures WebSocket...")
+            }
+            
+            guard let url = URL(string: "wss://stream.bybit.com/v5/public/linear") else {
+                print("❌ [WebSocket] Invalid Bybit Futures WebSocket URL")
+                Task { @MainActor in
+                    logAlert(event: "❌ Invalid Bybit Futures WebSocket URL")
+                }
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.timeoutInterval = TimeInterval(websocketTimeoutSeconds)
+            
+            let socket = WebSocket(request: request)
+            bybitSocket = socket
+            socket.connect()
+            
+            print("🔄 [WebSocket] Bybit Futures WebSocket connection initiated")
+            Task { @MainActor in
+                logAlert(event: "🔄 Bybit Futures WebSocket connection initiated")
+            }
+        }
+
+        static func subscribeToAllPriceFeeds() {
+            Task { @MainActor in
+                let pairs = tradingPairs
+                logAlert(event: "🔄 Subscribing to price feeds for \(pairs.count) pairs: \(pairs.joined(separator: ", "))")
+                
+                // Subscribe to KuCoin Spot
+                subscribeToKuCoinSpotPrices(pairs: pairs)
+                
+                // Subscribe to KuCoin Futures
+                subscribeToKuCoinFuturesPrices(pairs: pairs)
+                
+                // Subscribe to Bybit Spot
+                subscribeToBybitSpotPrices(pairs: pairs)
+                
+                // Subscribe to Bybit Futures
+                subscribeToBybitFuturesPrices(pairs: pairs)
+            }
+        }
+
+        static func subscribeToKuCoinSpotPrices(pairs: [String]) {
+            Task { @MainActor in
+                guard kucoinIsConnected, let socket = kucoinSocket else {
+                    print("❌ [WebSocket] KuCoin Spot not connected, cannot subscribe to prices")
+                    logAlert(event: "❌ KuCoin Spot not connected, cannot subscribe to prices")
+                    return
+                }
+                
+                let symbols = pairs.map { $0.replacingOccurrences(of: "-", with: "") }
+                let subscribeMessage: [String: Any] = [
+                    "id": Int.random(in: 1...999999),
+                    "type": "subscribe",
+                    "topic": "/market/ticker:\(symbols.joined(separator: ","))",
+                    "privateChannel": false,
+                    "response": true
+                ]
+                
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {
+                        socket.write(string: jsonString)
+                        print("✅ [WebSocket] Subscribed to KuCoin Spot prices for \(pairs.count) pairs")
+                        logAlert(event: "✅ Subscribed to KuCoin Spot prices for \(pairs.count) pairs")
+                    }
+                } catch {
+                    print("❌ [WebSocket] Failed to subscribe to KuCoin Spot prices: \(error)")
+                    logAlert(event: "❌ Failed to subscribe to KuCoin Spot prices: \(error)")
+                }
+            }
+        }
+
+        static func subscribeToBybitSpotPrices(pairs: [String]) {
+            Task { @MainActor in
+                guard bybitFuturesIsConnected, let socket = bybitSpotSocket else {
+                    print("❌ [WebSocket] Bybit Spot not connected, cannot subscribe to prices")
+                    logAlert(event: "❌ Bybit Spot not connected, cannot subscribe to prices")
+                    return
+                }
+                
+                let symbols = pairs.map { $0.replacingOccurrences(of: "-", with: "") }
+                let topics = symbols.map { "tickers.\($0)" }
+                
+                let subscribeMessage: [String: Any] = [
+                    "op": "subscribe",
+                    "args": topics
+                ]
+                
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {
+                        socket.write(string: jsonString)
+                        print("✅ [WebSocket] Subscribed to Bybit Spot prices for \(pairs.count) pairs")
+                        logAlert(event: "✅ Subscribed to Bybit Spot prices for \(pairs.count) pairs")
+                    }
+                } catch {
+                    print("❌ [WebSocket] Failed to subscribe to Bybit Spot prices: \(error)")
+                    logAlert(event: "❌ Failed to subscribe to Bybit Spot prices: \(error)")
+                }
+            }
+        }
+
+        static func initializeAllWebSocketConnections() {
+            Task { @MainActor in
+                logAlert(event: "🚀 Initializing all WebSocket connections...")
+                
+                // Connect to all exchanges
+                connectKuCoinSpotWebSocket()
+                connectBybitSpotWebSocket()
+                connectKuCoinFuturesWebSocket()
+                connectBybitFuturesWebSocket()
+                
+                // Wait for connections to establish
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                    subscribeToAllPriceFeeds()
+                    
+                    // Start periodic dashboard updates
+                    Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+                        Task { @MainActor in
+                            updateDashboardJSON()
+                        }
+                    }
+                    
+                    Task { @MainActor in
+                        logAlert(event: "✅ All WebSocket connections and subscriptions initialized")
+                    }
                 }
             }
         }
     }
-}
