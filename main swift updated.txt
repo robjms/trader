@@ -3372,8 +3372,7 @@ extension ExchangeWebSocket {
 
 //------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
 
-//--------------- Block 6 - Account Balance and API Initialization
-// VARIABLES TO ADD: Add to Block 1 if not present: static var kucoinToken: String?, static var kucoinFuturesToken: String?
+
 
 extension ExchangeWebSocket {
     
@@ -8567,6 +8566,9 @@ DispatchQueue.main.async {
 }
 
 RunLoop.main.run()
+
+
+
 
 //---------------------------------------------------------------------------------------------------------Block 15 - High-Frequency Trading Scalping
 
