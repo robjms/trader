@@ -258,3 +258,6 @@ Specific fill will be requested.
 
 "Fix the errors  by replacing relevant lines with the provided corrected versions, integrating them without removing other parts."Apply the fix and output ONLY the full fixed code.
 
+so the next issue is getting the bot to connect yo kucoin and get the dashboard to show live data and kucoin data
+
+
