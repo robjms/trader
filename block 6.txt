@@ -1,6 +1,7 @@
-// VARIABLES TO ADD: None - All variables included in previous blocks
+
 
 extension ExchangeWebSocket {
+    
     static func monitorFundingRateArbitrage() {
         Task {
             await withTaskGroup(of: Void.self) { group in
@@ -56,37 +57,6 @@ extension ExchangeWebSocket {
         }
     }
 
-    // FIXED: Added missing evaluateFundingRateMomentum function
-    static func evaluateFundingRateMomentum(pair: String, kucoinFundingRate: Double, bybitFundingRate: Double) async {
-        let threshold = getDouble("FUNDING_MOMENTUM_THRESHOLD", defaultValue: 0.00008)
-        let rateDifference = abs(kucoinFundingRate - bybitFundingRate)
-        
-        guard rateDifference > threshold else {
-            print("DEBUG: Funding rate difference below threshold for \(pair): \(rateDifference) <= \(threshold)")
-            return
-        }
-        
-        // Determine which exchange has higher funding rate (short side)
-        let highRateExchange = kucoinFundingRate > bybitFundingRate ? "kucoin" : "bybit"
-        let lowRateExchange = kucoinFundingRate > bybitFundingRate ? "bybit" : "kucoin"
-        
-        let profit = rateDifference * futuresTradeAmount
-        let minProfitRequired = getDouble("FUTURES_MIN_PROFIT_PERCENTAGE", defaultValue: 0.001) * futuresTradeAmount
-        
-        guard profit > minProfitRequired else {
-            print("DEBUG: Funding rate momentum profit too low for \(pair): \(profit) <= \(minProfitRequired)")
-            return
-        }
-        
-        await MainActor.run {
-            print("✅ Funding rate momentum opportunity for \(pair): \(highRateExchange)=\(kucoinFundingRate > bybitFundingRate ? kucoinFundingRate : bybitFundingRate), \(lowRateExchange)=\(kucoinFundingRate > bybitFundingRate ? bybitFundingRate : kucoinFundingRate), Expected profit: \(profit)")
-            logAlert(event: "Funding rate momentum opportunity for \(pair): Expected profit \(profit), Rate diff: \(rateDifference)")
-            
-            // Log the opportunity
-            futuresArbitrageExecuted[pair] = (profit: profit, timestamp: Date())
-        }
-    }
-
     static func fetchKuCoinWsToken(completion: @escaping @Sendable (String?) -> Void) {
         let url = URL(string: "https://api.kucoin.com/api/v1/bullet-public")!
         var request = URLRequest(url: url)
@@ -134,13 +104,9 @@ extension ExchangeWebSocket {
                     return
                 }
                 
+                print("DEBUG: Successfully fetched KuCoin WebSocket token")
                 Task { @MainActor in
-                    kucoinToken = token
-                    print("DEBUG: Fetched KuCoin WebSocket token: \(token)")
-                    kucoinSocket = WebSocket(request: URLRequest(url: URL(string: "wss://ws-api.kucoin.com/endpoint?token=\(token)")!))
-                    kucoinSocket?.delegate = kucoinDelegate
-                    kucoinSocket?.connect()
-                    print("DEBUG: KuCoin WebSocket connected for token: \(token)")
+                    logAlert(event: "Successfully fetched KuCoin WebSocket token")
                 }
                 completion(token)
             } catch {
@@ -200,13 +166,9 @@ extension ExchangeWebSocket {
                     return
                 }
                 
+                print("DEBUG: Successfully fetched KuCoin Futures WebSocket token")
                 Task { @MainActor in
-                    kucoinFuturesToken = token
-                    print("DEBUG: Fetched KuCoin Futures WebSocket token: \(token)")
-                    kucoinFuturesSocket = WebSocket(request: URLRequest(url: URL(string: "wss://ws-api-futures.kucoin.com/endpoint?token=\(token)")!))
-                    kucoinFuturesSocket?.delegate = kucoinFuturesDelegate
-                    kucoinFuturesSocket?.connect()
-                    print("DEBUG: KuCoin Futures WebSocket connected for token: \(token)")
+                    logAlert(event: "Successfully fetched KuCoin Futures WebSocket token")
                 }
                 completion(token)
             } catch {
@@ -301,6 +263,7 @@ extension ExchangeWebSocket {
                 Task { @MainActor in
                     kucoinBalance = balance
                     print("DEBUG: Fetched KuCoin balance: \(balance)")
+                    logAlert(event: "Successfully fetched KuCoin balance: \(balance)")
                     completion(balance)
                 }
             } catch {
@@ -399,6 +362,7 @@ extension ExchangeWebSocket {
                 Task { @MainActor in
                     bybitBalance = balance
                     print("DEBUG: Fetched Bybit balance: \(balance)")
+                    logAlert(event: "Successfully fetched Bybit balance: \(balance)")
                     completion(balance)
                 }
             } catch {
