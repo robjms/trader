@@ -1,339 +1,61 @@
-ok so terminal output: 
+Errors 
 
-DEBUG: Fetched sentiment score for MATIC-USDT: 0.1
-ALERT: 🟢 SUCCESS: Fetched sentiment score for MATIC-USDT: 0.1
-DEBUG: Initialized sentiment score for MATIC-USDT: 0.1
-DEBUG: Fetched sentiment score for SUI-USDT: 0.1
-ALERT: 🟢 SUCCESS: Fetched sentiment score for SUI-USDT: 0.1
-DEBUG: Initialized sentiment score for SUI-USDT: 0.1
-DEBUG: Fetched sentiment score for APT-USDT: 0.1
-ALERT: 🟢 SUCCESS: Fetched sentiment score for APT-USDT: 0.1
-DEBUG: Initialized sentiment score for APT-USDT: 0.1
-DEBUG: Fetched sentiment score for OP-USDT: 0.1
-ALERT: 🟢 SUCCESS: Fetched sentiment score for OP-USDT: 0.1
-DEBUG: Initialized sentiment score for OP-USDT: 0.1
-DEBUG: Fetched sentiment score for INJ-USDT: 0.1
-ALERT: 🟢 SUCCESS: Fetched sentiment score for INJ-USDT: 0.1
-DEBUG: Initialized sentiment score for INJ-USDT: 0.1
-Invalid order book response for kucoin-BTC-USDT-spot
-ALERT: Invalid order book response for kucoin-BTC-USDT-spot
-🔴 DEBUG: KuCoin WebSocket token response status: 200
-🔴 DEBUG: KuCoin WebSocket token response body: {"code":"200000","data":{"token":"2neAiuYvAU737TOajb2U3uT8AEZqSWYe0fBD4LoHuXJDSC7gIzJiH4kNTWhCPISWo6nDpAe7aUauJz42FAfOWSuqL5KQsOFCkL0SCbgsQmRGOJ1C5eWCpnwZIngtMdMrjqPnP-biofFWbNaP1cl0X1pZc2SQ-33hDH1LgNP-yg_t7Pgud3c6WhAMUbFQIq0N.px6CeXjgn4JVFx1Zk8aDwA==","instanceServers":[{"endpoint":"wss://ws-api-spot.kucoin.com/","encrypt":true,"protocol":"websocket","pingInterval":18000,"pingTimeout":10000}]}}
-🔴 SUCCESS: Fetched KuCoin WebSocket token: 2neAiuYvAU737TOajb2U...
-ALERT: 🔴 SUCCESS: Fetched KuCoin WebSocket token successfully
-🔴 DEBUG: Connecting to KuCoin WebSocket: wss://ws-api-spot.kucoin.com/?token=2neAiuYvAU737TOajb2U3uT8AEZqSWYe0fBD4LoHuXJDSC7gIzJiH4kNTWhCPISWo6nDpAe7aUauJz42FAfOWSuqL5KQsOFCkL0SCbgsQmRGOJ1C5eWCpnwZIngtMdMrjqPnP-biofFWbNaP1cl0X1pZc2SQ-33hDH1LgNP-yg_t7Pgud3c6WhAMUbFQIq0N.px6CeXjgn4JVFx1Zk8aDwA==
-✅ [Bybit Spot] WebSocket connected: ["X-Amz-Cf-Pop": "ZRH52-P1", "X-Cache": "Miss from cloudfront", "Via": "1.1 e88b7159f8022f6a253ca0d3e23a4574.cloudfront.net (CloudFront)", "Sec-WebSocket-Accept": "XuQvTTO2uA3hqQk8nEC0g1AgGPY=", "Connection": "upgrade", "X-Amz-Cf-Id": "6XW0fcXw-eVN0nw5hQudZDgSUFXc_kkB71gwft-Rblhq5UAHMBss6Q==", "Upgrade": "websocket", "Date": "Tue, 02 Sep 2025 17:16:38 GMT"]
-ALERT: ✅ Bybit Spot WebSocket connected
-Subscribed to Bybit spot topics: tickers.BTCUSDT, orderbook.50.BTCUSDT, publicTrade.BTCUSDT for pair: BTC-USDT
-Subscribed to Bybit spot topics: tickers.ETHUSDT, orderbook.50.ETHUSDT, publicTrade.ETHUSDT for pair: ETH-USDT
-Subscribed to Bybit spot topics: tickers.SOLUSDT, orderbook.50.SOLUSDT, publicTrade.SOLUSDT for pair: SOL-USDT
-Subscribed to Bybit spot topics: tickers.LINKUSDT, orderbook.50.LINKUSDT, publicTrade.LINKUSDT for pair: LINK-USDT
-Subscribed to Bybit spot topics: tickers.FLOKIUSDT, orderbook.50.FLOKIUSDT, publicTrade.FLOKIUSDT for pair: FLOKI-USDT
-✅ [Bybit Futures] Updated price for OP-USDT: $0.697
-✅ [Bybit Futures] Updated price for XRP-USDT: $2.7911
-✅ [Bybit Spot] Updated price for NEAR-USDT: $2.381
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.46
-✅ [KuCoin Spot] WebSocket connected: ["Date": "Tue, 02 Sep 2025 17:16:39 GMT", "Upgrade": "websocket", "Sec-WebSocket-Accept": "jTTaaaQHu5b1af5AwfODiqi0Rv4=", "Connection": "upgrade", "X-Amz-Cf-Pop": "ZRH55-P2", "X-Cache": "Miss from cloudfront", "X-Amz-Cf-Id": "tH0mZwDZ43X4ZvPAw44B4gjW370wVxnxg-fSfc0N9oniWBnsmiMSbA==", "Via": "1.1 a5b35da3a37f3b4542ea89737243a522.cloudfront.net (CloudFront)"]
-ALERT: ✅ KuCoin Spot WebSocket connected
-Subscribed to KuCoin spot topic: /market/ticker:BTCUSDT for pair: BTC-USDT
-Subscribed to KuCoin spot topic: /market/ticker:ETHUSDT for pair: ETH-USDT
-Subscribed to KuCoin spot topic: /market/ticker:SOLUSDT for pair: SOL-USDT
-Subscribed to KuCoin spot topic: /market/ticker:LINKUSDT for pair: LINK-USDT
-Subscribed to KuCoin spot topic: /market/ticker:FLOKIUSDT for pair: FLOKI-USDT
-Subscribed to KuCoin spot topic: /market/ticker:TONUSDT for pair: TON-USDT
-Subscribed to KuCoin spot topic: /market/ticker:NEARUSDT for pair: NEAR-USDT
-Subscribed to KuCoin spot topic: /market/ticker:ARBUSDT for pair: ARB-USDT
-Subscribed to KuCoin spot topic: /market/ticker:WIFUSDT for pair: WIF-USDT
-Subscribed to KuCoin spot topic: /market/ticker:PEPEUSDT for pair: PEPE-USDT
-Subscribed to KuCoin spot topic: /market/ticker:BONKUSDT for pair: BONK-USDT
-Subscribed to KuCoin spot topic: /market/ticker:SHIBUSDT for pair: SHIB-USDT
-Subscribed to KuCoin spot topic: /market/ticker:XRPUSDT for pair: XRP-USDT
-Subscribed to KuCoin spot topic: /market/ticker:ADAUSDT for pair: ADA-USDT
-Subscribed to KuCoin spot topic: /market/ticker:DOGEUSDT for pair: DOGE-USDT
-Subscribed to KuCoin spot topic: /market/ticker:AVAXUSDT for pair: AVAX-USDT
-Subscribed to KuCoin spot topic: /market/ticker:DOTUSDT for pair: DOT-USDT
-Subscribed to KuCoin spot topic: /market/ticker:MATICUSDT for pair: MATIC-USDT
-Subscribed to KuCoin spot topic: /market/ticker:SUIUSDT for pair: SUI-USDT
-Subscribed to KuCoin spot topic: /market/ticker:APTUSDT for pair: APT-USDT
-Subscribed to KuCoin spot topic: /market/ticker:INJUSDT for pair: INJ-USDT
-Subscribed to KuCoin spot topic: /market/ticker:OPUSDT for pair: OP-USDT
-KuCoin Spot WebSocket subscription confirmed
-✅ [Bybit Futures] Updated price for BTC-USDT: $110748.8
-✅ [Bybit Spot] Updated price for ETH-USDT: $4297.89
-✅ [Bybit Spot] Updated price for OP-USDT: $0.697
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4908
-✅ [Bybit Futures] Updated price for BTC-USDT: $110748.9
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.2501
-✅ [Bybit Spot] Updated price for ETH-USDT: $4297.89
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.647e-06
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.5
-✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2342e-05
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.7917
-✅ [Bybit Spot] Updated price for WIF-USDT: $0.8054
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.836
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.772
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.8153
-✅ [Bybit Spot] Updated price for APT-USDT: $4.296
-✅ [Bybit Spot] Updated price for TON-USDT: $3.139
-✅ [Bybit Spot] Updated price for BONK-USDT: $2.0203e-05
-✅ [Bybit Futures] Updated price for BTC-USDT: $110748.8
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.066e-05
-✅ [Bybit Spot] Updated price for BTC-USDT: $110789.8
-✅ [Bybit Spot] Updated price for LINK-USDT: $23.005
-✅ [Bybit Spot] Updated price for NEAR-USDT: $2.381
-🔴 SUCCESS: KuCoin WebSocket marked as connected
-ALERT: 🔴 SUCCESS: KuCoin WebSocket connected successfully
-✅ [Bybit Futures] Updated price for BTC-USDT: $110748.9
-✅ [Bybit Futures] Updated price for ETH-USDT: $4295.85
-✅ [Bybit Spot] Updated price for ETH-USDT: $4297.89
-Invalid order book response for kucoin-BTC-USDT-spot
-ALERT: Invalid order book response for kucoin-BTC-USDT-spot
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4908
-✅ [Bybit Futures] Updated price for BTC-USDT: $110749.5
-✅ [Bybit Spot] Updated price for ETH-USDT: $4297.88
-✅ [Bybit Futures] Updated price for ARB-USDT: $0.4909
-✅ [Bybit Spot] Updated price for APT-USDT: $4.297
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.42
-✅ [Bybit Futures] Updated price for SUI-USDT: $3.2497
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.772
-✅ [Bybit Futures] Updated price for ETH-USDT: $4296.21
-✅ [Bybit Futures] Updated price for NEAR-USDT: $2.38
-✅ [Bybit Futures] Updated price for SUI-USDT: $3.2497
-DEBUG: Max retries reached, using cached depth for kucoin-BTC-USDT-spot: 0.0
-ALERT: Max retries reached for order book fetch: kucoin-BTC-USDT-spot
-ALERT: Updated order book for kucoin-BTC-USDT-spot
-✅ [Bybit Futures] Updated price for DOGE-USDT: $0.2122
-✅ [Bybit Futures] Updated price for ADA-USDT: $0.8148
-✅ [Bybit Futures] Updated price for XRP-USDT: $2.7914
-✅ [Bybit Futures] Updated price for LINK-USDT: $23.007
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.7926
-✅ [Bybit Spot] Updated price for DOGE-USDT: $0.2123
-✅ [Bybit Futures] Updated price for ETH-USDT: $4296.53
-✅ [Bybit Spot] Updated price for ETH-USDT: $4298.53
-✅ [Bybit Futures] Updated price for OP-USDT: $0.6971
-✅ [Bybit Spot] Updated price for ETH-USDT: $4298.68
-✅ [Bybit Spot] Updated price for ETH-USDT: $4298.68
-✅ [Bybit Futures] Updated price for DOT-USDT: $3.7704
-✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21222
-✅ [Bybit Futures] Updated price for ARB-USDT: $0.4909
-✅ [Bybit Futures] Updated price for XRP-USDT: $2.7915
-✅ [Bybit Futures] Updated price for AVAX-USDT: $23.844
-✅ [Bybit Futures] Updated price for ETH-USDT: $4296.52
-✅ [Bybit Futures] Updated price for TON-USDT: $3.1368
-✅ [Bybit Spot] Updated price for BTC-USDT: $110794.1
-✅ [Bybit Futures] Updated price for BTC-USDT: $110758.8
-✅ [Bybit Spot] Updated price for LINK-USDT: $23.011
-✅ [Bybit Spot] Updated price for NEAR-USDT: $2.381
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.7928
-Invalid order book response for kucoin-BTC-USDT-futures
-ALERT: Invalid order book response for kucoin-BTC-USDT-futures
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.065e-05
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $9.065e-05
-✅ [Bybit Spot] Updated price for BTC-USDT: $110795.3
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4908
-✅ [Bybit Futures] Updated price for DOT-USDT: $3.7706
-✅ [Bybit Spot] Updated price for AVAX-USDT: $23.86
- [Bybit Spot] Updated price for BTC-USDT: $110734.0
-✅ [Bybit Spot] Updated price for BTC-USDT: $110735.1
-✅ [Bybit Futures] Updated price for XRP-USDT: $2.791
-✅ [Bybit Futures] Updated price for LINK-USDT: $23.01
-✅ [Bybit Spot] Updated price for NEAR-USDT: $2.382
-[2025-09-02T17:17:18Z] Dashboard Metrics:
-KuCoin Balance: 522.235326 USDT
-Bybit Balance: 716.65266351 USDT
-KuCoin Futures: 522.235326 USDT
-Bybit Futures: 716.65266351 USDT
-Total Trades: 0
-Total Profit: 0.0 USDT
-Total Fees: 0.0 USDT
-Active Price Feeds: 21/22
-WebSocket Status: KC=true, KCF=false, BB=true, BBF=true
-ALERT: [2025-09-02T17:17:18Z] Dashboard Metrics:
-KuCoin Balance: 522.235326 USDT
-Bybit Balance: 716.65266351 USDT
-KuCoin Futures: 522.235326 USDT
-Bybit Futures: 716.65266351 USDT
-Total Trades: 0
-Total Profit: 0.0 USDT
-Total Fees: 0.0 USDT
-Active Price Feeds: 21/22
-WebSocket Status: KC=true, KCF=false, BB=true, BBF=true
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [Bybit Spot] Updated price for BTC-USDT: $110739.2
-✅ [Bybit Spot] Updated price for ETH-USDT: $4298.46
-✅ [Bybit Spot] Updated price for ETH-USDT: $4298.48
-✅ [Bybit Spot] Updated price for BTC-USDT: $110739.5
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.0
-✅ [Bybit Futures] Updated price for LINK-USDT: $23.013
-✅ [Bybit Futures] Updated price for BTC-USDT: $110704.9
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.5
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.5
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.7919
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.7919
-✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21218
-Sent ping to Bybit Spot WebSocket
-Sent ping to Bybit Futures WebSocket
-✅ [Bybit Futures] Updated price for BTC-USDT: $110705.0
-✅ [Bybit Spot] Updated price for OP-USDT: $0.6972
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.45
-✅ [Bybit Spot] Updated price for BTC-USDT: $110739.5
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:1667:29 Cannot find 'logDashboardMetrics' in scope
 
-flash server terminal outpur:
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3424:31 Cannot find 'evaluateFundingRateMomentum' in scope
 
-INFO:__main__:🔄 [Dashboard API] Called at 18:17:35
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:17:35
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:17:35] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:14
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:14
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:14] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:16] "GET /new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:16
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:16
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:16] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:16] "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 -
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:16] "GET /apple-touch-icon.png HTTP/1.1" 404 -
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:16] "GET /favicon.ico HTTP/1.1" 404 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:21
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:21
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:21] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:26
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:26
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:26] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:31
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:31
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:31] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:35
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:35
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:35] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:36
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:36
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:36] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:41
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:41
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:41] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:46
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:46
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:46] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:51
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:51
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:51] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:18:56
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:18:56
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:18:56] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:19:01
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:19:01
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:19:01] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:19:06
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:19:06
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:19:06] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Dashboard API] Called at 18:19:11
-INFO:__main__:✅ [Dashboard] Loaded live data: 21 pairs, KuCoin=$522.24, Bybit=$716.65
-INFO:__main__:ℹ️ [Dashboard] Trade CSV is empty
-INFO:__main__:✅ [Dashboard] Loaded 1 real alerts
-INFO:__main__:✅ [Dashboard] API SUCCESS: 0 trades, 1 alerts, 21 live prices at 18:19:11
-INFO:werkzeug:127.0.0.1 - - [02/Sep/2025 18:19:11] "GET /api/new_dashboard HTTP/1.1" 200 -
-^C(base) Roberts-iMac-2:python robertsteinegger$ 
-DEBUG: Initialized sentiment score for XRP-USDT: 0.1
-🔴 DEBUG: KuCoin WebSocket token response status: 200
-🔴 DEBUG: KuCoin WebSocket token response body: {"code":"200000","data":{"token":"2neAiuYvAU737TOajb2U3uT8AEZqSWYe0fBD4LoHuXJDSC7gIzJiH4kNTWhCPISWo6nDpAe7aUauJz42FAfOWSuqL5KQsOFCkL0SCbgsQmRGOJ1C5eWCpnwZIngtMdMrjqPnP-biofFWbNaP1cl0X1pZc2SQ-33hDH1LgNP-yg8bwgLYgchKhUrCmAw--Qeg.Y_0bdrBSjFOc1kk-uTF0tQ==","instanceServers":[{"endpoint":"wss://ws-api-spot.kucoin.com/","encrypt":true,"protocol":"websocket","pingInterval":18000,"pingTimeout":10000}]}}
-🔴 SUCCESS: Fetched KuCoin WebSocket token: 2neAiuYvAU737TOajb2U...
-ALERT: 🔴 SUCCESS: Fetched KuCoin WebSocket token successfully
-🔴 DEBUG: Connecting to KuCoin WebSocket: wss://ws-api-spot.kucoin.com/?token=2neAiuYvAU737TOajb2U3uT8AEZqSWYe0fBD4LoHuXJDSC7gIzJiH4kNTWhCPISWo6nDpAe7aUauJz42FAfOWSuqL5KQsOFCkL0SCbgsQmRGOJ1C5eWCpnwZIngtMdMrjqPnP-biofFWbNaP1cl0X1pZc2SQ-33hDH1LgNP-yg8bwgLYgchKhUrCmAw--Qeg.Y_0bdrBSjFOc1kk-uTF0tQ==
-High latency detected for order book fetch: 623.7790584564209ms
-ALERT: High latency detected for order book fetch: 623.7790584564209ms
-Invalid order book response for kucoin-BTC-USDT-spot
-ALERT: Invalid order book response for kucoin-BTC-USDT-spot
-✅ [Bybit Spot] WebSocket connected: ["Date": "Tue, 02 Sep 2025 17:23:28 GMT", "X-Amz-Cf-Id": "I-EOeQlKZFdNR0jQ5PccsplSlrf1Zk21_phMDHBwto_Ics6HoVCHpA==", "X-Amz-Cf-Pop": "MAD53-P8", "X-Cache": "Miss from cloudfront", "Connection": "upgrade", "Upgrade": "websocket", "Sec-WebSocket-Accept": "Sr5c3SFcmw61YqvuEsp86H+FR1w=", "Via": "1.1 622d0a5eea7bcc7b68b8727e663d8a3e.cloudfront.net (CloudFront)"]
-ALERT: ✅ Bybit Spot WebSocket connected
-web dashboard output
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3770:7 Type 'KuCoinWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
 
-🔔 SYSTEM ALERTS & DISCOVERIES
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3887:35 Main actor-isolated static property 'kucoinCurrentPrice' can not be mutated from a nonisolated context
 
-🔔 18:24:24 - event
-✅ 18:24:22 - Evolution generation 342: New strategy discovered
-🔔 18:24:19 - event
-✅ 18:24:15 - Neural consensus achieved: High confidence arbitrage opportunity
-🔔 18:24:14 - event
-🔔 18:24:08 - event
-🔔 18:24:03 - event
-🔔 18:23:58 - event
-🔔 18:23:53 - event
-🔔 18:23:48 - event
-🔔 18:23:43 - event
-🔔 18:23:38 - event
-✅ 18:23:34 - Temporal prediction accuracy increased to 78.4%
-🔔 18:23:33 - event
-✅ 18:23:31 - Whale movement predicted 382ms before execution
-🔔 18:23:28 - event
-🔔 18:23:23 - event
-✅ 18:23:22 - Pattern #1847 discovered: 73% profit probability
-🔔 18:23:18 - event
-🔔 18:23:13 - event
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3888:35 Main actor-isolated static property 'kucoinPrices' can not be mutated from a nonisolated context
 
-📊 LIVE TRADING PAIRS MATRIX
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3891:38 Main actor-isolated static property 'kucoinPrices' can not be referenced from a nonisolated context
 
-PAIR	KUCOIN SPOT	KUCOIN FUTURES	BYBIT SPOT	BYBIT FUTURES	SPREAD %	AI SIGNAL	QUANTUM SCORE	ACTION
-ADA-USDT	$0.00	$0.00	$0.82	$0.81	0.000%	WAIT	6.3%	Waiting
-APT-USDT	$0.00	$0.00	$4.30	$4.30	0.000%	WAIT	40.4%	Waiting
-ARB-USDT	$0.00	$0.00	$0.49	$0.49	0.000%	WAIT	92.9%	Waiting
-AVAX-USDT	$0.00	$0.00	$23.86	$23.85	0.000%	WAIT	44.3%	Waiting
-BONK-USDT	$0.00	$0.00	$0.00	$0.00	0.000%	WAIT	1.1%	Waiting
-BTC-USDT	$0.00	$0.00	$110716.90	$110678.10	0.000%	WAIT	5.2%	Waiting
-DOGE-USDT	$0.00	$0.00	$0.21	$0.21	0.000%	WAIT	27.6%	Waiting
-DOT-USDT	$0.00	$0.00	$3.77	$3.77	0.000%	WAIT	15.5%	Waiting
-ETH-USDT	$0.00	$0.00	$4306.46	$4304.87	0.000%	WAIT	39.3%	Waiting
-FLOKI-USDT	$0.00	$0.00	$0.00	$0.00	0.000%	WAIT	75.3%	Waiting
-INJ-USDT	$0.00	$0.00	$12.84	$12.84	0.000%	WAIT	68.5%	Waiting
-LINK-USDT	$0.00	$0.00	$23.03	$23.03	0.000%	WAIT	56.7%	Waiting
-NEAR-USDT	$0.00	$0.00	$2.38	$2.38	0.000%	WAIT	46.4%	Waiting
-OP-USDT	$0.00	$0.00	$0.70	$0.70	0.000%	WAIT	82.6%	Waiting
-PEPE-USDT	$0.00	$0.00	$0.00	$0.00	0.000%	WAIT	34.1%	Waiting
-SHIB-USDT	$0.00	$0.00	$0.00	$0.00	0.000%	WAIT	18.8%	Waiting
-SOL-USDT	$0.00	$0.00	$202.93	$202.90	0.000%	WAIT	37.3%	Waiting
-SUI-USDT	$0.00	$0.00	$3.26	$3.25	0.000%	WAIT	49.7%	Waiting
-TON-USDT	$0.00	$0.00	$3.14	$3.14	0.000%	WAIT	0.5%	Waiting
-WIF-USDT	$0.00	$0.00	$0.81	$0.81	0.000%	WAIT	25.0%	Waiting
-XRP-USDT	$0.00	$0.00	$2.79	$2.79	0.000%	WAIT	81.6%	Waiting
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3891:89 Main actor-isolated static property 'priceHistoryRetention' can not be referenced from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3892:39 Main actor-isolated static property 'kucoinPrices' can not be mutated from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3895:35 Main actor-isolated static property 'lastPriceUpdate' can not be mutated from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3919:35 Main actor-isolated static property 'kucoinOrderBooks' can not be mutated from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3935:42 Main actor-isolated static property 'tradingPairs' can not be referenced from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3942:7 Invalid redeclaration of 'KuCoinFuturesWebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3942:7 Type 'KuCoinFuturesWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4056:35 Main actor-isolated static property 'kucoinCurrentFuturesPrice' can not be mutated from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4057:35 Main actor-isolated static property 'kucoinFuturesPrices' can not be mutated from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4060:38 Main actor-isolated static property 'kucoinFuturesPrices' can not be referenced from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4060:96 Main actor-isolated static property 'priceHistoryRetention' can not be referenced from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4061:39 Main actor-isolated static property 'kucoinFuturesPrices' can not be mutated from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4096:35 Main actor-isolated static property 'kucoinFuturesOrderBook' can not be mutated from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4108:60 Main actor-isolated static property 'kucoinFuturesSymbols' can not be referenced from a nonisolated context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4120:27 Invalid redeclaration of 'kucoinDelegate'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4288:17 Invalid redeclaration of 'connectBybitWebSocket(completion:)'
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6325:47 'KuCoinFuturesWebSocketDelegate' is ambiguous for type lookup in this context
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6454:17 Cannot assign to property: 'kucoinFuturesDelegate' is a 'let' constant
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6553:9 Cannot find 'bybitSpotDelegate' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6554:33 Cannot find 'bybitSpotDelegate' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6616:9 Cannot find 'bybitFuturesDelegate' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6617:37 Cannot find 'bybitFuturesDelegate' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:8162:15 Cannot find 'evaluateFundingRateMomentum' in scope
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:8663:27 Type 'ExchangeWebSocket' has no member 'logDashboardMetrics'
