@@ -3373,9 +3373,10 @@ extension ExchangeWebSocket {
 //------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
 
 
+//--------------- Block 6 - Account Balance and API Initialization
+// VARIABLES TO ADD: None - All required variables already exist in the codebase
 
 extension ExchangeWebSocket {
-    
     static func monitorFundingRateArbitrage() {
         Task {
             await withTaskGroup(of: Void.self) { group in
@@ -3478,9 +3479,13 @@ extension ExchangeWebSocket {
                     return
                 }
                 
-                print("DEBUG: Successfully fetched KuCoin WebSocket token")
                 Task { @MainActor in
-                    logAlert(event: "Successfully fetched KuCoin WebSocket token")
+                    kucoinToken = token
+                    print("DEBUG: Fetched KuCoin WebSocket token: \(token)")
+                    kucoinSocket = WebSocket(request: URLRequest(url: URL(string: "wss://ws-api.kucoin.com/endpoint?token=\(token)")!))
+                    kucoinSocket?.delegate = kucoinDelegate
+                    kucoinSocket?.connect()
+                    print("DEBUG: KuCoin WebSocket connected for token: \(token)")
                 }
                 completion(token)
             } catch {
@@ -3540,9 +3545,13 @@ extension ExchangeWebSocket {
                     return
                 }
                 
-                print("DEBUG: Successfully fetched KuCoin Futures WebSocket token")
                 Task { @MainActor in
-                    logAlert(event: "Successfully fetched KuCoin Futures WebSocket token")
+                    kucoinFuturesToken = token
+                    print("DEBUG: Fetched KuCoin Futures WebSocket token: \(token)")
+                    kucoinFuturesSocket = WebSocket(request: URLRequest(url: URL(string: "wss://ws-api-futures.kucoin.com/endpoint?token=\(token)")!))
+                    kucoinFuturesSocket?.delegate = kucoinFuturesDelegate
+                    kucoinFuturesSocket?.connect()
+                    print("DEBUG: KuCoin Futures WebSocket connected for token: \(token)")
                 }
                 completion(token)
             } catch {
@@ -3637,7 +3646,6 @@ extension ExchangeWebSocket {
                 Task { @MainActor in
                     kucoinBalance = balance
                     print("DEBUG: Fetched KuCoin balance: \(balance)")
-                    logAlert(event: "Successfully fetched KuCoin balance: \(balance)")
                     completion(balance)
                 }
             } catch {
@@ -3736,7 +3744,6 @@ extension ExchangeWebSocket {
                 Task { @MainActor in
                     bybitBalance = balance
                     print("DEBUG: Fetched Bybit balance: \(balance)")
-                    logAlert(event: "Successfully fetched Bybit balance: \(balance)")
                     completion(balance)
                 }
             } catch {
@@ -3751,8 +3758,6 @@ extension ExchangeWebSocket {
         }.resume()
     }
 }
-
-
 
 
 //-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
@@ -7809,11 +7814,113 @@ BB Futures: \(bybitFuturesPrice)
 
 //------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
 
-//---------------------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution - FIXED
+
+//------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
+// VARIABLES TO ADD: Added missing evaluateFundingRateMomentum function definition
 
 import Foundation
 
 extension ExchangeWebSocket {
+    
+    // MISSING FUNCTION ADDED: evaluateFundingRateMomentum
+    static func evaluateFundingRateMomentum(pair: String, kucoinFundingRate: Double, bybitFundingRate: Double) async {
+        // Calculate funding rate differential
+        let fundingRateDifference = abs(kucoinFundingRate - bybitFundingRate)
+        
+        // Check if funding rate momentum exceeds threshold
+        guard fundingRateDifference > fundingMomentumThreshold else {
+            print("DEBUG: Funding rate momentum below threshold for \(pair): \(fundingRateDifference) < \(fundingMomentumThreshold)")
+            return
+        }
+        
+        // Get current prices for both exchanges
+        let kucoinPrice = await MainActor.run { kucoinCurrentPrice[pair] ?? 0.0 }
+        let bybitPrice = await MainActor.run { bybitCurrentPrice[pair] ?? 0.0 }
+        
+        guard kucoinPrice > 0, bybitPrice > 0 else {
+            await MainActor.run {
+                logAlert(event: "Invalid prices for funding rate momentum evaluation - \(pair): KuCoin=\(kucoinPrice), Bybit=\(bybitPrice)")
+            }
+            return
+        }
+        
+        // Check liquidity on both exchanges
+        let tradeAmount = await MainActor.run { futuresTradeAmount }
+        let kucoinLiquidity = await checkLiquidityAsync(exchange: "kucoin", pair: pair, marketType: "futures", tradeAmount: tradeAmount, price: kucoinPrice)
+        let bybitLiquidity = await checkLiquidityAsync(exchange: "bybit", pair: pair, marketType: "futures", tradeAmount: tradeAmount, price: bybitPrice)
+        
+        let minLiquidityThresholdValue = await MainActor.run { minLiquidityThreshold }
+        guard let kucoinLiquidity = kucoinLiquidity, let bybitLiquidity = bybitLiquidity,
+              kucoinLiquidity >= minLiquidityThresholdValue, bybitLiquidity >= minLiquidityThresholdValue else {
+            await MainActor.run {
+                logAlert(event: "Insufficient liquidity for funding rate momentum trade - \(pair): KuCoin=\(kucoinLiquidity ?? 0.0), Bybit=\(bybitLiquidity ?? 0.0)")
+            }
+            return
+        }
+        
+        // Determine which exchange has higher funding rate (pay funding) and which has lower (receive funding)
+        let (payExchange, receiveExchange, payRate, receiveRate) = kucoinFundingRate > bybitFundingRate ?
+            ("kucoin", "bybit", kucoinFundingRate, bybitFundingRate) :
+            ("bybit", "kucoin", bybitFundingRate, kucoinFundingRate)
+        
+        // Calculate expected profit from funding rate arbitrage
+        let expectedFundingProfit = (payRate - receiveRate) * tradeAmount
+        let minProfitThreshold = await MainActor.run { futuresMinProfitPercentage * tradeAmount }
+        
+        guard expectedFundingProfit > minProfitThreshold else {
+            print("DEBUG: Funding rate profit below minimum threshold for \(pair): \(expectedFundingProfit) < \(minProfitThreshold)")
+            return
+        }
+        
+        // Check daily loss limits
+        let stopLossPercentage = await MainActor.run { futuresStopLossPercentage }
+        let potentialLoss = tradeAmount * stopLossPercentage
+        let dailyLossCheck = await checkDailyLossLimit(exchange: payExchange, pair: pair, potentialLoss: potentialLoss)
+        guard dailyLossCheck else {
+            await MainActor.run {
+                logAlert(event: "Daily loss limit would be exceeded for funding rate momentum trade - \(pair)")
+            }
+            return
+        }
+        
+        // Execute the funding rate arbitrage strategy
+        await MainActor.run {
+            let strategy = "funding_rate_momentum"
+            
+            // Log the opportunity
+            logAlert(event: "Funding rate momentum opportunity detected for \(pair): \(payExchange)=\(payRate), \(receiveExchange)=\(receiveRate), Expected profit: $\(expectedFundingProfit)")
+            
+            // Check simulation mode
+            Task {
+                let isSimulation = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
+                
+                if isSimulation {
+                    // Simulation mode - log trades without executing
+                    let timestamp = ISO8601DateFormatter().string(from: Date())
+                    
+                    // Log to CSV with proper trade entry format using accessible variables
+                    let tradeEntry1 = "\(timestamp),\(pair),\(strategy),\(payExchange),sell,\(payExchange == "kucoin" ? kucoinPrice : bybitPrice),\(tradeAmount),\(expectedFundingProfit),simulation\n"
+                    let tradeEntry2 = "\(timestamp),\(pair),\(strategy),\(receiveExchange),buy,\(receiveExchange == "kucoin" ? kucoinPrice : bybitPrice),\(tradeAmount),\(expectedFundingProfit),simulation\n"
+                    
+                    // Write to trades CSV file
+                    logTradeToCSV(pair: pair, strategy: strategy, profit: expectedFundingProfit, fees: (tradeAmount * 0.0002 * 2), tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
+                    
+                    // Send to Flask server for ML training
+                    sendTradeToFlaskServer(strategy: strategy, pair: pair, exchange: "cross-exchange", spotPrice: (kucoinPrice + bybitPrice) / 2, futuresPrice: 0.0, tradeAmount: tradeAmount, profit: expectedFundingProfit)
+                    
+                    print("SIMULATION: Funding rate momentum trade for \(pair) at \(timestamp)")
+                    print("SIMULATION: Strategy: \(strategy)")
+                    print("SIMULATION: Expected funding profit: $\(expectedFundingProfit)")
+                    
+                    logAlert(event: "SIMULATION: \(strategy) trade executed for \(pair) at \(timestamp) - Expected profit: $\(expectedFundingProfit)")
+                } else {
+                    // Live trading would be implemented here
+                    logAlert(event: "LIVE: \(strategy) opportunity detected for \(pair)")
+                }
+            }
+        }
+    }
+    
     static func startTradingLoop() {
         Task { @MainActor in
             ExchangeWebSocket.connectKucoin()
@@ -8566,10 +8673,6 @@ DispatchQueue.main.async {
 }
 
 RunLoop.main.run()
-
-
-
-
 //---------------------------------------------------------------------------------------------------------Block 15 - High-Frequency Trading Scalping
 
 import Foundation
