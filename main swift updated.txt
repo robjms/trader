@@ -394,6 +394,7 @@ func logAlert(event: String, completion: @escaping @Sendable () -> Void = {}) {
 //--------------- WebSocket Delegates - ADD BEFORE @MainActor class ExchangeWebSocket
 
 // FIXED WebSocket Delegates - Proper Starscream Protocol Conformance
+
 class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
     func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
         Task { @MainActor in
@@ -1194,7 +1195,9 @@ class ExchangeWebSocket {
     static var kucoinDelegate: KuCoinSpotWebSocketDelegate?
 
     static var bybitDelegate: BybitFuturesWebSocketDelegate?
-   
+    // Add these inside the ExchangeWebSocket class in Block 1:
+    
+    
     
     // New variables for performance optimization
     static var lastPriceUpdate: [String: (price: Double, timestamp: Date)] = [:]
@@ -3153,11 +3156,6 @@ extension ExchangeWebSocket {
     }
 
     
-    
-    
-    
-    
-    
     static func calculateVolatilityFromPrices(_ prices: [Double]) -> Double {
         guard prices.count > 1 else { return 0.0 }
         
@@ -3378,6 +3376,7 @@ extension ExchangeWebSocket {
 // VARIABLES TO ADD: Add to Block 1 if not present: static var kucoinToken: String?, static var kucoinFuturesToken: String?
 
 extension ExchangeWebSocket {
+    
     static func monitorFundingRateArbitrage() {
         Task {
             await withTaskGroup(of: Void.self) { group in
@@ -3754,11 +3753,11 @@ extension ExchangeWebSocket {
     }
 }
 
-    //-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
-    //--------------- Block 7 - WebSocket Connection Management
-//--------------- Block 7 - WebSocket Connection Management
 
-//--------------- Block 7 - WebSocket Connection Management
+
+
+//-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
+
 
 extension ExchangeWebSocket {
     
@@ -4263,6 +4262,11 @@ extension ExchangeWebSocket {
         }
     }
 
+    
+    
+    
+    
+    
     static func subscribeToKuCoinSpotPrices(pairs: [String]) {
         Task { @MainActor in
             guard kucoinIsConnected, let socket = kucoinSocket else {
