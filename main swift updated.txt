@@ -390,10 +390,8 @@ func logAlert(event: String, completion: @escaping @Sendable () -> Void = {}) {
 
 
 // ADD THESE 4 COMPLETE CLASSES BEFORE @MainActor class ExchangeWebSocket {
-//--------------- WebSocket Delegates - ADD BEFORE @MainActor class ExchangeWebSocket
-//--------------- WebSocket Delegates - ADD BEFORE @MainActor class ExchangeWebSocket
 
-// FIXED WebSocket Delegates - Proper Starscream Protocol Conformance
+
 
 class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
     func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
@@ -2060,9 +2058,6 @@ func loadEnv() -> [String: String] {
 //--------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
 
 
-
-//--------------- Block 3 - Order Book and Liquidity Management
-// VARIABLES TO ADD: None - All functions use existing variables from Block 1
 
 extension ExchangeWebSocket {
     static func checkLiquidity(exchange: String, pair: String, completion: @escaping @Sendable (Double?) -> Void) {
@@ -5009,10 +5004,7 @@ extension ExchangeWebSocket {
 
 //---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
 
-//---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
 
-// NOTE: Delegate classes are defined elsewhere in the codebase to prevent duplicates
-// This block contains only the WebSocket message processing logic
 
 extension ExchangeWebSocket {
     
@@ -6219,12 +6211,6 @@ extension ExchangeWebSocket {
 
 //-------------------------------------------------------------------------------------------------------------------------Block 11 - WebSocket Data Handling
 
-
-// VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities if not present:
-// private static var kucoinDelegate: KuCoinSpotWebSocketDelegate?
-// private static var kucoinFuturesDelegate: KuCoinFuturesWebSocketDelegate?
-// private static var bybitDelegate: BybitSpotWebSocketDelegate?
-// private static var bybitFuturesDelegate: BybitFuturesWebSocketDelegate?
 
 extension ExchangeWebSocket {
     private static var kucoinSpotDelegate: KuCoinSpotWebSocketDelegate?
@@ -7815,9 +7801,6 @@ BB Futures: \(bybitFuturesPrice)
 //------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
 
 
-//------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
-// VARIABLES TO ADD: Added missing evaluateFundingRateMomentum function definition
-
 import Foundation
 
 extension ExchangeWebSocket {
@@ -7899,8 +7882,8 @@ extension ExchangeWebSocket {
                     let timestamp = ISO8601DateFormatter().string(from: Date())
                     
                     // Log to CSV with proper trade entry format using accessible variables
-                    let tradeEntry1 = "\(timestamp),\(pair),\(strategy),\(payExchange),sell,\(payExchange == "kucoin" ? kucoinPrice : bybitPrice),\(tradeAmount),\(expectedFundingProfit),simulation\n"
-                    let tradeEntry2 = "\(timestamp),\(pair),\(strategy),\(receiveExchange),buy,\(receiveExchange == "kucoin" ? kucoinPrice : bybitPrice),\(tradeAmount),\(expectedFundingProfit),simulation\n"
+                    let _ = "\(timestamp),\(pair),\(strategy),\(payExchange),sell,\(payExchange == "kucoin" ? kucoinPrice : bybitPrice),\(tradeAmount),\(expectedFundingProfit),simulation\n"
+                    let _ = "\(timestamp),\(pair),\(strategy),\(receiveExchange),buy,\(receiveExchange == "kucoin" ? kucoinPrice : bybitPrice),\(tradeAmount),\(expectedFundingProfit),simulation\n"
                     
                     // Write to trades CSV file
                     logTradeToCSV(pair: pair, strategy: strategy, profit: expectedFundingProfit, fees: (tradeAmount * 0.0002 * 2), tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv"))
@@ -10167,9 +10150,7 @@ extension ExchangeWebSocket {
 
 //--------------------------------------------------------------------------------------------------------------Block 19 - Machine Learning Prediction Engine
 
-//--------------------------------------------------------------------------------------------------------------Block 19 - Machine Learning Prediction Engine
 
-//--------------------------------------------------------------------------------------------------------------Block 19 - Machine Learning Prediction Engine
 
 
 import Foundation // Added for String.Encoding and other Foundation types
@@ -11438,6 +11419,57 @@ extension ExchangeWebSocket {
     }
     
 }
+
+
+//---------------------------------addition
+
+// TOP-LEVEL EXECUTION (Replace the @main struct with this)
+print("🚀 BevaixBot v2.0 - AI-Enhanced HFT Trading System Starting...")
+
+Task { @MainActor in
+    ExchangeWebSocket.initializeParameters {
+        print("✅ Parameters loaded")
+        print("✅ Trading pairs: \(ExchangeWebSocket.tradingPairs)")
+        
+        if hasValidKuCoinCredentials {
+            print("🔄 Starting KuCoin connections...")
+            // Call existing KuCoin functions here
+            ExchangeWebSocket.fetchKuCoinWsToken { token in
+                if let token = token {
+                    Task { @MainActor in
+                        print("✅ KuCoin token obtained: \(token)")
+                        // Additional connection logic
+                    }
+                }
+            }
+        } else {
+            print("⚠️ KuCoin credentials invalid, skipping KuCoin")
+        }
+    }
+}
+
+// Keep program running with proper error handling
+Task {
+    while true {
+        do {
+            try await Task.sleep(nanoseconds: 10_000_000_000) // 10 seconds
+            await MainActor.run {
+                print("📊 Status: KuCoin Connected: \(ExchangeWebSocket.kucoinIsConnected)")
+                print("📊 Live prices: \(ExchangeWebSocket.kucoinCurrentPrice.count) pairs")
+            }
+        } catch {
+            print("Sleep interrupted: \(error)")
+        }
+    }
+}
+
+// Prevent immediate exit
+RunLoop.main.run()
+
+
+
+
+
 
 // ENHANCED: Main execution with complete bot startup
 //@MainActor
