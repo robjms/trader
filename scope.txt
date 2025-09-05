@@ -78,26 +78,26 @@ High-Frequency Core (60% allocation):
 
 Target: Micro-arbitrage on 0.05-0.2% spreads
 Volume: 300+ trades daily
-Profit: $0.10-0.50 per trade
+Profit: $0.30-0.50+ per trade
 Method: Cross-exchange price discrepancies
 
 ML-Enhanced Scalping (25% allocation):
 
 Target: Multi-indicator confluence signals
 Duration: 5-30 second holds
-Profit: $0.30-1.00 per trade
+Profit: $0.30-1.00+ per trade
 Method: AI-driven technical analysis
 
 Market Making (10% allocation):
 
 Target: Dynamic spread capture in low volatility
-Profit: $0.15-0.40 per trade
+Profit: $0.30-0.60+ per trade
 Method: Inventory management with bid/ask spreads
 
 Statistical Arbitrage (5% allocation):
 
 Target: Mean reversion on correlation breaks
-Profit: $0.50-2.00 per trade
+Profit: $0.50-2.00+ per trade
 Method: Pair trading & statistical models
 
 
@@ -109,12 +109,12 @@ SIMULATION_TRADE_LOGGING=true
 ACTIVE_PAIRS=BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT
 
 # PROFIT TARGETS
-FUTURES_MIN_PROFIT_PERCENTAGE=0.0010  # $0.60 profit per $600 trade
-ARBITRAGE_MIN_SPREAD_THRESHOLD=0.0030 # 0.3% minimum spread
-CROSS_EXCHANGE_MIN_SPREAD_THRESHOLD=0.0020 # 0.2% cross-exchange
+FUTURES_MIN_PROFIT_PERCENTAGE=0.0030  # $0.60 profit per $600 trade
+ARBITRAGE_MIN_SPREAD_THRESHOLD=0.0050 # 0.3% minimum spread
+CROSS_EXCHANGE_MIN_SPREAD_THRESHOLD=0.0040 # 0.2% cross-exchange
 
 # RISK LIMITS
-DAILY_LOSS_LIMIT_PERCENTAGE=0.08  # 8% max daily loss
+DAILY_LOSS_LIMIT_PERCENTAGE=0.04  # 8% max daily loss
 MAX_ACTIVE_FUTURES_TRADES=30      # Position limits
 
 # API CREDENTIALS (user must add)
@@ -162,7 +162,7 @@ Key Performance Indicators:
 Trade Frequency: Target 4+ per minute (2 per exchange)
 Win Rate: Target >60% profitable trades
 Average Profit: Target >$0.20 net per trade
-Daily Profit: Target >$200 net daily
+Daily Profit: Target >$800 net daily
 Maximum Drawdown: Keep <5% of capital
 
 Critical Files to Monitor:
@@ -213,7 +213,7 @@ Connection health monitoring
 
 🎯 NEXT STEPS FOR USER:
 
-Fix 2 compilation errors (provided above)
+Fix kucoin connection for spot and futures 
 Add API credentials to .env file
 Start bot in simulation mode: swift run BevaixBot
 Launch Flask server: python app.py
@@ -224,7 +224,7 @@ Gradually transition to micro-live trading with small amounts
 
 
 💡 SUCCESS METRICS:
-Learning Phase (Week 1-2):
+Learning Phase 
 
 Bot compiles & runs without crashes ✅
 WebSocket connections stable ✅
@@ -232,7 +232,7 @@ Simulation trades executing regularly
 AI models showing learning progress
 Win rate improving over time
 
-Production Readiness (Week 3+):
+Production Readiness 
 
 Consistent profitability in simulation (>60% win rate)
 Risk management systems functioning
@@ -258,6 +258,11 @@ Specific fill will be requested.
 
 "Fix the errors  by replacing relevant lines with the provided corrected versions, integrating them without removing other parts."Apply the fix and output ONLY the full fixed code.
 
-so the next issue is getting the bot to connect yo kucoin and get the dashboard to show live data and kucoin data
+so the next issue is getting the bot to connect to kucoin spot and futures and get the dashboard to show live data and kucoin data
+
+get all output to csv files to work
+
+get the bot trading with all ai and ml and all tools running
+
 
 
