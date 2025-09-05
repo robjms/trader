@@ -2057,12 +2057,7 @@ func loadEnv() -> [String: String] {
 
 //--------------------------------------------------------------------------------------------------------Block 3 - Order Book and Liquidity Management
 
-//--------------- Block 3 - Order Book and Liquidity Management
 
-// VARIABLES TO ADD: None needed - all variables already present in Block 1
-//--------------- Block 3 - Order Book and Liquidity Management
-
-// VARIABLES TO ADD: None needed - all variables already present in Block 1
 
 extension ExchangeWebSocket {
     static func checkLiquidity(exchange: String, pair: String, completion: @escaping @Sendable (Double?) -> Void) {
@@ -3373,8 +3368,6 @@ extension ExchangeWebSocket {
 //------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
 
 
-//--------------- Block 6 - Account Balance and API Initialization
-// VARIABLES TO ADD: None - All required variables already exist in the codebase
 
 extension ExchangeWebSocket {
     static func monitorFundingRateArbitrage() {
@@ -3762,14 +3755,9 @@ extension ExchangeWebSocket {
 
 //-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
 
-//-----------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
+
 
 extension ExchangeWebSocket {
-    // VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities:
-    // static var websocketReconnectAttempts: [String: Int] = [:]
-    // static var lastWebsocketActivity: [String: Date] = [:]
-    // static var enhancedMessageQueue: [[String: Any]] = []
-    // static var bybitWebSocket: WebSocket?
     
     static var bybitFuturesSocket: WebSocket?
     static var bybitSpotDelegate: BybitSpotWebSocketDelegate?
@@ -5100,11 +5088,8 @@ extension ExchangeWebSocket {
 //---------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
 
 
-//------------------------------------------------------------------------------------------------------------------------Block 9 - KuCoin WebSocket Processing
 extension ExchangeWebSocket {
-// VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities if not present:
-// static var websocketReconnectAttempts: [String: Int] = [:]
-// static var lastWebsocketActivity: [String: Date] = [:]
+
 static func handleKuCoinSpotMessage(_ message: String) async {
     do {
         guard let data = message.data(using: .utf8),
@@ -6067,6 +6052,9 @@ static func updateDashboardData() {
     }
 }
 }
+
+
+
 //------------------------------------------------------------------------------------------------------------------------Block 10 - Bybit WebSocket Processing
 
 extension ExchangeWebSocket {
@@ -7168,7 +7156,6 @@ extension ExchangeWebSocket {
                 }
             }
         }
-//--------------------------------------------------------------------------------------------------------------------------Block 12 - Trading Loop Monitoring and Support
 
 //--------------------------------------------------------------------------------------------------------------------------Block 12 - Trading Loop Monitoring and Support
 
@@ -12069,7 +12056,7 @@ RunLoop.main.run()
 
 
 
-//-------------------------- below code comment out as its no longer relevant
+
 
 // ENHANCED: Main execution with complete bot startup
 //@MainActor
