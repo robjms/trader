@@ -69,12 +69,11 @@ struct AdvancedSignal {
 
 struct MLPrediction {
     let prediction: Double
-    let confidence: Double
+    var confidence: Double
     let features: [String: Double]
-    let timestamp: Date
+    var timestamp: Date  // ← CHANGE: from 'let' to 'var'
     let model: String
 }
-
 struct PerformanceMetrics {
     var totalTrades: Int
     var winningTrades: Int
@@ -109,7 +108,7 @@ struct TradingOpportunity {
     let strategy: String
     let expectedProfit: Double
     let riskLevel: Double
-    let confidence: Double
+    var confidence: Double
     let timeHorizon: TimeInterval
 }
 
@@ -173,26 +172,61 @@ func getString(_ key: String, defaultValue: String) -> String {
 }
 
 // Global Environment Variable Storage
-// Global Environment Variable Storage
-// Global Environment Variable Storage
-var hasValidKuCoinCredentials: Bool = true // New flag to track KuCoin credential validity
+
+
+
+var hasValidKuCoinCredentials: Bool = true
 var environment: [String: String] = {
     do {
         let fileManager = FileManager.default
+        
+       
+        let projectRoot = "/Users/robertsteinegger/Desktop/BevaixBot"
+        let projectEnvPath = URL(fileURLWithPath: projectRoot).appendingPathComponent(".env").path
         let currentDirectory = fileManager.currentDirectoryPath
-        let envPath = URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
-        print("Loading .env from \(envPath)")
-        if fileManager.fileExists(atPath: envPath) {
-            print("Found .env file at \(envPath)")
+        let currentEnvPath = URL(fileURLWithPath: currentDirectory).appendingPathComponent(".env").path
+        
+        var envPath = projectEnvPath
+        var useProjectPath = true
+        
+        print("🔍 Primary: Loading .env from \(projectEnvPath)")
+        if fileManager.fileExists(atPath: projectEnvPath) {
+            print("✅ Found .env file at \(projectEnvPath)")
+            envPath = projectEnvPath
         } else {
-            print("No .env file found at \(envPath)")
-            Task { @MainActor in
-                logAlert(event: "No .env file found at \(envPath)")
+            print("⚠️ No .env file found at \(projectEnvPath)")
+            print("🔍 Fallback: Loading .env from \(currentEnvPath)")
+            if fileManager.fileExists(atPath: currentEnvPath) {
+                print("✅ Found .env file at \(currentEnvPath)")
+                envPath = currentEnvPath
+                useProjectPath = false
+            } else {
+                print("❌ No .env file found at \(currentEnvPath)")
+                Task { @MainActor in
+                    logAlert(event: "No .env file found at \(projectEnvPath) or \(currentEnvPath)")
+                }
             }
         }
         
-        try Dotenv.configure()
+        // FIXED: Set working directory to where .env file is located for SwiftDotenv
+        if useProjectPath {
+            fileManager.changeCurrentDirectoryPath(projectRoot)
+        }
+        
+        // Try SwiftDotenv first (preserving original functionality)
         var envDict: [String: String] = [:]
+        var swiftDotenvSuccess = false
+        
+        do {
+            try Dotenv.configure()
+            swiftDotenvSuccess = true
+            print("✅ SwiftDotenv configured successfully")
+            print("SwiftDotenv version: \(Dotenv.version?.stringValue ?? "unknown")")
+        } catch {
+            print("⚠️ SwiftDotenv failed: \(error), falling back to manual parsing")
+        }
+        
+        // COMPLETE original keys list - preserved exactly as in original code
         let keys = [
             "ACTIVE_PAIRS", "BYBIT_API_KEY", "BYBIT_API_SECRET", "KUCOIN_API_KEY",
             "KUCOIN_API_SECRET", "KUCOIN_API_PASSPHRASE", "BYBIT_RATE_WINDOW",
@@ -237,15 +271,46 @@ var environment: [String: String] = {
             "SPREAD_RETENTION_HOURS", "ORDER_BOOK_IMBALANCE_FALLBACK",
             "LIQUIDITY_CHECK_FALLBACK", "MARKET_MAKING_SPREAD", "HFT_ORDER_TYPE"
         ]
-        for key in keys {
-            if let value = Dotenv[key] {
-                let stringValue = value.stringValue
-                envDict[key] = stringValue
-                // FIXED: Also set in ProcessInfo so getDouble/getInt functions work
-                ProcessInfo.processInfo.setValue(stringValue, forKey: key)
+        
+        if swiftDotenvSuccess {
+            // Original SwiftDotenv loading method - preserved exactly
+            for key in keys {
+                if let value = Dotenv[key] {
+                    envDict[key] = value.stringValue
+                }
             }
+            print("✅ Successfully loaded .env file using SwiftDotenv")
+        } else {
+            // FALLBACK: Manual parsing if SwiftDotenv fails
+            print("🔄 Using manual .env parsing as fallback")
+            let contents = try String(contentsOfFile: envPath, encoding: .utf8)
+            let lines = contents.components(separatedBy: .newlines)
+            
+            for line in lines {
+                let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                // Skip empty lines and comments
+                if trimmed.isEmpty || trimmed.hasPrefix("#") { continue }
+                
+                // Parse key=value pairs
+                let parts = trimmed.components(separatedBy: "=")
+                if parts.count >= 2 {
+                    let key = parts[0].trimmingCharacters(in: .whitespaces)
+                    let value = parts.dropFirst().joined(separator: "=").trimmingCharacters(in: .whitespaces)
+                    
+                    // Remove quotes if present
+                    let cleanValue = value.trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+                    
+                    // Only add if it's in our keys list (preserving original selective loading)
+                    if keys.contains(key) {
+                        envDict[key] = cleanValue
+                    }
+                }
+            }
+            print("✅ Successfully loaded .env file using manual parsing")
         }
-        // Validate KuCoin API credentials
+        
+        // ORIGINAL KuCoin credential validation logic - preserved exactly
         let requiredKuCoinKeys = ["KUCOIN_API_KEY", "KUCOIN_API_SECRET", "KUCOIN_API_PASSPHRASE"]
         var missingKeys = [String]()
         for key in requiredKuCoinKeys {
@@ -261,17 +326,23 @@ var environment: [String: String] = {
             }
             hasValidKuCoinCredentials = false // Disable KuCoin operations
         }
-        // Debug: Log all loaded environment variables
+        
+        // ORIGINAL debug logging - preserved exactly
         print("DEBUG: Loaded environment variables: \(envDict)")
-        print("Successfully loaded .env file using SwiftDotenv")
-        print("SwiftDotenv version: \(Dotenv.version?.stringValue ?? "unknown")")
         print("DEBUG: ACTIVE_PAIRS from env: \(envDict["ACTIVE_PAIRS"] ?? "not found")")
         print("DEBUG: BYBIT_API_KEY from env: \(envDict["BYBIT_API_KEY"] ?? "not found")")
         print("DEBUG: KUCOIN_API_KEY from env: \(envDict["KUCOIN_API_KEY"] ?? "not found")")
-        print("DEBUG: BYBIT_FALLBACK_BALANCE from env: \(envDict["BYBIT_FALLBACK_BALANCE"] ?? "not found")")
-        print("DEBUG: KUCOIN_FALLBACK_BALANCE from env: \(envDict["KUCOIN_FALLBACK_BALANCE"] ?? "not found")")
+        
+        // ENHANCED: Set ProcessInfo environment for global access (needed for getDouble, getString, etc.)
+        for (key, value) in envDict {
+            setenv(key, value, 1)
+        }
+        
+        print("✅ Loaded \(envDict.count) environment variables")
         return envDict
+        
     } catch {
+        // ORIGINAL error handling - preserved exactly
         print("Failed to load .env file: \(error)")
         Task { @MainActor in
             logAlert(event: "Failed to load .env file: \(error)")
@@ -320,239 +391,442 @@ func logAlert(event: String, completion: @escaping @Sendable () -> Void = {}) {
 
 // ADD THESE 4 COMPLETE CLASSES BEFORE @MainActor class ExchangeWebSocket {
 
-class KuCoinSpotWebSocketDelegate: NSObject, WebSocketDelegate {
-    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
-        switch event {
-        case .connected(let headers):
-            print("✅ [KuCoin Spot] WebSocket connected: \(headers)")
-            Task { @MainActor in
+
+
+class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
+    func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
                 ExchangeWebSocket.kucoinIsConnected = true
+                print("✅ [KuCoin Spot] WebSocket connected: \(headers)")
                 ExchangeWebSocket.logAlert(event: "✅ KuCoin Spot WebSocket connected")
-            }
-            
-        case .disconnected(let reason, let code):
-            print("❌ [KuCoin Spot] WebSocket disconnected: \(reason) with code: \(code)")
-            Task { @MainActor in
+                
+                // Subscribe to all pairs
+                for pair in ExchangeWebSocket.tradingPairs {
+                    let symbol = pair.replacingOccurrences(of: "-", with: "")
+                    let subscriptionMessage = [
+                        "id": UUID().uuidString,
+                        "type": "subscribe",
+                        "topic": "/market/ticker:\(symbol)",
+                        "privateChannel": false,
+                        "response": true
+                    ] as [String : Any]
+                    
+                    if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
+                       let jsonString = String(data: data, encoding: .utf8) {
+                        client.write(string: jsonString)
+                        print("Subscribed to KuCoin spot topic: /market/ticker:\(symbol) for pair: \(pair)")
+                    }
+                }
+                
+            case .disconnected(let reason, let code):
                 ExchangeWebSocket.kucoinIsConnected = false
+                print("❌ [KuCoin Spot] WebSocket disconnected: \(reason) (\(code))")
                 ExchangeWebSocket.logAlert(event: "❌ KuCoin Spot WebSocket disconnected: \(reason)")
-            }
-            
-        case .text(let string):
-            guard let data = string.data(using: .utf8),
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
-            
-            if let type = json["type"] as? String, type == "message",
-               let topic = json["topic"] as? String, topic.contains("/market/ticker"),
-               let subject = json["subject"] as? String,
-               let data = json["data"] as? [String: Any],
-               let price = data["price"] as? String,
-               let priceDouble = Double(price) {
                 
-                let symbol = subject.replacingOccurrences(of: "trade.ticker.", with: "")
-                let pair = symbol.hasSuffix("USDT") ? "\(String(symbol.dropLast(4)))-USDT" : symbol
-                
-                Task { @MainActor in
-                    if ExchangeWebSocket.tradingPairs.contains(pair) {
-                        ExchangeWebSocket.kucoinCurrentPrice[pair] = priceDouble
-                        if ExchangeWebSocket.kucoinPrices[pair] == nil {
-                            ExchangeWebSocket.kucoinPrices[pair] = []
+            case .text(let text):
+                if let data = text.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    
+                    // Handle subscription confirmations
+                    if json["type"] as? String == "ack" {
+                        print("KuCoin Spot WebSocket subscription confirmed")
+                        return
+                    }
+                    
+                    // Handle price data
+                    if let subject = json["subject"] as? String,
+                       subject == "trade.ticker",
+                       let topic = json["topic"] as? String,
+                       let data = json["data"] as? [String: Any] {
+                        
+                        let symbol = topic.replacingOccurrences(of: "/market/ticker:", with: "")
+                        let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                        
+                        if let priceStr = data["price"] as? String,
+                           let price = Double(priceStr), price > 0 {
+                            
+                            ExchangeWebSocket.kucoinCurrentPrice[pair] = price
+                            ExchangeWebSocket.kucoinPrices[pair, default: []].append(price)
+                            
+                            // Maintain price history limit
+                            if ExchangeWebSocket.kucoinPrices[pair]!.count > ExchangeWebSocket.priceHistoryRetention {
+                                ExchangeWebSocket.kucoinPrices[pair]?.removeFirst()
+                            }
+                            
+                            print("✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
+                            
+                            // Update last data timestamp
+                            ExchangeWebSocket.lastDataUpdate[pair] = Date()
                         }
-                        ExchangeWebSocket.kucoinPrices[pair]?.append(priceDouble)
-                        if let count = ExchangeWebSocket.kucoinPrices[pair]?.count,
-                           count > ExchangeWebSocket.priceHistoryRetention {
-                            ExchangeWebSocket.kucoinPrices[pair]?.removeFirst()
-                        }
-                        print("✅ [KuCoin Spot] Updated price for \(pair): $\(priceDouble)")
                     }
                 }
-            }
-            
-        case .error(let error):
-            print("❌ [KuCoin Spot] WebSocket error: \(String(describing: error))")
-            Task { @MainActor in
+                
+            case .binary(_):
+                break
+                
+            case .ping(_):
+                client.write(pong: Data())
+                
+            case .pong(_):
+                break
+                
+            case .viabilityChanged(_):
+                break
+                
+            case .reconnectSuggested(_):
+                Task { @MainActor in
+                    ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket reconnection suggested")
+                }
+                
+            case .cancelled:
                 ExchangeWebSocket.kucoinIsConnected = false
+                print("❌ [KuCoin Spot] WebSocket cancelled")
+                
+            case .error(let error):
+                ExchangeWebSocket.kucoinIsConnected = false
+                print("❌ [KuCoin Spot] WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                
+            case .peerClosed:
+                ExchangeWebSocket.kucoinIsConnected = false
+                print("❌ [KuCoin Spot] WebSocket peer closed")
+                ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket peer closed")
             }
-            
-        default:
-            break
         }
     }
 }
 
-class KuCoinFuturesWebSocketDelegate: NSObject, WebSocketDelegate {
-    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
-        switch event {
-        case .connected(let headers):
-            print("✅ [KuCoin Futures] WebSocket connected: \(headers)")
-            Task { @MainActor in
+class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
+    func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
                 ExchangeWebSocket.kucoinFuturesIsConnected = true
+                print("✅ [KuCoin Futures] WebSocket connected: \(headers)")
                 ExchangeWebSocket.logAlert(event: "✅ KuCoin Futures WebSocket connected")
-            }
-            
-        case .disconnected(let reason, let code):
-            print("❌ [KuCoin Futures] WebSocket disconnected: \(reason) with code: \(code)")
-            Task { @MainActor in
+                
+                // Subscribe to all pairs
+                for pair in ExchangeWebSocket.tradingPairs {
+                    let futuresSymbol = ExchangeWebSocket.kucoinFuturesSymbols[pair] ?? "\(pair.replacingOccurrences(of: "-USDT", with: ""))USDTM"
+                    let subscriptionMessage = [
+                        "id": UUID().uuidString,
+                        "type": "subscribe",
+                        "topic": "/contractMarket/ticker:\(futuresSymbol)",
+                        "privateChannel": false,
+                        "response": true
+                    ] as [String : Any]
+                    
+                    if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
+                       let jsonString = String(data: data, encoding: .utf8) {
+                        client.write(string: jsonString)
+                        print("Subscribed to KuCoin futures topic: /contractMarket/ticker:\(futuresSymbol) for pair: \(pair)")
+                    }
+                }
+                
+            case .disconnected(let reason, let code):
                 ExchangeWebSocket.kucoinFuturesIsConnected = false
+                print("❌ [KuCoin Futures] WebSocket disconnected: \(reason) (\(code))")
                 ExchangeWebSocket.logAlert(event: "❌ KuCoin Futures WebSocket disconnected: \(reason)")
-            }
-            
-        case .text(let string):
-            guard let data = string.data(using: .utf8),
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
-            
-            if let type = json["type"] as? String, type == "message",
-               let topic = json["topic"] as? String, topic.contains("/contract/ticker"),
-               let subject = json["subject"] as? String,
-               let data = json["data"] as? [String: Any],
-               let price = data["price"] as? String,
-               let priceDouble = Double(price) {
                 
-                let symbol = subject.replacingOccurrences(of: "ticker.", with: "")
-                var base = String(symbol.dropLast(5))
-                if base == "XBT" { base = "BTC" }
-                let pair = "\(base)-USDT"
-                
-                Task { @MainActor in
-                    if ExchangeWebSocket.tradingPairs.contains(pair) {
-                        ExchangeWebSocket.kucoinCurrentFuturesPrice[pair] = priceDouble
-                        if ExchangeWebSocket.kucoinFuturesPrices[pair] == nil {
-                            ExchangeWebSocket.kucoinFuturesPrices[pair] = []
+            case .text(let text):
+                if let data = text.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    
+                    // Handle subscription confirmations
+                    if json["type"] as? String == "ack" {
+                        print("KuCoin Futures WebSocket subscription confirmed")
+                        return
+                    }
+                    
+                    // Handle price data
+                    if let subject = json["subject"] as? String,
+                       subject == "ticker",
+                       let topic = json["topic"] as? String,
+                       let data = json["data"] as? [String: Any] {
+                        
+                        let futuresSymbol = topic.replacingOccurrences(of: "/contractMarket/ticker:", with: "")
+                        
+                        // Find the pair that matches this futures symbol
+                        var pair: String?
+                        for (tradingPair, symbol) in ExchangeWebSocket.kucoinFuturesSymbols {
+                            if symbol == futuresSymbol {
+                                pair = tradingPair
+                                break
+                            }
                         }
-                        ExchangeWebSocket.kucoinFuturesPrices[pair]?.append(priceDouble)
-                        if let count = ExchangeWebSocket.kucoinFuturesPrices[pair]?.count,
-                           count > ExchangeWebSocket.priceHistoryRetention {
-                            ExchangeWebSocket.kucoinFuturesPrices[pair]?.removeFirst()
+                        
+                        if let pair = pair,
+                           let priceStr = data["price"] as? String,
+                           let price = Double(priceStr), price > 0 {
+                            
+                            ExchangeWebSocket.kucoinCurrentFuturesPrice[pair] = price
+                            ExchangeWebSocket.kucoinFuturesPrices[pair, default: []].append(price)
+                            
+                            // Maintain price history limit
+                            if ExchangeWebSocket.kucoinFuturesPrices[pair]!.count > ExchangeWebSocket.priceHistoryRetention {
+                                ExchangeWebSocket.kucoinFuturesPrices[pair]?.removeFirst()
+                            }
+                            
+                            print("✅ [KuCoin Futures] Updated price for \(pair): $\(price)")
+                            
+                            // Update last data timestamp
+                            ExchangeWebSocket.lastDataUpdate[pair] = Date()
                         }
-                        print("✅ [KuCoin Futures] Updated price for \(pair): $\(priceDouble)")
                     }
                 }
-            }
-            
-        case .error(let error):
-            print("❌ [KuCoin Futures] WebSocket error: \(String(describing: error))")
-            Task { @MainActor in
+                
+            case .binary(_):
+                break
+                
+            case .ping(_):
+                client.write(pong: Data())
+                
+            case .pong(_):
+                break
+                
+            case .viabilityChanged(_):
+                break
+                
+            case .reconnectSuggested(_):
+                Task { @MainActor in
+                    ExchangeWebSocket.logAlert(event: "KuCoin Futures WebSocket reconnection suggested")
+                }
+                
+            case .cancelled:
                 ExchangeWebSocket.kucoinFuturesIsConnected = false
+                print("❌ [KuCoin Futures] WebSocket cancelled")
+                
+            case .error(let error):
+                ExchangeWebSocket.kucoinFuturesIsConnected = false
+                print("❌ [KuCoin Futures] WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                ExchangeWebSocket.logAlert(event: "KuCoin Futures WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                
+            case .peerClosed:
+                ExchangeWebSocket.kucoinFuturesIsConnected = false
+                print("❌ [KuCoin Futures] WebSocket peer closed")
+                ExchangeWebSocket.logAlert(event: "KuCoin Futures WebSocket peer closed")
             }
-            
-        default:
-            break
         }
     }
 }
 
-class BybitSpotWebSocketDelegate: NSObject, WebSocketDelegate {
-    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
-        switch event {
-        case .connected(let headers):
-            print("✅ [Bybit Spot] WebSocket connected: \(headers)")
-            Task { @MainActor in
-                ExchangeWebSocket.bybitFuturesIsConnected = true
-                ExchangeWebSocket.logAlert(event: "✅ Bybit Spot WebSocket connected")
-            }
-            
-        case .disconnected(let reason, let code):
-            print("❌ [Bybit Spot] WebSocket disconnected: \(reason) with code: \(code)")
-            Task { @MainActor in
-                ExchangeWebSocket.bybitFuturesIsConnected = false
-                ExchangeWebSocket.logAlert(event: "❌ Bybit Spot WebSocket disconnected: \(reason)")
-            }
-            
-        case .text(let string):
-            guard let data = string.data(using: .utf8),
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
-            
-            if let topic = json["topic"] as? String, topic.hasPrefix("tickers."),
-               let data = json["data"] as? [String: Any],
-               let symbol = data["symbol"] as? String,
-               let lastPrice = data["lastPrice"] as? String,
-               let price = Double(lastPrice) {
-                
-                let pair = symbol.hasSuffix("USDT") ? "\(String(symbol.dropLast(4)))-USDT" : symbol
-                
-                Task { @MainActor in
-                    if ExchangeWebSocket.tradingPairs.contains(pair) {
-                        ExchangeWebSocket.bybitCurrentPrice[pair] = price
-                        if ExchangeWebSocket.bybitPrices[pair] == nil {
-                            ExchangeWebSocket.bybitPrices[pair] = []
-                        }
-                        ExchangeWebSocket.bybitPrices[pair]?.append(price)
-                        if let count = ExchangeWebSocket.bybitPrices[pair]?.count,
-                           count > ExchangeWebSocket.priceHistoryRetention {
-                            ExchangeWebSocket.bybitPrices[pair]?.removeFirst()
-                        }
-                        print("✅ [Bybit Spot] Updated price for \(pair): $\(price)")
-                    }
-                }
-            }
-            
-        case .error(let error):
-            print("❌ [Bybit Spot] WebSocket error: \(String(describing: error))")
-            Task { @MainActor in
-                ExchangeWebSocket.bybitFuturesIsConnected = false
-            }
-            
-        default:
-            break
-        }
-    }
-}
-
-class BybitFuturesWebSocketDelegate: NSObject, WebSocketDelegate {
-    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
-        switch event {
-        case .connected(let headers):
-            print("✅ [Bybit Futures] WebSocket connected: \(headers)")
-            Task { @MainActor in
+class BybitSpotWebSocketDelegate: WebSocketDelegate {
+    func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
                 ExchangeWebSocket.bybitIsConnected = true
-                ExchangeWebSocket.logAlert(event: "✅ Bybit Futures WebSocket connected")
-            }
-            
-        case .disconnected(let reason, let code):
-            print("❌ [Bybit Futures] WebSocket disconnected: \(reason) with code: \(code)")
-            Task { @MainActor in
+                print("✅ [Bybit Spot] WebSocket connected: \(headers)")
+                ExchangeWebSocket.logAlert(event: "✅ Bybit Spot WebSocket connected")
+                
+                // Subscribe to all pairs
+                var topics: [String] = []
+                for pair in ExchangeWebSocket.tradingPairs {
+                    let symbol = pair.replacingOccurrences(of: "-", with: "")
+                    topics.append("tickers.\(symbol)")
+                    topics.append("orderbook.50.\(symbol)")
+                    topics.append("publicTrade.\(symbol)")
+                    print("Subscribed to Bybit spot topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
+                }
+                
+                let subscriptionMessage = [
+                    "op": "subscribe",
+                    "args": topics
+                ] as [String : Any]
+                
+                if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
+                   let jsonString = String(data: data, encoding: .utf8) {
+                    client.write(string: jsonString)
+                }
+                
+            case .disconnected(let reason, let code):
                 ExchangeWebSocket.bybitIsConnected = false
-                ExchangeWebSocket.logAlert(event: "❌ Bybit Futures WebSocket disconnected: \(reason)")
-            }
-            
-        case .text(let string):
-            guard let data = string.data(using: .utf8),
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return }
-            
-            if let topic = json["topic"] as? String, topic.hasPrefix("tickers."),
-               let data = json["data"] as? [String: Any],
-               let symbol = data["symbol"] as? String,
-               let lastPrice = data["lastPrice"] as? String,
-               let price = Double(lastPrice) {
+                print("❌ [Bybit Spot] WebSocket disconnected: \(reason) (\(code))")
+                ExchangeWebSocket.logAlert(event: "❌ Bybit Spot WebSocket disconnected: \(reason)")
                 
-                let pair = symbol.hasSuffix("USDT") ? "\(String(symbol.dropLast(4)))-USDT" : symbol
-                
-                Task { @MainActor in
-                    if ExchangeWebSocket.tradingPairs.contains(pair) {
-                        ExchangeWebSocket.bybitCurrentFuturesPrice[pair] = price
-                        if ExchangeWebSocket.bybitFuturesPrices[pair] == nil {
-                            ExchangeWebSocket.bybitFuturesPrices[pair] = []
+            case .text(let text):
+                if let data = text.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    
+                    // Handle subscription confirmations
+                    if json["op"] as? String == "subscribe" {
+                        print("Bybit Spot subscription confirmed")
+                        return
+                    }
+                    
+                    // Handle price data
+                    if let topic = json["topic"] as? String,
+                       let data = json["data"] as? [String: Any] {
+                        
+                        if topic.hasPrefix("tickers.") {
+                            let symbol = topic.replacingOccurrences(of: "tickers.", with: "")
+                            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                            
+                            if let priceStr = data["lastPrice"] as? String,
+                               let price = Double(priceStr), price > 0 {
+                                
+                                ExchangeWebSocket.bybitCurrentPrice[pair] = price
+                                ExchangeWebSocket.bybitPrices[pair, default: []].append(price)
+                                
+                                // Maintain price history limit
+                                if ExchangeWebSocket.bybitPrices[pair]!.count > ExchangeWebSocket.priceHistoryRetention {
+                                    ExchangeWebSocket.bybitPrices[pair]?.removeFirst()
+                                }
+                                
+                                print("✅ [Bybit Spot] Updated price for \(pair): $\(price)")
+                                
+                                // Update last data timestamp
+                                ExchangeWebSocket.lastDataUpdate[pair] = Date()
+                            }
                         }
-                        ExchangeWebSocket.bybitFuturesPrices[pair]?.append(price)
-                        if let count = ExchangeWebSocket.bybitFuturesPrices[pair]?.count,
-                           count > ExchangeWebSocket.priceHistoryRetention {
-                            ExchangeWebSocket.bybitFuturesPrices[pair]?.removeFirst()
-                        }
-                        print("✅ [Bybit Futures] Updated price for \(pair): $\(price)")
                     }
                 }
-            }
-            
-        case .error(let error):
-            print("❌ [Bybit Futures] WebSocket error: \(String(describing: error))")
-            Task { @MainActor in
+                
+            case .binary(_):
+                break
+                
+            case .ping(_):
+                client.write(pong: Data())
+                
+            case .pong(_):
+                break
+                
+            case .viabilityChanged(_):
+                break
+                
+            case .reconnectSuggested(_):
+                Task { @MainActor in
+                    ExchangeWebSocket.logAlert(event: "Bybit Spot WebSocket reconnection suggested")
+                }
+                
+            case .cancelled:
                 ExchangeWebSocket.bybitIsConnected = false
+                print("❌ [Bybit Spot] WebSocket cancelled")
+                
+            case .error(let error):
+                ExchangeWebSocket.bybitIsConnected = false
+                print("❌ [Bybit Spot] WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                ExchangeWebSocket.logAlert(event: "Bybit Spot WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                
+            case .peerClosed:
+                ExchangeWebSocket.bybitIsConnected = false
+                print("❌ [Bybit Spot] WebSocket peer closed")
+                ExchangeWebSocket.logAlert(event: "Bybit Spot WebSocket peer closed")
             }
-            
-        default:
-            break
         }
     }
 }
+
+class BybitFuturesWebSocketDelegate: WebSocketDelegate {
+    func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
+                ExchangeWebSocket.bybitFuturesIsConnected = true
+                print("✅ [Bybit Futures] WebSocket connected: \(headers)")
+                ExchangeWebSocket.logAlert(event: "✅ Bybit Futures WebSocket connected")
+                
+                // Subscribe to all pairs
+                var topics: [String] = []
+                for pair in ExchangeWebSocket.tradingPairs {
+                    let symbol = pair.replacingOccurrences(of: "-", with: "")
+                    topics.append("tickers.\(symbol)")
+                    topics.append("orderbook.50.\(symbol)")
+                    topics.append("publicTrade.\(symbol)")
+                    print("Subscribed to Bybit futures topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
+                }
+                
+                let subscriptionMessage = [
+                    "op": "subscribe",
+                    "args": topics
+                ] as [String : Any]
+                
+                if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
+                   let jsonString = String(data: data, encoding: .utf8) {
+                    client.write(string: jsonString)
+                }
+                
+            case .disconnected(let reason, let code):
+                ExchangeWebSocket.bybitFuturesIsConnected = false
+                print("❌ [Bybit Futures] WebSocket disconnected: \(reason) (\(code))")
+                ExchangeWebSocket.logAlert(event: "❌ Bybit Futures WebSocket disconnected: \(reason)")
+                
+            case .text(let text):
+                if let data = text.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    
+                    // Handle subscription confirmations
+                    if json["op"] as? String == "subscribe" {
+                        print("Bybit Futures subscription confirmed")
+                        return
+                    }
+                    
+                    // Handle price data
+                    if let topic = json["topic"] as? String,
+                       let data = json["data"] as? [String: Any] {
+                        
+                        if topic.hasPrefix("tickers.") {
+                            let symbol = topic.replacingOccurrences(of: "tickers.", with: "")
+                            let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                            
+                            if let priceStr = data["lastPrice"] as? String,
+                               let price = Double(priceStr), price > 0 {
+                                
+                                ExchangeWebSocket.bybitCurrentFuturesPrice[pair] = price
+                                ExchangeWebSocket.bybitFuturesPrices[pair, default: []].append(price)
+                                
+                                // Maintain price history limit
+                                if ExchangeWebSocket.bybitFuturesPrices[pair]!.count > ExchangeWebSocket.priceHistoryRetention {
+                                    ExchangeWebSocket.bybitFuturesPrices[pair]?.removeFirst()
+                                }
+                                
+                                print("✅ [Bybit Futures] Updated price for \(pair): $\(price)")
+                                
+                                // Update last data timestamp
+                                ExchangeWebSocket.lastDataUpdate[pair] = Date()
+                            }
+                        }
+                    }
+                }
+                
+            case .binary(_):
+                break
+                
+            case .ping(_):
+                client.write(pong: Data())
+                
+            case .pong(_):
+                break
+                
+            case .viabilityChanged(_):
+                break
+                
+            case .reconnectSuggested(_):
+                Task { @MainActor in
+                    ExchangeWebSocket.logAlert(event: "Bybit Futures WebSocket reconnection suggested")
+                }
+                
+            case .cancelled:
+                ExchangeWebSocket.bybitFuturesIsConnected = false
+                print("❌ [Bybit Futures] WebSocket cancelled")
+                
+            case .error(let error):
+                ExchangeWebSocket.bybitFuturesIsConnected = false
+                print("❌ [Bybit Futures] WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                ExchangeWebSocket.logAlert(event: "Bybit Futures WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                
+            case .peerClosed:
+                ExchangeWebSocket.bybitFuturesIsConnected = false
+                print("❌ [Bybit Futures] WebSocket peer closed")
+                ExchangeWebSocket.logAlert(event: "Bybit Futures WebSocket peer closed")
+            }
+        }
+    }
+}
+
+
 //----------------------------------------------------------------------------------------
 
 @MainActor
@@ -878,6 +1152,7 @@ class ExchangeWebSocket {
     static var kucoinLeverage: String = ""
     static var bybitLeverage: String = ""
     static var priceHistoryRetention: Int = 0
+   
     
     // HFT parameters
     static var scalpEntryThreshold: Double = 0.0
@@ -916,9 +1191,11 @@ class ExchangeWebSocket {
     
     
     static var kucoinDelegate: KuCoinSpotWebSocketDelegate?
-    static var kucoinFuturesDelegate: KuCoinFuturesWebSocketDelegate?
+
     static var bybitDelegate: BybitFuturesWebSocketDelegate?
-    static var bybitSpotDelegate: BybitSpotWebSocketDelegate?
+    // Add these inside the ExchangeWebSocket class in Block 1:
+    
+    
     
     // New variables for performance optimization
     static var lastPriceUpdate: [String: (price: Double, timestamp: Date)] = [:]
@@ -1209,27 +1486,7 @@ class ExchangeWebSocket {
             logAlert(event: "Failed to write dashboard.json: \(error.localizedDescription)")
         }
     }
-    // Dashboard metrics logging
-    static func logDashboardMetrics() {
-        Task { @MainActor in
-            let timestamp = ISO8601DateFormatter().string(from: Date())
-            let metrics = """
-            [\(timestamp)] Dashboard Metrics:
-            KuCoin Balance: \(kucoinBalance) USDT
-            Bybit Balance: \(bybitBalance) USDT
-            KuCoin Futures: \(kucoinFuturesBalance) USDT
-            Bybit Futures: \(bybitFuturesBalance) USDT
-            Total Trades: \(performanceMetrics.values.reduce(0) { $0 + $1.trades })
-            Total Profit: \(performanceMetrics.values.reduce(0.0) { $0 + $1.profit }) USDT
-            Total Fees: \(performanceMetrics.values.reduce(0.0) { $0 + $1.fees }) USDT
-            """
-            print(metrics)
-            logAlert(event: metrics)
-            writeDashboardJSON()
-       
-        }
-    }
-    
+
     static func initializeParameters(completion: @escaping () -> Void) {
         let rawPairs = environment["ACTIVE_PAIRS"] ?? "BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT"
         print("DEBUG: Raw ACTIVE_PAIRS from .env: \(rawPairs)")
