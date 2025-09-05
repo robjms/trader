@@ -1,7 +1,9 @@
 
+//------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
+
+
 
 extension ExchangeWebSocket {
-    
     static func monitorFundingRateArbitrage() {
         Task {
             await withTaskGroup(of: Void.self) { group in
@@ -104,9 +106,13 @@ extension ExchangeWebSocket {
                     return
                 }
                 
-                print("DEBUG: Successfully fetched KuCoin WebSocket token")
                 Task { @MainActor in
-                    logAlert(event: "Successfully fetched KuCoin WebSocket token")
+                    kucoinToken = token
+                    print("DEBUG: Fetched KuCoin WebSocket token: \(token)")
+                    kucoinSocket = WebSocket(request: URLRequest(url: URL(string: "wss://ws-api.kucoin.com/endpoint?token=\(token)")!))
+                    kucoinSocket?.delegate = kucoinDelegate
+                    kucoinSocket?.connect()
+                    print("DEBUG: KuCoin WebSocket connected for token: \(token)")
                 }
                 completion(token)
             } catch {
@@ -166,9 +172,13 @@ extension ExchangeWebSocket {
                     return
                 }
                 
-                print("DEBUG: Successfully fetched KuCoin Futures WebSocket token")
                 Task { @MainActor in
-                    logAlert(event: "Successfully fetched KuCoin Futures WebSocket token")
+                    kucoinFuturesToken = token
+                    print("DEBUG: Fetched KuCoin Futures WebSocket token: \(token)")
+                    kucoinFuturesSocket = WebSocket(request: URLRequest(url: URL(string: "wss://ws-api-futures.kucoin.com/endpoint?token=\(token)")!))
+                    kucoinFuturesSocket?.delegate = kucoinFuturesDelegate
+                    kucoinFuturesSocket?.connect()
+                    print("DEBUG: KuCoin Futures WebSocket connected for token: \(token)")
                 }
                 completion(token)
             } catch {
@@ -263,7 +273,6 @@ extension ExchangeWebSocket {
                 Task { @MainActor in
                     kucoinBalance = balance
                     print("DEBUG: Fetched KuCoin balance: \(balance)")
-                    logAlert(event: "Successfully fetched KuCoin balance: \(balance)")
                     completion(balance)
                 }
             } catch {
@@ -362,7 +371,6 @@ extension ExchangeWebSocket {
                 Task { @MainActor in
                     bybitBalance = balance
                     print("DEBUG: Fetched Bybit balance: \(balance)")
-                    logAlert(event: "Successfully fetched Bybit balance: \(balance)")
                     completion(balance)
                 }
             } catch {
@@ -377,4 +385,3 @@ extension ExchangeWebSocket {
         }.resume()
     }
 }
-
