@@ -1,34 +1,15 @@
 
+//--------------------------------------------------------------------------------------------------------------------------Block 12 - Trading Loop Monitoring and Support
+
 import Foundation // Added for String.Encoding and other Foundation types
 
 extension ExchangeWebSocket {
     static var totalProfit: Double = 0.0
     static var totalFees: Double = 0.0
     static var kellyCreditRatio: Double = getDouble("KELLY_CREDIT_RATIO", defaultValue: 2.0)
+    static var totalBalance: Double = 0.0
 
-    static func checkLiquidityAsyncUnique(exchange: String, pair: String, marketType: String, tradeAmount: Double, price: Double) async -> Double? {
-        let minLiquidity = getDouble("MIN_LIQUIDITY_THRESHOLD", defaultValue: 500.0)
-        let requiredLiquidity = tradeAmount * price * liquidityDepthMultiplier
 
-        do {
-            let depth = try await fetchOrderBookDepth(for: exchange, pair: pair, marketType: marketType, retryCount: 0)
-            guard let unwrappedDepth = depth, unwrappedDepth >= max(minLiquidity, requiredLiquidity) else {
-                print("📝 DEBUG: Insufficient liquidity for \(exchange)-\(pair)-\(marketType): Depth \(String(describing: depth)), Required \(requiredLiquidity)")
-                await MainActor.run {
-                    logAlert(event: "Insufficient liquidity for \(exchange)-\(pair)-\(marketType): Depth \(String(describing: depth))")
-                }
-                return nil
-            }
-            print("DEBUG: Liquidity check passed for \(exchange)-\(pair)-\(marketType): Depth \(unwrappedDepth)")
-            return unwrappedDepth
-        } catch {
-            print("DEBUG: Error fetching order book depth for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
-            await MainActor.run {
-                logAlert(event: "Error fetching order book depth for \(exchange)-\(pair)-\(marketType): \(error.localizedDescription)")
-            }
-            return nil
-        }
-    }
 
     static func fetchOrderBookDepth(for exchange: String, pair: String, marketType: String, retryCount: Int = 0) async throws -> Double? {
         let maxRetries = getInt("API_MAX_RETRIES", defaultValue: 3)
@@ -223,18 +204,7 @@ extension ExchangeWebSocket {
         }
     }
 
-    static func executeHFTTrade(exchange: String, pair: String, side: String, price: Double, amount: Double) {
-        print("💸 Trade: \(side) \(amount) of \(pair) on \(exchange) at \(price)")
-        let fee = amount * price * (exchange == "kucoin" ? kucoinTakerFee : bybitTakerFee)
-        totalFees += fee
-        if exchange == "kucoin" {
-            kucoinBalance -= side == "buy" ? (amount * price + fee) : -fee
-            kucoinPositions[pair] = (kucoinPositions[pair] ?? 0.0) + (side == "buy" ? amount : -amount)
-        } else {
-            bybitBalance -= side == "buy" ? (amount * price + fee) : -fee
-            bybitPositions[pair] = (bybitPositions[pair] ?? 0.0) + (side == "buy" ? amount : -amount)
-        }
-    }
+
 
     static func connectWebSocket(exchange: String, pair: String, marketType: String) {
         print("📡 Connecting WebSocket for \(exchange), pair: \(pair), marketType: \(marketType)")
@@ -276,7 +246,7 @@ extension ExchangeWebSocket {
         var localBybitBalance = bybitBalance
 
         while Date().timeIntervalSince(startTime) < 60 {
-            if let currentPrice = await MainActor.run { exchange == "bybit" ? bybitCurrentPrice[pair] : kucoinCurrentPrice[pair] } {
+            if let currentPrice = await MainActor.run(body: { exchange == "bybit" ? bybitCurrentPrice[pair] : kucoinCurrentPrice[pair] }) {
                 if currentPrice > highestPrice {
                     highestPrice = currentPrice
                     trailingTargetPrice = highestPrice * (1 - trailingProfitPercent)
@@ -322,7 +292,7 @@ extension ExchangeWebSocket {
                 strategy: "HFT Scalping",
                 profit: profit,
                 fees: fees,
-                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv")
+                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv")
             )
             sendTradeToFlaskServer(strategy: "HFT Scalping", pair: pair, exchange: exchange, spotPrice: 0.0, futuresPrice: 0.0, tradeAmount: 0.0, profit: profit)
         }
@@ -387,7 +357,7 @@ extension ExchangeWebSocket {
                 strategy: "Funding Rate Momentum",
                 profit: profit,
                 fees: fees,
-                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trades.csv")
+                tradesCSVURL: URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv")
             )
             sendTradeToFlaskServer(strategy: "Funding Rate Momentum", pair: pair, exchange: exchange, spotPrice: 0.0, futuresPrice: 0.0, tradeAmount: 0.0, profit: profit)
         }
