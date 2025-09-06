@@ -1,5 +1,4 @@
 
-
 //--------------- Block 1 - Core Data Structures and Utilities
 // VARIABLES TO ADD: None - All variables included in this block
 
@@ -3767,12 +3766,19 @@ extension ExchangeWebSocket {
 //-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
 
 
+//-------------------------------------------------------------------------------------------------------------------Block 7 - WebSocket Connection Handling
+
+// ADDED: Import CryptoKit for HMAC functions
+import CryptoKit
+
 
 extension ExchangeWebSocket {
     
     static var bybitFuturesSocket: WebSocket?
     static var bybitSpotDelegate: BybitSpotWebSocketDelegate?
     static var bybitFuturesDelegate: BybitFuturesWebSocketDelegate?
+    
+   
     
     // ADDED: Master connection functions that call your detailed implementations
     static func connectKucoin() {
@@ -3784,6 +3790,7 @@ extension ExchangeWebSocket {
             connectKuCoinFuturesWebSocket()
         }
     }
+    
     
     static func connectBybitMaster() {
         Task { @MainActor in
@@ -3897,26 +3904,28 @@ extension ExchangeWebSocket {
                 return kucoinFuturesSymbols[pair]
             }
             
-            let subscribeMessage: [String: Any] = [
-                "id": Int.random(in: 1...999999),
-                "type": "subscribe",
-                "topic": "/contractMarket/ticker:\(symbols.joined(separator: ","))",
-                "privateChannel": false,
-                "response": true
-            ]
-            
-
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    socket.write(string: jsonString)
-                    print("✅ [WebSocket] Subscribed to KuCoin Futures prices for \(pairs.count) pairs")
-                    logAlert(event: "✅ Subscribed to KuCoin Futures prices for \(pairs.count) pairs")
+            // FIXED: Use individual topic subscriptions for better reliability
+            for symbol in symbols {
+                let subscribeMessage: [String: Any] = [
+                    "id": Int.random(in: 1...999999),
+                    "type": "subscribe",
+                    "topic": "/contractMarket/tickerV2:\(symbol)",
+                    "privateChannel": false,
+                    "response": true
+                ]
+                
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {
+                        socket.write(string: jsonString)
+                        print("✅ [WebSocket] Subscribed to KuCoin Futures ticker for \(symbol)")
+                    }
+                } catch {
+                    print("❌ [WebSocket] Failed to subscribe to KuCoin Futures ticker \(symbol): \(error)")
                 }
-            } catch {
-                print("❌ [WebSocket] Failed to subscribe to KuCoin Futures prices: \(error)")
-                logAlert(event: "❌ Failed to subscribe to KuCoin Futures prices: \(error)")
             }
+            
+            logAlert(event: "✅ Subscribed to KuCoin Futures prices for \(symbols.count) symbols")
         }
     }
     
@@ -4051,8 +4060,8 @@ extension ExchangeWebSocket {
                 
                 kucoinToken = websocketToken
                 
-                // Connect to WebSocket
-                guard let url = URL(string: "wss://ws-api-spot.kucoin.com/?token=\(websocketToken)") else {
+                // FIXED: Use correct WebSocket URL format with connectId
+                guard let url = URL(string: "wss://ws-api-spot.kucoin.com/?token=\(websocketToken)&[connectId=\(UUID().uuidString)]") else {
                     print("❌ [WebSocket] Invalid KuCoin WebSocket URL")
                     logAlert(event: "❌ Invalid KuCoin WebSocket URL")
                     return
@@ -4112,23 +4121,34 @@ extension ExchangeWebSocket {
                                     return
                                 }
                                 let symbol = components[1]
-                                let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                                // FIXED: Better symbol parsing for KuCoin spot
+                                let pair = symbol.count > 4 ? "\(symbol.dropLast(4))-\(symbol.suffix(4))" : symbol
                                 print("🔍 KuCoin parsed pair: \(pair)")
                                 
                                 if topic.contains("/market/ticker") {
                                     print("🔍 KuCoin ticker data: \(data)")
-                                    if let priceStr = data["price"] as? String, let price = Double(priceStr), price > 0 {
+                                    // FIXED: Try multiple price fields
+                                    var price: Double?
+                                    let priceFields = ["price", "bestAsk", "bestBid", "last"]
+                                    for field in priceFields {
+                                        if let priceStr = data[field] as? String, let parsedPrice = Double(priceStr), parsedPrice > 0 {
+                                            price = parsedPrice
+                                            break
+                                        }
+                                    }
+                                    
+                                    if let price = price {
                                         Task { @MainActor in
                                             kucoinCurrentPrice[pair] = price
                                             kucoinPrices[pair, default: []].append(price)
                                             if kucoinPrices[pair]!.count > priceHistoryRetention {
                                                 kucoinPrices[pair]!.removeFirst()
                                             }
-                                            print("✅ KuCoin \(pair) price updated: \(price)")
+                                            print("✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
                                             updateDashboardJSON()
                                         }
                                     } else {
-                                        print("🔍 KuCoin: Could not parse price from data")
+                                        print("🔍 KuCoin: Could not parse price from data: \(data)")
                                     }
                                 }
                             }
@@ -4166,6 +4186,7 @@ extension ExchangeWebSocket {
         }
     }
     
+    // FIXED: Enhanced token fetching with proper authentication
     static func fetchKuCoinWebSocketToken(completion: @escaping @Sendable (String?) -> Void) {
         guard let url = URL(string: "https://api.kucoin.com/api/v1/bullet-public") else {
             print("❌ [API] Invalid KuCoin token URL")
@@ -4176,6 +4197,30 @@ extension ExchangeWebSocket {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = TimeInterval(balanceFetchTimeout)
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // ADDED: For private endpoints, add authentication if credentials available
+        if let apiKey = environment["KUCOIN_API_KEY"],
+           let apiSecret = environment["KUCOIN_API_SECRET"],
+           let apiPassphrase = environment["KUCOIN_API_PASSPHRASE"],
+           !apiKey.isEmpty, !apiSecret.isEmpty, !apiPassphrase.isEmpty {
+            
+            let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
+            let endpoint = "/api/v1/bullet-public"
+            let method = "POST"
+            let body = ""
+            let strToSign = timestamp + method + endpoint + body
+            let signature = strToSign.data(using: .utf8)!.hmac(key: apiSecret)
+            let encryptedPassphrase = apiPassphrase.data(using: .utf8)!.hmac(key: apiSecret)
+            
+            request.addValue(apiKey, forHTTPHeaderField: "KC-API-KEY")
+            request.addValue(signature, forHTTPHeaderField: "KC-API-SIGN")
+            request.addValue(timestamp, forHTTPHeaderField: "KC-API-TIMESTAMP")
+            request.addValue(encryptedPassphrase, forHTTPHeaderField: "KC-API-PASSPHRASE")
+            request.addValue("2", forHTTPHeaderField: "KC-API-KEY-VERSION")
+            
+            print("✅ [API] Using authenticated KuCoin WebSocket token request")
+        }
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -4190,6 +4235,9 @@ extension ExchangeWebSocket {
                   let responseData = json["data"] as? [String: Any],
                   let token = responseData["token"] as? String else {
                 print("❌ [API] Invalid KuCoin WebSocket token response")
+                if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                    print("❌ [API] Response body: \(responseBody)")
+                }
                 completion(nil)
                 return
             }
@@ -4200,6 +4248,7 @@ extension ExchangeWebSocket {
         task.resume()
     }
 
+    // FIXED: Enhanced KuCoin Futures token fetching
     static func fetchKuCoinFuturesWebSocketToken(completion: @escaping @Sendable (String?) -> Void) {
         guard let url = URL(string: "https://api-futures.kucoin.com/api/v1/bullet-public") else {
             print("❌ [API] Invalid KuCoin Futures token URL")
@@ -4210,6 +4259,30 @@ extension ExchangeWebSocket {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = TimeInterval(balanceFetchTimeout)
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // ADDED: For private endpoints, add authentication if credentials available
+        if let apiKey = environment["KUCOIN_API_KEY"],
+           let apiSecret = environment["KUCOIN_API_SECRET"],
+           let apiPassphrase = environment["KUCOIN_API_PASSPHRASE"],
+           !apiKey.isEmpty, !apiSecret.isEmpty, !apiPassphrase.isEmpty {
+            
+            let timestamp = String(Int(Date().timeIntervalSince1970 * 1000))
+            let endpoint = "/api/v1/bullet-public"
+            let method = "POST"
+            let body = ""
+            let strToSign = timestamp + method + endpoint + body
+            let signature = strToSign.data(using: .utf8)!.hmac(key: apiSecret)
+            let encryptedPassphrase = apiPassphrase.data(using: .utf8)!.hmac(key: apiSecret)
+            
+            request.addValue(apiKey, forHTTPHeaderField: "KC-API-KEY")
+            request.addValue(signature, forHTTPHeaderField: "KC-API-SIGN")
+            request.addValue(timestamp, forHTTPHeaderField: "KC-API-TIMESTAMP")
+            request.addValue(encryptedPassphrase, forHTTPHeaderField: "KC-API-PASSPHRASE")
+            request.addValue("2", forHTTPHeaderField: "KC-API-KEY-VERSION")
+            
+            print("✅ [API] Using authenticated KuCoin Futures WebSocket token request")
+        }
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -4224,6 +4297,9 @@ extension ExchangeWebSocket {
                   let responseData = json["data"] as? [String: Any],
                   let token = responseData["token"] as? String else {
                 print("❌ [API] Invalid KuCoin Futures WebSocket token response")
+                if let data = data, let responseBody = String(data: data, encoding: .utf8) {
+                    print("❌ [API] Response body: \(responseBody)")
+                }
                 completion(nil)
                 return
             }
@@ -4284,7 +4360,8 @@ extension ExchangeWebSocket {
                 
                 kucoinFuturesToken = websocketToken
                 
-                guard let url = URL(string: "wss://ws-api-futures.kucoin.com/?token=\(websocketToken)") else {
+                // FIXED: Use correct WebSocket URL format with connectId
+                guard let url = URL(string: "wss://ws-api-futures.kucoin.com/?token=\(websocketToken)&[connectId=\(UUID().uuidString)]") else {
                     print("❌ [WebSocket] Invalid KuCoin Futures WebSocket URL")
                     logAlert(event: "❌ Invalid KuCoin Futures WebSocket URL")
                     return
@@ -4296,14 +4373,98 @@ extension ExchangeWebSocket {
                 let socket = WebSocket(request: request)
                 kucoinFuturesSocket = socket
                 
-                // FIXED: Assign the delegate to handle incoming messages
-                kucoinFuturesDelegate = KuCoinFuturesWebSocketDelegate()
-                socket.delegate = kucoinFuturesDelegate
+                // FIXED: Use onEvent handler for consistency with spot WebSocket
+                socket.onEvent = { event in
+                    switch event {
+                    case .connected(_):
+                        Task { @MainActor in
+                            kucoinFuturesIsConnected = true
+                            kucoinFuturesReconnectAttempts = 0
+                            websocketReconnectAttempts["kucoin-futures"] = 0
+                            print("✅ KuCoin Futures WebSocket connected via onEvent")
+                            logAlert(event: "✅ KuCoin Futures WebSocket connected via onEvent")
+                            
+                            // Subscribe immediately after connection
+                            subscribeToKuCoinFuturesPrices(pairs: tradingPairs)
+                        }
+                    case .text(let string):
+                        // DEBUG: Log incoming messages
+                        print("🔍 KuCoin Futures RAW MESSAGE: \(string)")
+                        Task { @MainActor in
+                            lastWebsocketActivity["kucoin-futures"] = Date()
+                        }
+                        
+                        // Handle incoming messages
+                        do {
+                            guard let json = try JSONSerialization.jsonObject(with: string.data(using: .utf8)!) as? [String: Any],
+                                  let type = json["type"] as? String else {
+                                return
+                            }
+                            
+                            if type == "ack" {
+                                print("✅ KuCoin Futures subscription confirmed")
+                                return
+                            }
+                            
+                            if type == "message", let data = json["data"] as? [String: Any], let topic = json["topic"] as? String {
+                                let components = topic.components(separatedBy: ":")
+                                guard components.count > 1 else { return }
+                                let futuresSymbol = components[1]
+                                guard let pair = kucoinFuturesSymbols.first(where: { $0.value == futuresSymbol })?.key else {
+                                    print("🔍 KuCoin Futures: No pair found for symbol \(futuresSymbol)")
+                                    return
+                                }
+                                
+                                if topic.contains("/contractMarket/tickerV2") {
+                                    // FIXED: Try multiple price fields
+                                    var price: Double?
+                                    let priceFields = ["bestAskPrice", "bestBidPrice", "lastPrice", "indexPrice"]
+                                    for field in priceFields {
+                                        if let priceStr = data[field] as? String, let parsedPrice = Double(priceStr), parsedPrice > 0 {
+                                            price = parsedPrice
+                                            break
+                                        }
+                                    }
+                                    
+                                    if let price = price {
+                                        Task { @MainActor in
+                                            kucoinCurrentFuturesPrice[pair] = price
+                                            kucoinFuturesPrices[pair, default: []].append(price)
+                                            if kucoinFuturesPrices[pair]!.count > priceHistoryRetention {
+                                                kucoinFuturesPrices[pair]!.removeFirst()
+                                            }
+                                            print("✅ [KuCoin Futures] Updated price for \(pair): $\(price)")
+                                            updateDashboardJSON()
+                                        }
+                                    }
+                                }
+                            }
+                        } catch {
+                            print("❌ Failed to parse KuCoin Futures message: \(error)")
+                        }
+                    case .disconnected(let reason, let code):
+                        Task { @MainActor in
+                            kucoinFuturesIsConnected = false
+                            print("❌ KuCoin Futures disconnected: \(reason), code: \(code)")
+                            logAlert(event: "❌ KuCoin Futures disconnected: \(reason), code: \(code)")
+                            handleWebSocketReconnection(exchange: "kucoin", marketType: "futures")
+                        }
+                    case .error(let error):
+                        print("❌ KuCoin Futures WebSocket error: \(error?.localizedDescription ?? "Unknown")")
+                        Task { @MainActor in
+                            kucoinFuturesIsConnected = false
+                            logAlert(event: "❌ KuCoin Futures WebSocket error: \(error?.localizedDescription ?? "Unknown")")
+                            handleWebSocketReconnection(exchange: "kucoin", marketType: "futures")
+                        }
+                    default:
+                        break
+                    }
+                }
                 
                 socket.connect()
                 
-                print("🔄 [WebSocket] KuCoin Futures WebSocket connection initiated with delegate")
-                logAlert(event: "🔄 KuCoin Futures WebSocket connection initiated with delegate")
+                print("🔄 [WebSocket] KuCoin Futures WebSocket connection initiated with onEvent")
+                logAlert(event: "🔄 KuCoin Futures WebSocket connection initiated with onEvent")
             }
         }
     }
@@ -4360,6 +4521,7 @@ extension ExchangeWebSocket {
         }
     }
     
+    // FIXED: Enhanced KuCoin spot subscription with individual topic subscriptions
     static func subscribeToKuCoinSpotPrices(pairs: [String]) {
         Task { @MainActor in
             guard kucoinIsConnected, let socket = kucoinSocket else {
@@ -4368,26 +4530,29 @@ extension ExchangeWebSocket {
                 return
             }
             
+            // FIXED: Subscribe to individual tickers for better reliability
             let symbols = pairs.map { $0.replacingOccurrences(of: "-", with: "") }
-            let subscribeMessage: [String: Any] = [
-                "id": Int.random(in: 1...999999),
-                "type": "subscribe",
-                "topic": "/market/ticker:\(symbols.joined(separator: ","))",
-                "privateChannel": false,
-                "response": true
-            ]
-            
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    socket.write(string: jsonString)
-                    print("✅ [WebSocket] Subscribed to KuCoin Spot prices for \(pairs.count) pairs")
-                    logAlert(event: "✅ Subscribed to KuCoin Spot prices for \(pairs.count) pairs")
+            for symbol in symbols {
+                let subscribeMessage: [String: Any] = [
+                    "id": Int.random(in: 1...999999),
+                    "type": "subscribe",
+                    "topic": "/market/ticker:\(symbol)",
+                    "privateChannel": false,
+                    "response": true
+                ]
+                
+                do {
+                    let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage, options: [])
+                    if let jsonString = String(data: jsonData, encoding: .utf8) {
+                        socket.write(string: jsonString)
+                        print("✅ [WebSocket] Subscribed to KuCoin Spot ticker for \(symbol)")
+                    }
+                } catch {
+                    print("❌ [WebSocket] Failed to subscribe to KuCoin Spot ticker \(symbol): \(error)")
                 }
-            } catch {
-                print("❌ [WebSocket] Failed to subscribe to KuCoin Spot prices: \(error)")
-                logAlert(event: "❌ Failed to subscribe to KuCoin Spot prices: \(error)")
             }
+            
+            logAlert(event: "✅ Subscribed to KuCoin Spot prices for \(symbols.count) symbols")
         }
     }
 
@@ -4447,7 +4612,6 @@ extension ExchangeWebSocket {
         }
     }
 }
-
 
 //---------------------------------------------------------------------------------------------------------------------Block 8 - WebSocket Delegate Operations
 
