@@ -1,20 +1,13 @@
 //-------------------------------------------------------------------------------------------------------------------------Block 11 - WebSocket Data Handling
 
 
-// VARIABLES TO ADD: Add to Block 1 - Core Data Structures and Utilities if not present:
-// private static var kucoinDelegate: KuCoinSpotWebSocketDelegate?
-// private static var kucoinFuturesDelegate: KuCoinFuturesWebSocketDelegate?
-// private static var bybitDelegate: BybitSpotWebSocketDelegate?
-// private static var bybitFuturesDelegate: BybitFuturesWebSocketDelegate?
-
 extension ExchangeWebSocket {
     private static var kucoinSpotDelegate: KuCoinSpotWebSocketDelegate?
     private static var kucoinFuturesDelegate: KuCoinFuturesWebSocketDelegate?
-    private static var bybitSpotDelegate: BybitSpotWebSocketDelegate?
-    private static var bybitFuturesDelegate: BybitFuturesWebSocketDelegate?
+  
 
     @MainActor
-    static func connectKucoin() {
+    static func connectKucoinMaster() {
         guard hasValidKuCoinCredentials else {
             print("Skipping KuCoin WebSocket connection due to missing credentials")
             Task { @MainActor in
@@ -234,133 +227,133 @@ extension ExchangeWebSocket {
         }
     }
 
-    @MainActor
-    static func connectBybit() {
-        print("Attempting to connect to Bybit WebSocket...")
-        bybitSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/spot")!))
-        bybitSpotDelegate = BybitSpotWebSocketDelegate()
-        bybitSocket?.delegate = bybitSpotDelegate
-        bybitSocket?.connect()
-        
-        weak var spotWs = bybitSocket
-        spotWs?.onEvent = { event in
-            Task { @MainActor in
-                switch event {
-                case .connected(_):
-                    for pair in tradingPairs {
-                        // Fixed symbol formatting for Bybit
-                        let symbol = pair.replacingOccurrences(of: "-", with: "")
-                        let subscribeMessage: [String: Any] = [
-                            "req_id": "bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))",
-                            "op": "subscribe",
-                            "args": [
-                                "tickers.\(symbol)",
-                                "orderbook.50.\(symbol)",
-                                "publicTrade.\(symbol)"
-                            ]
-                        ]
-                        if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
-                           let message = String(data: data, encoding: .utf8) {
-                            spotWs?.write(string: message)
-                            print("Subscribed to Bybit spot topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
-                        } else {
-                            print("Failed to subscribe to Bybit spot topics for pair: \(pair)")
+            @MainActor
+            static func connectBybit() {
+                print("Attempting to connect to Bybit WebSocket...")
+                bybitSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/spot")!))
+                bybitSpotDelegate = BybitSpotWebSocketDelegate()
+                bybitSocket?.delegate = bybitSpotDelegate
+                bybitSocket?.connect()
+                
+                weak var spotWs = bybitSocket
+                spotWs?.onEvent = { event in
+                    Task { @MainActor in
+                        switch event {
+                        case .connected(_):
+                            for pair in tradingPairs {
+                                // Fixed symbol formatting for Bybit
+                                let symbol = pair.replacingOccurrences(of: "-", with: "")
+                                let subscribeMessage: [String: Any] = [
+                                    "req_id": "bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))",
+                                    "op": "subscribe",
+                                    "args": [
+                                        "tickers.\(symbol)",
+                                        "orderbook.50.\(symbol)",
+                                        "publicTrade.\(symbol)"
+                                    ]
+                                ]
+                                if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
+                                   let message = String(data: data, encoding: .utf8) {
+                                    spotWs?.write(string: message)
+                                    print("Subscribed to Bybit spot topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
+                                } else {
+                                    print("Failed to subscribe to Bybit spot topics for pair: \(pair)")
+                                }
+                            }
+                            Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
+                                Task { @MainActor in
+                                    let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
+                                    spotWs?.write(string: pingMessage)
+                                    print("Sent ping to Bybit Spot WebSocket")
+                                }
+                            }
+                        case .disconnected(_, _):
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                connectBybit()
+                            }
+                        case .error(_):
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                connectBybit()
+                            }
+                        case .text(let string):
+                            if let data = string.data(using: .utf8),
+                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                               let success = json["success"] as? Bool, success,
+                               let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
+                                print("Bybit Spot subscription confirmed")
+                            }
+                        case .peerClosed:
+                            print("Bybit Spot WebSocket peer closed connection")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                connectBybit()
+                            }
+                        default:
+                            break
                         }
                     }
-                    Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
-                        Task { @MainActor in
-                            let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
-                            spotWs?.write(string: pingMessage)
-                            print("Sent ping to Bybit Spot WebSocket")
+                }
+                
+                bybitSpotSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/linear")!))
+                bybitFuturesDelegate = BybitFuturesWebSocketDelegate()
+                bybitSpotSocket?.delegate = bybitFuturesDelegate
+                bybitSpotSocket?.connect()
+                
+                weak var futuresWs = bybitSpotSocket
+                futuresWs?.onEvent = { event in
+                    Task { @MainActor in
+                        switch event {
+                        case .connected(_):
+                            for pair in tradingPairs {
+                                // Fixed symbol formatting for Bybit futures
+                                let symbol = pair.replacingOccurrences(of: "-", with: "")
+                                let subscribeMessage: [String: Any] = [
+                                    "req_id": "bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))",
+                                    "op": "subscribe",
+                                    "args": [
+                                        "tickers.\(symbol)",
+                                        "orderbook.50.\(symbol)",
+                                        "publicTrade.\(symbol)"
+                                    ]
+                                ]
+                                if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
+                                   let message = String(data: data, encoding: .utf8) {
+                                    futuresWs?.write(string: message)
+                                    print("Subscribed to Bybit futures topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
+                                } else {
+                                    print("Failed to subscribe to Bybit futures topics for pair: \(pair)")
+                                }
+                            }
+                            Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
+                                Task { @MainActor in
+                                    let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
+                                    futuresWs?.write(string: pingMessage)
+                                    print("Sent ping to Bybit Futures WebSocket")
+                                }
+                            }
+                        case .disconnected(_, _):
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                connectBybit()
+                            }
+                        case .error(_):
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                connectBybit()
+                            }
+                        case .text(let string):
+                            if let data = string.data(using: .utf8),
+                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                               let success = json["success"] as? Bool, success,
+                               let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
+                                print("Bybit Futures subscription confirmed")
+                            }
+                        case .peerClosed:
+                            print("Bybit Futures WebSocket peer closed connection")
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                connectBybit()
+                            }
+                        default:
+                            break
                         }
                     }
-                case .disconnected(_, _):
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                case .error(_):
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                case .text(let string):
-                    if let data = string.data(using: .utf8),
-                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let success = json["success"] as? Bool, success,
-                       let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
-                        print("Bybit Spot subscription confirmed")
-                    }
-                case .peerClosed:
-                    print("Bybit Spot WebSocket peer closed connection")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                default:
-                    break
                 }
             }
         }
-        
-        bybitSpotSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/linear")!))
-        bybitFuturesDelegate = BybitFuturesWebSocketDelegate()
-        bybitSpotSocket?.delegate = bybitFuturesDelegate
-        bybitSpotSocket?.connect()
-        
-        weak var futuresWs = bybitSpotSocket
-        futuresWs?.onEvent = { event in
-            Task { @MainActor in
-                switch event {
-                case .connected(_):
-                    for pair in tradingPairs {
-                        // Fixed symbol formatting for Bybit futures
-                        let symbol = pair.replacingOccurrences(of: "-", with: "")
-                        let subscribeMessage: [String: Any] = [
-                            "req_id": "bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))",
-                            "op": "subscribe",
-                            "args": [
-                                "tickers.\(symbol)",
-                                "orderbook.50.\(symbol)",
-                                "publicTrade.\(symbol)"
-                            ]
-                        ]
-                        if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
-                           let message = String(data: data, encoding: .utf8) {
-                            futuresWs?.write(string: message)
-                            print("Subscribed to Bybit futures topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
-                        } else {
-                            print("Failed to subscribe to Bybit futures topics for pair: \(pair)")
-                        }
-                    }
-                    Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
-                        Task { @MainActor in
-                            let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
-                            futuresWs?.write(string: pingMessage)
-                            print("Sent ping to Bybit Futures WebSocket")
-                        }
-                    }
-                case .disconnected(_, _):
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                case .error(_):
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                case .text(let string):
-                    if let data = string.data(using: .utf8),
-                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let success = json["success"] as? Bool, success,
-                       let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
-                        print("Bybit Futures subscription confirmed")
-                    }
-                case .peerClosed:
-                    print("Bybit Futures WebSocket peer closed connection")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectBybit()
-                    }
-                default:
-                    break
-                }
-            }
-        }
-    }
-}
