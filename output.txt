@@ -334,69 +334,7 @@ No trades executed yet
 
 
 terminal output:
-(base) Roberts-iMac-2:Python robertsteinegger$ swift run BevaixBot
-warning: 'starscream': found 1 file(s) which are unhandled; explicitly declare them as resources or exclude from the target
-    /Users/robertsteinegger/Desktop/BevaixBot/.build/checkouts/Starscream/Sources/Info.plist
-[1/1] Planning build
-Building for debugging...
-[1/1] Write swift-version--58304C5D6DBC2206.txt
-Build of product 'BevaixBot' complete! (2.30s)
-🔍 Primary: Loading .env from /Users/robertsteinegger/Desktop/BevaixBot/.env
-✅ Found .env file at /Users/robertsteinegger/Desktop/BevaixBot/.env
-✅ SwiftDotenv configured successfully
-SwiftDotenv version: unknown
-✅ Successfully loaded .env file using SwiftDotenv
-DEBUG: Loaded environment variables: ["BYBIT_API_KEY": "c5HePA9t71x6bqzU3b", "KUCOIN_FUTURES_FEE_RATE": "0.0002", "VOLATILITY_SPIKE_THRESHOLD": "0.20  # Increased from 0.10 to 0.15 to reduce pauses", "MACD_LONG_PERIOD": "20", "SPOT_EMA_MEDIUM_PERIOD": "10", "CROSS_EXCHANGE_MIN_FUNDING_RATE_THRESHOLD": "0.0000005  # Increased from 0.0000003 to 0.0000005 to avoid high funding cost trades", "SPREAD_RETENTION_HOURS": "24", "SPOT_EMA_LONG_PERIOD": "20", "ORDER_BOOK_IMBALANCE_THRESHOLD": "3.0  # Threshold for imbalance checks", "HFT_TRADE_AMOUNT": "60.0", "LATENCY_SPIKE_THRESHOLD": "500.0  # Increased from 80.0 to 200.0 to reduce false positives", "LIQUIDITY_CHECK_FALLBACK": "true", "SPOT_STOP_LOSS_PERCENTAGE": "0.0020  # Increased from 0.0012 to 0.0020 to align with profit target", "TRADE_HOLD_DURATION_MINUTES": "3  # Reduced from 5 to 3 to exit trades faster", "SCALP_ENTRY_THRESHOLD": "0.0006  # Increased from 0.0004 to 0.0006 for stronger entry signals", "MAX_ORDER_BOOK_IMBALANCE": "20.0  # Increased from 8.0 to 20.0 to allow higher imbalances", "CROSS_EXCHANGE_MIN_BALANCE": "300.0", "VOLATILITY_SPIKE_COOLDOWN_SECONDS": "60  # Increased from 30 to 60 to wait longer after volatility spikes", "SPOT_TRADE_AMOUNT": "50.0  # Increased from 30.0 to 50.0 for larger trades", "FUNDING_RATE_COST_MULTIPLIER": "0.05  # Increased from 0.03 to 0.05 to account for higher funding costs", "FUTURES_TRAILING_STOP_PERCENTAGE": "0.0020  # Increased from 0.0015 to 0.0020 to allow more room for price movement", "MIN_LIQUIDITY_THRESHOLD": "20.0  # Increased from 15.0 to 20.0 to ensure better liquidity", "FUTURES_EMA_SHORT_PERIOD": "5", "WEBSOCKET_TIMEOUT_SECONDS": "8", "SPOT_RSI_PERIOD": "14  # Increased from 10 to 14 for more standard RSI calculation", "MIN_ORDERBOOK_REFRESH_RATE": "1  # Refresh order book every 1 second", "HFT_COOLDOWN_SECONDS": "1.5  # Increased from 1.0 to 1.5 to reduce over-trading", "SLIPPAGE_PERCENTAGE": "0.003  # Increased from 0.002 to 0.003 to account for market volatility", "FUTURES_EMA_MEDIUM_PERIOD": "10", "FUTURES_TRADE_AMOUNT": "600.0", "KUCOIN_FALLBACK_BALANCE": "522.235326", "FUTURES_STOP_LOSS_PERCENTAGE": "0.0020  # Increased from 0.0015 to 0.0020 to align with trailing stop", "MARKET_MAKING_SPREAD": "0.002", "ARBITRAGE_MIN_BALANCE": "20.0", "SCALP_STOP_LOSS": "0.0015  # Increased from 0.0012 to 0.0015 to align with profit target", "VOLUME_ANOMALY_MULTIPLIER": "1.5  # Increased from 1.0 to 1.5 for more significant anomaly detection", "PRICE_REVERSAL_THRESHOLD": "0.0010  # Increased from 0.0008 to 0.0010 to require stronger reversals", "SPOT_RSI_UPPER_THRESHOLD": "70.0  # Increased from 65.0 to 70.0 for stricter overbought condition", "MAX_SLIPPAGE": "0.005  # Maximum 0.5% slippage", "FUNDING_MOMENTUM_THRESHOLD": "0.00008  # Increased from 0.00005 to 0.00008 for stronger momentum signals", "BYBIT_FALLBACK_BALANCE": "716.65266351", "HFT_SPREAD_THRESHOLD": "0.0012  # Increased from 0.0008 to 0.0012 to ensure profitability", "KUCOIN_LEVERAGE": "6", "ORDER_BOOK_PRICE_RANGE": "0.001", "FUTURES_MIN_PROFIT_PERCENTAGE": "0.0010  # Increased from 0.0005 to 0.0010 to ensure $0.60 profit per trade, covering $0.24 fees + $0.36 margin for slippage/funding", "SPOT_TRAILING_STOP_PERCENTAGE": "0.0010  # Increased from 0.0004 to 0.0010 for more room", "VOLUME_ANOMALY_COOLDOWN_SECONDS": "120  # Increased from 90 to 120 to wait longer after volume anomalies", "VOLATILITY_SPIKE_WINDOW_MINUTES": "1", "SPOOFING_VOLUME_THRESHOLD": "1.5  # Increased from 1.0 to 1.5 for more significant spoofing detection", "MIN_PRICE_DATA_POINTS": "14  # Increased from 1 to 14 to ensure enough data for RSI/MACD calculations", "MAX_ACTIVE_SPOT_TRADES": "20  # Reduced from 30 to 20 to lower exposure", "VOLUME_ANOMALY_THRESHOLD": "1.5  # Increased from 1.0 to 1.5 to align with anomaly multiplier", "CROSS_EXCHANGE_TRADE_AMOUNT": "300.0", "FUTURES_EMA_LONG_PERIOD": "20", "ORDER_BOOK_IMBALANCE_FALLBACK": "1.5  # Increased from 1.2 to 1.5 for stricter fallback", "KUCOIN_API_SECRET": "6f3c878f-dc1c-4f05-871b-1aa161b17b7b", "ATR_MULTIPLIER": "0.8  # Increased from 0.6 to 0.8 to make ATR-based decisions more sensitive to volatility", "ARBITRAGE_MIN_SPREAD_THRESHOLD": "0.0030  # Increased from 0.0020 to 0.0025 to cover KuCoin fees (0.002) + margin", "VOLATILITY_PAUSE_SECONDS": "300  # Pause trading for 5 minutes after volatility spike", "MACD_SHORT_PERIOD": "8", "SPOT_RSI_LOWER_THRESHOLD": "30.0  # Decreased from 35.0 to 30.0 for stricter oversold condition", "KUCOIN_API_KEY": "689a70f51cad950001b734ab", "SLIPPAGE_DEPTH_THRESHOLD": "0.5  # Increased from 0.3 to 0.5 to require deeper liquidity", "ATR_FALLBACK_PERCENTAGE": "0.005  # Increased from 0.004 to 0.005 for more conservative ATR fallback", "SPOT_EMA_SHORT_PERIOD": "5", "MAX_ACTIVE_FUTURES_TRADES": "30  # Reduced from 50 to 30 to lower exposure", "LIQUIDITY_PRICE_IMPACT_THRESHOLD": "0.008  # Reduced from 0.010 to 0.008 to avoid high price impact", "KUCOIN_API_PASSPHRASE": "Roryjames2006", "ARBITRAGE_HIGH_SPREAD_THRESHOLD": "0.0035  # Increased from 0.0030 to 0.0035 for higher profit", "ARBITRAGE_TRADE_AMOUNT": "500.0", "VOLUME_ANOMALY_WINDOW_HOURS": "1", "DAILY_LOSS_LIMIT_PERCENTAGE": "0.08  # Reduced from 0.12 to 0.08 to tighten risk control", "BYBIT_API_SECRET": "V8mHjEcI2aXwwPLrWxmCDcgGZnqoHapPgsGg", "MACD_CONFIRMATION_THRESHOLD": "0.0001  # Increased from 0.00005 to 0.0001 for stronger MACD signals", "SIMULATION_TRADE_LOGGING": "true", "BALANCE_FETCH_TIMEOUT": "12", "SPOOFING_PROFIT_TARGET": "0.008  # Increased from 0.007 to 0.008 to target higher profits", "SCALP_PROFIT_TARGET": "0.0040  # Increased from 0.0008 to 0.0012 to ensure profitability", "PRICE_REVERSAL_WINDOW_MINUTES": "2  # Increased from 1 to 2 minutes for more reliable signals", "VOLUME_TRACKING_VALUE": "200.0  # Increased from 150.0 to 200.0 for larger volume tracking", "SPOT_FEE_RATE": "0.001", "SLIPPAGE_TRADE_AMOUNT": "100.0  # Increased from 80.0 to 100.0 for larger trades with better liquidity", "CROSS_EXCHANGE_MIN_SPREAD_THRESHOLD": "0.0020  # Adjusted to 0.0020 to cover fees (0.0014) + margin", "MAX_FUNDING_RATE": "0.0005  # Increased from 0.0003 to 0.0005 to allow slightly higher funding rates", "BYBIT_FUTURES_FEE_RATE": "0.0002", "CROSS_EXCHANGE_COOLDOWN_SECONDS": "0.2  # Increased from 0.1 to 0.2 to reduce over-trading", "PRICE_HISTORY_RETENTION": "2880  # Increased from 1440 to 2880 (48 hours) to collect more data", "ACTIVE_PAIRS": "BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT", "MACD_SIGNAL_PERIOD": "6", "BYBIT_LEVERAGE": "6", "LIQUIDITY_CHECK_INTERVAL": "30  # Check liquidity every 30 seconds"]
-DEBUG: ACTIVE_PAIRS from env: BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT
-DEBUG: BYBIT_API_KEY from env: c5HePA9t71x6bqzU3b
-DEBUG: KUCOIN_API_KEY from env: 689a70f51cad950001b734ab
-✅ Loaded 91 environment variables
-DEBUG: Raw ACTIVE_PAIRS from .env: BTC-USDT,ETH-USDT,SOL-USDT,LINK-USDT,FLOKI-USDT,TON-USDT,NEAR-USDT,ARB-USDT,WIF-USDT,PEPE-USDT,BONK-USDT,SHIB-USDT,XRP-USDT,ADA-USDT,DOGE-USDT,AVAX-USDT,DOT-USDT,MATIC-USDT,SUI-USDT,APT-USDT,INJ-USDT,OP-USDT
-DEBUG: Loaded tradingPairs: ["BTC-USDT", "ETH-USDT", "SOL-USDT", "LINK-USDT", "FLOKI-USDT", "TON-USDT", "NEAR-USDT", "ARB-USDT", "WIF-USDT", "PEPE-USDT", "BONK-USDT", "SHIB-USDT", "XRP-USDT", "ADA-USDT", "DOGE-USDT", "AVAX-USDT", "DOT-USDT", "MATIC-USDT", "SUI-USDT", "APT-USDT", "INJ-USDT", "OP-USDT"]
-DEBUG: Number of pairs loaded: 22
-DEBUG: Initialized kucoinFuturesSymbols: ["ADA-USDT": "ADAUSDTM", "MATIC-USDT": "MATICUSDTM", "ETH-USDT": "ETHUSDTM", "SUI-USDT": "SUIUSDTM", "ARB-USDT": "ARBUSDTM", "DOGE-USDT": "DOGEUSDTM", "BONK-USDT": "BONKUSDTM", "SHIB-USDT": "SHIBUSDTM", "APT-USDT": "APTUSDTM", "FLOKI-USDT": "FLOKIUSDTM", "LINK-USDT": "LINKUSDTM", "DOT-USDT": "DOTUSDTM", "NEAR-USDT": "NEARUSDTM", "SOL-USDT": "SOLUSDTM", "XRP-USDT": "XRPUSDTM", "TON-USDT": "TONUSDTM", "BTC-USDT": "XBTUSDTM", "AVAX-USDT": "AVAXUSDTM", "WIF-USDT": "WIFUSDTM", "PEPE-USDT": "PEPEUSDTM", "INJ-USDT": "INJUSDTM", "OP-USDT": "OPUSDTM"]
-DEBUG: Initialized kucoinFuturesSymbols: ["ADA-USDT": "ADAUSDTM", "MATIC-USDT": "MATICUSDTM", "ETH-USDT": "ETHUSDTM", "SUI-USDT": "SUIUSDTM", "ARB-USDT": "ARBUSDTM", "DOGE-USDT": "DOGEUSDTM", "BONK-USDT": "BONKUSDTM", "SHIB-USDT": "SHIBUSDTM", "APT-USDT": "APTUSDTM", "FLOKI-USDT": "FLOKIUSDTM", "LINK-USDT": "LINKUSDTM", "DOT-USDT": "DOTUSDTM", "NEAR-USDT": "NEARUSDTM", "SOL-USDT": "SOLUSDTM", "XRP-USDT": "XRPUSDTM", "TON-USDT": "TONUSDTM", "BTC-USDT": "XBTUSDTM", "AVAX-USDT": "AVAXUSDTM", "WIF-USDT": "WIFUSDTM", "PEPE-USDT": "PEPEUSDTM", "INJ-USDT": "INJUSDTM", "OP-USDT": "OPUSDTM"]
-DEBUG: Initialized storage for pair: BTC-USDT
-DEBUG: Initialized storage for pair: ETH-USDT
-DEBUG: Initialized storage for pair: SOL-USDT
-DEBUG: Initialized storage for pair: LINK-USDT
-DEBUG: Initialized storage for pair: FLOKI-USDT
-DEBUG: Initialized storage for pair: TON-USDT
-DEBUG: Initialized storage for pair: NEAR-USDT
-DEBUG: Initialized storage for pair: ARB-USDT
-DEBUG: Initialized storage for pair: WIF-USDT
-DEBUG: Initialized storage for pair: PEPE-USDT
-DEBUG: Initialized storage for pair: BONK-USDT
-DEBUG: Initialized storage for pair: SHIB-USDT
-DEBUG: Initialized storage for pair: XRP-USDT
-DEBUG: Initialized storage for pair: ADA-USDT
-DEBUG: Initialized storage for pair: DOGE-USDT
-DEBUG: Initialized storage for pair: AVAX-USDT
-DEBUG: Initialized storage for pair: DOT-USDT
-DEBUG: Initialized storage for pair: MATIC-USDT
-DEBUG: Initialized storage for pair: SUI-USDT
-DEBUG: Initialized storage for pair: APT-USDT
-DEBUG: Initialized storage for pair: INJ-USDT
-DEBUG: Initialized storage for pair: OP-USDT
-Environment variable SPOT_MINUTE_PROFIT_PERCENTAGE not found or empty
-DEBUG: Initialized balances - KuCoin: 522.235326, KuCoin Futures: 522.235326
-DEBUG: Initialized balances - Bybit: 716.65266351, Bybit Futures: 716.65266351
-DEBUG: Initialized futures trade amount: 600.0
-DEBUG: Initialized spot trade amount: 50.0
-Attempting to connect to Bybit WebSocket...
-[2025-09-06T10:27:39Z] Dashboard Metrics:
-KuCoin Balance: 522.235326 USDT
-Bybit Balance: 716.65266351 USDT
-KuCoin Futures: 522.235326 USDT
-Bybit Futures: 716.65266351 USDT
-Total Trades: 0
-Total Profit: 0.0 USDT
-Total Fees: 0.0 USDT
-Active Price Feeds: 0/22
-WebSocket Status: KC=false, KCF=false, BB=false, BBF=false
-ALERT: [2025-09-06T10:27:39Z] Dashboard Metrics:
-KuCoin Balance: 522.235326 USDT
-Bybit Balance: 716.65266351 USDT
+
 KuCoin Futures: 522.235326 USDT
 Bybit Futures: 716.65266351 USDT
 Total Trades: 0
@@ -482,6 +420,8 @@ DEBUG: Initialized sentiment score for OP-USDT: 0.1
 ✅ [API] Successfully obtained KuCoin Futures WebSocket token
 🔄 [WebSocket] KuCoin Futures WebSocket connection initiated with delegate
 ALERT: 🔄 KuCoin Futures WebSocket connection initiated with delegate
+Invalid order book response for kucoin-BTC-USDT-spot
+ALERT: Invalid order book response for kucoin-BTC-USDT-spot
 ✅ [API] Successfully obtained KuCoin WebSocket token
 🚨 DEBUG: Got KuCoin token, creating WebSocket
 ALERT: 🚨 DEBUG: Got KuCoin token, creating WebSocket
@@ -491,12 +431,7 @@ ALERT: 🚨 DEBUG: Setting up onEvent handler
 ALERT: 🚨 DEBUG: About to call socket.connect()
 🔄 [WebSocket] KuCoin Spot WebSocket connection initiated with onEvent
 ALERT: 🔄 KuCoin Spot WebSocket connection initiated with onEvent
-High latency detected for order book fetch: 527.3089408874512ms
-ALERT: High latency detected for order book fetch: 527.3089408874512ms
-Invalid order book response for kucoin-BTC-USDT-spot
-ALERT: Invalid order book response for kucoin-BTC-USDT-spot
-🔍 KuCoin OTHER EVENT: viabilityChanged(true)
-✅ [Bybit Futures] WebSocket connected: ["Connection": "upgrade", "Upgrade": "websocket", "X-Amz-Cf-Id": "PkVJGWNtuFDx73pLnnmpAqSO3DpLYs6-BPp9u3BmyYHMyKROPmG01Q==", "Via": "1.1 5caac9801194f5c377f2e49a24fa86f8.cloudfront.net (CloudFront)", "Sec-WebSocket-Accept": "6hW19YyILhSlaZ4UJ/NoXNZIeO4=", "X-Cache": "Miss from cloudfront", "Date": "Sat, 06 Sep 2025 10:27:40 GMT", "X-Amz-Cf-Pop": "MXP53-P4"]
+✅ [Bybit Futures] WebSocket connected: ["X-Cache": "Miss from cloudfront", "Connection": "upgrade", "Via": "1.1 d68cd7b08ead733c702a702d3ac9119e.cloudfront.net (CloudFront)", "X-Amz-Cf-Pop": "MXP53-P4", "Upgrade": "websocket", "X-Amz-Cf-Id": "hky9l2_0ZpmOXazQXAgS8AVY4f6ygRDlmQ8krRBKNYaF0qMUudissg==", "Sec-WebSocket-Accept": "vBH58b+TSXuHq8VwEJldbQMyVhg=", "Date": "Sat, 06 Sep 2025 18:05:19 GMT"]
 ALERT: ✅ Bybit Futures WebSocket connected
 Subscribed to Bybit futures topics: tickers.BTCUSDT, orderbook.50.BTCUSDT, publicTrade.BTCUSDT for pair: BTC-USDT
 Subscribed to Bybit futures topics: tickers.ETHUSDT, orderbook.50.ETHUSDT, publicTrade.ETHUSDT for pair: ETH-USDT
@@ -542,7 +477,20 @@ Subscribed to Bybit futures topics: tickers.SUIUSDT, orderbook.50.SUIUSDT, publi
 Subscribed to Bybit futures topics: tickers.APTUSDT, orderbook.50.APTUSDT, publicTrade.APTUSDT for pair: APT-USDT
 Subscribed to Bybit futures topics: tickers.INJUSDT, orderbook.50.INJUSDT, publicTrade.INJUSDT for pair: INJ-USDT
 Subscribed to Bybit futures topics: tickers.OPUSDT, orderbook.50.OPUSDT, publicTrade.OPUSDT for pair: OP-USDT
-✅ [Bybit Spot] WebSocket connected: ["Date": "Sat, 06 Sep 2025 10:27:40 GMT", "X-Amz-Cf-Pop": "MXP53-P4", "Upgrade": "websocket", "Sec-WebSocket-Accept": "2wn7VSw/EpXDLC6zC7mGJv0MzwA=", "X-Cache": "Miss from cloudfront", "Via": "1.1 443e748792bb2fdc6a17d8d9a0398f12.cloudfront.net (CloudFront)", "X-Amz-Cf-Id": "Je8k_hkxEg1RxJ8FFNByGhc5M64xtDP4o5SEAKOCz0QN8hHVcNw6Qg==", "Connection": "upgrade"]
+🔍 KuCoin OTHER EVENT: viabilityChanged(true)
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for BTC-USDT: $110084.5
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for ETH-USDT: $4273.27
+✅ [Bybit Futures] Updated price for ETH-USDT: $4273.37
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.99
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.98
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.99
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for LINK-USDT: $22.052
+Bybit Futures subscription confirmed
+✅ [Bybit Spot] WebSocket connected: ["X-Amz-Cf-Pop": "MXP53-P4", "X-Amz-Cf-Id": "IYRoqx2ZCtdyhM5hU_BjGpmuW-nSPzaWENnU0h_6no1QBD1w7J_sgQ==", "Date": "Sat, 06 Sep 2025 18:05:20 GMT", "Sec-WebSocket-Accept": "1Ik/lm1vTKZoFC0l2gCPUsyT2bU=", "Connection": "upgrade", "X-Cache": "Miss from cloudfront", "Via": "1.1 fea184b77c563e367c19bf00650cf190.cloudfront.net (CloudFront)", "Upgrade": "websocket"]
 ALERT: ✅ Bybit Spot WebSocket connected
 Subscribed to Bybit spot topics: tickers.BTCUSDT, orderbook.50.BTCUSDT, publicTrade.BTCUSDT for pair: BTC-USDT
 Subscribed to Bybit spot topics: tickers.ETHUSDT, orderbook.50.ETHUSDT, publicTrade.ETHUSDT for pair: ETH-USDT
@@ -589,64 +537,42 @@ Subscribed to Bybit spot topics: tickers.APTUSDT, orderbook.50.APTUSDT, publicTr
 Subscribed to Bybit spot topics: tickers.INJUSDT, orderbook.50.INJUSDT, publicTrade.INJUSDT for pair: INJ-USDT
 Subscribed to Bybit spot topics: tickers.OPUSDT, orderbook.50.OPUSDT, publicTrade.OPUSDT for pair: OP-USDT
 Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.4
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.5
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for ETH-USDT: $4292.77
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.62
+✅ [Bybit Futures] Updated price for TON-USDT: $3.0565
 Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.14
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.34
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.32
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.29
+✅ [Bybit Futures] Updated price for NEAR-USDT: $2.388
 Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.52
+✅ [Bybit Futures] Updated price for ARB-USDT: $0.4869
 Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for LINK-USDT: $22.081
-Bybit Futures subscription confirmed
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for TON-USDT: $3.051
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for NEAR-USDT: $2.375
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.092
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.935e-05
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for TON-USDT: $3.052
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for ARB-USDT: $0.4875
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Futures] Updated price for ARB-USDT: $0.4876
-✅ [Bybit Spot] Updated price for NEAR-USDT: $2.377
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4878
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for WIF-USDT: $0.7998
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for WIF-USDT: $0.7997
+✅ [Bybit Futures] Updated price for WIF-USDT: $0.807
 Bybit Futures subscription confirmed
 Bybit Futures subscription confirmed
 Bybit Futures subscription confirmed
 Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for XRP-USDT: $2.805
-✅ [Bybit Futures] Updated price for XRP-USDT: $2.8051
+✅ [Bybit Futures] Updated price for XRP-USDT: $2.8004
 Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for ADA-USDT: $0.8196
-✅ [KuCoin Futures] WebSocket connected: ["X-Cache": "Miss from cloudfront", "X-Amz-Cf-Id": "5uX9o084epGJIByUm_AgEofZUGGPMKONhVw5wQVkbzvgMSJnbw6vDQ==", "Connection": "upgrade", "Date": "Sat, 06 Sep 2025 10:27:40 GMT", "X-Amz-Cf-Pop": "MXP63-P1", "Via": "1.1 906a12a3e09cb87f356daa980a4edd38.cloudfront.net (CloudFront)", "Upgrade": "websocket", "Sec-WebSocket-Accept": "+LQ6OK62HeVDhTvHaIINy1SS1W4="]
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8188
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.2136
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for AVAX-USDT: $24.388
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for DOT-USDT: $3.7976
+Bybit Futures subscription confirmed
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.3312
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for APT-USDT: $4.207
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for INJ-USDT: $12.905
+✅ [Bybit Futures] Updated price for INJ-USDT: $12.906
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7195
+Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for BTC-USDT: $110081.1
+✅ [Bybit Futures] Updated price for ETH-USDT: $4273.02
+✅ [Bybit Futures] Updated price for LINK-USDT: $22.05
+✅ [Bybit Futures] Updated price for BTC-USDT: $110078.0
+✅ [KuCoin Futures] WebSocket connected: ["Connection": "upgrade", "Via": "1.1 3889464930fc240ec6e67dcf9392dcc2.cloudfront.net (CloudFront)", "X-Cache": "Miss from cloudfront", "Upgrade": "websocket", "Sec-WebSocket-Accept": "xH15k8SKtJqB+NOLhh02vnQTRn0=", "X-Amz-Cf-Id": "S9rTAm0rEhOEMQgoI5uAvJW7pCKOAohazNbSntsARUSgcbjmpY8skA==", "Date": "Sat, 06 Sep 2025 18:05:20 GMT", "X-Amz-Cf-Pop": "MXP63-P1"]
 ALERT: ✅ KuCoin Futures WebSocket connected
 Subscribed to KuCoin futures topic: /contractMarket/ticker:XBTUSDTM for pair: BTC-USDT
 Subscribed to KuCoin futures topic: /contractMarket/ticker:ETHUSDTM for pair: ETH-USDT
@@ -670,568 +596,290 @@ Subscribed to KuCoin futures topic: /contractMarket/ticker:SUIUSDTM for pair: SU
 Subscribed to KuCoin futures topic: /contractMarket/ticker:APTUSDTM for pair: APT-USDT
 Subscribed to KuCoin futures topic: /contractMarket/ticker:INJUSDTM for pair: INJ-USDT
 Subscribed to KuCoin futures topic: /contractMarket/ticker:OPUSDTM for pair: OP-USDT
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21397
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for AVAX-USDT: $24.098
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for DOT-USDT: $3.7963
-Bybit Futures subscription confirmed
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for SUI-USDT: $3.3444
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for APT-USDT: $4.205
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for INJ-USDT: $12.865
-Bybit Futures subscription confirmed
-✅ [Bybit Futures] Updated price for OP-USDT: $0.7094
-Bybit Futures subscription confirmed
+✅ [Bybit Futures] Updated price for ETH-USDT: $4272.88
+✅ [Bybit Futures] Updated price for ETH-USDT: $4272.85
+✅ [Bybit Futures] Updated price for ETH-USDT: $4272.84
 Bybit Spot subscription confirmed
 Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
 Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for BONK-USDT: $1.9866e-05
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2242e-05
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.82
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21409
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.797
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3461
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for APT-USDT: $4.208
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-Bybit Spot subscription confirmed
-Bybit Spot subscription confirmed
-✅ [Bybit Spot] Updated price for OP-USDT: $0.7097
-✅ [Bybit Spot] Updated price for ETH-USDT: $4292.78
-✅ [Bybit Spot] Updated price for ETH-USDT: $4292.94
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.092
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.7
+✅ [Bybit Spot] Updated price for BTC-USDT: $110128.9
+✅ [Bybit Futures] Updated price for ETH-USDT: $4272.85
+✅ [Bybit Futures] Updated price for BTC-USDT: $110076.7
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
+KuCoin Futures WebSocket subscription confirmed
 ✅ KuCoin Spot WebSocket connected via onEvent
 ALERT: ✅ KuCoin Spot WebSocket connected via onEvent
 ✅ [WebSocket] Subscribed to KuCoin Spot prices for 22 pairs
 ALERT: ✅ Subscribed to KuCoin Spot prices for 22 pairs
-🔍 KuCoin RAW MESSAGE: {"id":"149Q4TkWmGW","type":"welcome"}
+🔍 KuCoin RAW MESSAGE: {"id":"149wmC3dH9M","type":"welcome"}
 🔍 KuCoin message type: welcome
-ALERT: 🔍 KuCoin RAW: {"id":"149Q4TkWmGW","type":"welcome"}
+ALERT: 🔍 KuCoin RAW: {"id":"149wmC3dH9M","type":"welcome"}
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.24
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.11
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for LINK-USDT: $22.059
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.959e-05
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for TON-USDT: $3.058
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.39
 KuCoin Futures WebSocket subscription confirmed
 KuCoin Futures WebSocket subscription confirmed
 KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.62
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-KuCoin Futures WebSocket subscription confirmed
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Spot] Updated price for ETH-USDT: $4292.94
-🔍 KuCoin RAW MESSAGE: {"id":"926952","type":"ack"}
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.81915
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4871
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.807
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.613e-06
+🔍 KuCoin RAW MESSAGE: {"id":"686086","type":"ack"}
 🔍 KuCoin message type: ack
 ✅ KuCoin subscription confirmed
-ALERT: 🔍 KuCoin RAW: {"id":"926952","type":"ack"}
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.797
-✅ [Bybit Spot] Updated price for TON-USDT: $3.052
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.82
-✅ [Bybit Futures] Updated price for LINK-USDT: $22.083
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21409
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.092
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.51
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4878
-✅ [Bybit Futures] Updated price for WIF-USDT: $0.7996
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.62
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3461
-✅ [Bybit Spot] Updated price for ETH-USDT: $4292.94
-✅ [Bybit Spot] Updated price for APT-USDT: $4.208
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.63
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.093
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.095
-✅ [Bybit Futures] Updated price for LINK-USDT: $22.086
+ALERT: 🔍 KuCoin RAW: {"id":"686086","type":"ack"}
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for BONK-USDT: $1.9874e-05
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2225e-05
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8018
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8191
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21369
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.394
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.799
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3325
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for APT-USDT: $4.211
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.91
+Bybit Spot subscription confirmed
+Bybit Spot subscription confirmed
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7194
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7194
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4871
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8192
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2225e-05
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.11
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.394
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.613e-06
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3325
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.24
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.11
+✅ [Bybit Spot] Updated price for TON-USDT: $3.058
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.799
+✅ [Bybit Spot] Updated price for APT-USDT: $4.211
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.807
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8192
+✅ [Bybit Spot] Updated price for BONK-USDT: $1.9874e-05
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.91
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8018
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.3313
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.959e-05
+✅ [Bybit Futures] Updated price for TON-USDT: $3.0564
+✅ [KuCoin Futures] Updated price for OP-USDT: $0.7197
+✅ [Bybit Futures] Updated price for BTC-USDT: $110076.6
+✅ [Bybit Spot] Updated price for BTC-USDT: $110128.9
+✅ [Bybit Spot] Updated price for LINK-USDT: $22.059
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.39
+✅ [Bybit Spot] Updated price for BTC-USDT: $110127.5
+✅ [Bybit Futures] Updated price for BTC-USDT: $110076.7
 Invalid order book response for kucoin-BTC-USDT-spot
 ALERT: Invalid order book response for kucoin-BTC-USDT-spot
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.58
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.62
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.58e-06
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.0
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4878
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [KuCoin Futures] Updated price for TON-USDT: $3.0527
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3461
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.0
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for APT-USDT: $4.208
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.45
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.61
-✅ [KuCoin Futures] Updated price for SOL-USDT: $202.64
-✅ [KuCoin Futures] Updated price for SOL-USDT: $202.64
-✅ [KuCoin Futures] Updated price for SOL-USDT: $202.64
-✅ [KuCoin Futures] Updated price for SOL-USDT: $202.64
-✅ [KuCoin Futures] Updated price for SOL-USDT: $202.64
-✅ [Bybit Futures] Updated price for OP-USDT: $0.7093
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.5
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.4
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.46
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.61
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.0
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3461
-✅ [Bybit Spot] Updated price for BONK-USDT: $1.9866e-05
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.6
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.935e-05
-✅ [KuCoin Futures] Updated price for FLOKI-USDT: $8.9262e-05
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.45
-✅ [KuCoin Futures] Updated price for SHIB-USDT: $1.224e-05
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7194
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4871
+✅ [Bybit Futures] Updated price for ETH-USDT: $4272.84
+✅ [Bybit Futures] Updated price for TON-USDT: $3.0558
+✅ [Bybit Futures] Updated price for ETH-USDT: $4273.16
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.24
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2225e-05
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.394
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.11
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.613e-06
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8018
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.799
+✅ [Bybit Spot] Updated price for TON-USDT: $3.058
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.807
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8192
+✅ [Bybit Spot] Updated price for APT-USDT: $4.211
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.91
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.959e-05
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8018
+✅ [Bybit Spot] Updated price for BTC-USDT: $110127.5
+✅ [Bybit Spot] Updated price for LINK-USDT: $22.059
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.39
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.98
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8018
+✅ [Bybit Futures] Updated price for ETH-USDT: $4273.01
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.3312
+✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21373
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21359
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4871
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7198
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.11
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.394
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.613e-06
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3325
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.24
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8192
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8018
+✅ [Bybit Spot] Updated price for TON-USDT: $3.058
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.799
+✅ [Bybit Spot] Updated price for BONK-USDT: $1.9874e-05
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.91
+✅ [Bybit Spot] Updated price for APT-USDT: $4.211
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.6117e-06
+✅ [Bybit Spot] Updated price for LINK-USDT: $22.059
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.39
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.99
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.97
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.23
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7198
+✅ [Bybit Futures] Updated price for BTC-USDT: $110076.6
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4871
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7194
 Invalid order book response for kucoin-BTC-USDT-spot
 ALERT: Invalid order book response for kucoin-BTC-USDT-spot
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.5796e-06
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.46
-✅ [KuCoin Futures] Updated price for LINK-USDT: $22.1
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.0
-✅ [Bybit Futures] Updated price for DOT-USDT: $3.7964
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [KuCoin Futures] Updated price for SHIB-USDT: $1.2241e-05
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.935e-05
-✅ [Bybit Futures] Updated price for XRP-USDT: $2.805
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.49
-✅ [Bybit Spot] Updated price for WIF-USDT: $0.8001
-✅ [Bybit Spot] Updated price for NEAR-USDT: $2.377
-✅ [KuCoin Futures] Updated price for AVAX-USDT: $24.12
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.5
-✅ [Bybit Futures] Updated price for NEAR-USDT: $2.376
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.0
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3461
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for TON-USDT: $3.052
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.797
-✅ [Bybit Spot] Updated price for APT-USDT: $4.208
-✅ [Bybit Spot] Updated price for WIF-USDT: $0.8001
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.82
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.5796e-06
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.29
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.095
-✅ [Bybit Spot] Updated price for OP-USDT: $0.7098
-✅ [Bybit Spot] Updated price for OP-USDT: $0.7098
-✅ [Bybit Spot] Updated price for OP-USDT: $0.7101
-✅ [Bybit Spot] Updated price for NEAR-USDT: $2.377
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4878
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4877
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4875
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4875
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4874
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4877
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4876
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4874
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4874
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4873
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4873
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4873
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4873
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4872
-✅ [Bybit Futures] Updated price for OP-USDT: $0.7095
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4872
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Futures] Updated price for SUI-USDT: $3.3445
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4872
-✅ [Bybit Futures] Updated price for ARB-USDT: $0.487
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Futures] Updated price for ARB-USDT: $0.4869
-✅ [KuCoin Futures] Updated price for LINK-USDT: $22.1
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.4
-✅ [Bybit Spot] Updated price for OP-USDT: $0.7101
-✅ [Bybit Spot] Updated price for WIF-USDT: $0.8001
-DEBUG: Max retries reached, using cached depth for kucoin-BTC-USDT-spot: 0.0
-ALERT: Max retries reached for order book fetch: kucoin-BTC-USDT-spot
-ALERT: Updated order book for kucoin-BTC-USDT-spot
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.3
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4871
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Futures] Updated price for ARB-USDT: $0.487
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4872
-✅ [KuCoin Futures] Updated price for ETH-USDT: $4293.84
-✅ [KuCoin Futures] Updated price for ETH-USDT: $4293.84
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3461
-✅ [Bybit Spot] Updated price for TON-USDT: $3.052
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.797
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for WIF-USDT: $0.8001
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.82
-✅ [Bybit Spot] Updated price for APT-USDT: $4.208
-Invalid order book response for kucoin-BTC-USDT-futures
-ALERT: Invalid order book response for kucoin-BTC-USDT-futures
-✅ [KuCoin Futures] Updated price for ARB-USDT: $0.4873
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.5794e-06
-✅ [KuCoin Futures] Updated price for ETH-USDT: $4293.5
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.935e-05
-✅ [KuCoin Futures] Updated price for LINK-USDT: $22.099
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.095
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.5795e-06
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.29
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Futures] Updated price for INJ-USDT: $12.859
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.3
-✅ [KuCoin Futures] Updated price for LINK-USDT: $22.099
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.5794e-06
-✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21398
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.0
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3461
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for APT-USDT: $4.208
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.29
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.935e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.5794e-06
-✅ [Bybit Futures] Updated price for AVAX-USDT:
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [KuCoin Futures] Updated price for OP-USDT: $0.7099
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.105
-✅ [Bybit Futures] Updated price for SUI-USDT: $3.3456
-Invalid order book response for kucoin-LINK-USDT-spot
-ALERT: Invalid order book response for kucoin-LINK-USDT-spot
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [KuCoin Futures] Updated price for ETH-USDT: $4294.44
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4874
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3463
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.798
-✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21395
-✅ [KuCoin Futures] Updated price for ETH-USDT: $4294.44
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.105
-✅ [Bybit Spot] Updated price for OP-USDT: $0.7099
-✅ [KuCoin Futures] Updated price for LINK-USDT: $22.104
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.5
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [KuCoin Futures] Updated price for LINK-USDT: $22.104
-✅ [KuCoin Futures] Updated price for TON-USDT: $3.0544
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.37
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.36
-✅ [Bybit Futures] Updated price for TON-USDT: $3.053
-Invalid order book response for kucoin-LINK-USDT-spot
-ALERT: Invalid order book response for kucoin-LINK-USDT-spot
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.101
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21396
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.8202
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.23
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2225e-05
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3325
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.613e-06
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.394
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2225e-05
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.11
+✅ [Bybit Spot] Updated price for BTC-USDT: $110127.6
+✅ [Bybit Spot] Updated price for BONK-USDT: $1.9874e-05
+✅ [Bybit Spot] Updated price for APT-USDT: $4.211
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8192
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.799
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8018
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.91
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.959e-05
+✅ [Bybit Spot] Updated price for BTC-USDT: $110127.6
+✅ [Bybit Futures] Updated price for WIF-USDT: $0.8069
+✅ [Bybit Spot] Updated price for NEAR-USDT: $2.39
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7197
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7197
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7193
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.6117e-06
+✅ [KuCoin Futures] Updated price for AVAX-USDT: $24.4
+✅ [Bybit Futures] Updated price for INJ-USDT: $12.907
+✅ [KuCoin Futures] Updated price for SOL-USDT: $200.17
+✅ [Bybit Futures] Updated price for INJ-USDT: $12.905
+✅ [Bybit Futures] Updated price for WIF-USDT: $0.8068
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.23
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.23
+✅ [Bybit Spot] Updated price for ETH-USDT: $4275.1
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.397
+✅ [Bybit Futures] Updated price for ETH-USDT: $4272.72
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.963e-05
+✅ [Bybit Spot] Updated price for BONK-USDT: $1.9881e-05
+✅ [Bybit Spot] Updated price for ETH-USDT: $4274.89
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7192
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3328
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.396
+✅ [Bybit Futures] Updated price for TON-USDT: $3.0556
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21358
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7197
+✅ [Bybit Futures] Updated price for ADA-USDT: $0.8187
+✅ [Bybit Futures] Updated price for INJ-USDT: $12.904
+✅ [Bybit Futures] Updated price for LINK-USDT: $22.044
+✅ [Bybit Spot] Updated price for ETH-USDT: $4274.88
+✅ [Bybit Spot] Updated price for ETH-USDT: $4274.84
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4871
+✅ [Bybit Futures] Updated price for ETH-USDT: $4272.7
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.609e-06
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21357
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.99
+✅ [Bybit Spot] Updated price for ETH-USDT: $4274.84
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.613e-06
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.396
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.11
+✅ [Bybit Spot] Updated price for WIF-USDT: $0.807
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8018
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.91
+✅ [Bybit Spot] Updated price for TON-USDT: $3.058
+✅ [Bybit Spot] Updated price for DOT-USDT: $3.799
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8192
+✅ [Bybit Spot] Updated price for BONK-USDT: $1.9881e-05
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.963e-05
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.6088e-06
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.3321
+✅ [Bybit Spot] Updated price for PEPE-USDT: $9.604e-06
+✅ [Bybit Spot] Updated price for AVAX-USDT: $24.398
+✅ [Bybit Spot] Updated price for SOL-USDT: $200.01
+✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2222e-05
+Sent ping to Bybit Spot WebSocket
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8012
+✅ [Bybit Spot] Updated price for TON-USDT: $3.057
+✅ [Bybit Spot] Updated price for INJ-USDT: $12.905
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.819
+✅ [Bybit Spot] Updated price for APT-USDT: $4.213
 ✅ [Bybit Spot] Updated price for BONK-USDT: $1.987e-05
-✅ [KuCoin Futures] Updated price for FLOKI-USDT: $8.9318e-05
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [KuCoin Futures] Updated price for ADA-USDT: $0.82023
-✅ [Bybit Futures] Updated price for TON-USDT: $3.0528
-✅ [Bybit Futures] Updated price for AVAX-USDT: $24.099
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Futures] Updated price for ADA-USDT: $0.8196
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.4
-✅ [Bybit Futures] Updated price for WIF-USDT: $0.8001
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.8202
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.935e-05
-Invalid order book response for kucoin-LINK-USDT-spot
-ALERT: Invalid order book response for kucoin-LINK-USDT-spot
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.101
-✅ [Bybit Spot] Updated price for OP-USDT: $0.7099
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3463
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.798
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.101
-[2025-09-06T10:28:30Z] Dashboard Metrics:
-KuCoin Balance: 522.235326 USDT
-Bybit Balance: 716.65266351 USDT
-KuCoin Futures: 522.235326 USDT
-Bybit Futures: 716.65266351 USDT
-Total Trades: 0
-Total Profit: 0.0 USDT
-Total Fees: 0.0 USDT
-Active Price Feeds: 21/22
-WebSocket Status: KC=true, KCF=true, BB=true, BBF=true
-ALERT: [2025-09-06T10:28:30Z] Dashboard Metrics:
-KuCoin Balance: 522.235326 USDT
-Bybit Balance: 716.65266351 USDT
-KuCoin Futures: 522.235326 USDT
-Bybit Futures: 716.65266351 USDT
-Total Trades: 0
-Total Profit: 0.0 USDT
-Total Fees: 0.0 USDT
-Active Price Feeds: 21/22
-WebSocket Status: KC=true, KCF=true, BB=true, BBF=true
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Futures] Updated price for TON-USDT: $3.0533
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4874
-✅ [Bybit Futures] Updated price for TON-USDT: $3.0528
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3463
-✅ [Bybit Spot] Updated price for BONK-USDT: $1.987e-05
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.798
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-DEBUG: Max retries reached, using cached depth for kucoin-LINK-USDT-spot: 0.0
-ALERT: Max retries reached for order book fetch: kucoin-LINK-USDT-spot
-ALERT: Updated order book for kucoin-LINK-USDT-spot
-Invalid order book response for kucoin-LINK-USDT-futures
-ALERT: Invalid order book response for kucoin-LINK-USDT-futures
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for TON-USDT: $3.054
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.6
-✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21395
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4874
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.51
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3463
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-✅ [Bybit Spot] Updated price for TON-USDT: $3.054
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.101
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.5
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Futures] Updated price for AVAX-USDT: $24.1
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3463
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for DOT-USDT: $3.798
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.8202
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8065
-Invalid order book response for kucoin-LINK-USDT-futures
-ALERT: Invalid order book response for kucoin-LINK-USDT-futures
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.52
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.101
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.58
-✅ [Bybit Spot] Updated price for ARB-USDT: $0.4874
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3463
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for TON-USDT: $3.054
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.103
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.104
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.104
-✅ [Bybit Futures] Updated price for LINK-USDT: $22.093
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8064
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.59
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.104
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.5
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.58
-✅ [KuCoin Futures] Updated price for ETH-USDT: $4294.45
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8064
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.39
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.62
-Invalid order book response for kucoin-LINK-USDT-futures
-ALERT: Invalid order book response for kucoin-LINK-USDT-futures
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.8202
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.39
-✅ [Bybit Spot] Updated price for LINK-USDT: $22.104
-✅ [KuCoin Futures] Updated price for ETH-USDT: $4293.79
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.39
-✅ [Bybit Spot] Updated price for BONK-USDT: $1.987e-05
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8064
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.4
-✅ [Bybit Futures] Updated price for SOL-USDT: $202.51
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-DEBUG: Max retries reached, using cached depth for kucoin-LINK-USDT-futures: 0.0
-ALERT: Max retries reached for order book fetch: kucoin-LINK-USDT-futures
-ALERT: Updated order book for kucoin-LINK-USDT-futures
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.5798e-06
-DEBUG: Bybit order book depth for LINK-USDT-spot: 16757.795439
-ALERT: Updated order book for bybit-LINK-USDT-spot
-DEBUG: Bybit order book depth for LINK-USDT-futures: 382437.19909999997
-ALERT: Updated order book for bybit-LINK-USDT-futures
-✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21407
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.59
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for TON-USDT: $3.054
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.8202
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8064
-✅ [Bybit Spot] Updated price for BONK-USDT: $1.987e-05
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.8011
+✅ [Bybit Spot] Updated price for FLOKI-USDT: $8.965e-05
 Invalid order book response for kucoin-FLOKI-USDT-spot
 ALERT: Invalid order book response for kucoin-FLOKI-USDT-spot
-✅ [KuCoin Futures] Updated price for FLOKI-USDT: $8.9319e-05
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-✅ [Bybit Spot] Updated price for DOGE-USDT: $0.21407
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.6
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.39
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $9.5809e-06
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.8202
-✅ [Bybit Spot] Updated price for SHIB-USDT: $1.2241e-05
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.6
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.39
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Futures] Updated price for BTC-USDT: $110702.5
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8064
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.63
-Sent ping to Bybit Futures WebSocket
-Sent ping to Bybit Spot WebSocket
-✅ [Bybit Futures] Updated price for ARB-USDT: $0.4873
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.4
-[2025-09-06T10:28:40Z] Dashboard Metrics:
-KuCoin Balance: 522.235326 USDT
-Bybit Balance: 716.65266351 USDT
-KuCoin Futures: 522.235326 USDT
-Bybit Futures: 716.65266351 USDT
-Total Trades: 0
-Total Profit: 0.0 USDT
-Total Fees: 0.0 USDT
-Active Price Feeds: 21/22
-WebSocket Status: KC=true, KCF=true, BB=true, BBF=true
-ALERT: [2025-09-06T10:28:40Z] Dashboard Metrics:
-KuCoin Balance: 522.235326 USDT
-Bybit Balance: 716.65266351 USDT
-KuCoin Futures: 522.235326 USDT
-Bybit Futures: 716.65266351 USDT
-Total Trades: 0
-Total Profit: 0.0 USDT
-Total Fees: 0.0 USDT
-Active Price Feeds: 21/22
-WebSocket Status: KC=true, KCF=true, BB=true, BBF=true
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.74
-✅ [Bybit Futures] Updated price for WIF-USDT: $0.7999
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.75
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-🔍 KuCoin OTHER EVENT: peerClosed
+✅ [Bybit Spot] Updated price for BTC-USDT: $110124.5
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.87
+✅ [Bybit Spot] Updated price for LINK-USDT: $22.041
 ❌ [KuCoin Futures] WebSocket disconnected: Bye (1000)
 ALERT: ❌ KuCoin Futures WebSocket disconnected: Bye
 ❌ [KuCoin Futures] WebSocket peer closed
 ALERT: KuCoin Futures WebSocket peer closed
 ❌ [KuCoin Futures] WebSocket cancelled
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.6
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for INJ-USDT: $12.869
-✅ [Bybit Spot] Updated price for TON-USDT: $3.054
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-Invalid order book response for kucoin-FLOKI-USDT-spot
-ALERT: Invalid order book response for kucoin-FLOKI-USDT-spot
-✅ [Bybit Futures] Updated price for ETH-USDT: $4291.74
-✅ [Bybit Spot] Updated price for BTC-USDT: $110749.3
-✅ [Bybit Spot] Updated price for SUI-USDT: $3.3463
-✅ [Bybit Spot] Updated price for PEPE-USDT: $9.581e-06
-✅ [Bybit Spot] Updated price for ETH-USDT: $4293.4
-✅ [Bybit Spot] Updated price for AVAX-USDT: $24.116
-✅ [Bybit Spot] Updated price for SOL-USDT: $202.6
-✅ [Bybit Spot] Updated price for XRP-USDT: $2.8064
-✅ [Bybit Spot] Updated price for ADA-USDT: $0.8202
+🔍 KuCoin OTHER EVENT: peerClosed
+✅ [Bybit Futures] Updated price for APT-USDT: $4.206
+✅ [Bybit Spot] Updated price for OP-USDT: $0.7194
+✅ [Bybit Futures] Updated price for SOL-USDT: $199.86
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.4869
+✅ [Bybit Futures] Updated price for ETH-USDT: $4270.0
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7185
+✅ [Bybit Futures] Updated price for SUI-USDT: $3.3297
+✅ [Bybit Futures] Updated price for DOT-USDT: $3.7956
+✅ [Bybit Futures] Updated price for DOGE-USDT: $0.21346
