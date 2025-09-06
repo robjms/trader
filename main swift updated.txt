@@ -432,17 +432,16 @@ func logTradeToCSV(pair: String, exchange: String, action: String, price: Double
     let timestamp = ISO8601DateFormatter().string(from: Date())
     let logEntry = "\(timestamp),\(pair),\(exchange),\(action),\(price),\(amount),\(profit),\(fee),\(strategy)\n"
     
-    do {
-        if let fileHandle = try? FileHandle(forWritingTo: tradeLogURL) {
-            defer { fileHandle.closeFile() }
-            fileHandle.seekToEndOfFile()
-            if let data = logEntry.data(using: .utf8) {
-                fileHandle.write(data)
-            }
+    // FIXED: Removed unreachable catch block - handle file operations directly
+    if let fileHandle = try? FileHandle(forWritingTo: tradeLogURL) {
+        defer { fileHandle.closeFile() }
+        fileHandle.seekToEndOfFile()
+        if let data = logEntry.data(using: .utf8) {
+            fileHandle.write(data)
         }
         print("✅ Logged trade: \(action) \(pair) on \(exchange)")
-    } catch {
-        print("❌ Failed to log trade: \(error)")
+    } else {
+        print("❌ Failed to open trade log file for writing")
     }
 }
 
@@ -456,22 +455,20 @@ func logSpreadToCSV(pair: String, kucoinPrice: Double, bybitPrice: Double, sprea
     let opportunity = isOpportunity ? "YES" : "NO"
     let logEntry = "\(timestamp),\(pair),\(kucoinPrice),\(bybitPrice),\(spreadPercent),\(opportunity)\n"
     
-    do {
-        if let fileHandle = try? FileHandle(forWritingTo: spreadLogURL) {
-            defer { fileHandle.closeFile() }
-            fileHandle.seekToEndOfFile()
-            if let data = logEntry.data(using: .utf8) {
-                fileHandle.write(data)
-            }
+    // FIXED: Removed unreachable catch block - handle file operations directly
+    if let fileHandle = try? FileHandle(forWritingTo: spreadLogURL) {
+        defer { fileHandle.closeFile() }
+        fileHandle.seekToEndOfFile()
+        if let data = logEntry.data(using: .utf8) {
+            fileHandle.write(data)
         }
         if isOpportunity {
             print("🔥 Logged arbitrage opportunity: \(pair) - \(String(format: "%.4f%%", spreadPercent)) spread")
         }
-    } catch {
-        print("❌ Failed to log spread: \(error)")
+    } else {
+        print("❌ Failed to open spread log file for writing")
     }
 }
-
 
 // ADD THESE 4 COMPLETE CLASSES BEFORE @MainActor class ExchangeWebSocket {
 
@@ -5175,6 +5172,7 @@ extension ExchangeWebSocket {
 }
 
 //--------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
+
 // FIXED: Create a separate delegate class to handle WebSocket events
 class ExchangeWebSocketDelegate: NSObject, WebSocketDelegate {
 func didReceive(event: WebSocketEvent, client: WebSocketClient) {
@@ -5362,7 +5360,7 @@ do {
 guard let data = message.data(using: .utf8),
 let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
 await MainActor.run {
-logAlert(event: "🟡❌ Failed to parse KuCoin Spot message: (message)")
+logAlert(event: "🟡❌ Failed to parse KuCoin Spot message: \(message)")
 }
 return
 }
@@ -5487,7 +5485,7 @@ do {
 guard let data = message.data(using: .utf8),
 let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
 await MainActor.run {
-logAlert(event: "🟡❌ Failed to parse KuCoin Futures message: (message)")
+logAlert(event: "🟡❌ Failed to parse KuCoin Futures message: \(message)")
 }
 return
 }
@@ -5589,7 +5587,7 @@ do {
 guard let data = message.data(using: .utf8),
 let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
 await MainActor.run {
-logAlert(event: "🔵❌ Failed to parse Bybit Spot message: (message)")
+logAlert(event: "🔵❌ Failed to parse Bybit Spot message: \(message)")
 }
 return
 }
@@ -5661,7 +5659,7 @@ do {
 guard let data = message.data(using: .utf8),
 let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
 await MainActor.run {
-logAlert(event: "🔵❌ Failed to parse Bybit Futures message: (message)")
+logAlert(event: "🔵❌ Failed to parse Bybit Futures message: \(message)")
 }
 return
 }
@@ -5852,7 +5850,7 @@ logAlert(event: "✅ KuCoin Futures price update: \(pair) = $\(price)")
 private static func processKuCoinFuturesOrderBook(topic: String, data: [String: Any]) {
 let futuresSymbol = topic.components(separatedBy: ":").last ?? ""
 guard let pair = kucoinFuturesSymbols.first(where: { $0.value == futuresSymbol })?.key else {
-print("No pair found for futures symbol: (futuresSymbol)")
+print("No pair found for futures symbol: \(futuresSymbol)")
 return
 }
 var orderBook: [(price: Double, volume: Double, side: String)] = []
@@ -5917,8 +5915,8 @@ if let success = json["success"] as? Bool {
 if success, let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
 print("Bybit Spot subscription confirmed")
 } else if !success {
-print("Bybit Spot WebSocket error: (json)")
-logAlert(event: "❌ Bybit Spot WebSocket error: (json)")
+print("Bybit Spot WebSocket error: \(json)")
+logAlert(event: "❌ Bybit Spot WebSocket error: \(json)")
 }
 } else if let topic = json["topic"] as? String {
 if topic.hasPrefix("tickers.") {
@@ -6019,8 +6017,8 @@ if let success = json["success"] as? Bool {
 if success, let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
 print("Bybit Futures subscription confirmed")
 } else if !success {
-print("Bybit Futures WebSocket error: (json)")
-logAlert(event: "❌ Bybit Futures WebSocket error: (json)")
+print("Bybit Futures WebSocket error: \(json)")
+logAlert(event: "❌ Bybit Futures WebSocket error: \(json)")
 }
 } else if let topic = json["topic"] as? String {
 if topic.hasPrefix("tickers.") {
@@ -6614,17 +6612,86 @@ if isOpportunity {
     // Store opportunity
     arbitrageOpportunities[pair] = spread
     
-    // Log potential trade
+    // FIXED: Call logTradeToCSV properly within MainActor context
     logTradeToCSV(pair: pair, exchange: "cross", action: "arbitrage_detected",
                  price: (kucoinPrice + bybitPrice) / 2, amount: crossExchangeTradeAmount,
                  profit: 0, fee: 0, strategy: "cross_exchange_arbitrage")
 }
 }
-// ADDED: Enhanced WebSocket Activity Logging
+
+// FIXED: Added missing CSV logging functions
 @MainActor
-static var lastWebsocketActivity: [String: Date] = [:]
+static func logTradeToCSV(pair: String, exchange: String, action: String, price: Double, amount: Double, profit: Double, fee: Double, strategy: String) {
+    let tradeLogURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv")
+    let timestamp = ISO8601DateFormatter().string(from: Date())
+    let logEntry = "\(timestamp),\(pair),\(exchange),\(action),\(price),\(amount),\(profit),\(fee),\(strategy)\n"
+    
+    do {
+        let fileManager = FileManager.default
+        if !fileManager.fileExists(atPath: tradeLogURL.path) {
+            try "timestamp,pair,exchange,action,price,amount,profit,fee,strategy\n".write(to: tradeLogURL, atomically: true, encoding: .utf8)
+            try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: tradeLogURL.path)
+        }
+        
+        if let fileHandle = try? FileHandle(forWritingTo: tradeLogURL) {
+            defer { fileHandle.closeFile() }
+            if let data = logEntry.data(using: .utf8) {
+                fileHandle.seekToEndOfFile()
+                fileHandle.write(data)
+            }
+        } else {
+            let fileHandle = try FileHandle(forWritingTo: tradeLogURL)
+            defer { fileHandle.closeFile() }
+            if let data = logEntry.data(using: .utf8) {
+                fileHandle.seekToEndOfFile()
+                fileHandle.write(data)
+            }
+        }
+        print("DEBUG: Logged trade to trade_log.csv: \(logEntry.trimmingCharacters(in: .whitespacesAndNewlines))")
+    } catch {
+        print("DEBUG: Failed to log trade to trade_log.csv: \(error.localizedDescription)")
+        logAlert(event: "Failed to log trade to trade_log.csv: \(error.localizedDescription)")
+    }
+}
+
+@MainActor
+static func logSpreadToCSV(pair: String, kucoinPrice: Double, bybitPrice: Double, spreadPercent: Double, isOpportunity: Bool) {
+    let spreadsURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/historical_spreads.csv")
+    let timestamp = ISO8601DateFormatter().string(from: Date())
+    let logEntry = "\(timestamp),\(pair),\(kucoinPrice),\(bybitPrice),\(spreadPercent),\(isOpportunity)\n"
+    
+    do {
+        let fileManager = FileManager.default
+        if !fileManager.fileExists(atPath: spreadsURL.path) {
+            try "timestamp,pair,kucoin_price,bybit_price,spread_percent,is_opportunity\n".write(to: spreadsURL, atomically: true, encoding: .utf8)
+            try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: spreadsURL.path)
+        }
+        
+        if let fileHandle = try? FileHandle(forWritingTo: spreadsURL) {
+            defer { fileHandle.closeFile() }
+            if let data = logEntry.data(using: .utf8) {
+                fileHandle.seekToEndOfFile()
+                fileHandle.write(data)
+            }
+        } else {
+            let fileHandle = try FileHandle(forWritingTo: spreadsURL)
+            defer { fileHandle.closeFile() }
+            if let data = logEntry.data(using: .utf8) {
+                fileHandle.seekToEndOfFile()
+                fileHandle.write(data)
+            }
+        }
+        print("DEBUG: Logged spread to historical_spreads.csv: \(logEntry.trimmingCharacters(in: .whitespacesAndNewlines))")
+    } catch {
+        print("DEBUG: Failed to log spread to historical_spreads.csv: \(error.localizedDescription)")
+        logAlert(event: "Failed to log spread to historical_spreads.csv: \(error.localizedDescription)")
+    }
+}
+
+// FIXED: Removed duplicate declaration of lastWebsocketActivity since it already exists in Block 1
+@MainActor
 static func logWebSocketActivity(exchange: String, pair: String, messageType: String) {
-let key = "(exchange)-(pair)"
+let key = "\(exchange)-\(pair)"
 lastWebsocketActivity[key] = Date()
 // Log significant events
 if messageType == "price_update" {
@@ -6636,8 +6703,6 @@ if messageType == "price_update" {
 }
 }
 }
-
-
 //------------------------------------------------------------------------------------------------------------------------Block 10 - Bybit WebSocket Processing
 
 extension ExchangeWebSocket {
