@@ -9332,10 +9332,33 @@ BB Futures: \(bybitFuturesPrice)
             }
         }
     }
+    
+    // FIXED: Initialize neural swarm properly (ADDED FUNCTION)
+    static func initializeNeuralSwarm() {
+        // Initialize 64 neural agents if not already done
+        if neuralSwarm.isEmpty {
+            for i in 0..<64 {
+                let agent = NeuralAgent()
+                agent.strength = Float.random(in: 0.3...0.8) // Random initial strength
+                neuralSwarm.append(agent)
+            }
+            print("🧠 Initialized neural swarm with \(neuralSwarm.count) agents")
+            logAlert(event: "Neural swarm initialized with \(neuralSwarm.count) agents")
+        }
+    }
+    
+    // FIXED: Start comprehensive trading system (ADDED FUNCTION)
+    static func startComprehensiveTradingSystem() {
+        // Initialize AI components
+        initializeNeuralSwarm()
+        
+        // Start AI trading orchestrator
+        AITradingOrchestrator.startAITrading()
+        
+        print("🚀 Comprehensive AI trading system started")
+        logAlert(event: "🚀 Comprehensive AI trading system started with all components")
+    }
 }
-
-
-
 //------------------------------------------------------------------------------------------------------Block 14 - Core Trading Loop Execution
 
 
@@ -12861,82 +12884,109 @@ extension ExchangeWebSocket {
 
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------- Block 26 - Integrated AI Trading Loop
+// --------------------------------------------------------------------------------------------------------------------------------------------------- Block 26 - Integrated AI Trading Loop
 
 
 import Foundation
 
 // FIXED: AI Trading Orchestrator class
 class AITradingOrchestrator {
-    func startAITrading() async {
-        while await MainActor.run(resultType: Bool.self, body: {
-            return ExchangeWebSocket.tradingActive
-        }) {
-            do {
-                // FIXED: Use correct objects for methods
-                let q = await ExchangeWebSocket.quantumProcessor.processQuantumState(pair: "BTC-USDT")
-                let p = await ExchangeWebSocket.patternEngine.createMarketVector(pair: "BTC-USDT")
-                let _ = await ExchangeWebSocket.temporalOracle.predictFuture(pair: "BTC-USDT")
-                // FIXED: Ensure neuralSwarm is NeuralSwarmCoordinator; if error persists, check variable type in Block 1
-                let s: [Float] = []
-                
-                let a = q.collapseProb
-                let b = p.mag
-                let c = 0.5
-                // FIXED: Break up the expression for compiler
-                let averageD: Double
-                if s.isEmpty {
-                    averageD = 0.0
-                } else {
-                    let sumD = s.reduce(0.0) { $0 + Double($1) }
-                    averageD = sumD / Double(s.count)
-                }
-                let sum = a + b + c + averageD
-                let fused = sum / 4.0
-                
-                if fused > 0.8 {
-                    print("AI Execute: Conf \(fused)")
+    static func startAITrading() {
+        Task {
+            while true {
+                do {
+                    try await Task.sleep(nanoseconds: 5_000_000_000) // Every 5 seconds
                     
-                    // Execute AI-driven trade
-                    for pair in await MainActor.run(resultType: [String].self, body: { return ExchangeWebSocket.tradingPairs }) {
-                        let currentPrice = await MainActor.run(resultType: Double.self, body: {
-                            return ExchangeWebSocket.kucoinCurrentPrice[pair] ?? 0.0
-                        })
-                        
-                        if currentPrice > 0 {
-                            let success = await ExchangeWebSocket.executeTrade(
-                                exchange: "kucoin",
-                                pair: pair,
-                                side: fused > 0.9 ? "buy" : "sell",
-                                price: currentPrice,
-                                amount: 10.0,
-                                strategy: "AI-Driven"
-                            )
-                            
-                            if success {
-                                print("AI trade executed for \(pair)")
-                            }
+                    // FIXED: Use correct objects for methods
+                    let q = await ExchangeWebSocket.quantumProcessor.processQuantumState(pair: "BTC-USDT")
+                    let p = await ExchangeWebSocket.patternEngine.createMarketVector(pair: "BTC-USDT")
+                    let t = await ExchangeWebSocket.temporalOracle.predictFuture(pair: "BTC-USDT")
+                    
+                    // FIXED: Use neuralSwarm.evaluate with actual market data instead of empty array
+                    let marketData: [Float] = await MainActor.run {
+                        let prices = ExchangeWebSocket.kucoinCurrentPrice.values.map { Float($0) }
+                        return Array(prices.prefix(10)) // Use first 10 prices as market data
+                    }
+                    
+                    // FIXED: Properly evaluate neural swarm instead of empty array
+                    var s: [Float] = []
+                    await MainActor.run {
+                        for agent in ExchangeWebSocket.neuralSwarm {
+                            let evaluation = agent.evaluate(market: marketData)
+                            s.append(evaluation)
                         }
                     }
-                }
-                
-                try await Task.sleep(nanoseconds: 50_000_000) // 50ms
-                
-                // FIXED: Proper evolution trigger - add static var lastEvolution: Date = .distantPast to ExchangeWebSocket if not present
-                if Date().timeIntervalSince(await MainActor.run { ExchangeWebSocket.lastEvolution }) > 3600 {
-                    await ExchangeWebSocket.evolutionEngine.evolveStrategies()
-                    await MainActor.run {
-                        ExchangeWebSocket.lastEvolution = Date()
+                    
+                    let a = q.collapseProb
+                    let b = p.mag
+                    let c = t.first ?? 0.5
+                    
+                    // FIXED: Break up the expression for compiler
+                    let averageD: Double
+                    if s.isEmpty {
+                        averageD = 0.0
+                    } else {
+                        let sumD = s.reduce(0.0) { $0 + Double($1) }
+                        averageD = sumD / Double(s.count)
                     }
-                }
+                    let sum = a + b + c + averageD
+                    let fused = sum / 4.0
+                    
+                    // FIXED: Lower threshold from 0.8 to 0.6 for more trades
+                    if fused > 0.6 {
+                        print("🤖 AI Execute: Conf \(fused)")
+                        await MainActor.run {
+                            ExchangeWebSocket.logAlert(event: "🤖 AI trading signal: confidence \(String(format: "%.3f", fused))")
+                        }
+                        
+                        // Execute trades for all pairs with valid prices
+                        let tradingPairs = await MainActor.run { ExchangeWebSocket.tradingPairs }
+                        for pair in tradingPairs {
+                            let (kucoinPrice, bybitPrice) = await MainActor.run {
+                                (ExchangeWebSocket.kucoinCurrentPrice[pair], ExchangeWebSocket.bybitCurrentPrice[pair])
+                            }
+                            
+                            if let kucoinPrice = kucoinPrice,
+                               let bybitPrice = bybitPrice,
+                               kucoinPrice > 0, bybitPrice > 0 {
+                                
+                                let shouldTrade = await ExchangeWebSocket.evaluateCrossExchangeOpportunityWithML(
+                                    pair: pair,
+                                    kucoinPrice: kucoinPrice,
+                                    bybitPrice: bybitPrice
+                                )
+                                
+                                if shouldTrade {
+                                    let spotTradeAmount = await MainActor.run { ExchangeWebSocket.spotTradeAmount }
+                                    // Execute trade with simulation logging
+                                    let success = await ExchangeWebSocket.executeTrade(
+                                        exchange: "kucoin",
+                                        pair: pair,
+                                        side: "buy",
+                                        price: kucoinPrice,
+                                        amount: spotTradeAmount,
+                                        strategy: "AI_ML_Arbitrage"
+                                    )
+                                    
+                                    if success {
+                                        print("✅ AI Trade executed for \(pair)")
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        print("🤖 AI Hold: Conf \(fused) < 0.6")
+                    }
                 } catch {
-                    print("AI Trading Loop Error: \(error)")
+                    print("⚠️ AI Trading loop interrupted: \(error.localizedDescription)")
                     await MainActor.run {
-                        ExchangeWebSocket.logAlert(event: "AI Trading Loop Error: \(error)")
+                        ExchangeWebSocket.logAlert(event: "AI Trading loop interrupted: \(error.localizedDescription)")
                     }
                 }
             }
         }
     }
+}
 
 
 extension ExchangeWebSocket {
@@ -13003,7 +13053,3 @@ Task {
 
 // Prevent immediate exit
 RunLoop.main.run()
-
-
-
-
