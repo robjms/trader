@@ -3248,7 +3248,10 @@ extension ExchangeWebSocket {
             logAlert(event: "📊 Strategy allocations updated: \(strategyAllocations)")
         }
     }
-
+    
+    
+    
+//------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
     // Enhanced WebSocket Connection Functions
 
     static func connectKucoinWebSocket(completion: @escaping () -> Void) {
@@ -3373,10 +3376,6 @@ extension ExchangeWebSocket {
         bybitSocket?.connect()
     }
 }
-
-
-//------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
-
 
 
 extension ExchangeWebSocket {
