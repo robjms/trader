@@ -1,6 +1,128 @@
-
 //------------------------------------------------------------------------------------------------------------------- Block 6 - Account Balance and API Initialization
+    // Enhanced WebSocket Connection Functions
 
+    static func connectKucoinWebSocket(completion: @escaping () -> Void) {
+        guard !kucoinIsConnected else {
+            print("KuCoin WebSocket already connected")
+            completion()
+            return
+        }
+
+        guard let socket = kucoinSocket else {
+            print("KuCoin WebSocket not initialized")
+            Task { @MainActor in
+                logAlert(event: "KuCoin WebSocket not initialized")
+            }
+            completion()
+            return
+        }
+
+        socket.connect()
+        
+        // Monitor connection status
+        Task {
+            var connectionAttempts = 0
+            while connectionAttempts < 10 && !kucoinIsConnected {
+                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                connectionAttempts += 1
+            }
+            
+            if kucoinIsConnected {
+                print("✅ KuCoin WebSocket connected successfully")
+                completion()
+            } else {
+                print("❌ KuCoin WebSocket connection failed after 10 attempts")
+                await MainActor.run {
+                    logAlert(event: "❌ KuCoin WebSocket connection failed after 10 attempts")
+                }
+                completion()
+            }
+        }
+    }
+
+    static func connectBybitWebSocket(completion: @escaping () -> Void) {
+        guard !bybitIsConnected else {
+            print("Bybit WebSocket already connected")
+            completion()
+            return
+        }
+
+        let url = URL(string: "wss://stream.bybit.com/v5/public/linear")!
+        var request = URLRequest(url: url)
+        request.timeoutInterval = Double(websocketTimeoutSeconds)
+        bybitSocket = WebSocket(request: request)
+        
+        bybitSocket?.onEvent = { event in
+            switch event {
+            case .connected(_):
+                Task { @MainActor in
+                    bybitIsConnected = true
+                    bybitReconnectAttempts = 0
+                    print("✅ Bybit WebSocket connected")
+                    logAlert(event: "✅ Bybit WebSocket connected")
+                    
+                    // Subscribe to all trading pairs
+                    let tickerTopics = tradingPairs.map { "tickers.\($0.replacingOccurrences(of: "-USDT", with: "USDT"))" }
+                    let orderBookTopics = tradingPairs.map { "orderbook.50.\($0.replacingOccurrences(of: "-USDT", with: "USDT"))" }
+                    
+                    let subscribeMessage: [String: Any] = [
+                        "op": "subscribe",
+                        "args": tickerTopics + orderBookTopics
+                    ]
+                    
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: subscribeMessage)
+                        bybitSocket?.write(data: jsonData)
+                        print("📡 Subscribed to Bybit topics: \(tickerTopics.count + orderBookTopics.count) total")
+                        logAlert(event: "📡 Subscribed to Bybit topics: \(tickerTopics.count + orderBookTopics.count) total")
+                    } catch {
+                        print("Failed to send Bybit subscription: \(error)")
+                        logAlert(event: "Failed to send Bybit subscription: \(error)")
+                    }
+                }
+                completion()
+                
+            case .disconnected(let reason, let code):
+                Task { @MainActor in
+                    bybitIsConnected = false
+                    print("❌ Bybit WebSocket disconnected: \(reason), code: \(code)")
+                    logAlert(event: "❌ Bybit WebSocket disconnected: \(reason), code: \(code)")
+                    
+                    if bybitReconnectAttempts < maxReconnectAttempts {
+                        bybitReconnectAttempts += 1
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                            connectBybitWebSocket(completion: completion)
+                        }
+                    }
+                }
+                
+            case .text(let string):
+                Task {
+                    do {
+                        if let json = try JSONSerialization.jsonObject(with: string.data(using: .utf8)!) as? [String: Any] {
+                            await handleWebSocketMessage(socket: bybitSocket!, message: json, exchange: "bybit")
+                        }
+                    } catch {
+                        await MainActor.run {
+                            logAlert(event: "Failed to parse Bybit WebSocket message: \(error)")
+                        }
+                    }
+                }
+                
+            case .error(let error):
+                Task { @MainActor in
+                    print("❌ Bybit WebSocket error: \(error?.localizedDescription ?? "Unknown")")
+                    logAlert(event: "❌ Bybit WebSocket error: \(error?.localizedDescription ?? "Unknown")")
+                }
+                
+            default:
+                break
+            }
+        }
+        
+        bybitSocket?.connect()
+    }
+}
 
 
 extension ExchangeWebSocket {
@@ -385,3 +507,4 @@ extension ExchangeWebSocket {
         }.resume()
     }
 }
+
