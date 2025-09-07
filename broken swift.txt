@@ -5259,6 +5259,7 @@ extension ExchangeWebSocket {
 
 
 //-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
+//-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
 
 class ExchangeWebSocketDelegate: NSObject, WebSocketDelegate {
     func didReceive(event: WebSocketEvent, client: WebSocketClient) {
@@ -5276,6 +5277,108 @@ class ExchangeWebSocketDelegate: NSObject, WebSocketDelegate {
                 ExchangeWebSocket.handleWebSocketError(client: client, error: error)
             default:
                 break
+            }
+        }
+    }
+}
+
+class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
+    func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+        Task { @MainActor in
+            switch event {
+            case .connected(let headers):
+                ExchangeWebSocket.kucoinIsConnected = true
+                print("✅ [KuCoin Spot] WebSocket connected: \(headers)")
+                ExchangeWebSocket.logAlert(event: "✅ KuCoin Spot WebSocket connected")
+                
+                // FIXED: Subscribe with correct format (BTC-USDT not BTCUSDT)
+                for pair in ExchangeWebSocket.tradingPairs {
+                    let subscriptionMessage = [
+                        "id": UUID().uuidString,
+                        "type": "subscribe",
+                        "topic": "/market/ticker:\(pair)", // Use pair directly with hyphen
+                        "privateChannel": false,
+                        "response": true
+                    ] as [String : Any]
+                    
+                    if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
+                       let jsonString = String(data: data, encoding: .utf8) {
+                        client.write(string: jsonString)
+                        print("📡 Subscribed to KuCoin spot topic: /market/ticker:\(pair)")
+                    }
+                }
+                
+            case .disconnected(let reason, let code):
+                ExchangeWebSocket.kucoinIsConnected = false
+                print("❌ [KuCoin Spot] WebSocket disconnected: \(reason) (\(code))")
+                ExchangeWebSocket.logAlert(event: "❌ KuCoin Spot WebSocket disconnected: \(reason)")
+                
+            case .text(let text):
+                if let data = text.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    
+                    // Handle subscription confirmations
+                    if json["type"] as? String == "ack" {
+                        print("✅ KuCoin Spot WebSocket subscription confirmed")
+                        return
+                    }
+                    
+                    // FIXED: Extract price correctly and update immediately to fix $0.000000 issue
+                    if let subject = json["subject"] as? String,
+                       subject == "trade.ticker",
+                       let topic = json["topic"] as? String,
+                       let data = json["data"] as? [String: Any],
+                       let priceStr = data["price"] as? String,
+                       let price = Double(priceStr), price > 0 {
+                        
+                        let symbol = topic.replacingOccurrences(of: "/market/ticker:", with: "")
+                        let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                        
+                        // FIXED: Immediate update to fix $0.000000 dashboard issue
+                        ExchangeWebSocket.kucoinCurrentPrice[pair] = price
+                        ExchangeWebSocket.kucoinPrices[pair, default: []].append(price)
+                        
+                        // Maintain price history limit
+                        if ExchangeWebSocket.kucoinPrices[pair]!.count > ExchangeWebSocket.priceHistoryRetention {
+                            ExchangeWebSocket.kucoinPrices[pair]?.removeFirst()
+                        }
+                        
+                        print("✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
+                        ExchangeWebSocket.logAlert(event: "✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
+                        
+                        // Update last data timestamp
+                        ExchangeWebSocket.lastDataUpdate[pair] = Date()
+                    }
+                }
+                
+            case .binary(_):
+                break
+                
+            case .ping(_):
+                client.write(pong: Data())
+                
+            case .pong(_):
+                break
+                
+            case .viabilityChanged(_):
+                break
+                
+            case .reconnectSuggested(_):
+                ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket reconnection suggested")
+                
+            case .cancelled:
+                ExchangeWebSocket.kucoinIsConnected = false
+                print("❌ [KuCoin Spot] WebSocket cancelled")
+                
+            case .error(let error):
+                ExchangeWebSocket.kucoinIsConnected = false
+                print("❌ [KuCoin Spot] WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket error: \(error?.localizedDescription ?? "unknown")")
+                
+            case .peerClosed:
+                ExchangeWebSocket.kucoinIsConnected = false
+                print("❌ [KuCoin Spot] WebSocket peer closed")
+                ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket peer closed")
             }
         }
     }
