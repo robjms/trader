@@ -5260,7 +5260,7 @@ extension ExchangeWebSocket {
 }
 
 
-//--------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
+//------------------------------------------------------------------------------ Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
 //--------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
 class ExchangeWebSocketDelegate: NSObject, WebSocketDelegate {
     func didReceive(event: WebSocketEvent, client: WebSocketClient) {
@@ -5399,9 +5399,6 @@ extension ExchangeWebSocket {
             return
         }
         
-        print("🟡🔍 DEBUG: Starting KuCoin spot ticker subscriptions...")
-        logAlert(event: "🟡🔍 DEBUG: Starting KuCoin spot ticker subscriptions...")
-        
         // Subscribe to individual ticker topics for better reliability
         for pair in tradingPairs {
             // FIX: Convert BTC-USDT to BTCUSDT format for KuCoin API
@@ -5418,8 +5415,7 @@ extension ExchangeWebSocket {
                 let jsonData = try JSONSerialization.data(withJSONObject: subscriptionMessage)
                 if let jsonString = String(data: jsonData, encoding: .utf8) {
                     socket.write(string: jsonString)
-                    print("🟡📡 Subscribed to KuCoin SPOT ticker for \(pair) (symbol: \(symbol))")
-                    logAlert(event: "🟡📡 Subscribed to KuCoin SPOT ticker for \(pair) (symbol: \(symbol))")
+                    print("📡 Subscribed to KuCoin SPOT ticker for \(pair) (symbol: \(symbol))")
                 }
             } catch {
                 print("❌ Failed to subscribe to KuCoin spot ticker for \(pair): \(error)")
@@ -5443,7 +5439,7 @@ extension ExchangeWebSocket {
                 let jsonData = try JSONSerialization.data(withJSONObject: orderBookSubscription)
                 if let jsonString = String(data: jsonData, encoding: .utf8) {
                     socket.write(string: jsonString)
-                    print("🟡📊 Subscribed to KuCoin SPOT order book for \(pair) (symbol: \(symbol))")
+                    print("📊 Subscribed to KuCoin SPOT order book for \(pair) (symbol: \(symbol))")
                 }
             } catch {
                 print("❌ Failed to subscribe to KuCoin spot order book for \(pair): \(error)")
@@ -5453,24 +5449,17 @@ extension ExchangeWebSocket {
         logAlert(event: "✅ Subscribed to KuCoin SPOT tickers for \(tradingPairs.count) pairs")
     }
 
-// EXISTING FUNCTIONS FROM YOUR CODE - PRESERVED COMPLETELY WITH ENHANCED DEBUG LOGGING
+// EXISTING FUNCTIONS FROM YOUR CODE - PRESERVED COMPLETELY
 
 static func handleKuCoinSpotMessage(_ message: String) async {
-    // ENHANCED: Add comprehensive debug logging
-    print("🟡🔍 DEBUG: KuCoin Raw Message: \(message)")
-    
     do {
         guard let data = message.data(using: .utf8),
               let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             await MainActor.run {
-                print("🟡❌ Failed to parse KuCoin Spot message: \(message)")
                 logAlert(event: "🟡❌ Failed to parse KuCoin Spot message: \(message)")
             }
             return
         }
-        
-        // ENHANCED: Add debug logging for parsed JSON
-        print("🟡🔍 DEBUG: Parsed JSON keys: \(json.keys)")
         
         await MainActor.run {
             lastWebsocketActivity["kucoin-spot"] = Date()
@@ -5478,44 +5467,19 @@ static func handleKuCoinSpotMessage(_ message: String) async {
         
         // Handle different message types
         if let type = json["type"] as? String {
-            // ENHANCED: Add debug logging for message type
-            print("🟡🔍 DEBUG: Message type: \(type)")
-            
             switch type {
             case "welcome":
                 await MainActor.run {
-                    print("🟡✅ KuCoin Spot welcome message received")
                     logAlert(event: "🟡✅ KuCoin Spot welcome message received")
                 }
                 
             case "ack":
                 await MainActor.run {
-                    print("🟡✅ KuCoin Spot subscription acknowledged")
                     logAlert(event: "🟡✅ KuCoin Spot subscription acknowledged")
                 }
                 
             case "message":
-                // ENHANCED: Add debug logging for data message processing
-                print("🟡🔍 DEBUG: Processing ticker message")
                 await handleKuCoinSpotDataMessage(json)
-                
-            // ENHANCED: Add ping/pong handling
-            case "ping":
-                print("🟡💓 KuCoin Spot ping received, sending pong...")
-                await MainActor.run {
-                    if let socket = kucoinSocket, let id = json["id"] as? String {
-                        let pongMessage: [String: Any] = ["id": id, "type": "pong"]
-                        do {
-                            let jsonData = try JSONSerialization.data(withJSONObject: pongMessage)
-                            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                                socket.write(string: jsonString)
-                                print("🟡💓 Sent pong response to KuCoin")
-                            }
-                        } catch {
-                            print("🟡❌ Failed to send pong: \(error)")
-                        }
-                    }
-                }
                 
             case "pong":
                 print("🟡💓 KuCoin Spot pong received")
@@ -5523,38 +5487,25 @@ static func handleKuCoinSpotMessage(_ message: String) async {
             case "error":
                 let errorMsg = json["data"] as? String ?? "Unknown error"
                 await MainActor.run {
-                    print("🟡❌ KuCoin Spot error: \(errorMsg)")
                     logAlert(event: "🟡❌ KuCoin Spot error: \(errorMsg)")
                 }
                 
             default:
                 print("🟡❓ Unknown KuCoin Spot message type: \(type)")
             }
-        } else {
-            // ENHANCED: Add debug logging for messages without type field
-            print("🟡🔍 DEBUG: Message without type field: \(json)")
         }
     } catch {
         await MainActor.run {
-            print("🟡❌ Error processing KuCoin Spot message: \(error.localizedDescription)")
             logAlert(event: "🟡❌ Error processing KuCoin Spot message: \(error.localizedDescription)")
         }
     }
 }
 
 static func handleKuCoinSpotDataMessage(_ json: [String: Any]) async {
-    // ENHANCED: Add comprehensive debug logging
-    print("🟡🔍 DEBUG: Processing data message with keys: \(json.keys)")
-    
     guard let topic = json["topic"] as? String,
           let data = json["data"] as? [String: Any] else {
-        print("🟡❌ Missing topic or data in message")
         return
     }
-    
-    // ENHANCED: Add debug logging for topic and data
-    print("🟡🔍 DEBUG: Topic: \(topic)")
-    print("🟡🔍 DEBUG: Data keys: \(data.keys)")
     
     await MainActor.run {
         if topic.contains("/market/ticker:") {
@@ -5562,46 +5513,32 @@ static func handleKuCoinSpotDataMessage(_ json: [String: Any]) async {
             let symbolStart = topic.range(of: ":")?.upperBound
             if let start = symbolStart {
                 let symbol = String(topic[start...])
-                // ENHANCED: Add debug logging for symbol extraction
-                print("🟡🔍 DEBUG: Extracted symbol: '\(symbol)'")
                 
                 // ✅ CRITICAL FIX: Direct conversion like Bybit does
                 let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
-                // ENHANCED: Add debug logging for symbol conversion
-                print("🟡🔍 DEBUG: Converted to pair: '\(pair)'")
                 
                 // FIX: Only process if this is a valid trading pair
                 guard tradingPairs.contains(pair) else {
-                    print("🟡🔍 DEBUG: Ignoring non-trading pair: \(pair) (symbol: \(symbol))")
+                    print("DEBUG: Ignoring price update for non-trading pair: \(pair) (symbol: \(symbol))")
                     return
                 }
                 
-                // ENHANCED: Add debug logging for valid pair processing
-                print("🟡🔍 DEBUG: Processing price for valid pair: \(pair)")
-                print("🟡🔍 DEBUG: Available data keys: \(data.keys)")
-                
-                // Extract price data - try multiple possible fields with enhanced logging
-                let priceKeys = ["price", "last", "lastPrice", "bestAsk", "bestBid", "close"]
+                // Extract price data - try multiple possible fields
                 var price: Double?
-                var priceSource = ""
-                
-                for key in priceKeys {
-                    if let priceStr = data[key] as? String {
-                        price = Double(priceStr)
-                        priceSource = key
-                        print("🟡🔍 DEBUG: Price source: \(key), Raw price: \(priceStr)")
-                        break
-                    }
+                if let priceStr = data["price"] as? String {
+                    price = Double(priceStr)
+                } else if let priceStr = data["last"] as? String {
+                    price = Double(priceStr)
+                } else if let priceStr = data["bestAsk"] as? String {
+                    price = Double(priceStr)
+                } else if let priceStr = data["bestBid"] as? String {
+                    price = Double(priceStr)
                 }
                 
                 guard let finalPrice = price, finalPrice > 0 else {
-                    print("🟡❌ Failed to extract valid price from KuCoin data: \(data)")
-                    logAlert(event: "🟡❌ Failed to extract valid price for \(pair): \(data)")
+                    print("DEBUG: Failed to extract valid price from KuCoin data: \(data)")
                     return
                 }
-                
-                // ENHANCED: Add debug logging for successful price parsing
-                print("🟡🔍 DEBUG: Successfully parsed price: \(finalPrice) from field: \(priceSource)")
                 
                 kucoinCurrentPrice[pair] = finalPrice
                 kucoinPrices[pair, default: []].append(finalPrice)
@@ -5629,13 +5566,8 @@ static func handleKuCoinSpotDataMessage(_ json: [String: Any]) async {
                         kucoinSpotVolume[pair]?.removeFirst()
                     }
                 }
-            } else {
-                // ENHANCED: Add debug logging for failed symbol extraction
-                print("🟡❌ Failed to extract symbol from topic: \(topic)")
             }
         } else if topic.contains("/market/level2:") {
-            // ENHANCED: Add debug logging for order book processing
-            print("🟡🔍 DEBUG: Processing order book update for topic: \(topic)")
             // Order book updates
             let symbolStart = topic.range(of: ":")?.upperBound
             if let start = symbolStart {
@@ -5646,9 +5578,6 @@ static func handleKuCoinSpotDataMessage(_ json: [String: Any]) async {
                     updateKuCoinOrderBook(pair: pair, changes: changes)
                 }
             }
-        } else {
-            // ENHANCED: Add debug logging for unhandled topics
-            print("🟡🔍 DEBUG: Unhandled topic: \(topic)")
         }
     }
 }
@@ -6783,6 +6712,7 @@ static func triggerCrossExchangeArbitrageCheck(pair: String) {
     }
 }
 }
+
 //------------------------------------------------------------------------------------------------------------------------Block 10 - Bybit WebSocket Processing
 
 extension ExchangeWebSocket {
