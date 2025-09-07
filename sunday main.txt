@@ -394,6 +394,8 @@ func logAlert(event: String, completion: @escaping @Sendable () -> Void = {}) {
 
 
 
+// VARIABLES TO ADD: None - All existing variables preserved
+
 class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
     func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
         Task { @MainActor in
@@ -403,13 +405,12 @@ class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
                 print("✅ [KuCoin Spot] WebSocket connected: \(headers)")
                 ExchangeWebSocket.logAlert(event: "✅ KuCoin Spot WebSocket connected")
                 
-                // Subscribe to all pairs
+                // Subscribe to all pairs with CORRECT FORMAT (BTC-USDT, not BTCUSDT)
                 for pair in ExchangeWebSocket.tradingPairs {
-                    let symbol = pair.replacingOccurrences(of: "-", with: "")
                     let subscriptionMessage = [
                         "id": UUID().uuidString,
                         "type": "subscribe",
-                        "topic": "/market/ticker:\(symbol)",
+                        "topic": "/market/ticker:\(pair)", // FIXED: Use pair directly with hyphen
                         "privateChannel": false,
                         "response": true
                     ] as [String : Any]
@@ -417,7 +418,7 @@ class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
                     if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
                        let jsonString = String(data: data, encoding: .utf8) {
                         client.write(string: jsonString)
-                        print("Subscribed to KuCoin spot topic: /market/ticker:\(symbol) for pair: \(pair)")
+                        print("📡 Subscribed to KuCoin spot topic: /market/ticker:\(pair)")
                     }
                 }
                 
@@ -432,19 +433,20 @@ class KuCoinSpotWebSocketDelegate: WebSocketDelegate {
                     
                     // Handle subscription confirmations
                     if json["type"] as? String == "ack" {
-                        print("KuCoin Spot WebSocket subscription confirmed")
+                        print("✅ KuCoin Spot WebSocket subscription confirmed")
                         return
                     }
                     
-                    // Handle price data
+                    // Handle price data - FIXED: Correct parsing
                     if let subject = json["subject"] as? String,
                        subject == "trade.ticker",
                        let topic = json["topic"] as? String,
                        let data = json["data"] as? [String: Any] {
                         
-                        let symbol = topic.replacingOccurrences(of: "/market/ticker:", with: "")
-                        let pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                        // FIXED: Extract pair correctly from topic
+                        let pair = topic.replacingOccurrences(of: "/market/ticker:", with: "")
                         
+                        // FIXED: Parse price correctly - KuCoin uses "price" field
                         if let priceStr = data["price"] as? String,
                            let price = Double(priceStr), price > 0 {
                             
@@ -508,13 +510,13 @@ class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
                 print("✅ [KuCoin Futures] WebSocket connected: \(headers)")
                 ExchangeWebSocket.logAlert(event: "✅ KuCoin Futures WebSocket connected")
                 
-                // Subscribe to all pairs
+                // Subscribe to all pairs with CORRECT FORMAT
                 for pair in ExchangeWebSocket.tradingPairs {
                     let futuresSymbol = ExchangeWebSocket.kucoinFuturesSymbols[pair] ?? "\(pair.replacingOccurrences(of: "-USDT", with: ""))USDTM"
                     let subscriptionMessage = [
                         "id": UUID().uuidString,
                         "type": "subscribe",
-                        "topic": "/contractMarket/ticker:\(futuresSymbol)",
+                        "topic": "/contractMarket/ticker:\(futuresSymbol)", // FIXED: Correct futures topic
                         "privateChannel": false,
                         "response": true
                     ] as [String : Any]
@@ -522,7 +524,7 @@ class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
                     if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
                        let jsonString = String(data: data, encoding: .utf8) {
                         client.write(string: jsonString)
-                        print("Subscribed to KuCoin futures topic: /contractMarket/ticker:\(futuresSymbol) for pair: \(pair)")
+                        print("📡 Subscribed to KuCoin futures topic: /contractMarket/ticker:\(futuresSymbol) for pair: \(pair)")
                     }
                 }
                 
@@ -537,11 +539,11 @@ class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
                     
                     // Handle subscription confirmations
                     if json["type"] as? String == "ack" {
-                        print("KuCoin Futures WebSocket subscription confirmed")
+                        print("✅ KuCoin Futures WebSocket subscription confirmed")
                         return
                     }
                     
-                    // Handle price data
+                    // Handle price data - FIXED: Correct parsing for futures
                     if let subject = json["subject"] as? String,
                        subject == "ticker",
                        let topic = json["topic"] as? String,
@@ -558,6 +560,7 @@ class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
                             }
                         }
                         
+                        // FIXED: Parse price correctly for futures
                         if let pair = pair,
                            let priceStr = data["price"] as? String,
                            let price = Double(priceStr), price > 0 {
@@ -612,6 +615,7 @@ class KuCoinFuturesWebSocketDelegate: WebSocketDelegate {
         }
     }
 }
+
 
 class BybitSpotWebSocketDelegate: WebSocketDelegate {
     func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
