@@ -1,61 +1,28 @@
 Errors 
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:1202:32 'KuCoinSpotWebSocketDelegate' is ambiguous for type lookup in this context
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:1667:29 Cannot find 'logDashboardMetrics' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:1204:31 'BybitFuturesWebSocketDelegate' is ambiguous for type lookup in this context
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3424:31 Cannot find 'evaluateFundingRateMomentum' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3777:35 'BybitSpotWebSocketDelegate' is ambiguous for type lookup in this context
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3770:7 Type 'KuCoinWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3778:38 'BybitFuturesWebSocketDelegate' is ambiguous for type lookup in this context
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3887:35 Main actor-isolated static property 'kucoinCurrentPrice' can not be mutated from a nonisolated context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7480:7 Invalid redeclaration of 'KuCoinSpotWebSocketDelegate'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3888:35 Main actor-isolated static property 'kucoinPrices' can not be mutated from a nonisolated context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7511:7 Invalid redeclaration of 'KuCoinFuturesWebSocketDelegate'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3891:38 Main actor-isolated static property 'kucoinPrices' can not be referenced from a nonisolated context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7542:7 Invalid redeclaration of 'BybitSpotWebSocketDelegate'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3891:89 Main actor-isolated static property 'priceHistoryRetention' can not be referenced from a nonisolated context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7573:7 Invalid redeclaration of 'BybitFuturesWebSocketDelegate'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3892:39 Main actor-isolated static property 'kucoinPrices' can not be mutated from a nonisolated context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7580:35 Type 'ExchangeWebSocket' has no member 'bybitFuturesReconnectAttempts'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3895:35 Main actor-isolated static property 'lastPriceUpdate' can not be mutated from a nonisolated context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7605:44 'KuCoinSpotWebSocketDelegate' is ambiguous for type lookup in this context
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3919:35 Main actor-isolated static property 'kucoinOrderBooks' can not be mutated from a nonisolated context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7606:47 'KuCoinFuturesWebSocketDelegate' is ambiguous for type lookup in this context
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3935:42 Main actor-isolated static property 'tradingPairs' can not be referenced from a nonisolated context
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7608:43 'BybitSpotWebSocketDelegate' is ambiguous for type lookup in this context
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3942:7 Invalid redeclaration of 'KuCoinFuturesWebSocketDelegate'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7609:46 'BybitFuturesWebSocketDelegate' is ambiguous for type lookup in this context
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:3942:7 Type 'KuCoinFuturesWebSocketDelegate' does not conform to protocol 'WebSocketDelegate'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4056:35 Main actor-isolated static property 'kucoinCurrentFuturesPrice' can not be mutated from a nonisolated context
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4057:35 Main actor-isolated static property 'kucoinFuturesPrices' can not be mutated from a nonisolated context
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4060:38 Main actor-isolated static property 'kucoinFuturesPrices' can not be referenced from a nonisolated context
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4060:96 Main actor-isolated static property 'priceHistoryRetention' can not be referenced from a nonisolated context
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4061:39 Main actor-isolated static property 'kucoinFuturesPrices' can not be mutated from a nonisolated context
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4096:35 Main actor-isolated static property 'kucoinFuturesOrderBook' can not be mutated from a nonisolated context
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4108:60 Main actor-isolated static property 'kucoinFuturesSymbols' can not be referenced from a nonisolated context
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4120:27 Invalid redeclaration of 'kucoinDelegate'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:4288:17 Invalid redeclaration of 'connectBybitWebSocket(completion:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6325:47 'KuCoinFuturesWebSocketDelegate' is ambiguous for type lookup in this context
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6454:17 Cannot assign to property: 'kucoinFuturesDelegate' is a 'let' constant
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6553:9 Cannot find 'bybitSpotDelegate' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6554:33 Cannot find 'bybitSpotDelegate' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6616:9 Cannot find 'bybitFuturesDelegate' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6617:37 Cannot find 'bybitFuturesDelegate' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:8162:15 Cannot find 'evaluateFundingRateMomentum' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:8663:27 Type 'ExchangeWebSocket' has no member 'logDashboardMetrics'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:8077:13 No 'async' operations occur within 'await' expression
