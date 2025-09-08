@@ -298,4 +298,44 @@ Created a dedicated WebSocketState actor to manage the hasReceivedWelcome state
 Removed the instance variable completely from the delegate class
 All state access goes through the actor using await state.setWelcomeReceived() and await state.getWelcomeReceived()
 
+Fix Summary
+The data race error at line 5289:30 was caused by WebSocket delegate classes that weren't @MainActor isolated but were capturing self inside Task { @MainActor in } blocks.
+Key Changes Made:
+
+Added @MainActor to all delegate classes:
+
+KucoinWebSocketDelegate
+KucoinFuturesWebSocketDelegate
+BybitWebSocketDelegate
+BybitFuturesWebSocketDelegate
+
+
+Removed unnecessary Task { @MainActor in } wrappers since the entire classes are now MainActor-isolated didnt work
+
+Fixes Applied:
+
+Protocol Conformance Fix:
+
+Removed @MainActor from class declarations
+Added nonisolated to didReceive protocol methods
+Wrapped method contents in Task { @MainActor in } to properly access MainActor-isolated state
+
+
+Scope Error Fix:
+
+Fixed line that incorrectly used data instead of jsonData in the subscription function didnt work
+
+Minimal Data Race Fixes Applied:
+
+Added @MainActor to delegate classes:
+
+ExchangeWebSocketDelegate - now properly isolated
+KuCoinSpotWebSocketDelegateEnhanced - now properly isolated
+
+
+Removed unnecessary Task wrappers:
+
+Removed Task { @MainActor in } blocks since classes are now MainActor-isolated
+Kept Task { @MainActor [weak self] in } pattern where weak self is needed for reconnection logic dint work
+
 
