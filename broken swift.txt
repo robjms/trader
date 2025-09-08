@@ -5261,206 +5261,203 @@ extension ExchangeWebSocket {
 //-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
 //-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
 
+@MainActor
 class ExchangeWebSocketDelegate: NSObject, WebSocketDelegate {
     func didReceive(event: WebSocketEvent, client: WebSocketClient) {
-        Task { @MainActor in
-            switch event {
-            case .connected(let headers):
-                ExchangeWebSocket.handleWebSocketConnected(client: client, headers: headers)
-            case .disconnected(let reason, let code):
-                ExchangeWebSocket.handleWebSocketDisconnected(client: client, reason: reason, code: code)
-            case .text(let string):
-                ExchangeWebSocket.handleWebSocketTextMessage(client: client, text: string)
-            case .binary(let data):
-                ExchangeWebSocket.handleWebSocketBinaryMessage(client: client, data: data)
-            case .error(let error):
-                ExchangeWebSocket.handleWebSocketError(client: client, error: error)
-            default:
-                break
-            }
+        switch event {
+        case .connected(let headers):
+            ExchangeWebSocket.handleWebSocketConnected(client: client, headers: headers)
+        case .disconnected(let reason, let code):
+            ExchangeWebSocket.handleWebSocketDisconnected(client: client, reason: reason, code: code)
+        case .text(let string):
+            ExchangeWebSocket.handleWebSocketTextMessage(client: client, text: string)
+        case .binary(let data):
+            ExchangeWebSocket.handleWebSocketBinaryMessage(client: client, data: data)
+        case .error(let error):
+            ExchangeWebSocket.handleWebSocketError(client: client, error: error)
+        default:
+            break
         }
     }
 }
+
+@MainActor
 class KuCoinSpotWebSocketDelegateEnhanced: WebSocketDelegate {
     private var hasReceivedWelcome = false
     
     func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
-        Task { @MainActor [weak self] in
-            guard let self = self else { return }
+        switch event {
+        case .connected(let headers):
+            print("🔗 [KuCoin Spot] WebSocket connected: \(headers)")
+            ExchangeWebSocket.logAlert(event: "🔗 KuCoin Spot WebSocket connected, waiting for welcome...")
+            self.hasReceivedWelcome = false
             
-            switch event {
-            case .connected(let headers):
-                print("🔗 [KuCoin Spot] WebSocket connected: \(headers)")
-                ExchangeWebSocket.logAlert(event: "🔗 KuCoin Spot WebSocket connected, waiting for welcome...")
-                self.hasReceivedWelcome = false
-                
-            case .disconnected(let reason, let code):
-                ExchangeWebSocket.kucoinIsConnected = false
-                self.hasReceivedWelcome = false
-                print("❌ [KuCoin Spot] WebSocket disconnected: \(reason) (\(code))")
-                ExchangeWebSocket.logAlert(event: "❌ KuCoin Spot WebSocket disconnected: \(reason)")
-                
-                // Auto-reconnect after delay with weak self
-                DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
-                    guard self != nil else { return }
-                    ExchangeWebSocket.connectToKuCoinSpotWebSocket()
-                }
-                
-            case .text(let text):
-                if let data = text.data(using: .utf8),
-                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    
-                    // STEP 1: Handle welcome message FIRST (CRITICAL)
-                    if let type = json["type"] as? String, type == "welcome" {
-                        self.hasReceivedWelcome = true
-                        ExchangeWebSocket.kucoinIsConnected = true
-                        print("✅ [KuCoin Spot] Welcome message received! Now subscribing...")
-                        ExchangeWebSocket.logAlert(event: "✅ KuCoin Spot welcome received, subscribing to pairs...")
-                        
-                        // STEP 2: Subscribe to all pairs AFTER welcome
-                        for pair in ExchangeWebSocket.tradingPairs {
-                            // CRITICAL: Use correct KuCoin API format (BTCUSDT not BTC-USDT)
-                            let symbol = pair.replacingOccurrences(of: "-", with: "")
-                            let subscriptionMessage = [
-                                "id": UUID().uuidString,
-                                "type": "subscribe",
-                                "topic": "/market/ticker:\(symbol)", // FIXED: BTCUSDT format
-                                "privateChannel": false,
-                                "response": true
-                            ] as [String : Any]
-                            
-                            if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
-                               let jsonString = String(data: data, encoding: .utf8) {
-                                client.write(string: jsonString)
-                                print("📡 [KuCoin Spot] Subscribed to: \(symbol) (pair: \(pair))")
-                            }
-                        }
-                        return
-                    }
-                    
-                    // STEP 3: Don't process other messages until welcome received
-                    guard self.hasReceivedWelcome else {
-                        print("⚠️ [KuCoin Spot] Ignoring message - no welcome received yet: \(json["type"] as? String ?? "unknown")")
-                        return
-                    }
-                    
-                    // Handle subscription confirmations
-                    if json["type"] as? String == "ack" {
-                        print("✅ KuCoin Spot WebSocket subscription confirmed")
-                        ExchangeWebSocket.logAlert(event: "✅ KuCoin Spot subscription confirmed")
-                        return
-                    }
-                    
-                    // FIXED: Extract price correctly and update immediately to fix $0.000000 issue
-                    if let subject = json["subject"] as? String,
-                       subject == "trade.ticker",
-                       let topic = json["topic"] as? String,
-                       let data = json["data"] as? [String: Any] {
-                        
-                        print("🔍 [KuCoin Spot] Processing ticker message:")
-                        print("   Topic: \(topic)")
-                        print("   Data keys: \(Array(data.keys))")
-                        
-                        // Extract symbol from topic (/market/ticker:BTCUSDT)
-                        let symbol = topic.replacingOccurrences(of: "/market/ticker:", with: "")
-                        
-                        // Convert BTCUSDT back to BTC-USDT for internal storage
-                        let pair: String
-                        if symbol.hasSuffix("USDT") && symbol.count > 4 {
-                            let baseAsset = symbol.replacingOccurrences(of: "USDT", with: "")
-                            pair = "\(baseAsset)-USDT"
-                        } else {
-                            pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
-                        }
-                        
-                        print("   Symbol: \(symbol) -> Pair: \(pair)")
-                        
-                        // CRITICAL FIX: Extract price using multiple keys (enhanced)
-                        let priceKeys = ["price", "last", "bestAsk", "bestBid", "close", "c"]
-                        var extractedPrice: Double?
-                        var usedKey = ""
-                        
-                        for key in priceKeys {
-                            if let priceStr = data[key] as? String,
-                               let price = Double(priceStr), price > 0 {
-                                extractedPrice = price
-                                usedKey = key
-                                break
-                            }
-                        }
-                        
-                        if let price = extractedPrice {
-                            print("✅ [KuCoin Spot] Found price for \(pair): $\(price) (key: \(usedKey))")
-                            
-                            // FIXED: Immediate update to fix $0.000000 dashboard issue
-                            ExchangeWebSocket.kucoinCurrentPrice[pair] = price
-                            ExchangeWebSocket.kucoinPrices[pair, default: []].append(price)
-                            
-                            // Maintain price history limit
-                            if ExchangeWebSocket.kucoinPrices[pair]!.count > ExchangeWebSocket.priceHistoryRetention {
-                                ExchangeWebSocket.kucoinPrices[pair]?.removeFirst()
-                            }
-                            
-                            print("✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
-                            ExchangeWebSocket.logAlert(event: "✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
-                            
-                            // Update last data timestamp
-                            ExchangeWebSocket.lastDataUpdate[pair] = Date()
-                            
-                            // Trigger arbitrage check and dashboard update
-                            ExchangeWebSocket.triggerCrossExchangeArbitrageCheck(pair: pair)
-                            ExchangeWebSocket.updateDashboardData()
-                            
-                        } else {
-                            print("❌ [KuCoin Spot] NO VALID PRICE found for \(pair)")
-                            print("   Available data: \(data)")
-                            ExchangeWebSocket.logAlert(event: "❌ KuCoin Spot: NO PRICE for \(pair)")
-                        }
-                    }
-                }
-                
-            case .binary(_):
-                break
-                
-            case .ping(_):
-                client.write(pong: Data())
-                
-            case .pong(_):
-                break
-                
-            case .viabilityChanged(_):
-                break
-                
-            case .reconnectSuggested(_):
-                ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket reconnection suggested")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
-                    guard self != nil else { return }
-                    ExchangeWebSocket.connectToKuCoinSpotWebSocket()
-                }
-                
-            case .cancelled:
-                ExchangeWebSocket.kucoinIsConnected = false
-                self.hasReceivedWelcome = false
-                print("❌ [KuCoin Spot] WebSocket cancelled")
-                
-            case .error(let error):
-                ExchangeWebSocket.kucoinIsConnected = false
-                self.hasReceivedWelcome = false
-                print("❌ [KuCoin Spot] WebSocket error: \(error?.localizedDescription ?? "unknown")")
-                ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket error: \(error?.localizedDescription ?? "unknown")")
-                
-                // Reconnect on error with weak self
-                DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
-                    guard self != nil else { return }
-                    ExchangeWebSocket.connectToKuCoinSpotWebSocket()
-                }
-                
-            case .peerClosed:
-                ExchangeWebSocket.kucoinIsConnected = false
-                self.hasReceivedWelcome = false
-                print("❌ [KuCoin Spot] WebSocket peer closed")
-                ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket peer closed")
+        case .disconnected(let reason, let code):
+            ExchangeWebSocket.kucoinIsConnected = false
+            self.hasReceivedWelcome = false
+            print("❌ [KuCoin Spot] WebSocket disconnected: \(reason) (\(code))")
+            ExchangeWebSocket.logAlert(event: "❌ KuCoin Spot WebSocket disconnected: \(reason)")
+            
+            // Auto-reconnect after delay with weak self
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+                guard self != nil else { return }
+                ExchangeWebSocket.connectToKuCoinSpotWebSocket()
             }
+            
+        case .text(let text):
+            if let data = text.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                
+                // STEP 1: Handle welcome message FIRST (CRITICAL)
+                if let type = json["type"] as? String, type == "welcome" {
+                    self.hasReceivedWelcome = true
+                    ExchangeWebSocket.kucoinIsConnected = true
+                    print("✅ [KuCoin Spot] Welcome message received! Now subscribing...")
+                    ExchangeWebSocket.logAlert(event: "✅ KuCoin Spot welcome received, subscribing to pairs...")
+                    
+                    // STEP 2: Subscribe to all pairs AFTER welcome
+                    for pair in ExchangeWebSocket.tradingPairs {
+                        // CRITICAL: Use correct KuCoin API format (BTCUSDT not BTC-USDT)
+                        let symbol = pair.replacingOccurrences(of: "-", with: "")
+                        let subscriptionMessage = [
+                            "id": UUID().uuidString,
+                            "type": "subscribe",
+                            "topic": "/market/ticker:\(symbol)", // FIXED: BTCUSDT format
+                            "privateChannel": false,
+                            "response": true
+                        ] as [String : Any]
+                        
+                        if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
+                           let jsonString = String(data: data, encoding: .utf8) {
+                            client.write(string: jsonString)
+                            print("📡 [KuCoin Spot] Subscribed to: \(symbol) (pair: \(pair))")
+                        }
+                    }
+                    return
+                }
+                
+                // STEP 3: Don't process other messages until welcome received
+                guard self.hasReceivedWelcome else {
+                    print("⚠️ [KuCoin Spot] Ignoring message - no welcome received yet: \(json["type"] as? String ?? "unknown")")
+                    return
+                }
+                
+                // Handle subscription confirmations
+                if json["type"] as? String == "ack" {
+                    print("✅ KuCoin Spot WebSocket subscription confirmed")
+                    ExchangeWebSocket.logAlert(event: "✅ KuCoin Spot subscription confirmed")
+                    return
+                }
+                
+                // FIXED: Extract price correctly and update immediately to fix $0.000000 issue
+                if let subject = json["subject"] as? String,
+                   subject == "trade.ticker",
+                   let topic = json["topic"] as? String,
+                   let data = json["data"] as? [String: Any] {
+                    
+                    print("🔍 [KuCoin Spot] Processing ticker message:")
+                    print("   Topic: \(topic)")
+                    print("   Data keys: \(Array(data.keys))")
+                    
+                    // Extract symbol from topic (/market/ticker:BTCUSDT)
+                    let symbol = topic.replacingOccurrences(of: "/market/ticker:", with: "")
+                    
+                    // Convert BTCUSDT back to BTC-USDT for internal storage
+                    let pair: String
+                    if symbol.hasSuffix("USDT") && symbol.count > 4 {
+                        let baseAsset = symbol.replacingOccurrences(of: "USDT", with: "")
+                        pair = "\(baseAsset)-USDT"
+                    } else {
+                        pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                    }
+                    
+                    print("   Symbol: \(symbol) -> Pair: \(pair)")
+                    
+                    // CRITICAL FIX: Extract price using multiple keys (enhanced)
+                    let priceKeys = ["price", "last", "bestAsk", "bestBid", "close", "c"]
+                    var extractedPrice: Double?
+                    var usedKey = ""
+                    
+                    for key in priceKeys {
+                        if let priceStr = data[key] as? String,
+                           let price = Double(priceStr), price > 0 {
+                            extractedPrice = price
+                            usedKey = key
+                            break
+                        }
+                    }
+                    
+                    if let price = extractedPrice {
+                        print("✅ [KuCoin Spot] Found price for \(pair): $\(price) (key: \(usedKey))")
+                        
+                        // FIXED: Immediate update to fix $0.000000 dashboard issue
+                        ExchangeWebSocket.kucoinCurrentPrice[pair] = price
+                        ExchangeWebSocket.kucoinPrices[pair, default: []].append(price)
+                        
+                        // Maintain price history limit
+                        if ExchangeWebSocket.kucoinPrices[pair]!.count > ExchangeWebSocket.priceHistoryRetention {
+                            ExchangeWebSocket.kucoinPrices[pair]?.removeFirst()
+                        }
+                        
+                        print("✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
+                        ExchangeWebSocket.logAlert(event: "✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
+                        
+                        // Update last data timestamp
+                        ExchangeWebSocket.lastDataUpdate[pair] = Date()
+                        
+                        // Trigger arbitrage check and dashboard update
+                        ExchangeWebSocket.triggerCrossExchangeArbitrageCheck(pair: pair)
+                        ExchangeWebSocket.updateDashboardData()
+                        
+                    } else {
+                        print("❌ [KuCoin Spot] NO VALID PRICE found for \(pair)")
+                        print("   Available data: \(data)")
+                        ExchangeWebSocket.logAlert(event: "❌ KuCoin Spot: NO PRICE for \(pair)")
+                    }
+                }
+            }
+            
+        case .binary(_):
+            break
+            
+        case .ping(_):
+            client.write(pong: Data())
+            
+        case .pong(_):
+            break
+            
+        case .viabilityChanged(_):
+            break
+            
+        case .reconnectSuggested(_):
+            ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket reconnection suggested")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
+                guard self != nil else { return }
+                ExchangeWebSocket.connectToKuCoinSpotWebSocket()
+            }
+            
+        case .cancelled:
+            ExchangeWebSocket.kucoinIsConnected = false
+            self.hasReceivedWelcome = false
+            print("❌ [KuCoin Spot] WebSocket cancelled")
+            
+        case .error(let error):
+            ExchangeWebSocket.kucoinIsConnected = false
+            self.hasReceivedWelcome = false
+            print("❌ [KuCoin Spot] WebSocket error: \(error?.localizedDescription ?? "unknown")")
+            ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket error: \(error?.localizedDescription ?? "unknown")")
+            
+            // Reconnect on error with weak self
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+                guard self != nil else { return }
+                ExchangeWebSocket.connectToKuCoinSpotWebSocket()
+            }
+            
+        case .peerClosed:
+            ExchangeWebSocket.kucoinIsConnected = false
+            self.hasReceivedWelcome = false
+            print("❌ [KuCoin Spot] WebSocket peer closed")
+            ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket peer closed")
         }
     }
 }
@@ -5468,6 +5465,184 @@ class KuCoinSpotWebSocketDelegateEnhanced: WebSocketDelegate {
 extension ExchangeWebSocket {
     // Add strong reference to prevent delegate deallocation
     static var kucoinSpotEnhancedDelegate: KuCoinSpotWebSocketDelegateEnhanced?
+    
+    // Track welcome state for KuCoin Spot
+    static var kucoinSpotHasReceivedWelcome = false
+    
+    // Handle KuCoin Spot WebSocket events
+    @MainActor
+    static func handleKuCoinSpotWebSocketEvent(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
+        switch event {
+        case .connected(let headers):
+            print("🔗 [KuCoin Spot] WebSocket connected: \(headers)")
+            logAlert(event: "🔗 KuCoin Spot WebSocket connected, waiting for welcome...")
+            kucoinSpotHasReceivedWelcome = false
+            
+        case .disconnected(let reason, let code):
+            kucoinIsConnected = false
+            kucoinSpotHasReceivedWelcome = false
+            print("❌ [KuCoin Spot] WebSocket disconnected: \(reason) (\(code))")
+            logAlert(event: "❌ KuCoin Spot WebSocket disconnected: \(reason)")
+            
+            // Auto-reconnect after delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+                connectToKuCoinSpotWebSocket()
+            }
+            
+        case .text(let text):
+            if let data = text.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                
+                // STEP 1: Handle welcome message FIRST (CRITICAL)
+                if let type = json["type"] as? String, type == "welcome" {
+                    kucoinSpotHasReceivedWelcome = true
+                    kucoinIsConnected = true
+                    print("✅ [KuCoin Spot] Welcome message received! Now subscribing...")
+                    logAlert(event: "✅ KuCoin Spot welcome received, subscribing to pairs...")
+                    
+                    // STEP 2: Subscribe to all pairs AFTER welcome
+                    for pair in tradingPairs {
+                        // CRITICAL: Use correct KuCoin API format (BTCUSDT not BTC-USDT)
+                        let symbol = pair.replacingOccurrences(of: "-", with: "")
+                        let subscriptionMessage = [
+                            "id": UUID().uuidString,
+                            "type": "subscribe",
+                            "topic": "/market/ticker:\(symbol)", // FIXED: BTCUSDT format
+                            "privateChannel": false,
+                            "response": true
+                        ] as [String : Any]
+                        
+                        if let data = try? JSONSerialization.data(withJSONObject: subscriptionMessage),
+                           let jsonString = String(data: data, encoding: .utf8) {
+                            client.write(string: jsonString)
+                            print("📡 [KuCoin Spot] Subscribed to: \(symbol) (pair: \(pair))")
+                        }
+                    }
+                    return
+                }
+                
+                // STEP 3: Don't process other messages until welcome received
+                guard kucoinSpotHasReceivedWelcome else {
+                    print("⚠️ [KuCoin Spot] Ignoring message - no welcome received yet: \(json["type"] as? String ?? "unknown")")
+                    return
+                }
+                
+                // Handle subscription confirmations
+                if json["type"] as? String == "ack" {
+                    print("✅ KuCoin Spot WebSocket subscription confirmed")
+                    logAlert(event: "✅ KuCoin Spot subscription confirmed")
+                    return
+                }
+                
+                // FIXED: Extract price correctly and update immediately to fix $0.000000 issue
+                if let subject = json["subject"] as? String,
+                   subject == "trade.ticker",
+                   let topic = json["topic"] as? String,
+                   let data = json["data"] as? [String: Any] {
+                    
+                    print("🔍 [KuCoin Spot] Processing ticker message:")
+                    print("   Topic: \(topic)")
+                    print("   Data keys: \(Array(data.keys))")
+                    
+                    // Extract symbol from topic (/market/ticker:BTCUSDT)
+                    let symbol = topic.replacingOccurrences(of: "/market/ticker:", with: "")
+                    
+                    // Convert BTCUSDT back to BTC-USDT for internal storage
+                    let pair: String
+                    if symbol.hasSuffix("USDT") && symbol.count > 4 {
+                        let baseAsset = symbol.replacingOccurrences(of: "USDT", with: "")
+                        pair = "\(baseAsset)-USDT"
+                    } else {
+                        pair = symbol.replacingOccurrences(of: "USDT", with: "-USDT")
+                    }
+                    
+                    print("   Symbol: \(symbol) -> Pair: \(pair)")
+                    
+                    // CRITICAL FIX: Extract price using multiple keys (enhanced)
+                    let priceKeys = ["price", "last", "bestAsk", "bestBid", "close", "c"]
+                    var extractedPrice: Double?
+                    var usedKey = ""
+                    
+                    for key in priceKeys {
+                        if let priceStr = data[key] as? String,
+                           let price = Double(priceStr), price > 0 {
+                            extractedPrice = price
+                            usedKey = key
+                            break
+                        }
+                    }
+                    
+                    if let price = extractedPrice {
+                        print("✅ [KuCoin Spot] Found price for \(pair): $\(price) (key: \(usedKey))")
+                        
+                        // FIXED: Immediate update to fix $0.000000 dashboard issue
+                        kucoinCurrentPrice[pair] = price
+                        kucoinPrices[pair, default: []].append(price)
+                        
+                        // Maintain price history limit
+                        if kucoinPrices[pair]!.count > priceHistoryRetention {
+                            kucoinPrices[pair]?.removeFirst()
+                        }
+                        
+                        print("✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
+                        logAlert(event: "✅ [KuCoin Spot] Updated price for \(pair): $\(price)")
+                        
+                        // Update last data timestamp
+                        lastDataUpdate[pair] = Date()
+                        
+                        // Trigger arbitrage check and dashboard update
+                        triggerCrossExchangeArbitrageCheck(pair: pair)
+                        updateDashboardData()
+                        
+                    } else {
+                        print("❌ [KuCoin Spot] NO VALID PRICE found for \(pair)")
+                        print("   Available data: \(data)")
+                        logAlert(event: "❌ KuCoin Spot: NO PRICE for \(pair)")
+                    }
+                }
+            }
+            
+        case .binary(_):
+            break
+            
+        case .ping(_):
+            client.write(pong: Data())
+            
+        case .pong(_):
+            break
+            
+        case .viabilityChanged(_):
+            break
+            
+        case .reconnectSuggested(_):
+            logAlert(event: "KuCoin Spot WebSocket reconnection suggested")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                connectToKuCoinSpotWebSocket()
+            }
+            
+        case .cancelled:
+            kucoinIsConnected = false
+            kucoinSpotHasReceivedWelcome = false
+            print("❌ [KuCoin Spot] WebSocket cancelled")
+            
+        case .error(let error):
+            kucoinIsConnected = false
+            kucoinSpotHasReceivedWelcome = false
+            print("❌ [KuCoin Spot] WebSocket error: \(error?.localizedDescription ?? "unknown")")
+            logAlert(event: "KuCoin Spot WebSocket error: \(error?.localizedDescription ?? "unknown")")
+            
+            // Reconnect on error
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+                connectToKuCoinSpotWebSocket()
+            }
+            
+        case .peerClosed:
+            kucoinIsConnected = false
+            kucoinSpotHasReceivedWelcome = false
+            print("❌ [KuCoin Spot] WebSocket peer closed")
+            logAlert(event: "KuCoin Spot WebSocket peer closed")
+        }
+    }
     
     // FIXED: Use ObjectIdentifier to compare WebSocket instances
     @MainActor
