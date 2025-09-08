@@ -5260,12 +5260,10 @@ extension ExchangeWebSocket {
 
 //-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
 //-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
-//-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
 
 class ExchangeWebSocketDelegate: NSObject, WebSocketDelegate {
     func didReceive(event: WebSocketEvent, client: WebSocketClient) {
-        Task { @MainActor [weak self] in
-            guard let self = self else { return }
+        Task { @MainActor in
             switch event {
             case .connected(let headers):
                 ExchangeWebSocket.handleWebSocketConnected(client: client, headers: headers)
@@ -5283,18 +5281,18 @@ class ExchangeWebSocketDelegate: NSObject, WebSocketDelegate {
         }
     }
 }
-
 class KuCoinSpotWebSocketDelegateEnhanced: WebSocketDelegate {
     private var hasReceivedWelcome = false
     
     func didReceive(event: Starscream.WebSocketEvent, client: any Starscream.WebSocketClient) {
         Task { @MainActor [weak self] in
             guard let self = self else { return }
+            
             switch event {
             case .connected(let headers):
                 print("🔗 [KuCoin Spot] WebSocket connected: \(headers)")
                 ExchangeWebSocket.logAlert(event: "🔗 KuCoin Spot WebSocket connected, waiting for welcome...")
-                self.hasReceivedWelcome = false // Reset welcome flag
+                self.hasReceivedWelcome = false
                 
             case .disconnected(let reason, let code):
                 ExchangeWebSocket.kucoinIsConnected = false
@@ -5302,8 +5300,9 @@ class KuCoinSpotWebSocketDelegateEnhanced: WebSocketDelegate {
                 print("❌ [KuCoin Spot] WebSocket disconnected: \(reason) (\(code))")
                 ExchangeWebSocket.logAlert(event: "❌ KuCoin Spot WebSocket disconnected: \(reason)")
                 
-                // Auto-reconnect after delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+                // Auto-reconnect after delay with weak self
+                DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+                    guard self != nil else { return }
                     ExchangeWebSocket.connectToKuCoinSpotWebSocket()
                 }
                 
@@ -5434,7 +5433,8 @@ class KuCoinSpotWebSocketDelegateEnhanced: WebSocketDelegate {
                 
             case .reconnectSuggested(_):
                 ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket reconnection suggested")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
+                    guard self != nil else { return }
                     ExchangeWebSocket.connectToKuCoinSpotWebSocket()
                 }
                 
@@ -5449,8 +5449,9 @@ class KuCoinSpotWebSocketDelegateEnhanced: WebSocketDelegate {
                 print("❌ [KuCoin Spot] WebSocket error: \(error?.localizedDescription ?? "unknown")")
                 ExchangeWebSocket.logAlert(event: "KuCoin Spot WebSocket error: \(error?.localizedDescription ?? "unknown")")
                 
-                // Reconnect on error
-                DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+                // Reconnect on error with weak self
+                DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+                    guard self != nil else { return }
                     ExchangeWebSocket.connectToKuCoinSpotWebSocket()
                 }
                 
