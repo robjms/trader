@@ -49,6 +49,7 @@ nonisolated func didReceive(event: Starscream.WebSocketEvent, client: any Starsc
             }
             
         case .text(let text):
+            print("🔍 Raw KuCoin Spot message: \(text)") // Debug: Log raw message to trace data receipt
             if let data = text.data(using: .utf8),
                let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
                 
@@ -479,8 +480,7 @@ static func handleKuCoinSpotWebSocketEvent(event: Starscream.WebSocketEvent, cli
                 
                 if let price = extractedPrice {
                     print("✅ [KuCoin Spot] Found price for \(pair): $\(price) (key: \(usedKey))")
-                    
-                    // FIXED: Immediate update to fix $0.000000 dashboard issue
+                    print("✅ [KuCoin Spot] Updated kucoinCurrentPrice[\(pair)] = $\(price)") // Debug: Confirm price update
                     kucoinCurrentPrice[pair] = price
                     kucoinPrices[pair, default: []].append(price)
                     
@@ -548,6 +548,4 @@ static func handleKuCoinSpotWebSocketEvent(event: Starscream.WebSocketEvent, cli
         logAlert(event: "KuCoin Spot WebSocket peer closed")
     }
 }
-    
-    
     
