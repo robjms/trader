@@ -1,10 +1,8 @@
 //-------------------------------------------------------------------------------------------------------------------------Block 11 - WebSocket Data Handling
 
-
 extension ExchangeWebSocket {
     private static var kucoinSpotDelegate: KuCoinSpotWebSocketDelegate?
     private static var kucoinFuturesDelegate: KuCoinFuturesWebSocketDelegate?
-  
 
     @MainActor
     static func connectKucoinMaster() {
@@ -20,7 +18,7 @@ extension ExchangeWebSocket {
             guard let token = token else {
                 print("Failed to fetch KuCoin WebSocket token, retrying in 5 seconds...")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    connectKucoin()
+                    connectKucoinMaster()
                 }
                 return
             }
@@ -30,7 +28,7 @@ extension ExchangeWebSocket {
                 guard let wsURL = URL(string: wsURLString) else {
                     print("Invalid KuCoin WebSocket URL: \(wsURLString), retrying in 5 seconds...")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                        connectKucoin()
+                        connectKucoinMaster()
                     }
                     return
                 }
@@ -46,6 +44,11 @@ extension ExchangeWebSocket {
                     Task { @MainActor in
                         switch event {
                         case .connected(_):
+                            print("✅ KuCoin Spot WebSocket connected via onEvent")
+                            logAlert(event: "✅ KuCoin Spot WebSocket connected via onEvent")
+                            kucoinIsConnected = true
+                            kucoinReconnectAttempts = 0
+                            
                             for (index, pair) in tradingPairs.enumerated() {
                                 // Fixed symbol formatting for KuCoin spot
                                 let formattedPair = pair.replacingOccurrences(of: "-", with: "")
@@ -60,36 +63,53 @@ extension ExchangeWebSocket {
                                 if let spotData = try? JSONSerialization.data(withJSONObject: spotSubscribeMessage),
                                    let spotMessage = String(data: spotData, encoding: .utf8) {
                                     ws?.write(string: spotMessage)
-                                    print("Subscribed to KuCoin spot topic: \(spotTopic) for pair: \(pair)")
+                                    print("✅ Subscribed to KuCoin spot topic: \(spotTopic) for pair: \(pair)")
+                                    logAlert(event: "✅ Subscribed to KuCoin spot topic: \(spotTopic) for pair: \(pair)")
                                 } else {
-                                    print("Failed to subscribe to KuCoin spot topic: \(spotTopic) for pair: \(pair)")
+                                    print("❌ Failed to subscribe to KuCoin spot topic: \(spotTopic) for pair: \(pair)")
+                                    logAlert(event: "❌ Failed to subscribe to KuCoin spot topic: \(spotTopic) for pair: \(pair)")
                                 }
+                                
+                                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                             }
                             Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { _ in
                                 Task { @MainActor in
                                     let pingMessage = "{\"id\": \"ping_\(Int(Date().timeIntervalSince1970))\", \"type\": \"ping\"}"
                                     ws?.write(string: pingMessage)
-                                    print("Sent ping to KuCoin Spot WebSocket")
+                                    print("💓 Sent ping to KuCoin Spot WebSocket")
                                 }
                             }
                         case .disconnected(_, _):
+                            print("❌ KuCoin Spot WebSocket disconnected via onEvent")
+                            logAlert(event: "❌ KuCoin Spot WebSocket disconnected via onEvent")
+                            kucoinIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectKucoin()
+                                connectKucoinMaster()
                             }
                         case .error(_):
+                            print("❌ KuCoin Spot WebSocket error via onEvent")
+                            logAlert(event: "❌ KuCoin Spot WebSocket error via onEvent")
+                            kucoinIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectKucoin()
+                                connectKucoinMaster()
                             }
                         case .text(let string):
                             if let data = string.data(using: .utf8),
                                let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                let type = json["type"] as? String, type == "welcome" {
-                                print("KuCoin Spot WebSocket subscription confirmed")
+                                print("✅ KuCoin Spot WebSocket subscription confirmed")
+                                logAlert(event: "✅ KuCoin Spot WebSocket welcome message received")
+                            }
+                            // Route message to Block 9 handler
+                            Task {
+                                await handleKuCoinSpotMessage(string)
                             }
                         case .peerClosed:
-                            print("KuCoin Spot WebSocket peer closed connection")
+                            print("❌ KuCoin Spot WebSocket peer closed connection")
+                            logAlert(event: "❌ KuCoin Spot WebSocket peer closed connection")
+                            kucoinIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectKucoin()
+                                connectKucoinMaster()
                             }
                         default:
                             break
@@ -141,6 +161,11 @@ extension ExchangeWebSocket {
                     Task { @MainActor in
                         switch event {
                         case .connected(_):
+                            print("✅ KuCoin Futures WebSocket connected via onEvent")
+                            logAlert(event: "✅ KuCoin Futures WebSocket connected via onEvent")
+                            kucoinFuturesIsConnected = true
+                            // Only use variables that exist
+                            
                             for (index, pair) in tradingPairs.enumerated() {
                                 guard let futuresSymbol = kucoinFuturesSymbols[pair] else {
                                     print("No futures symbol found for pair: \(pair), skipping subscription")
@@ -157,9 +182,11 @@ extension ExchangeWebSocket {
                                 if let priceData = try? JSONSerialization.data(withJSONObject: priceSubscription),
                                    let priceMessage = String(data: priceData, encoding: .utf8) {
                                     ws?.write(string: priceMessage)
-                                    print("Subscribed to KuCoin Futures price topic: \(priceTopic) for pair: \(pair)")
+                                    print("✅ Subscribed to KuCoin Futures price topic: \(priceTopic) for pair: \(pair)")
+                                    logAlert(event: "✅ Subscribed to KuCoin Futures price topic: \(priceTopic) for pair: \(pair)")
                                 } else {
-                                    print("Failed to subscribe to KuCoin Futures price topic: \(priceTopic) for pair: \(pair)")
+                                    print("❌ Failed to subscribe to KuCoin Futures price topic: \(priceTopic) for pair: \(pair)")
+                                    logAlert(event: "❌ Failed to subscribe to KuCoin Futures price topic: \(priceTopic) for pair: \(pair)")
                                 }
                                 let orderBookTopic = "/contractMarket/level2:\(futuresSymbol)"
                                 let orderBookSubscription: [String: Any] = [
@@ -172,9 +199,11 @@ extension ExchangeWebSocket {
                                 if let orderBookData = try? JSONSerialization.data(withJSONObject: orderBookSubscription),
                                    let orderBookMessage = String(data: orderBookData, encoding: .utf8) {
                                     ws?.write(string: orderBookMessage)
-                                    print("Subscribed to KuCoin Futures order book topic: \(orderBookTopic) for pair: \(pair)")
+                                    print("✅ Subscribed to KuCoin Futures order book topic: \(orderBookTopic) for pair: \(pair)")
+                                    logAlert(event: "✅ Subscribed to KuCoin Futures order book topic: \(orderBookTopic) for pair: \(pair)")
                                 } else {
-                                    print("Failed to subscribe to KuCoin Futures order book topic: \(orderBookTopic) for pair: \(pair)")
+                                    print("❌ Failed to subscribe to KuCoin Futures order book topic: \(orderBookTopic) for pair: \(pair)")
+                                    logAlert(event: "❌ Failed to subscribe to KuCoin Futures order book topic: \(orderBookTopic) for pair: \(pair)")
                                 }
                                 let fundingTopic = "/contract/instrument:\(futuresSymbol)"
                                 let fundingSubscription: [String: Any] = [
@@ -187,23 +216,33 @@ extension ExchangeWebSocket {
                                 if let fundingData = try? JSONSerialization.data(withJSONObject: fundingSubscription),
                                    let fundingMessage = String(data: fundingData, encoding: .utf8) {
                                     ws?.write(string: fundingMessage)
-                                    print("Subscribed to KuCoin Futures funding rate topic: \(fundingTopic) for pair: \(pair)")
+                                    print("✅ Subscribed to KuCoin Futures funding rate topic: \(fundingTopic) for pair: \(pair)")
+                                    logAlert(event: "✅ Subscribed to KuCoin Futures funding rate topic: \(fundingTopic) for pair: \(pair)")
                                 } else {
-                                    print("Failed to subscribe to KuCoin Futures funding rate topic: \(fundingTopic) for pair: \(pair)")
+                                    print("❌ Failed to subscribe to KuCoin Futures funding rate topic: \(fundingTopic) for pair: \(pair)")
+                                    logAlert(event: "❌ Failed to subscribe to KuCoin Futures funding rate topic: \(fundingTopic) for pair: \(pair)")
                                 }
+                                
+                                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
                             }
                             Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { _ in
                                 Task { @MainActor in
                                     let pingMessage = "{\"id\": \"ping_\(Int(Date().timeIntervalSince1970))\", \"type\": \"ping\"}"
                                     ws?.write(string: pingMessage)
-                                    print("Sent ping to KuCoin Futures WebSocket")
+                                    print("💓 Sent ping to KuCoin Futures WebSocket")
                                 }
                             }
                         case .disconnected(_, _):
+                            print("❌ KuCoin Futures WebSocket disconnected via onEvent")
+                            logAlert(event: "❌ KuCoin Futures WebSocket disconnected via onEvent")
+                            kucoinFuturesIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                 connectKucoinFutures()
                             }
                         case .error(_):
+                            print("❌ KuCoin Futures WebSocket error via onEvent")
+                            logAlert(event: "❌ KuCoin Futures WebSocket error via onEvent")
+                            kucoinFuturesIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                 connectKucoinFutures()
                             }
@@ -211,10 +250,17 @@ extension ExchangeWebSocket {
                             if let data = string.data(using: .utf8),
                                let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                                let type = json["type"] as? String, type == "welcome" {
-                                print("KuCoin Futures WebSocket subscription confirmed")
+                                print("✅ KuCoin Futures WebSocket subscription confirmed")
+                                logAlert(event: "✅ KuCoin Futures WebSocket welcome message received")
+                            }
+                            // Route message to Block 9 handler
+                            Task {
+                                await handleKuCoinFuturesMessage(string)
                             }
                         case .peerClosed:
-                            print("KuCoin Futures WebSocket peer closed connection")
+                            print("❌ KuCoin Futures WebSocket peer closed connection")
+                            logAlert(event: "❌ KuCoin Futures WebSocket peer closed connection")
+                            kucoinFuturesIsConnected = false
                             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                                 connectKucoinFutures()
                             }
@@ -227,133 +273,173 @@ extension ExchangeWebSocket {
         }
     }
 
-            @MainActor
-            static func connectBybit() {
-                print("Attempting to connect to Bybit WebSocket...")
-                bybitSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/spot")!))
-                bybitSpotDelegate = BybitSpotWebSocketDelegate()
-                bybitSocket?.delegate = bybitSpotDelegate
-                bybitSocket?.connect()
-                
-                weak var spotWs = bybitSocket
-                spotWs?.onEvent = { event in
-                    Task { @MainActor in
-                        switch event {
-                        case .connected(_):
-                            for pair in tradingPairs {
-                                // Fixed symbol formatting for Bybit
-                                let symbol = pair.replacingOccurrences(of: "-", with: "")
-                                let subscribeMessage: [String: Any] = [
-                                    "req_id": "bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))",
-                                    "op": "subscribe",
-                                    "args": [
-                                        "tickers.\(symbol)",
-                                        "orderbook.50.\(symbol)",
-                                        "publicTrade.\(symbol)"
-                                    ]
-                                ]
-                                if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
-                                   let message = String(data: data, encoding: .utf8) {
-                                    spotWs?.write(string: message)
-                                    print("Subscribed to Bybit spot topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
-                                } else {
-                                    print("Failed to subscribe to Bybit spot topics for pair: \(pair)")
-                                }
-                            }
-                            Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
-                                Task { @MainActor in
-                                    let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
-                                    spotWs?.write(string: pingMessage)
-                                    print("Sent ping to Bybit Spot WebSocket")
-                                }
-                            }
-                        case .disconnected(_, _):
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectBybit()
-                            }
-                        case .error(_):
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectBybit()
-                            }
-                        case .text(let string):
-                            if let data = string.data(using: .utf8),
-                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                               let success = json["success"] as? Bool, success,
-                               let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
-                                print("Bybit Spot subscription confirmed")
-                            }
-                        case .peerClosed:
-                            print("Bybit Spot WebSocket peer closed connection")
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectBybit()
-                            }
-                        default:
-                            break
+    @MainActor
+    static func connectBybit() {
+        print("Attempting to connect to Bybit WebSocket...")
+        bybitSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/spot")!))
+        bybitSpotDelegate = BybitSpotWebSocketDelegate()
+        bybitSocket?.delegate = bybitSpotDelegate
+        bybitSocket?.connect()
+        
+        weak var spotWs = bybitSocket
+        spotWs?.onEvent = { event in
+            Task { @MainActor in
+                switch event {
+                case .connected(_):
+                    print("✅ Bybit Spot WebSocket connected via onEvent")
+                    logAlert(event: "✅ Bybit Spot WebSocket connected via onEvent")
+                    bybitIsConnected = true
+                    // Only use variables that exist
+                    
+                    for pair in tradingPairs {
+                        // Fixed symbol formatting for Bybit
+                        let symbol = pair.replacingOccurrences(of: "-", with: "")
+                        let subscribeMessage: [String: Any] = [
+                            "req_id": "bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))",
+                            "op": "subscribe",
+                            "args": [
+                                "tickers.\(symbol)",
+                                "orderbook.50.\(symbol)",
+                                "publicTrade.\(symbol)"
+                            ]
+                        ]
+                        if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
+                           let message = String(data: data, encoding: .utf8) {
+                            spotWs?.write(string: message)
+                            print("✅ Subscribed to Bybit spot topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
+                            logAlert(event: "✅ Subscribed to Bybit spot topics for pair: \(pair)")
+                        } else {
+                            print("❌ Failed to subscribe to Bybit spot topics for pair: \(pair)")
+                            logAlert(event: "❌ Failed to subscribe to Bybit spot topics for pair: \(pair)")
                         }
                     }
-                }
-                
-                bybitSpotSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/linear")!))
-                bybitFuturesDelegate = BybitFuturesWebSocketDelegate()
-                bybitSpotSocket?.delegate = bybitFuturesDelegate
-                bybitSpotSocket?.connect()
-                
-                weak var futuresWs = bybitSpotSocket
-                futuresWs?.onEvent = { event in
-                    Task { @MainActor in
-                        switch event {
-                        case .connected(_):
-                            for pair in tradingPairs {
-                                // Fixed symbol formatting for Bybit futures
-                                let symbol = pair.replacingOccurrences(of: "-", with: "")
-                                let subscribeMessage: [String: Any] = [
-                                    "req_id": "bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))",
-                                    "op": "subscribe",
-                                    "args": [
-                                        "tickers.\(symbol)",
-                                        "orderbook.50.\(symbol)",
-                                        "publicTrade.\(symbol)"
-                                    ]
-                                ]
-                                if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
-                                   let message = String(data: data, encoding: .utf8) {
-                                    futuresWs?.write(string: message)
-                                    print("Subscribed to Bybit futures topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
-                                } else {
-                                    print("Failed to subscribe to Bybit futures topics for pair: \(pair)")
-                                }
-                            }
-                            Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
-                                Task { @MainActor in
-                                    let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
-                                    futuresWs?.write(string: pingMessage)
-                                    print("Sent ping to Bybit Futures WebSocket")
-                                }
-                            }
-                        case .disconnected(_, _):
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectBybit()
-                            }
-                        case .error(_):
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectBybit()
-                            }
-                        case .text(let string):
-                            if let data = string.data(using: .utf8),
-                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                               let success = json["success"] as? Bool, success,
-                               let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
-                                print("Bybit Futures subscription confirmed")
-                            }
-                        case .peerClosed:
-                            print("Bybit Futures WebSocket peer closed connection")
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                connectBybit()
-                            }
-                        default:
-                            break
+                    Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
+                        Task { @MainActor in
+                            let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_spot_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
+                            spotWs?.write(string: pingMessage)
+                            print("💓 Sent ping to Bybit Spot WebSocket")
                         }
                     }
+                case .disconnected(_, _):
+                    print("❌ Bybit Spot WebSocket disconnected via onEvent")
+                    logAlert(event: "❌ Bybit Spot WebSocket disconnected via onEvent")
+                    bybitIsConnected = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        connectBybit()
+                    }
+                case .error(_):
+                    print("❌ Bybit Spot WebSocket error via onEvent")
+                    logAlert(event: "❌ Bybit Spot WebSocket error via onEvent")
+                    bybitIsConnected = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        connectBybit()
+                    }
+                case .text(let string):
+                    if let data = string.data(using: .utf8),
+                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let success = json["success"] as? Bool, success,
+                       let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
+                        print("✅ Bybit Spot subscription confirmed")
+                        logAlert(event: "✅ Bybit Spot subscription confirmed")
+                    }
+                    // Route message to Block 9 handler
+                    Task {
+                        await handleBybitSpotMessage(string)
+                    }
+                case .peerClosed:
+                    print("❌ Bybit Spot WebSocket peer closed connection")
+                    logAlert(event: "❌ Bybit Spot WebSocket peer closed connection")
+                    bybitIsConnected = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        connectBybit()
+                    }
+                default:
+                    break
                 }
             }
         }
+        
+        bybitSpotSocket = WebSocket(request: URLRequest(url: URL(string: "wss://stream.bybit.com/v5/public/linear")!))
+        bybitFuturesDelegate = BybitFuturesWebSocketDelegate()
+        bybitSpotSocket?.delegate = bybitFuturesDelegate
+        bybitSpotSocket?.connect()
+        
+        weak var futuresWs = bybitSpotSocket
+        futuresWs?.onEvent = { event in
+            Task { @MainActor in
+                switch event {
+                case .connected(_):
+                    print("✅ Bybit Futures WebSocket connected via onEvent")
+                    logAlert(event: "✅ Bybit Futures WebSocket connected via onEvent")
+                    bybitFuturesIsConnected = true
+                    // Only use variables that exist
+                    
+                    for pair in tradingPairs {
+                        // Fixed symbol formatting for Bybit futures
+                        let symbol = pair.replacingOccurrences(of: "-", with: "")
+                        let subscribeMessage: [String: Any] = [
+                            "req_id": "bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))",
+                            "op": "subscribe",
+                            "args": [
+                                "tickers.\(symbol)",
+                                "orderbook.50.\(symbol)",
+                                "publicTrade.\(symbol)"
+                            ]
+                        ]
+                        if let data = try? JSONSerialization.data(withJSONObject: subscribeMessage),
+                           let message = String(data: data, encoding: .utf8) {
+                            futuresWs?.write(string: message)
+                            print("✅ Subscribed to Bybit futures topics: tickers.\(symbol), orderbook.50.\(symbol), publicTrade.\(symbol) for pair: \(pair)")
+                            logAlert(event: "✅ Subscribed to Bybit futures topics for pair: \(pair)")
+                        } else {
+                            print("❌ Failed to subscribe to Bybit futures topics for pair: \(pair)")
+                            logAlert(event: "❌ Failed to subscribe to Bybit futures topics for pair: \(pair)")
+                        }
+                    }
+                    Timer.scheduledTimer(withTimeInterval: 20.0, repeats: true) { _ in
+                        Task { @MainActor in
+                            let pingMessage = "{\"op\": \"ping\", \"req_id\": \"bybit_futures_\(Int(Date().timeIntervalSince1970 * 1000))\"}"
+                            futuresWs?.write(string: pingMessage)
+                            print("💓 Sent ping to Bybit Futures WebSocket")
+                        }
+                    }
+                case .disconnected(_, _):
+                    print("❌ Bybit Futures WebSocket disconnected via onEvent")
+                    logAlert(event: "❌ Bybit Futures WebSocket disconnected via onEvent")
+                    bybitFuturesIsConnected = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        connectBybit()
+                    }
+                case .error(_):
+                    print("❌ Bybit Futures WebSocket error via onEvent")
+                    logAlert(event: "❌ Bybit Futures WebSocket error via onEvent")
+                    bybitFuturesIsConnected = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        connectBybit()
+                    }
+                case .text(let string):
+                    if let data = string.data(using: .utf8),
+                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let success = json["success"] as? Bool, success,
+                       let retMsg = json["ret_msg"] as? String, retMsg == "subscribe" {
+                        print("✅ Bybit Futures subscription confirmed")
+                        logAlert(event: "✅ Bybit Futures subscription confirmed")
+                    }
+                    // Route message to Block 9 handler
+                    Task {
+                        await handleBybitFuturesMessage(string)
+                    }
+                case .peerClosed:
+                    print("❌ Bybit Futures WebSocket peer closed connection")
+                    logAlert(event: "❌ Bybit Futures WebSocket peer closed connection")
+                    bybitFuturesIsConnected = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                        connectBybit()
+                    }
+                default:
+                    break
+                }
+            }
+        }
+    }
+}
