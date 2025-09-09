@@ -1202,7 +1202,7 @@ class ExchangeWebSocket {
     static var lastVolatilityPause: Date = .distantPast
     static var lastSummaryTime: Date = .distantPast
     
-    
+    static var hasReceivedWelcome: Bool = false
     static var kucoinDelegate: KuCoinSpotWebSocketDelegate?
 
     static var bybitDelegate: BybitFuturesWebSocketDelegate?
@@ -5258,10 +5258,12 @@ extension ExchangeWebSocket {
 }
 
 
-//-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
-//-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
-//-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
-//-------------------------------------------------------------------------------------------------------------------- Block 9 - Enhanced KuCoin WebSocket Processing with Spot Price Support
+
+//-------------------------------------------------------------------------------------------------------------------- Block 9A - Enhanced WebSocket Processing with Spot Price Support
+
+
+
+
 // VARIABLES TO ADD: None - all existing variables preserved and enhanced
 @MainActor
 class ExchangeWebSocketDelegate: NSObject, WebSocketDelegate {
@@ -5308,6 +5310,7 @@ nonisolated func didReceive(event: Starscream.WebSocketEvent, client: any Starsc
             }
             
         case .text(let text):
+            print("🔍 Raw KuCoin Spot message: \(text)") // Debug: Log raw message to trace data receipt
             if let data = text.data(using: .utf8),
                let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
                 
@@ -5738,8 +5741,7 @@ static func handleKuCoinSpotWebSocketEvent(event: Starscream.WebSocketEvent, cli
                 
                 if let price = extractedPrice {
                     print("✅ [KuCoin Spot] Found price for \(pair): $\(price) (key: \(usedKey))")
-                    
-                    // FIXED: Immediate update to fix $0.000000 dashboard issue
+                    print("✅ [KuCoin Spot] Updated kucoinCurrentPrice[\(pair)] = $\(price)") // Debug: Confirm price update
                     kucoinCurrentPrice[pair] = price
                     kucoinPrices[pair, default: []].append(price)
                     
@@ -5807,7 +5809,12 @@ static func handleKuCoinSpotWebSocketEvent(event: Starscream.WebSocketEvent, cli
         logAlert(event: "KuCoin Spot WebSocket peer closed")
     }
 }
-
+    
+    
+//--------------------------------------------------------------------------------------------------------------------------------Block 9B - Enhanced KuCoin WebSocket Processing with Spot Price Support
+    
+    
+    
 // FIXED: Use ObjectIdentifier to compare WebSocket instances
 @MainActor
 static func handleWebSocketConnected(client: WebSocketClient, headers: [String: String]) {
@@ -6752,7 +6759,13 @@ private static func processKuCoinFuturesFunding(topic: String, data: [String: An
     print("✅ [KuCoin Futures] Updated funding rate for \(pair): \(fundingRate)")
     logAlert(event: "✅ KuCoin Funding rate update: \(pair) = \(fundingRate * 100)%")
 }
-
+    
+    
+    
+//--------------------------------------------------------------------------------------------------------------------------Block 9C - Enhanced  WebSocket Processing with Spot Price Support
+    
+    
+    
 // ENHANCED: Bybit Spot Message Processing
 @MainActor
 static func processBybitSpotMessage(_ json: [String: Any]) {
