@@ -1,638 +1,538 @@
 Errors 
+
+
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5274:19 Type 'ExchangeWebSocket' has no member 'handleWebSocketConnected'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5439:43 Type 'ExchangeWebSocket' has no member 'updateDashboardData'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5309:35 Type 'ExchangeWebSocket' has no member 'connectToKuCoinSpotWebSocket'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5962:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5811:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5964:20 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5813:20 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5965:27 Cannot find 'kucoinFuturesSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5814:27 Cannot find 'kucoinFuturesSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5966:19 Cannot find 'bybitSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5815:19 Cannot find 'bybitSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5969:9 Cannot find 'kucoinIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5818:9 Cannot find 'kucoinIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5970:9 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5819:9 Cannot find 'kucoinReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5977:9 Cannot find 'kucoinFuturesIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5826:9 Cannot find 'kucoinFuturesIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5978:9 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5827:9 Cannot find 'kucoinFuturesReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5982:9 Cannot find 'bybitIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5831:9 Cannot find 'bybitIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5983:9 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5832:9 Cannot find 'bybitReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5992:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5841:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5994:20 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5843:20 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5995:27 Cannot find 'kucoinFuturesSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5844:27 Cannot find 'kucoinFuturesSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5996:19 Cannot find 'bybitSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5845:19 Cannot find 'bybitSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5999:9 Cannot find 'kucoinIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5848:9 Cannot find 'kucoinIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6004:9 Cannot find 'kucoinFuturesIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5853:9 Cannot find 'kucoinFuturesIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6009:9 Cannot find 'bybitIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5858:9 Cannot find 'bybitIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6019:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5868:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6021:20 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5870:20 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6022:27 Cannot find 'kucoinFuturesSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5871:27 Cannot find 'kucoinFuturesSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6023:19 Cannot find 'bybitSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5872:19 Cannot find 'bybitSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6042:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5891:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6047:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5896:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6053:20 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5902:20 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6054:27 Cannot find 'kucoinFuturesSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5903:27 Cannot find 'kucoinFuturesSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6055:19 Cannot find 'bybitSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5904:19 Cannot find 'bybitSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6069:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5918:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6070:11 Cannot find 'kucoinIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5919:11 Cannot find 'kucoinIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6070:43 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5919:43 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6076:17 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5925:17 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6101:17 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5951:17 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6123:71 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5973:71 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6128:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5978:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6139:13 Cannot find 'lastWebsocketActivity' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5989:13 Cannot find 'lastWebsocketActivity' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6181:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6031:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6243:19 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6086:19 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6245:66 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6088:66 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6307:28 Cannot find 'kucoinCurrentPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6150:28 Cannot find 'kucoinCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6308:13 Cannot find 'kucoinCurrentPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6151:13 Cannot find 'kucoinCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6309:13 Cannot find 'kucoinPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6152:13 Cannot find 'kucoinPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6312:16 Cannot find 'kucoinPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6155:16 Cannot find 'kucoinPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6312:44 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6155:44 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6313:17 Cannot find 'kucoinPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6156:17 Cannot find 'kucoinPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6317:13 Cannot find 'lastDataUpdate' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6160:13 Cannot find 'lastDataUpdate' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6339:21 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6182:21 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6340:24 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6183:24 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6340:56 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6183:56 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6341:25 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6184:25 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6346:21 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6189:21 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6347:24 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6190:24 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6347:56 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6190:56 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6348:25 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6191:25 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6376:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6219:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6377:11 Cannot find 'kucoinIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6220:11 Cannot find 'kucoinIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6377:43 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6220:43 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6383:57 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6226:57 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6386:26 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6229:26 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6411:74 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6255:74 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6416:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6260:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6447:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6291:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6458:13 Cannot find 'lastWebsocketActivity' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6302:13 Cannot find 'lastWebsocketActivity' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6497:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6341:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6515:21 Cannot find 'kucoinCurrentFuturesPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6359:21 Cannot find 'kucoinCurrentFuturesPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6516:21 Cannot find 'kucoinFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6360:21 Cannot find 'kucoinFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6519:24 Cannot find 'kucoinFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6363:24 Cannot find 'kucoinFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6519:59 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6363:59 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6520:25 Cannot find 'kucoinFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6364:25 Cannot find 'kucoinFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6533:21 Cannot find 'kucoinFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6377:21 Cannot find 'kucoinFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6534:24 Cannot find 'kucoinFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6378:24 Cannot find 'kucoinFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6534:59 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6378:59 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6535:25 Cannot find 'kucoinFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6379:25 Cannot find 'kucoinFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6542:21 Cannot find 'kucoinFundingRates' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6386:21 Cannot find 'kucoinFundingRates' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6543:21 Cannot find 'kucoinFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6387:21 Cannot find 'kucoinFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6544:24 Cannot find 'kucoinFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6388:24 Cannot find 'kucoinFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6544:64 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6388:64 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6545:25 Cannot find 'kucoinFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6389:25 Cannot find 'kucoinFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6553:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6397:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6564:13 Cannot find 'lastWebsocketActivity' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6408:13 Cannot find 'lastWebsocketActivity' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6590:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6434:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6596:16 Expression is 'async' but is not marked with 'await'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6447:13 Cannot find 'bybitCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6603:13 Cannot find 'bybitCurrentPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6448:13 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6604:13 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6451:16 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6607:16 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6451:43 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6607:43 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6452:17 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6608:17 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6468:13 Cannot find 'bybitSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6624:13 Cannot find 'bybitSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6469:16 Cannot find 'bybitSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6625:16 Cannot find 'bybitSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6469:47 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6625:47 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6470:17 Cannot find 'bybitSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6626:17 Cannot find 'bybitSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6476:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6632:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6487:13 Cannot find 'lastWebsocketActivity' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6643:13 Cannot find 'lastWebsocketActivity' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6513:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6669:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6526:13 Cannot find 'bybitCurrentFuturesPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6675:16 Expression is 'async' but is not marked with 'await'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6527:13 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6682:13 Cannot find 'bybitCurrentFuturesPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6530:16 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6683:13 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6530:50 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6686:16 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6531:17 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6686:50 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6544:13 Cannot find 'bybitFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6687:17 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6545:16 Cannot find 'bybitFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6700:13 Cannot find 'bybitFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6545:50 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6701:16 Cannot find 'bybitFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6546:17 Cannot find 'bybitFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6701:50 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6553:13 Cannot find 'bybitFundingRates' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6702:17 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6554:13 Cannot find 'bybitFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6709:13 Cannot find 'bybitFundingRates' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6555:16 Cannot find 'bybitFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6710:13 Cannot find 'bybitFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6555:55 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6711:16 Cannot find 'bybitFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6556:17 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6711:55 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6564:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6712:17 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6601:5 Cannot find 'kucoinCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6720:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6602:5 Cannot find 'kucoinPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6757:5 Cannot find 'kucoinCurrentPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6604:8 Cannot find 'kucoinPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6758:5 Cannot find 'kucoinPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6604:36 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6760:8 Cannot find 'kucoinPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6605:9 Cannot find 'kucoinPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6760:36 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6611:9 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6761:9 Cannot find 'kucoinPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6612:12 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6767:9 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6612:44 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6768:12 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6613:13 Cannot find 'kucoinSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6768:44 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6623:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6769:13 Cannot find 'kucoinSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6641:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6779:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6658:22 Cannot find 'kucoinFuturesSymbols' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6797:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6663:5 Cannot find 'kucoinCurrentFuturesPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6814:22 Cannot find 'kucoinFuturesSymbols' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6664:5 Cannot find 'kucoinFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6819:5 Cannot find 'kucoinCurrentFuturesPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6666:8 Cannot find 'kucoinFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6820:5 Cannot find 'kucoinFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6666:43 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6822:8 Cannot find 'kucoinFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6667:9 Cannot find 'kucoinFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6822:43 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6673:9 Cannot find 'kucoinFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6823:9 Cannot find 'kucoinFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6674:12 Cannot find 'kucoinFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6829:9 Cannot find 'kucoinFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6674:47 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6830:12 Cannot find 'kucoinFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6675:13 Cannot find 'kucoinFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6830:47 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6684:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6831:13 Cannot find 'kucoinFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6686:22 Cannot find 'kucoinFuturesSymbols' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6840:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6712:21 Cannot find 'kucoinFuturesOrderBook' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6842:22 Cannot find 'kucoinFuturesSymbols' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6725:5 Cannot find 'kucoinFuturesOrderBook' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6868:21 Cannot find 'kucoinFuturesOrderBook' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6730:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6881:5 Cannot find 'kucoinFuturesOrderBook' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6734:22 Cannot find 'kucoinFuturesSymbols' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6886:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6738:5 Cannot find 'kucoinFundingRates' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6890:22 Cannot find 'kucoinFuturesSymbols' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6739:5 Cannot find 'kucoinFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6894:5 Cannot find 'kucoinFundingRates' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6741:8 Cannot find 'kucoinFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6895:5 Cannot find 'kucoinFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6742:9 Cannot find 'kucoinFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6897:8 Cannot find 'kucoinFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6758:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6898:9 Cannot find 'kucoinFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6778:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6907:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6798:5 Cannot find 'bybitCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6927:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6799:5 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6928:5 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6801:8 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6929:37 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6801:35 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6931:61 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6802:9 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6932:68 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6808:9 Cannot find 'bybitSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6935:12 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6809:12 Cannot find 'bybitSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6935:38 Cannot find 'maxReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6809:43 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6945:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6810:13 Cannot find 'bybitSpotVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6946:5 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6819:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6947:37 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6842:5 Cannot find 'bybitOrderBooks' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6949:64 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6847:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6952:12 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6855:5 Cannot find 'bybitCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6952:45 Cannot find 'maxReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6856:5 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6960:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6858:8 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6961:5 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6858:35 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6962:37 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6859:9 Cannot find 'bybitPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6964:55 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6867:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6967:12 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6887:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6967:37 Cannot find 'maxReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6907:5 Cannot find 'bybitCurrentFuturesPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6983:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6908:5 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7003:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6910:8 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7023:5 Cannot find 'bybitCurrentPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6910:42 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7024:5 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6911:9 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7026:8 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6917:9 Cannot find 'bybitFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7026:35 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6918:12 Cannot find 'bybitFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7027:9 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6918:46 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7033:9 Cannot find 'bybitSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6919:13 Cannot find 'bybitFuturesVolume' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7034:12 Cannot find 'bybitSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6926:9 Cannot find 'bybitFundingRates' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7034:43 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6927:9 Cannot find 'bybitFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7035:13 Cannot find 'bybitSpotVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6929:12 Cannot find 'bybitFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7044:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6930:13 Cannot find 'bybitFundingRateHistory' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7067:5 Cannot find 'bybitOrderBooks' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6941:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7072:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6952:21 Cannot find 'bybitFuturesOrderBook' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7080:5 Cannot find 'bybitCurrentPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6981:5 Cannot find 'bybitFuturesOrderBook' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7081:5 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6986:16 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7083:8 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6994:5 Cannot find 'bybitCurrentFuturesPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7083:35 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6995:5 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7084:9 Cannot find 'bybitPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6997:8 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7092:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6997:42 Cannot find 'priceHistoryRetention' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7112:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:6998:9 Cannot find 'bybitFuturesPrices' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7132:5 Cannot find 'bybitCurrentFuturesPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7006:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7133:5 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7008:24 Cannot find 'kucoinIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7135:8 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7009:27 Cannot find 'kucoinFuturesIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7135:42 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7010:23 Cannot find 'bybitIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7136:9 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7011:26 Cannot find 'bybitFuturesIsConnected' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7142:9 Cannot find 'bybitFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7032:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7143:12 Cannot find 'bybitFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7039:21 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7143:46 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7053:16 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7144:13 Cannot find 'bybitFuturesVolume' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7077:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7151:9 Cannot find 'bybitFundingRates' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7078:23 Cannot find 'kucoinOrderBooks' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7152:9 Cannot find 'bybitFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7126:5 Cannot find 'kucoinOrderBooks' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7154:12 Cannot find 'bybitFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7131:33 Cannot convert value of type 'String' to expected argument type 'Int'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7155:13 Cannot find 'bybitFundingRateHistory' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7132:9 Cannot find 'kucoinCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7166:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7138:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7177:21 Cannot find 'bybitFuturesOrderBook' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7139:11 Cannot find 'kucoinReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7206:5 Cannot find 'bybitFuturesOrderBook' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7139:37 Cannot find 'maxReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7211:16 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7145:5 Cannot find 'kucoinReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7219:5 Cannot find 'bybitCurrentFuturesPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7146:34 Cannot find 'kucoinReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7220:5 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7148:77 Cannot find 'kucoinReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7222:8 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7157:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7222:42 Cannot find 'priceHistoryRetention' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7158:11 Cannot find 'kucoinFuturesReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7223:9 Cannot find 'bybitFuturesPrices' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7158:44 Cannot find 'maxReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7231:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7164:5 Cannot find 'kucoinFuturesReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7233:24 Cannot find 'kucoinIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7165:34 Cannot find 'kucoinFuturesReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7234:27 Cannot find 'kucoinFuturesIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7167:85 Cannot find 'kucoinFuturesReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7235:23 Cannot find 'bybitIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7176:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7236:26 Cannot find 'bybitFuturesIsConnected' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7177:11 Cannot find 'bybitReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7257:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7177:36 Cannot find 'maxReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7257:13 Invalid redeclaration of 'convertSymbolToPair(symbol:isFutures:)'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7183:5 Cannot find 'bybitReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7264:21 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7184:34 Cannot find 'bybitReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7278:16 Cannot find 'tradingPairs' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7186:76 Cannot find 'bybitReconnectAttempts' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7302:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7196:8 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7303:23 Cannot find 'kucoinOrderBooks' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7207:5 Cannot find 'getKuCoinWebSocketTokenAndEndpoint' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7351:5 Cannot find 'kucoinOrderBooks' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7217:29 Cannot find 'kucoinToken' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7356:33 Cannot convert value of type 'String' to expected argument type 'Int'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7222:62 Cannot find 'websocketTimeoutSeconds' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7357:9 Cannot find 'kucoinCurrentPrice' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7224:29 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7363:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7227:29 Cannot find 'kucoinSpotEnhancedDelegate' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7363:13 Invalid redeclaration of 'scheduleKuCoinReconnection()'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7228:29 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7364:11 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7229:29 Cannot find 'kucoinSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7364:37 Cannot find 'maxReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7238:24 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7370:5 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7242:21 Cannot find 'getKuCoinFuturesWebSocketTokenAndEndpoint' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7371:34 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7253:29 Cannot find 'kucoinFuturesToken' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7373:77 Cannot find 'kucoinReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7256:32 Cannot find 'webSocketDelegate' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7382:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7257:33 Cannot find 'webSocketDelegate' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7382:13 Invalid redeclaration of 'scheduleKuCoinFuturesReconnection()'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7263:62 Cannot find 'websocketTimeoutSeconds' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7383:11 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7265:29 Cannot find 'kucoinFuturesSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7383:44 Cannot find 'maxReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7266:29 Cannot find 'kucoinFuturesSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7389:5 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7266:61 Cannot find 'webSocketDelegate' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7390:34 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7267:29 Cannot find 'kucoinFuturesSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7392:85 Cannot find 'kucoinFuturesReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7276:24 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7401:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7280:24 Cannot find 'webSocketDelegate' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7401:13 Invalid redeclaration of 'scheduleBybitReconnection()'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7281:25 Cannot find 'webSocketDelegate' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7402:11 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7286:54 Cannot find 'websocketTimeoutSeconds' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7402:36 Cannot find 'maxReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7288:21 Cannot find 'bybitSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7408:5 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7289:21 Cannot find 'bybitSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7409:34 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7289:45 Cannot find 'webSocketDelegate' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7411:76 Cannot find 'bybitReconnectAttempts' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7290:21 Cannot find 'bybitSocket' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7421:8 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7296:24 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7432:5 Cannot find 'getKuCoinWebSocketTokenAndEndpoint' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7334:24 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7442:29 Cannot find 'kucoinToken' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7366:24 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7447:62 Cannot find 'websocketTimeoutSeconds' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7368:33 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7449:29 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7373:46 Cannot find 'kucoinBalances' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7452:29 Cannot find 'kucoinSpotEnhancedDelegate' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7374:45 Cannot find 'bybitBalances' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7453:29 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7378:39 Cannot find 'performanceMetrics' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7454:29 Cannot find 'kucoinSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7379:39 Cannot find 'performanceMetrics' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7463:24 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7380:37 Cannot find 'performanceMetrics' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7467:21 Cannot find 'getKuCoinFuturesWebSocketTokenAndEndpoint' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7386:76 Cannot find 'kucoinBalance' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7478:29 Cannot find 'kucoinFuturesToken' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7386:126 Cannot find 'bybitBalance' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7481:32 Cannot find 'webSocketDelegate' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7390:33 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7482:33 Cannot find 'webSocketDelegate' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7391:38 Cannot find 'kucoinCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7488:62 Cannot find 'websocketTimeoutSeconds' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7392:38 Cannot find 'bybitCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7490:29 Cannot find 'kucoinFuturesSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7398:25 Cannot find 'arbitrageOpportunities' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7491:29 Cannot find 'kucoinFuturesSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7399:69 Cannot find 'arbitrageOpportunities' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7491:61 Cannot find 'webSocketDelegate' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7400:47 Cannot find 'arbitrageOpportunities' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7492:29 Cannot find 'kucoinFuturesSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7410:46 Cannot find 'lastSummaryTime' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7501:24 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7411:25 Cannot find 'lastSummaryTime' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7505:24 Cannot find 'webSocketDelegate' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7426:24 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7506:25 Cannot find 'webSocketDelegate' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7427:49 Cannot find 'kucoinCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7511:54 Cannot find 'websocketTimeoutSeconds' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7428:48 Cannot find 'bybitCurrentPrice' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7513:21 Cannot find 'bybitSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7433:54 Cannot convert value of type 'Duration' to expected argument type 'Int32'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7514:21 Cannot find 'bybitSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7434:37 Cannot find 'crossExchangeMinSpreadThreshold' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7514:45 Cannot find 'webSocketDelegate' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7444:25 Cannot find 'arbitrageOpportunities' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7515:21 Cannot find 'bybitSocket' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7453:24 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7521:24 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7476:24 Static methods may only be declared on a type
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7559:24 Static methods may only be declared on a type
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7495:41 Cannot find 'tradingPairs' in scope
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7591:24 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7593:33 Cannot find 'tradingPairs' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7598:46 Cannot find 'kucoinBalances' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7599:45 Cannot find 'bybitBalances' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7603:39 Cannot find 'performanceMetrics' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7604:39 Cannot find 'performanceMetrics' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7605:37 Cannot find 'performanceMetrics' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7611:76 Cannot find 'kucoinBalance' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7611:126 Cannot find 'bybitBalance' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7615:33 Cannot find 'tradingPairs' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7616:38 Cannot find 'kucoinCurrentPrice' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7617:38 Cannot find 'bybitCurrentPrice' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7623:25 Cannot find 'arbitrageOpportunities' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7624:69 Cannot find 'arbitrageOpportunities' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7625:47 Cannot find 'arbitrageOpportunities' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7635:46 Cannot find 'lastSummaryTime' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7636:25 Cannot find 'lastSummaryTime' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7651:24 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7652:49 Cannot find 'kucoinCurrentPrice' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7653:48 Cannot find 'bybitCurrentPrice' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7658:54 Cannot convert value of type 'Duration' to expected argument type 'Int32'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7659:37 Cannot find 'crossExchangeMinSpreadThreshold' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7669:25 Cannot find 'arbitrageOpportunities' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7678:24 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7701:24 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7720:41 Cannot find 'tradingPairs' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7740:8 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7759:8 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7764:17 No 'async' operations occur within 'await' expression
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7773:8 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7779:9 Cannot find 'kucoinIsConnected' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7785:9 Cannot find 'bybitIsConnected' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7791:17 Cannot find 'tradingPairs' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7792:29 Cannot find 'lastDataUpdate' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7803:9 Cannot find 'kucoinIsConnected' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7804:9 Cannot find 'bybitIsConnected' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7812:8 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7815:32 Cannot find 'tradingPairs' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7819:32 Cannot find 'kucoinSocket' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7820:35 Cannot find 'kucoinIsConnected' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7821:33 Cannot find 'kucoinSpotHasReceivedWelcome' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7824:31 Cannot find 'tradingPairs' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7827:17 Cannot find 'tradingPairs' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7835:17 Cannot find 'tradingPairs' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7836:22 Cannot find 'kucoinCurrentPrice' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7837:22 Cannot find 'bybitCurrentPrice' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7842:37 Cannot find 'lastWebsocketActivity' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7852:8 Static methods may only be declared on a type
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7856:5 Cannot find 'kucoinSocket' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7857:5 Cannot find 'kucoinIsConnected' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7858:5 Cannot find 'kucoinSpotHasReceivedWelcome' in scope
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7870:1 Extraneous '}' at top level
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:7512:1 Extraneous '}' at top level
