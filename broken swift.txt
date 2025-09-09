@@ -1389,8 +1389,11 @@ class ExchangeWebSocket {
     static func updatePrice(pair: String, exchange: String, price: Double) {
         Task { @MainActor in
             if price <= 0 {
-                logAlert(event: "Zero price detected for \(exchange)-\(pair)")
-                return
+                if exchange != "kucoin" {  // Allow KuCoin zero prices for debugging
+                    logAlert(event: "Zero price detected for \(exchange)-\(pair)")
+                    return
+                }
+                print("⚠️ KuCoin zero price detected for \(pair): \(price)")
             }
             if exchange == "kucoin" {
                 kucoinCurrentPrice[pair] = price
@@ -4119,9 +4122,18 @@ extension ExchangeWebSocket {
                                     return
                                 }
                                 let symbol = components[1]
-                                // FIXED: Better symbol parsing for KuCoin spot
-                                let pair = symbol.count > 4 ? "\(symbol.dropLast(4))-\(symbol.suffix(4))" : symbol
-                                print("🔍 KuCoin parsed pair: \(pair)")
+                                
+                                // CRITICAL FIX: Handle KuCoin symbol format correctly
+                                let pair: String
+                                if symbol.contains("-") {
+                                    // Already in correct format like "BTC-USDT"
+                                    pair = symbol
+                                    print("🔍 DIAGNOSTIC: Using symbol '\(symbol)' as pair directly: '\(pair)'")
+                                } else {
+                                    // Convert from format like "BTCUSDT" to "BTC-USDT"
+                                    pair = symbol.count > 4 ? "\(symbol.dropLast(4))-\(symbol.suffix(4))" : symbol
+                                    print("🔍 DIAGNOSTIC: Converted symbol '\(symbol)' to pair '\(pair)'")
+                                }
                                 
                                 if topic.contains("/market/ticker") {
                                     print("🔍 KuCoin ticker data: \(data)")
@@ -5367,6 +5379,10 @@ nonisolated func didReceive(event: Starscream.WebSocketEvent, client: any Starsc
                     
                     // Extract symbol from topic (/market/ticker:BTCUSDT)
                     let symbol = topic.replacingOccurrences(of: "/market/ticker:", with: "")
+                    if symbol.isEmpty || !ExchangeWebSocket.tradingPairs.contains(symbol) {
+                        print("⚠️ KuCoin: Invalid symbol '\(symbol)' not in tradingPairs")
+                        return
+                    }
                     
                     // Convert BTCUSDT back to BTC-USDT for internal storage
                     let pair: String
@@ -5713,6 +5729,10 @@ static func handleKuCoinSpotWebSocketEvent(event: Starscream.WebSocketEvent, cli
                 
                 // Extract symbol from topic (/market/ticker:BTCUSDT)
                 let symbol = topic.replacingOccurrences(of: "/market/ticker:", with: "")
+                if symbol.isEmpty || !ExchangeWebSocket.tradingPairs.contains(symbol) {
+                    print("⚠️ KuCoin: Invalid symbol '\(symbol)' not in tradingPairs")
+                    return
+                }
                 
                 // STEP 4: Convert symbol to pair with enhanced validation (FIXED)
                 let pair: String
