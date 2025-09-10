@@ -1,10 +1,6 @@
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:8311:9 Ambiguous use of 'fetchKuCoinWsToken(completion:)'
-
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13746:17 Invalid redeclaration of 'evaluateCrossExchangeOpportunityWithML(pair:kucoinPrice:bybitPrice:)'
 
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13762:17 Invalid redeclaration of 'executeTrade(exchange:pair:side:price:amount:strategy:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13848:17 Capture of 'completion' with non-sendable type '(String?) -> Void' in a '@Sendable' closure
 
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13952:48 Generic parameter 'T' could not be inferred
 
@@ -16,10 +12,10 @@
 
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14015:1 'main' attribute cannot be used in a module that contains top-level code
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14041:31 Ambiguous use of 'fetchKuCoinWsToken(completion:)'
-
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14067:9 No 'async' operations occur within 'await' expression
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14100:31 Ambiguous use of 'fetchKuCoinWsToken(completion:)'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14392:17 Initialization of immutable value 'bybitSpot' was never used; consider replacing with assignment to '_' or removing it
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14393:17 Initialization of immutable value 'kucoinFutures' was never used; consider replacing with assignment to '_' or removing it
 
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14492:17 Invalid redeclaration of 'logSimulatedTrade(pair:strategy:buyExchange:sellExchange:profit:amount:)'
