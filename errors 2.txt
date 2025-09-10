@@ -1,58 +1,25 @@
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10747:63 'await' cannot appear to the right of a non-assignment operator
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:8311:9 Ambiguous use of 'fetchKuCoinWsToken(completion:)'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10750:55 'await' cannot appear to the right of a non-assignment operator
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13746:17 Invalid redeclaration of 'evaluateCrossExchangeOpportunityWithML(pair:kucoinPrice:bybitPrice:)'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10752:50 Binary operator '<=' cannot be applied to operands of type 'Double' and 'Float'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13762:17 Invalid redeclaration of 'executeTrade(exchange:pair:side:price:amount:strategy:)'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10752:54 Cannot find 'await' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13848:17 Capture of 'completion' with non-sendable type '(String?) -> Void' in a '@Sendable' closure
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10752:59 Consecutive statements on a line must be separated by ';'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13952:48 Generic parameter 'T' could not be inferred
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10752:60 Expression is 'async' but is not marked with 'await'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13952:76 Cannot convert value of type '[Any]' to expected argument type 'T?'
 
-Call is 'async'
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10752:70 Result of call to 'run(resultType:body:)' is unused
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13953:47 Generic parameter 'T' could not be inferred
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10783:63 'await' cannot appear to the right of a non-assignment operator
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:13953:74 Cannot convert value of type '[Any]' to expected argument type 'T?'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10785:55 'await' cannot appear to the right of a non-assignment operator
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14015:1 'main' attribute cannot be used in a module that contains top-level code
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10787:50 Binary operator '<=' cannot be applied to operands of type 'Double' and 'Float'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14041:31 Ambiguous use of 'fetchKuCoinWsToken(completion:)'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10787:54 Cannot find 'await' in scope
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14067:9 No 'async' operations occur within 'await' expression
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10787:59 Consecutive statements on a line must be separated by ';'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14100:31 Ambiguous use of 'fetchKuCoinWsToken(completion:)'
 
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10787:60 Expression is 'async' but is not marked with 'await'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:10787:70 Result of call to 'run(resultType:body:)' is unused
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11024:17 Invalid redeclaration of 'calculateMarketVolatility()'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11053:17 Invalid redeclaration of 'calculateMomentumSignal(pair:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11075:17 Invalid redeclaration of 'calculateMeanReversionSignal(pair:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11089:17 Invalid redeclaration of 'calculateMarketMakingSignal(pair:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11109:17 Invalid redeclaration of 'compareExchangeLiquidity(pair:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11122:17 Invalid redeclaration of 'assessPortfolioRisk()'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11125:74 Value of optional type 'Double?' must be unwrapped to a value of type 'Double'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11133:17 Invalid redeclaration of 'updateRiskMetrics()'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11146:17 Invalid redeclaration of 'monitorDataQuality()'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11159:17 Invalid redeclaration of 'checkDailyLossLimit(exchange:pair:potentialLoss:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11169:17 Invalid redeclaration of 'dynamicTradeAmount(balance:riskPercent:volatility:pair:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11178:17 Invalid redeclaration of 'executeHFTTrade(exchange:pair:side:price:amount:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11225:17 Invalid redeclaration of 'logTradeToCSV(pair:strategy:profit:fees:tradesCSVURL:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:11249:17 Invalid redeclaration of 'sendTradeToFlaskServer(strategy:pair:exchange:spotPrice:futuresPrice:tradeAmount:profit:)'
-
-/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:12412:17 Invalid redeclaration of 'monitorHFTScalpingOpportunities()'
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14492:17 Invalid redeclaration of 'logSimulatedTrade(pair:strategy:buyExchange:sellExchange:profit:amount:)'
