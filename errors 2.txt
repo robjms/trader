@@ -19,3 +19,4 @@
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14393:17 Initialization of immutable value 'kucoinFutures' was never used; consider replacing with assignment to '_' or removing it
 
 /Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:14492:17 Invalid redeclaration of 'logSimulatedTrade(pair:strategy:buyExchange:sellExchange:profit:amount:)'
+
