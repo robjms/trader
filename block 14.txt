@@ -104,25 +104,6 @@ extension ExchangeWebSocket {
         }
     }
     
-    // MISSING FUNCTION ADDED: The core HFT monitoring function that was missing!
-    static func monitorHFTScalpingOpportunities() {
-        Task {
-            while tradingActive {
-                await withTaskGroup(of: Void.self) { group in
-                    let tradingPairsValue = await MainActor.run { tradingPairs }
-                    for pair in tradingPairsValue {
-                        group.addTask { @MainActor @Sendable in
-                            await detectAndExecuteHFTOpportunity(pair: pair)
-                        }
-                    }
-                }
-                
-                // Wait before next scan - targeting 4 trades per minute means scan every 15 seconds
-                try? await Task.sleep(nanoseconds: 15_000_000_000) // 15 seconds
-            }
-        }
-    }
-    
     // MISSING FUNCTION ADDED: Core HFT opportunity detection
     static func detectAndExecuteHFTOpportunity(pair: String) async {
         // Get current prices from both exchanges
@@ -386,15 +367,12 @@ extension ExchangeWebSocket {
         }
     }
     
-    // FIXED: Added missing scanTradingOpportunities method (Error line 7542)
     static func scanTradingOpportunities() async {
-        // ENHANCED: Comprehensive opportunity scanning with all strategies
         while tradingActive {
             do {
                 await withTaskGroup(of: Void.self) { group in
                     for pair in tradingPairs {
                         group.addTask {
-                            // Multi-strategy opportunity evaluation
                             await evaluateArbitrageOpportunities(pair: pair)
                             await evaluateHFTOpportunities(pair: pair)
                             await evaluateMarketMakingOpportunities(pair: pair)
@@ -403,7 +381,6 @@ extension ExchangeWebSocket {
                     }
                 }
                 
-                // FIXED: Removed await from non-async functions (Lines 7600, 7601, 7602)
                 assessPortfolioRisk()
                 updateRiskMetrics()
                 monitorDataQuality()
@@ -418,14 +395,12 @@ extension ExchangeWebSocket {
         }
     }
     
-    // ENHANCED: Individual opportunity evaluation methods
     static func evaluateArbitrageOpportunities(pair: String) async {
         let kucoinPrice = await MainActor.run { kucoinCurrentPrice[pair] ?? 0.0 }
         let bybitPrice = await MainActor.run { bybitCurrentPrice[pair] ?? 0.0 }
         let kucoinFuturesPrice = await MainActor.run { kucoinCurrentFuturesPrice[pair] ?? 0.0 }
         let bybitFuturesPrice = await MainActor.run { bybitCurrentFuturesPrice[pair] ?? 0.0 }
         
-        // Cross-exchange arbitrage
         if kucoinPrice > 0 && bybitPrice > 0 {
             let spread = abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
             if spread > crossExchangeMinSpreadThreshold {
@@ -439,7 +414,6 @@ extension ExchangeWebSocket {
             }
         }
         
-        // Spot-futures arbitrage on KuCoin
         if kucoinPrice > 0 && kucoinFuturesPrice > 0 {
             let spread = abs(kucoinPrice - kucoinFuturesPrice) / min(kucoinPrice, kucoinFuturesPrice)
             if spread > arbitrageMinSpreadThreshold {
@@ -460,7 +434,6 @@ extension ExchangeWebSocket {
             }
         }
         
-        // Spot-futures arbitrage on Bybit
         if bybitPrice > 0 && bybitFuturesPrice > 0 {
             let spread = abs(bybitPrice - bybitFuturesPrice) / min(bybitPrice, bybitFuturesPrice)
             if spread > arbitrageMinSpreadThreshold {
@@ -490,14 +463,10 @@ extension ExchangeWebSocket {
         
         guard kucoinPrice > 0 && bybitPrice > 0 else { return }
         
-        // Calculate technical indicators
         let kucoinRSI = calculateRSI(prices: kucoinPrices, period: spotRsiPeriod) ?? 50.0
         let bybitRSI = calculateRSI(prices: bybitPrices, period: spotRsiPeriod) ?? 50.0
         
-        // Enhanced HFT evaluation with all indicators
         await evaluateHFTStrategy(pair: pair, kucoinSpotRsi: kucoinRSI, bybitSpotRsi: bybitRSI)
-        
-        // ENHANCED: Additional HFT patterns
         await evaluateLatencyArbitrage(pair: pair, kucoinPrice: kucoinPrice, bybitPrice: bybitPrice)
         await evaluateOrderBookImbalance(pair: pair)
         await evaluateVolumeSpikes(pair: pair)
@@ -507,7 +476,6 @@ extension ExchangeWebSocket {
         let kucoinBook = await MainActor.run { kucoinOrderBooks[pair] }
         let bybitBook = await MainActor.run { bybitOrderBooks[pair] }
         
-        // KuCoin market making
         if let book = kucoinBook, !book.bids.isEmpty && !book.asks.isEmpty {
             let spread = (book.asks.first!.price - book.bids.first!.price) / book.bids.first!.price
             let marketMakingSpread = getDouble("MARKET_MAKING_SPREAD", defaultValue: 0.002)
@@ -517,7 +485,6 @@ extension ExchangeWebSocket {
             }
         }
         
-        // Bybit market making
         if let book = bybitBook, !book.bids.isEmpty && !book.asks.isEmpty {
             let spread = (book.asks.first!.price - book.bids.first!.price) / book.bids.first!.price
             let marketMakingSpread = getDouble("MARKET_MAKING_SPREAD", defaultValue: 0.002)
@@ -535,18 +502,16 @@ extension ExchangeWebSocket {
         await evaluateFundingRateMomentum(pair: pair, kucoinFundingRate: kucoinFundingRate, bybitFundingRate: bybitFundingRate)
     }
     
-    // ENHANCED: Additional HFT evaluation methods
     static func evaluateLatencyArbitrage(pair: String, kucoinPrice: Double, bybitPrice: Double) async {
         let latencyDiff = abs((lastLatency["kucoin-\(pair)"] ?? 0.0) - (lastLatency["bybit-\(pair)"] ?? 0.0))
         
-        if latencyDiff > 50.0 { // 50ms latency difference
+        if latencyDiff > 50.0 {
             let spread = abs(kucoinPrice - bybitPrice) / min(kucoinPrice, bybitPrice)
             if spread > hftSpreadThreshold {
                 await MainActor.run {
                     logAlert(event: "🚀 Latency arbitrage opportunity detected for \(pair): Spread \(spread), Latency diff \(latencyDiff)ms")
                 }
                 
-                // Execute latency arbitrage
                 let success = await executeTrade(
                     exchange: latencyDiff > 0 ? "kucoin" : "bybit",
                     pair: pair,
@@ -616,7 +581,6 @@ extension ExchangeWebSocket {
         let kucoinVolumes = await MainActor.run { kucoinSpotVolume[pair] ?? [] }
         let bybitVolumes = await MainActor.run { bybitSpotVolume[pair] ?? [] }
         
-        // Detect volume spikes
         if kucoinVolumes.count >= 10 {
             let avgVolume = kucoinVolumes.suffix(10).reduce(0, +) / 10.0
             let currentVolume = kucoinVolumes.last ?? 0.0
@@ -626,13 +590,12 @@ extension ExchangeWebSocket {
                     logAlert(event: "📈 Volume spike detected on KuCoin \(pair): \(currentVolume) vs avg \(avgVolume)")
                 }
                 
-                // Volume momentum trade
                 let success = await executeTrade(
                     exchange: "kucoin",
                     pair: pair,
-                    side: "buy", // Assume volume spike indicates buying pressure
+                    side: "buy",
                     price: kucoinCurrentPrice[pair] ?? 0.0,
-                    amount: spotTradeAmount * 0.5, // Smaller size for volume trades
+                    amount: spotTradeAmount * 0.5,
                     strategy: "Volume-Momentum"
                 )
                 
@@ -653,13 +616,12 @@ extension ExchangeWebSocket {
                     logAlert(event: "📈 Volume spike detected on Bybit \(pair): \(currentVolume) vs avg \(avgVolume)")
                 }
                 
-                // Volume momentum trade
                 let success = await executeTrade(
                     exchange: "bybit",
                     pair: pair,
-                    side: "buy", // Assume volume spike indicates buying pressure
+                    side: "buy",
                     price: bybitCurrentPrice[pair] ?? 0.0,
-                    amount: spotTradeAmount * 0.5, // Smaller size for volume trades
+                    amount: spotTradeAmount * 0.5,
                     strategy: "Volume-Momentum"
                 )
                 
@@ -680,17 +642,15 @@ extension ExchangeWebSocket {
         let midPrice = (bestBid + bestAsk) / 2.0
         let marketMakingSpread = getDouble("MARKET_MAKING_SPREAD", defaultValue: 0.002)
         
-        // Place orders inside the spread
         let bidPrice = midPrice * (1 - marketMakingSpread / 2)
         let askPrice = midPrice * (1 + marketMakingSpread / 2)
         
-        // Simulate market making orders
         let success = await executeTrade(
             exchange: exchange,
             pair: pair,
-            side: "both", // Special case for market making
+            side: "both",
             price: midPrice,
-            amount: spotTradeAmount * 0.3, // Smaller size for market making
+            amount: spotTradeAmount * 0.3,
             strategy: "Market-Making"
         )
         
@@ -701,12 +661,10 @@ extension ExchangeWebSocket {
         }
     }
     
-    // ENHANCED: Main trading loop with comprehensive strategy orchestration (Fixes line 7315 complex expression)
     static func startMainTradingLoop() {
         Task {
             while tradingActive {
                 do {
-                    // FIXED: Break up complex expression into sub-expressions (Line 7315 fix)
                     let totalBalance = kucoinBalance + bybitBalance
                     let balanceRatio = totalBalance > 0 ? kucoinBalance / totalBalance : 0.5
                     let pairCount = Double(tradingPairs.count)
@@ -722,17 +680,10 @@ extension ExchangeWebSocket {
                         }
                     }
                     
-                    // FIXED: Added await for async function calls (Lines 7487, 7493)
                     await scanTradingOpportunities()
                     await monitorActivePositions()
-                    
-                    // ENHANCED: AI-driven strategy selection
                     await orchestrateAITrading()
-                    
-                    // ENHANCED: Dynamic parameter adjustment
                     await adjustDynamicParameters()
-                    
-                    // ENHANCED: Performance monitoring
                     await updatePerformanceMetrics()
                     
                     try await Task.sleep(nanoseconds: 100_000_000) // 100ms main loop
@@ -746,10 +697,8 @@ extension ExchangeWebSocket {
         }
     }
     
-    // ENHANCED: Active position monitoring with trailing stops
     static func monitorActivePositions() async {
         for pair in tradingPairs {
-            // Monitor KuCoin positions
             if await MainActor.run(body: { kucoinInSpotTrade[pair] ?? false }) {
                 let entryPrice = await MainActor.run { kucoinSpotEntryPrice[pair] ?? 0.0 }
                 let currentPrice = await MainActor.run { kucoinCurrentPrice[pair] ?? 0.0 }
@@ -759,7 +708,6 @@ extension ExchangeWebSocket {
                     let profitPercent = (currentPrice - entryPrice) / entryPrice
                     let newTrailingStop = currentPrice * (1 - spotTrailingStopPercentage)
                     
-                    // Enhanced exit conditions
                     let shouldExit = profitPercent >= spotMinProfitPercentage ||
                                    currentPrice <= trailingStop ||
                                    profitPercent <= -spotStopLossPercentage
@@ -785,7 +733,6 @@ extension ExchangeWebSocket {
                 }
             }
             
-            // Monitor Bybit positions (same logic)
             if await MainActor.run(body: { bybitInSpotTrade[pair] ?? false }) {
                 let entryPrice = await MainActor.run { bybitSpotEntryPrice[pair] ?? 0.0 }
                 let currentPrice = await MainActor.run { bybitCurrentPrice[pair] ?? 0.0 }
@@ -822,13 +769,11 @@ extension ExchangeWebSocket {
         }
     }
     
-    // ENHANCED: AI trading orchestration
     static func orchestrateAITrading() async {
-        // Check if AI system should make trading decisions
         let aiConfidence = await calculateAIConfidence()
         
         if aiConfidence > 0.8 {
-            for pair in tradingPairs.prefix(5) { // Limit AI trading to top 5 pairs
+            for pair in tradingPairs.prefix(5) {
                 let signals = await generateAISignals(pair: pair)
                 await executeAITrades(pair: pair, signals: signals, confidence: aiConfidence)
             }
@@ -836,29 +781,23 @@ extension ExchangeWebSocket {
     }
     
     static func calculateAIConfidence() async -> Double {
-        // Combine multiple AI systems for confidence score
         var confidenceFactors: [Double] = []
         
-        // Market volatility factor
         let volatility = calculateMarketVolatility()
         confidenceFactors.append(1.0 - min(volatility * 10, 1.0))
         
-        // Data quality factor
         let dataQuality = await assessDataQuality()
         confidenceFactors.append(dataQuality)
         
-        // Performance factor
         let recentPerformance = await assessRecentPerformance()
         confidenceFactors.append(recentPerformance)
         
-        // Return weighted average
         return confidenceFactors.reduce(0, +) / Double(confidenceFactors.count)
     }
     
     static func generateAISignals(pair: String) async -> [String: Double] {
         var signals: [String: Double] = [:]
         
-        // Generate signals from each AI system
         signals["momentum"] = calculateMomentumSignal(pair: pair)
         signals["meanReversion"] = calculateMeanReversionSignal(pair: pair)
         signals["marketMaking"] = calculateMarketMakingSignal(pair: pair)
@@ -871,7 +810,6 @@ extension ExchangeWebSocket {
         let momentumSignal = signals["momentum"] ?? 0.0
         let sentimentSignal = signals["sentiment"] ?? 0.0
         
-        // Combined signal strength
         let combinedSignal = (momentumSignal + sentimentSignal) / 2.0
         let signalStrength = abs(combinedSignal) * confidence
         
@@ -888,7 +826,7 @@ extension ExchangeWebSocket {
                     pair: pair,
                     side: side,
                     price: price,
-                    amount: spotTradeAmount * signalStrength, // Scale by signal strength
+                    amount: spotTradeAmount * signalStrength,
                     strategy: "AI-Enhanced"
                 )
                 
@@ -901,7 +839,6 @@ extension ExchangeWebSocket {
         }
     }
     
-    // ENHANCED: Dynamic parameter adjustment based on market conditions
     static func adjustDynamicParameters() async {
         let marketCondition = await analyzeCurrentMarketCondition()
         
@@ -950,12 +887,10 @@ extension ExchangeWebSocket {
         }
     }
     
-    // ENHANCED: Comprehensive performance monitoring
     static func updatePerformanceMetrics() async {
         let currentTime = Date()
         
         await MainActor.run {
-            // Calculate real-time metrics
             let totalTrades = tradeMetrics.values.reduce(0) { $0 + $1.wins + $1.losses }
             let totalWins = tradeMetrics.values.reduce(0) { $0 + $1.wins }
             let winRate = totalTrades > 0 ? Double(totalWins) / Double(totalTrades) : 0.0
@@ -963,7 +898,6 @@ extension ExchangeWebSocket {
             let totalFeesValue = tradeMetrics.values.reduce(0.0) { $0 + $1.totalFees }
             let netProfit = totalProfitValue - totalFeesValue
             
-            // Update real-time metrics
             realtimeMetrics["total_trades"] = Double(totalTrades)
             realtimeMetrics["win_rate"] = winRate
             realtimeMetrics["total_profit"] = totalProfitValue
@@ -972,7 +906,6 @@ extension ExchangeWebSocket {
             realtimeMetrics["kucoin_balance"] = kucoinBalance
             realtimeMetrics["bybit_balance"] = bybitBalance
             
-            // Log detailed performance summary every 5 minutes
             if currentTime.timeIntervalSince(lastSummaryTime) > 300 {
                 lastSummaryTime = currentTime
                 
@@ -993,7 +926,6 @@ extension ExchangeWebSocket {
         }
     }
     
-    // ENHANCED: Helper methods for AI confidence calculation
     static func assessDataQuality() async -> Double {
         var qualityScore = 1.0
         let now = Date()
@@ -1003,10 +935,10 @@ extension ExchangeWebSocket {
             if let update = lastUpdate {
                 let staleness = now.timeIntervalSince(update)
                 if staleness > 60 {
-                    qualityScore *= 0.9 // Reduce quality for stale data
+                    qualityScore *= 0.9
                 }
             } else {
-                qualityScore *= 0.8 // Reduce quality for missing data
+                qualityScore *= 0.8
             }
         }
         
@@ -1026,130 +958,6 @@ extension ExchangeWebSocket {
         }
         
         return winRate
-    }
-    
-    // MISSING HELPER FUNCTIONS ADDED: These are referenced but not defined
-    static func calculateMarketVolatility() -> Double {
-        var totalVolatility: Double = 0.0
-        var pairCount = 0
-        
-        for pair in tradingPairs {
-            let kucoinPricesArray = kucoinPrices[pair] ?? []
-            let bybitPricesArray = bybitPrices[pair] ?? []
-            
-            if !kucoinPricesArray.isEmpty {
-                let prices = kucoinPricesArray.suffix(20)
-                let avgPrice = prices.reduce(0, +) / Double(prices.count)
-                let variance = prices.reduce(0) { $0 + pow($1 - avgPrice, 2) } / Double(prices.count)
-                totalVolatility += sqrt(variance) / avgPrice
-                pairCount += 1
-            }
-            
-            if !bybitPricesArray.isEmpty {
-                let prices = bybitPricesArray.suffix(20)
-                let avgPrice = prices.reduce(0, +) / Double(prices.count)
-                let variance = prices.reduce(0) { $0 + pow($1 - avgPrice, 2) } / Double(prices.count)
-                totalVolatility += sqrt(variance) / avgPrice
-                pairCount += 1
-            }
-        }
-        
-        return pairCount > 0 ? totalVolatility / Double(pairCount) : 0.02
-    }
-    
-    static func calculateMomentumSignal(pair: String) -> Double {
-        let kucoinPricesArray = kucoinPrices[pair] ?? []
-        let bybitPricesArray = bybitPrices[pair] ?? []
-        
-        var signals: [Double] = []
-        
-        if kucoinPricesArray.count >= 10 {
-            let recent = kucoinPricesArray.suffix(10)
-            let momentum = (recent.last! - recent.first!) / recent.first!
-            signals.append(momentum)
-        }
-        
-        if bybitPricesArray.count >= 10 {
-            let recent = bybitPricesArray.suffix(10)
-            let momentum = (recent.last! - recent.first!) / recent.first!
-            signals.append(momentum)
-        }
-        
-        return signals.isEmpty ? 0.0 : signals.reduce(0, +) / Double(signals.count)
-    }
-    
-    static func calculateMeanReversionSignal(pair: String) -> Double {
-        let kucoinPricesArray = kucoinPrices[pair] ?? []
-        
-        guard kucoinPricesArray.count >= 20 else { return 0.0 }
-        
-        let recent = kucoinPricesArray.suffix(20)
-        let currentPrice = recent.last!
-        let avgPrice = recent.reduce(0, +) / Double(recent.count)
-        
-        // Mean reversion signal: negative when price is above average (sell), positive when below (buy)
-        return (avgPrice - currentPrice) / avgPrice
-    }
-    
-    static func calculateMarketMakingSignal(pair: String) -> Double {
-        let kucoinBook = kucoinOrderBooks[pair]
-        let bybitBook = bybitOrderBooks[pair]
-        
-        var signals: [Double] = []
-        
-        if let book = kucoinBook, !book.bids.isEmpty && !book.asks.isEmpty {
-            let spread = (book.asks.first!.price - book.bids.first!.price) / book.bids.first!.price
-            signals.append(spread)
-        }
-        
-        if let book = bybitBook, !book.bids.isEmpty && !book.asks.isEmpty {
-            let spread = (book.asks.first!.price - book.bids.first!.price) / book.bids.first!.price
-            signals.append(spread)
-        }
-        
-        return signals.isEmpty ? 0.0 : signals.reduce(0, +) / Double(signals.count)
-    }
-    
-    static func compareExchangeLiquidity(pair: String) -> String {
-        let kucoinBook = kucoinOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
-        let bybitBook = bybitOrderBooks[pair] ?? BevaixOrderBook(bids: [], asks: [])
-        
-        let kucoinDepth = kucoinBook.bids.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity } +
-                         kucoinBook.asks.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity }
-        let bybitDepth = bybitBook.bids.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity } +
-                        bybitBook.asks.prefix(10).reduce(0.0) { $0 + $1.price * $1.quantity }
-        
-        return kucoinDepth > bybitDepth ? "kucoin" : "bybit"
-    }
-    
-    static func assessPortfolioRisk() {
-        // Risk assessment logic
-        let totalBalance = kucoinBalance + bybitBalance
-        let dailyLossPercentage = (dailyLoss["kucoin"] ?? 0.0 + dailyLoss["bybit"] ?? 0.0) / totalBalance
-        
-        if dailyLossPercentage > dailyLossLimitPercentage * 0.8 {
-            logAlert(event: "⚠️ Portfolio risk approaching daily loss limit: \(String(format: "%.2f", dailyLossPercentage * 100))%")
-        }
-    }
-    
-    static func updateRiskMetrics() {
-        // Update risk metrics
-        for pair in tradingPairs {
-            let position = kucoinPositions[pair] ?? 0.0 + bybitPositions[pair] ?? 0.0
-            exposureByPair[pair] = abs(position) * (kucoinCurrentPrice[pair] ?? 0.0)
-        }
-    }
-    
-    static func monitorDataQuality() {
-        let now = Date()
-        for pair in tradingPairs {
-            let kucoinLastUpdate = lastPriceUpdate[pair]?.timestamp ?? Date.distantPast
-            let staleness = now.timeIntervalSince(kucoinLastUpdate)
-            
-            if staleness > 120 { // 2 minutes
-                logAlert(event: "⚠️ Stale price data detected for \(pair): \(Int(staleness))s old")
-            }
-        }
     }
 }
 
