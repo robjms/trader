@@ -1,593 +1,1183 @@
 flask server:
-(base) Roberts-iMac-2:python robertsteinegger$ python app.py
-Loading .env from: /Users/robertsteinegger/Desktop/BevaixBot/.env at 12:20:04
-✅ .env loaded successfully from /Users/robertsteinegger/Desktop/BevaixBot/.env
-INFO:__main__:🚀 [Python] Starting Flask Server at 12:20:04
-INFO:__main__:📁 [Python] Project root: /Users/robertsteinegger/Desktop/BevaixBot
-INFO:__main__:📄 [Python] Dashboard path: /Users/robertsteinegger/Desktop/BevaixBot/dashboard.json
-INFO:__main__:📍 Routes available:
-INFO:__main__:   http://127.0.0.1:5001/new_dashboard
-INFO:__main__:   http://127.0.0.1:5001/api/new_dashboard
-INFO:__main__:   http://127.0.0.1:5001/debug/status
-INFO:__main__:   http://127.0.0.1:5001/debug/dashboard (Raw JSON)
- * Serving Flask app 'app'
- * Debug mode: on
-INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
- * Running on http://127.0.0.1:5001
-INFO:werkzeug:Press CTRL+C to quit
-INFO:werkzeug: * Restarting with watchdog (fsevents)
-Loading .env from: /Users/robertsteinegger/Desktop/BevaixBot/.env at 12:20:05
-✅ .env loaded successfully from /Users/robertsteinegger/Desktop/BevaixBot/.env
-INFO:__main__:🚀 [Python] Starting Flask Server at 12:20:05
-INFO:__main__:📁 [Python] Project root: /Users/robertsteinegger/Desktop/BevaixBot
-INFO:__main__:📄 [Python] Dashboard path: /Users/robertsteinegger/Desktop/BevaixBot/dashboard.json
-INFO:__main__:📍 Routes available:
-INFO:__main__:   http://127.0.0.1:5001/new_dashboard
-INFO:__main__:   http://127.0.0.1:5001/api/new_dashboard
-INFO:__main__:   http://127.0.0.1:5001/debug/status
-INFO:__main__:   http://127.0.0.1:5001/debug/dashboard (Raw JSON)
-WARNING:werkzeug: * Debugger is active!
-INFO:werkzeug: * Debugger PIN: 787-441-244
-INFO:__main__:🔄 [Python] API called at 12:20:37
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'bybit': True, 'bybit_futures': True, 'kucoin_futures': True, 'kucoin': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['INJ-USDT', 'APT-USDT', 'PEPE-USDT', 'WIF-USDT', 'BTC-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['INJ-USDT', 'APT-USDT', 'PEPE-USDT', 'WIF-USDT', 'BTC-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:37] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:20:50] "POST /sentiment HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:21:37
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'bybit': True, 'bybit_futures': True, 'kucoin': True, 'kucoin_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['LINK-USDT', 'SHIB-USDT', 'WIF-USDT', 'XRP-USDT', 'ADA-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['LINK-USDT', 'SHIB-USDT', 'WIF-USDT', 'XRP-USDT', 'ADA-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:21:37] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:18
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:08] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Python] API called at 09:09:13
 INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
 INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
 INFO:__main__:✅ [Python] Connections: {'bybit_futures': True, 'kucoin': True, 'kucoin_futures': True, 'bybit': True}
 INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['ARB-USDT', 'ETH-USDT', 'SHIB-USDT', 'XRP-USDT', 'ADA-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['ARB-USDT', 'ETH-USDT', 'SHIB-USDT', 'XRP-USDT', 'ADA-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['SOL-USDT', 'WIF-USDT', 'ETH-USDT', 'XRP-USDT', 'BTC-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['SOL-USDT', 'WIF-USDT', 'ETH-USDT', 'XRP-USDT', 'BTC-USDT']
 INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
 INFO:__main__:🔍 [DEBUG] Bybit connection status: True
 INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:18] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:18] "GET /apple-touch-icon-precomposed.png HTTP/1.1" 404 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:18] "GET /apple-touch-icon.png HTTP/1.1" 404 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:18] "GET /favicon.ico HTTP/1.1" 404 -
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:21] "GET /new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:21
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:13] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Python] API called at 09:09:18
 INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
 INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin_futures': True, 'bybit_futures': True, 'kucoin': True, 'bybit': True}
+INFO:__main__:✅ [Python] Connections: {'kucoin_futures': True, 'bybit_futures': True, 'bybit': True, 'kucoin': True}
 INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['ARB-USDT', 'INJ-USDT', 'OP-USDT', 'LINK-USDT', 'ADA-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['ARB-USDT', 'INJ-USDT', 'OP-USDT', 'LINK-USDT', 'ADA-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['ARB-USDT', 'SOL-USDT', 'ETH-USDT', 'FLOKI-USDT', 'PEPE-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['ARB-USDT', 'SOL-USDT', 'ETH-USDT', 'FLOKI-USDT', 'PEPE-USDT']
 INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
 INFO:__main__:🔍 [DEBUG] Bybit connection status: True
 INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:21] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:26
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:18] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Python] API called at 09:09:23
 INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
 INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin_futures': True, 'bybit_futures': True, 'kucoin': True, 'bybit': True}
+INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'bybit_futures': True, 'kucoin_futures': True, 'bybit': True}
 INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['XRP-USDT', 'NEAR-USDT', 'INJ-USDT', 'LINK-USDT', 'ETH-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['XRP-USDT', 'NEAR-USDT', 'INJ-USDT', 'LINK-USDT', 'ETH-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['APT-USDT', 'SHIB-USDT', 'OP-USDT', 'PEPE-USDT', 'DOT-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['APT-USDT', 'SHIB-USDT', 'OP-USDT', 'PEPE-USDT', 'DOT-USDT']
 INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
 INFO:__main__:🔍 [DEBUG] Bybit connection status: True
 INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:26] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:31
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:23] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Python] API called at 09:09:28
 INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
 INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin_futures': True, 'bybit': True, 'kucoin': True, 'bybit_futures': True}
+INFO:__main__:✅ [Python] Connections: {'bybit_futures': True, 'kucoin': True, 'kucoin_futures': True, 'bybit': True}
 INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['FLOKI-USDT', 'ADA-USDT', 'DOGE-USDT', 'NEAR-USDT', 'LINK-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['FLOKI-USDT', 'ADA-USDT', 'DOGE-USDT', 'NEAR-USDT', 'LINK-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['NEAR-USDT', 'ETH-USDT', 'DOT-USDT', 'PEPE-USDT', 'LINK-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['NEAR-USDT', 'ETH-USDT', 'DOT-USDT', 'PEPE-USDT', 'LINK-USDT']
 INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
 INFO:__main__:🔍 [DEBUG] Bybit connection status: True
 INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:31] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:37
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:28] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Python] API called at 09:09:33
+INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
+INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
+INFO:__main__:✅ [Python] Connections: {'bybit_futures': True, 'kucoin': True, 'bybit': True, 'kucoin_futures': True}
+INFO:__main__:✅ [Python] Loaded 1 real alerts
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['PEPE-USDT', 'XRP-USDT', 'BTC-USDT', 'SUI-USDT', 'OP-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['PEPE-USDT', 'XRP-USDT', 'BTC-USDT', 'SUI-USDT', 'OP-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
+INFO:__main__:🔍 [DEBUG] Bybit connection status: True
+INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:33] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Python] API called at 09:09:38
 INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
 INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
 INFO:__main__:✅ [Python] Connections: {'bybit_futures': True, 'kucoin_futures': True, 'kucoin': True, 'bybit': True}
 INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['FLOKI-USDT', 'AVAX-USDT', 'ARB-USDT', 'TON-USDT', 'SHIB-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['FLOKI-USDT', 'AVAX-USDT', 'ARB-USDT', 'TON-USDT', 'SHIB-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['OP-USDT', 'INJ-USDT', 'BTC-USDT', 'SOL-USDT', 'BONK-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'INJ-USDT', 'BTC-USDT', 'SOL-USDT', 'BONK-USDT']
 INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
 INFO:__main__:🔍 [DEBUG] Bybit connection status: True
 INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:37] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:37
-ERROR:__main__:❌ Dashboard load error: Expecting value: line 1 column 1 (char 0)
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 0 - []
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 0 - []
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: False
-INFO:__main__:🔍 [DEBUG] Bybit connection status: False
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 0 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:37] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:48
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:38] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Python] API called at 09:09:43
 INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
 INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': True, 'bybit_futures': True, 'bybit': True}
+INFO:__main__:✅ [Python] Connections: {'bybit': True, 'bybit_futures': True, 'kucoin': True, 'kucoin_futures': True}
 INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['DOT-USDT', 'ADA-USDT', 'INJ-USDT', 'ETH-USDT', 'FLOKI-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['DOT-USDT', 'ADA-USDT', 'INJ-USDT', 'ETH-USDT', 'FLOKI-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['DOGE-USDT', 'NEAR-USDT', 'ARB-USDT', 'DOT-USDT', 'PEPE-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['DOGE-USDT', 'NEAR-USDT', 'ARB-USDT', 'DOT-USDT', 'PEPE-USDT']
 INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
 INFO:__main__:🔍 [DEBUG] Bybit connection status: True
 INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:48] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:53
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:43] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:__main__:🔄 [Python] API called at 09:09:48
 INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
 INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin_futures': True, 'kucoin': True, 'bybit': True, 'bybit_futures': True}
+INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': True, 'bybit': True, 'bybit_futures': True}
 INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['WIF-USDT', 'NEAR-USDT', 'ETH-USDT', 'BTC-USDT', 'SHIB-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['WIF-USDT', 'NEAR-USDT', 'ETH-USDT', 'BTC-USDT', 'SHIB-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['BONK-USDT', 'ETH-USDT', 'SOL-USDT', 'ADA-USDT', 'DOGE-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['BONK-USDT', 'ETH-USDT', 'SOL-USDT', 'ADA-USDT', 'DOGE-USDT']
 INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
 INFO:__main__:🔍 [DEBUG] Bybit connection status: True
 INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:53] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:22:58
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'bybit_futures': True, 'kucoin_futures': True, 'bybit': True, 'kucoin': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['INJ-USDT', 'FLOKI-USDT', 'OP-USDT', 'ETH-USDT', 'SOL-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['INJ-USDT', 'FLOKI-USDT', 'OP-USDT', 'ETH-USDT', 'SOL-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:22:58] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:23:11
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin_futures': True, 'bybit_futures': True, 'kucoin': True, 'bybit': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['TON-USDT', 'NEAR-USDT', 'FLOKI-USDT', 'ADA-USDT', 'LINK-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['TON-USDT', 'NEAR-USDT', 'FLOKI-USDT', 'ADA-USDT', 'LINK-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:23:11] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:23:37
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'bybit': True, 'kucoin_futures': False, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['WIF-USDT', 'SHIB-USDT', 'LINK-USDT', 'APT-USDT', 'ETH-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['WIF-USDT', 'SHIB-USDT', 'LINK-USDT', 'APT-USDT', 'ETH-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:23:37] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:23:39
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': False, 'bybit': True, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:23:39] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:23:48
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': False, 'bybit': True, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:23:48] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:24:33
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': False, 'bybit': True, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:24:33] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:24:37
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': False, 'bybit': True, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:24:37] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:25:23
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': False, 'bybit': True, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:25:23] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:25:37
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': False, 'bybit': True, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:25:37] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:26:37
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': False, 'bybit': True, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-INFO:werkzeug:127.0.0.1 - - [08/Sep/2025 12:26:37] "GET /api/new_dashboard HTTP/1.1" 200 -
-INFO:__main__:🔄 [Python] API called at 12:26:54
-INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
-INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
-INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'kucoin_futures': False, 'bybit': True, 'bybit_futures': True}
-INFO:__main__:✅ [Python] Loaded 1 real alerts
-INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 20 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['OP-USDT', 'NEAR-USDT', 'LINK-USDT', 'DOGE-USDT', 'XRP-USDT']
-INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
-INFO:__main__:🔍 [DEBUG] Bybit connection status: True
-INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
-
+INFO:werkzeug:127.0.0.1 - - [10/Sep/2025 09:09:48] "GET /api/new_dashboard HTTP/1.1" 200 -
 terminl output
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [Bybit Futures] Updated price for WIF-USDT: $0.844
-ALERT: ✅ [Bybit Futures] Updated price for WIF-USDT: $0.844
-📊 DASHBOARD UPDATE [2025-09-08T11:21:55Z]
+ALERT: ✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+📊 DASHBOARD UPDATE [2025-09-10T08:08:30Z]
 💰 Balances - KuCoin: $522.24, Bybit: $716.65
 💱 SPOT PRICES:
-   BTC-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $111954.100000
-   ETH-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $4321.000000
-   SOL-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $213.740000
-   LINK-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $23.031000
-   FLOKI-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $0.000094
-📈 FUTURES PRICES:
-   BTC-USDT ✅/✅ - KuCoin: $111926.100000, Bybit: $111917.400000
-   ETH-USDT ✅/✅ - KuCoin: $4321.500000, Bybit: $4319.300000
-   SOL-USDT ✅/✅ - KuCoin: $213.733000, Bybit: $213.710000
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.5066
+✅ [Bybit Spot] Updated price for ARB-USDT: $0.5066
+ALERT: ✅ [Bybit Spot] Updated price for ARB-USDT: $0.5066
+📊 DASHBOARD UPDATE [2025-09-10T08:08:30Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+ALERT: ✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+📊 DASHBOARD UPDATE [2025-09-10T08:08:30Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:PEPE-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000010483","bestAskSize":"51745083","bestBid":"0.000010482","bestBidSize":"33750000","price":"0.000010481","sequence":"4050530429","size":"81217500","time":1757491703410}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:PEPE-USDT
+🔍 DIAGNOSTIC: Using symbol 'PEPE-USDT' as pair directly: 'PEPE-USDT'
+🔍 KuCoin ticker data: ["time": 1757491703410, "bestAsk": 0.000010483, "bestBid": 0.000010482, "price": 0.000010481, "bestAskSize": 51745083, "size": 81217500, "bestBidSize": 33750000, "sequence": 4050530429]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ADA-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8805","bestAskSize":"1504.48","bestBid":"0.8804","bestBidSize":"720.15","price":"0.8804","sequence":"5728087103","size":"102.8","time":1757491705860}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ADA-USDT
+🔍 DIAGNOSTIC: Using symbol 'ADA-USDT' as pair directly: 'ADA-USDT'
+🔍 KuCoin ticker data: ["time": 1757491705860, "bestAsk": 0.8805, "bestBid": 0.8804, "price": 0.8804, "bestAskSize": 1504.48, "size": 102.8, "bestBidSize": 720.15, "sequence": 5728087103]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:SHIB-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000012964","bestAskSize":"167394203.9215","bestBid":"0.000012962","bestBidSize":"27000000","price":"0.000012964","sequence":"5519979131","size":"63004293.3127","time":1757491699609}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:SHIB-USDT
+🔍 DIAGNOSTIC: Using symbol 'SHIB-USDT' as pair directly: 'SHIB-USDT'
+🔍 KuCoin ticker data: ["price": 0.000012964, "bestBid": 0.000012962, "bestAskSize": 167394203.9215, "time": 1757491699609, "size": 63004293.3127, "bestAsk": 0.000012964, "bestBidSize": 27000000, "sequence": 5519979131]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:PEPE-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000010483","bestAskSize":"51745083","bestBid":"0.00
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:DOT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.1157","bestAskSize":"121.5","bestBid":"4.1154","bestBidSize":"121.5","price":"4.1176","sequence":"7037861590","size":"21.6203","time":1757491685688}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:DOT-USDT
+🔍 DIAGNOSTIC: Using symbol 'DOT-USDT' as pair directly: 'DOT-USDT'
+🔍 KuCoin ticker data: ["price": 4.1176, "bestBid": 4.1154, "bestAskSize": 121.5, "time": 1757491685688, "size": 21.6203, "bestAsk": 4.1157, "bestBidSize": 121.5, "sequence": 7037861590]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:XRP-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"2.97973","bestAskSize":"3203.0274","bestBid":"2.97972","bestBidSize":"1710.0646","price":"2.97972","sequence":"14072929443","size":"17.7055","time":1757491708145}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:XRP-USDT
+🔍 DIAGNOSTIC: Using symbol 'XRP-USDT' as pair directly: 'XRP-USDT'
+🔍 KuCoin ticker data: ["bestBid": 2.97972, "bestAsk": 2.97973, "price": 2.97972, "sequence": 14072929443, "bestBidSize": 1710.0646, "time": 1757491708145, "bestAskSize": 3203.0274, "size": 17.7055]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:SUI-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.5513","bestAskSize":"126.5","bestBid":"3.5512","bestBidSize":"8.5","price":"3.5504","sequence":"5379659663","size":"8.5","time":1757491686461}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:SUI-USDT
+🔍 DIAGNOSTIC: Using symbol 'SUI-USDT' as pair directly: 'SUI-USDT'
+🔍 KuCoin ticker data: ["price": 3.5504, "bestBid": 3.5512, "bestAskSize": 126.5, "time": 1757491686461, "size": 8.5, "bestAsk": 3.5513, "bestBidSize": 8.5, "sequence": 5379659663]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ARB-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.5067","bestAskSize":"7048.8285","bestBid":"0.5066","bestBidSize":"1.0549","price":"0.5069","sequence":"3542282315","size":"139.7607","time":1757491687941}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ARB-USDT
+🔍 DIAGNOSTIC: Using symbol 'ARB-USDT' as pair directly: 'ARB-USDT'
+🔍 KuCoin ticker data: ["size": 139.7607, "sequence": 3542282315, "bestBid": 0.5066, "bestAsk": 0.5067, "bestBidSize": 1.0549, "price": 0.5069, "bestAskSize": 7048.8285, "time": 1757491687941]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:LINK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"23.4376","bestAskSize":"13.05","bestBid":"23.4365","bestBidSize":"13.0797","price":"23.4365","sequence":"9132894753","size":"0.109","time":1757491706930}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:LINK-USDT
+🔍 DIAGNOSTIC: Using symbol 'LINK-USDT' as pair directly: 'LINK-USDT'
+🔍 KuCoin ticker data: ["size": 0.109, "sequence": 9132894753, "bestBid": 23.4365, "bestAsk": 23.4376, "bestBidSize": 13.0797, "price": 23.4365, "bestAskSize": 13.05, "time": 1757491706930]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:INJ-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"13.94","bestAskSize":"9.0423","bestBid":"13.938","bestBidSize":"8.325","price":"13.94","sequence":"4233457007","size":"4.7889","time":1757491710628}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:INJ-USDT
+🔍 DIAGNOSTIC: Using symbol 'INJ-USDT' as pair directly: 'INJ-USDT'
+🔍 KuCoin ticker data: ["size": 4.7889, "sequence": 4233457007, "bestBid": 13.938, "bestAsk": 13.94, "bestBidSize": 8.325, "price": 13.94, "bestAskSize": 9.0423, "time": 1757491710628]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:AVAX-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"26.85","bestAskSize":"19.2944","bestBid":"26.849","bestBidSize":"15.75","price":"26.852","sequence":"7318800941","size":"0.0219","time":1757491704537}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:AVAX-USDT
+🔍 DIAGNOSTIC: Using symbol 'AVAX-USDT' as pair directly: 'AVAX-USDT'
+🔍 KuCoin ticker data: ["size": 0.0219, "time": 1757491704537, "bestAsk": 26.85, "bestAskSize": 19.2944, "bestBid": 26.849, "price": 26.852, "sequence": 7318800941, "bestBidSize": 15.75]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ETH-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4325.86","bestAskSize":"11.3010865","bestBid":"4325.85","bestBidSize":"0.5036837","price":"4325.85","sequence":"15515420942","size":"0.007579","time":1757491707454}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ETH-USDT
+🔍 DIAGNOSTIC: Using symbol 'ETH-USDT' as pair directly: 'ETH-USDT'
+🔍 KuCoin ticker data: ["bestBidSize": 0.5036837, "price": 4325.85, "sequence": 15515420942, "size": 0.007579, "time": 1757491707454, "bestAsk": 4325.86, "bestAskSize": 11.3010865, "bestBid": 4325.85]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:SOL-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"221.67","bestAskSize":"32.844","bestBid":"221.66","bestBidSize":"4.893","price":"221.66","sequence":"14926083528","size":"0.002","time":1757491710021}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:SOL-USDT
+🔍 DIAGNOSTIC: Using symbol 'SOL-USDT' as pair directly: 'SOL-USDT'
+🔍 KuCoin ticker data: ["bestBid": 221.66, "price": 221.66, "bestAsk": 221.67, "bestAskSize": 32.844, "sequence": 14926083528, "size": 0.002, "bestBidSize": 4.893, "time": 1757491710021]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:OP-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.77","bestAskSize":"1526.8155","bestBid":"0.769","bestBidSize":"19089.5576","price":"0.77","sequence":"1937229341","size":"649.3154","time":1757491699338}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:OP-USDT
+🔍 DIAGNOSTIC: Using symbol 'OP-USDT' as pair directly: 'OP-USDT'
+🔍 KuCoin ticker data: ["sequence": 1937229341, "bestAskSize": 1526.8155, "price": 0.77, "size": 649.3154, "bestBidSize": 19089.5576, "bestBid": 0.769, "bestAsk": 0.77, "time": 1757491699338]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:BTC-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"112561.2","bestAskSize":"0.85274785","bestBid":"112561.1","bestBidSize":"0.62511781","price":"112557.8","sequence":"21916786713","size":"0.00310691","time":1757491707021}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:BTC-USDT
+🔍 DIAGNOSTIC: Using symbol 'BTC-USDT' as pair directly: 'BTC-USDT'
+🔍 KuCoin ticker data: ["bestBid": 112561.1, "price": 112557.8, "bestAsk": 112561.2, "bestAskSize": 0.85274785, "sequence": 21916786713, "size": 0.00310691, "bestBidSize": 0.62511781, "time": 1757491707021]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:APT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.4131","bestAskSize":"32.8587","bestBid":"4.413","bestBidSize":"4.532","price":"4.413","sequence":"5680657704","size":"12.1081","time":1757491693464}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:APT-USDT
+🔍 DIAGNOSTIC: Using symbol 'APT-USDT' as pair directly: 'APT-USDT'
+🔍 KuCoin ticker data: ["price": 4.413, "sequence": 5680657704, "bestBidSize": 4.532, "bestBid": 4.413, "bestAsk": 4.4131, "time": 1757491693464, "bestAskSize": 32.8587, "size": 12.1081]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:DOGE-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.242","bestAskSize":"5433.9076","bestBid":"0.24199","bestBidSize":"2182.8546","price":"0.24196","sequence":"9130556387","size":"110.4301","time":1757491702586}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:DOGE-USDT
+🔍 DIAGNOSTIC: Using symbol 'DOGE-USDT' as pair directly: 'DOGE-USDT'
+🔍 KuCoin ticker data: ["price": 0.24196, "sequence": 9130556387, "bestBidSize": 2182.8546, "bestBid": 0.24199, "bestAsk": 0.242, "time": 1757491702586, "bestAskSize": 5433.9076, "size": 110.4301]
+✅ [KuCoin Spot] Updated price for PEPE-USDT: $1.0481e-05
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ADA-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8805","bestAskSize":"1504.48","bestBid":"0.8804","be
+✅ [KuCoin Spot] Updated price for ADA-USDT: $0.8804
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:SHIB-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000012964","bestAskSize":"167394203.9215","bestBid"
+✅ [KuCoin Spot] Updated price for SHIB-USDT: $1.2964e-05
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:DOT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.1157","bestAskSize":"121.5","bestBid":"4.1154","best
+✅ [KuCoin Spot] Updated price for DOT-USDT: $4.1176
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:XRP-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"2.97973","bestAskSize":"3203.0274","bestBid":"2.97972"
+✅ [KuCoin Spot] Updated price for XRP-USDT: $2.97972
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:SUI-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.5513","bestAskSize":"126.5","bestBid":"3.5512","best
+✅ [KuCoin Spot] Updated price for SUI-USDT: $3.5504
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ARB-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.5067","bestAskSize":"7048.8285","bestBid":"0.5066","
+✅ [KuCoin Spot] Updated price for ARB-USDT: $0.5069
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:LINK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"23.4376","bestAskSize":"13.05","bestBid":"23.4365","b
+✅ [KuCoin Spot] Updated price for LINK-USDT: $23.4365
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:INJ-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"13.94","bestAskSize":"9.0423","bestBid":"13.938","best
+✅ [KuCoin Spot] Updated price for INJ-USDT: $13.94
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:AVAX-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"26.85","bestAskSize":"19.2944","bestBid":"26.849","be
+✅ [KuCoin Spot] Updated price for AVAX-USDT: $26.852
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ETH-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4325.86","bestAskSize":"11.3010865","bestBid":"4325.85
+✅ [KuCoin Spot] Updated price for ETH-USDT: $4325.85
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:SOL-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"221.67","bestAskSize":"32.844","bestBid":"221.66","bes
+✅ [KuCoin Spot] Updated price for SOL-USDT: $221.66
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:OP-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.77","bestAskSize":"1526.8155","bestBid":"0.769","best
+✅ [KuCoin Spot] Updated price for OP-USDT: $0.77
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:BTC-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"112561.2","bestAskSize":"0.85274785","bestBid":"112561
+✅ [KuCoin Spot] Updated price for BTC-USDT: $112557.8
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:APT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.4131","bestAskSize":"32.8587","bestBid":"4.413","bes
+✅ [KuCoin Spot] Updated price for APT-USDT: $4.413
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:DOGE-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.242","bestAskSize":"5433.9076","bestBid":"0.24199",
+✅ [KuCoin Spot] Updated price for DOGE-USDT: $0.24196
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:WIF-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8858","bestAskSize":"355.7234","bestBid":"0.8855","bestBidSize":"425","price":"0.8857","sequence":"4819612988","size":"231.1643","time":1757491710582}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:WIF-USDT
+🔍 DIAGNOSTIC: Using symbol 'WIF-USDT' as pair directly: 'WIF-USDT'
+🔍 KuCoin ticker data: ["size": 231.1643, "bestBidSize": 425, "bestAskSize": 355.7234, "time": 1757491710582, "sequence": 4819612988, "bestBid": 0.8855, "bestAsk": 0.8858, "price": 0.8857]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ADA-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8805","bestAskSize":"1504.48","bestBid":"0.8804","bestBidSize":"720.15","price":"0.8804","sequence":"5728087120","size":"102.8","time":1757491705860}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ADA-USDT
+🔍 DIAGNOSTIC: Using symbol 'ADA-USDT' as pair directly: 'ADA-USDT'
+🔍 KuCoin ticker data: ["size": 102.8, "bestAskSize": 1504.48, "bestBid": 0.8804, "bestAsk": 0.8805, "sequence": 5728087120, "bestBidSize": 720.15, "price": 0.8804, "time": 1757491705860]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:WIF-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8858","bestAskSize":"355.7234","bestBid":"0.8855","b
+✅ [KuCoin Spot] Updated price for WIF-USDT: $0.8857
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ADA-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8805","bestAskSize":"1504.48","bestBid":"0.8804","be
+✅ [KuCoin Spot] Updated price for ADA-USDT: $0.8804
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:DOT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.1157","bestAskSize":"121.5","bestBid":"4.1154","bestBidSize":"121.5","price":"4.1176","sequence":"7037861592","size":"21.6203","time":1757491685688}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:DOT-USDT
+🔍 DIAGNOSTIC: Using symbol 'DOT-USDT' as pair directly: 'DOT-USDT'
+🔍 KuCoin ticker data: ["bestBid": 4.1154, "size": 21.6203, "time": 1757491685688, "price": 4.1176, "bestBidSize": 121.5, "sequence": 7037861592, "bestAsk": 4.1157, "bestAskSize": 121.5]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:DOT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.1157","bestAskSize":"121.5","bestBid":"4.1154","best
+✅ [KuCoin Spot] Updated price for DOT-USDT: $4.1176
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:SUI-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.5513","bestAskSize":"126.5","bestBid":"3.5512","bestBidSize":"8.5","price":"3.5504","sequence":"5379659671","size":"8.5","time":1757491686461}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:SUI-USDT
+🔍 DIAGNOSTIC: Using symbol 'SUI-USDT' as pair directly: 'SUI-USDT'
+🔍 KuCoin ticker data: ["sequence": 5379659671, "time": 1757491686461, "price": 3.5504, "size": 8.5, "bestAskSize": 126.5, "bestBid": 3.5512, "bestAsk": 3.5513, "bestBidSize": 8.5]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:SUI-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.5513","bestAskSize":"126.5","bestBid":"3.5512","best
+✅ [KuCoin Spot] Updated price for SUI-USDT: $3.5504
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:TON-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.116","bestAskSize":"257.1788","bestBid":"3.1159","bestBidSize":"571.0346","price":"3.1156","sequence":"3865393657","size":"168.3547","time":1757491708230}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:TON-USDT
+🔍 DIAGNOSTIC: Using symbol 'TON-USDT' as pair directly: 'TON-USDT'
+🔍 KuCoin ticker data: ["sequence": 3865393657, "time": 1757491708230, "price": 3.1156, "size": 168.3547, "bestAskSize": 257.1788, "bestBid": 3.1159, "bestAsk": 3.116, "bestBidSize": 571.0346]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:TON-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.116","bestAskSize":"257.1788","bestBid":"3.1159","be
+✅ [KuCoin Spot] Updated price for TON-USDT: $3.1156
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:XRP-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"2.97973","bestAskSize":"3203.0274","bestBid":"2.97972","bestBidSize":"1710.0646","price":"2.97972","sequence":"14072929444","size":"17.7055","time":1757491708145}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:XRP-USDT
+🔍 DIAGNOSTIC: Using symbol 'XRP-USDT' as pair directly: 'XRP-USDT'
+🔍 KuCoin ticker data: ["sequence": 14072929444, "time": 1757491708145, "price": 2.97972, "size": 17.7055, "bestAskSize": 3203.0274, "bestBid": 2.97972, "bestAsk": 2.97973, "bestBidSize": 1710.0646]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:XRP-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"2.97973","bestAskSize":"3203.0274","bestBid":"2.97972"
+✅ [KuCoin Spot] Updated price for XRP-USDT: $2.97972
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ARB-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.5067","bestAskSize":"7048.8285","bestBid":"0.5066","bestBidSize":"563.5549","price":"0.5069","sequence":"3542282320","size":"139.7607","time":1757491687941}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ARB-USDT
+🔍 DIAGNOSTIC: Using symbol 'ARB-USDT' as pair directly: 'ARB-USDT'
+🔍 KuCoin ticker data: ["time": 1757491687941, "bestAsk": 0.5067, "bestBid": 0.5066, "sequence": 3542282320, "size": 139.7607, "price": 0.5069, "bestBidSize": 563.5549, "bestAskSize": 7048.8285]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ARB-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.5067","bestAskSize":"7048.8285","bestBid":"0.5066","
+✅ [KuCoin Spot] Updated price for ARB-USDT: $0.5069
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:LINK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"23.4376","bestAskSize":"13.05","bestBid":"23.4372","bestBidSize":"13.0797","price":"23.4365","sequence":"9132894813","size":"0.109","time":1757491706930}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:LINK-USDT
+🔍 DIAGNOSTIC: Using symbol 'LINK-USDT' as pair directly: 'LINK-USDT'
+🔍 KuCoin ticker data: ["bestAskSize": 13.05, "price": 23.4365, "time": 1757491706930, "size": 0.109, "sequence": 9132894813, "bestBid": 23.4372, "bestAsk": 23.4376, "bestBidSize": 13.0797]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:LINK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"23.4376","bestAskSize":"13.05","bestBid":"23.4372","b
+✅ [KuCoin Spot] Updated price for LINK-USDT: $23.4365
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+ALERT: ✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+📊 DASHBOARD UPDATE [2025-09-10T08:08:30Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:INJ-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"13.94","bestAskSize":"9.0423","bestBid":"13.938","bestBidSize":"8.325","price":"13.94","sequence":"4233457009","size":"4.7889","time":1757491710628}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:INJ-USDT
+🔍 DIAGNOSTIC: Using symbol 'INJ-USDT' as pair directly: 'INJ-USDT'
+🔍 KuCoin ticker data: ["time": 1757491710628, "bestAsk": 13.94, "bestBid": 13.938, "sequence": 4233457009, "size": 4.7889, "price": 13.94, "bestBidSize": 8.325, "bestAskSize": 9.0423]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:INJ-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"13.94","bestAskSize":"9.0423","bestBid":"13.938","best
+✅ [KuCoin Spot] Updated price for INJ-USDT: $13.94
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:FLOKI-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.0000969","bestAskSize":"31058546","bestBid":"0.0000968","bestBidSize":"9474059","price":"0.0000967","sequence":"1819239208","size":"2905590","time":1757491596039}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:FLOKI-USDT
+🔍 DIAGNOSTIC: Using symbol 'FLOKI-USDT' as pair directly: 'FLOKI-USDT'
+🔍 KuCoin ticker data: ["bestAskSize": 31058546, "price": 0.0000967, "time": 1757491596039, "size": 2905590, "sequence": 1819239208, "bestBid": 0.0000968, "bestAsk": 0.0000969, "bestBidSize": 9474059]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:FLOKI-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.0000969","bestAskSize":"31058546","bestBid":"0.000
+✅ [KuCoin Spot] Updated price for FLOKI-USDT: $9.67e-05
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:BONK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000023149","bestAskSize":"2266670.3667","bestBid":"0.000023147","bestBidSize":"7392511.0487","price":"0.00002317","sequence":"4634850139","size":"7564000","time":1757491685676}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:BONK-USDT
+🔍 DIAGNOSTIC: Using symbol 'BONK-USDT' as pair directly: 'BONK-USDT'
+🔍 KuCoin ticker data: ["bestAskSize": 2266670.3667, "price": 0.00002317, "time": 1757491685676, "size": 7564000, "sequence": 4634850139, "bestBid": 0.000023147, "bestAsk": 0.000023149, "bestBidSize": 7392511.0487]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:BONK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000023149","bestAskSize":"2266670.3667","bestBid":"
+✅ [KuCoin Spot] Updated price for BONK-USDT: $2.317e-05
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ETH-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4325.86","bestAskSize":"11.3010865","bestBid":"4325.85","bestBidSize":"1.8536837","price":"4325.85","sequence":"15515420953","size":"0.007579","time":1757491707454}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ETH-USDT
+🔍 DIAGNOSTIC: Using symbol 'ETH-USDT' as pair directly: 'ETH-USDT'
+🔍 KuCoin ticker data: ["size": 0.007579, "price": 4325.85, "bestBidSize": 1.8536837, "bestAskSize": 11.3010865, "bestAsk": 4325.86, "time": 1757491707454, "bestBid": 4325.85, "sequence": 15515420953]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ETH-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4325.86","bestAskSize":"11.3010865","bestBid":"4325.85
+✅ [KuCoin Spot] Updated price for ETH-USDT: $4325.85
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:SOL-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"221.67","bestAskSize":"32.844","bestBid":"221.66","bestBidSize":"13.218","price":"221.66","sequence":"14926083540","size":"0.002","time":1757491710021}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:SOL-USDT
+🔍 DIAGNOSTIC: Using symbol 'SOL-USDT' as pair directly: 'SOL-USDT'
+🔍 KuCoin ticker data: ["size": 0.002, "price": 221.66, "bestBidSize": 13.218, "bestAskSize": 32.844, "bestAsk": 221.67, "time": 1757491710021, "bestBid": 221.66, "sequence": 14926083540]
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:SOL-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"221.67","bestAskSize":"32.844","bestBid":"221.66","bes
+✅ [KuCoin Spot] Updated price for SOL-USDT: $221.66
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+ALERT: ✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+📊 DASHBOARD UPDATE [2025-09-10T08:08:30Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721498146442,"data":{"symbol":"XBTUSDTM","sequence":1721498146442,"bestBidSize":18,"bestBidPrice":"112556.6","bestAskPrice":"112556.7","bestAskSize":2204,"ts":1757491710746000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134199,"data":{"symbol":"LINKUSDTM","sequence":1703489134199,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":121,"ts":1757491710746000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134200,"data":{"symbol":"LINKUSDTM","sequence":1703489134200,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":121,"ts":1757491710746000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396659,"data":{"symbol":"PEPEUSDTM","sequence":1711022396659,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104833","bestAskSize":35,"ts":1757491710746000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396660,"data":{"symbol":"PEPEUSDTM","sequence":1711022396660,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104833","bestAskSize":35,"ts":1757491710746000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719360261151,"data":{"symbol":"WIFUSDTM","sequence":1719360261151,"bestBidSize":78,"bestBidPrice":"0.8859","bestAskPrice":"0.886","bestAskSize":132,"ts":1757491710747000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721498146443,"data":{"symbol":"XBTUSDTM","sequence":1721498146443,"bestBidSize":18,"bestBidPrice":"112556.6","bestAskPrice":"112556.7","bestAskSize":2204,"ts":1757491710747000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721498146444,"data":{"symbol":"XBTUSDTM","sequence":1721498146444,"bestBidSize":18,"bestBidPrice":"112556.6","bestAskPrice":"112556.7","bestAskSize":2204,"ts":1757491710747000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862711,"data":{"symbol":"ADAUSDTM","sequence":1706918862711,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710749000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862712,"data":{"symbol":"ADAUSDTM","sequence":1706918862712,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710749000000}}
+✅ [KuCoin Futures] Updated price for BTC-USDT: $112556.7
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862713,"data":{"symbol":"ADAUSDTM","sequence":1706918862713,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710749000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396661,"data":{"symbol":"PEPEUSDTM","sequence":1711022396661,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104833","bestAskSize":35,"ts":1757491710749000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396662,"data":{"symbol":"PEPEUSDTM","sequence":1711022396662,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104833","bestAskSize":35,"ts":1757491710749000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719360261152,"data":{"symbol":"WIFUSDTM","sequence":1719360261152,"bestBidSize":78,"bestBidPrice":"0.8859","bestAskPrice":"0.886","bestAskSize":132,"ts":1757491710750000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396663,"data":{"symbol":"PEPEUSDTM","sequence":1711022396663,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104832","bestAskSize":101,"ts":1757491710750000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396664,"data":{"symbol":"PEPEUSDTM","sequence":1711022396664,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104832","bestAskSize":101,"ts":1757491710750000000}}
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396665,"data":{"symbol":"PEPEUSDTM","sequence":1711022396665,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104832","bestAskSize":101,"ts":1757491710751000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396666,"data":{"symbol":"PEPEUSDTM","sequence":1711022396666,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104832","bestAskSize":101,"ts":1757491710751000000}}
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04833e-05
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04833e-05
+✅ [KuCoin Futures] Updated price for WIF-USDT: $0.886
+✅ [KuCoin Futures] Updated price for BTC-USDT: $112556.7
+✅ [KuCoin Futures] Updated price for BTC-USDT: $112556.7
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04833e-05
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04833e-05
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+✅ [KuCoin Futures] Updated price for WIF-USDT: $0.886
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04832e-05
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04832e-05
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04832e-05
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04832e-05
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:AVAX-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"26.85","bestAskSize":"19.2944","bestBid":"26.849","bestBidSize":"15.75","price":"26.852","sequence":"7318800948","size":"0.0219","time":1757491704537}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:AVAX-USDT
+🔍 DIAGNOSTIC: Using symbol 'AVAX-USDT' as pair directly: 'AVAX-USDT'
+🔍 KuCoin ticker data: ["bestAsk": 26.85, "sequence": 7318800948, "time": 1757491704537, "price": 26.852, "bestBid": 26.849, "bestBidSize": 15.75, "bestAskSize": 19.2944, "size": 0.0219]
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134201,"data":{"symbol":"LINKUSDTM","sequence":1703489134201,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":121,"ts":1757491710750000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844826,"data":{"symbol":"SUIUSDTM","sequence":1706518844826,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710752000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134202,"data":{"symbol":"LINKUSDTM","sequence":1703489134202,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":68,"ts":1757491710752000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844827,"data":{"symbol":"SUIUSDTM","sequence":1706518844827,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710752000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134203,"data":{"symbol":"LINKUSDTM","sequence":1703489134203,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":68,"ts":1757491710752000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396667,"data":{"symbol":"PEPEUSDTM","sequence":1711022396667,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104832","bestAskSize":101,"ts":1757491710753000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396668,"data":{"symbol":"PEPEUSDTM","sequence":1711022396668,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104832","bestAskSize":101,"ts":1757491710753000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862714,"data":{"symbol":"ADAUSDTM","sequence":1706918862714,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710752000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862715,"data":{"symbol":"ADAUSDTM","sequence":1706918862715,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710752000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396669,"data":{"symbol":"PEPEUSDTM","sequence":1711022396669,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104843","bestAskSize":34,"ts":1757491710753000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SOLUSDTM","type":"message","subject":"tickerV2","sn":1719404757516,"data":{"symbol":"SOLUSDTM","sequence":1719404757516,"bestBidSize":17,"bestBidPrice":"221.675","bestAskPrice":"221.676","bestAskSize":1185,"ts":1757491710754000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862716,"data":{"symbol":"ADAUSDTM","sequence":1706918862716,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710752000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719360261153,"data":{"symbol":"WIFUSDTM","sequence":1719360261153,"bestBidSize":78,"bestBidPrice":"0.8859","bestAskPrice":"0.886","bestAskSize":132,"ts":1757491710754000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862717,"data":{"symbol":"ADAUSDTM","sequence":1706918862717,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710752000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396670,"data":{"symbol":"PEPEUSDTM","sequence":1711022396670,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104843","bestAskSize":34,"ts":1757491710754000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862718,"data":{"symbol":"ADAUSDTM","sequence":1706918862718,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710754000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396671,"data":{"symbol":"PEPEUSDTM","sequence":1711022396671,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SOLUSDTM","type":"message","subject":"tickerV2","sn":1719404757517,"data":{"symbol":"SOLUSDTM","sequence":1719404757517,"bestBidSize":17,"bestBidPrice":"221.675","bestAskPrice":"221.676","bestAskSize":1185,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386605,"data":{"symbol":"XRPUSDTM","sequence":1706215386605,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396672,"data":{"symbol":"PEPEUSDTM","sequence":1711022396672,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386606,"data":{"symbol":"XRPUSDTM","sequence":1706215386606,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SOLUSDTM","type":"message","subject":"tickerV2","sn":1719404757518,"data":{"symbol":"SOLUSDTM","sequence":1719404757518,"bestBidSize":17,"bestBidPrice":"221.675","bestAskPrice":"221.676","bestAskSize":1185,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721498146445,"data":{"symbol":"XBTUSDTM","sequence":1721498146445,"bestBidSize":18,"bestBidPrice":"112556.6","bestAskPrice":"112556.7","bestAskSize":2204,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386607,"data":{"symbol":"XRPUSDTM","sequence":1706215386607,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721498146446,"data":{"symbol":"XBTUSDTM","sequence":1721498146446,"bestBidSize":18,"bestBidPrice":"112556.6","bestAskPrice":"112556.7","bestAskSize":2204,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386608,"data":{"symbol":"XRPUSDTM","sequence":1706215386608,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721498146447,"data":{"symbol":"XBTUSDTM","sequence":1721498146447,"bestBidSize":18,"bestBidPrice":"112556.6","bestAskPrice":"112556.7","bestAskSize":2204,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386609,"data":{"symbol":"XRPUSDTM","sequence":1706215386609,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721498146448,"data":{"symbol":"XBTUSDTM","sequence":1721498146448,"bestBidSize":18,"bestBidPrice":"112556.6","bestAskPrice":"112556.7","bestAskSize":2204,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386610,"data":{"symbol":"XRPUSDTM","sequence":1706215386610,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710755000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844828,"data":{"symbol":"SUIUSDTM","sequence":1706518844828,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710756000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844829,"data":{"symbol":"SUIUSDTM","sequence":1706518844829,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710756000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862719,"data":{"symbol":"ADAUSDTM","sequence":1706918862719,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710756000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844830,"data":{"symbol":"SUIUSDTM","sequence":1706518844830,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710756000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862720,"data":{"symbol":"ADAUSDTM","sequence":1706918862720,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710756000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844831,"data":{"symbol":"SUIUSDTM","sequence":1706518844831,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710756000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721498146449,"data":{"symbol":"XBTUSDTM","sequence":1721498146449,"bestBidSize":18,"bestBidPrice":"112556.6","bestAskPrice":"112556.7","bestAskSize":2204,"ts":1757491710757000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396673,"data":{"symbol":"PEPEUSDTM","sequence":1711022396673,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:OPUSDTM","type":"message","subject":"tickerV2","sn":1698394492422,"data":{"symbol":"OPUSDTM","sequence":1698394492422,"bestBidSize":138,"bestBidPrice":"0.7699","bestAskPrice":"0.77","bestAskSize":138,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862721,"data":{"symbol":"ADAUSDTM","sequence":1706918862721,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SOLUSDTM","type":"message","subject":"tickerV2","sn":1719404757519,"data":{"symbol":"SOLUSDTM","sequence":1719404757519,"bestBidSize":17,"bestBidPrice":"221.675","bestAskPrice":"221.676","bestAskSize":1185,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862722,"data":{"symbol":"ADAUSDTM","sequence":1706918862722,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844832,"data":{"symbol":"SUIUSDTM","sequence":1706518844832,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844833,"data":{"symbol":"SUIUSDTM","sequence":1706518844833,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SOLUSDTM","type":"message","subject":"tickerV2","sn":1719404757520,"data":{"symbol":"SOLUSDTM","sequence":1719404757520,"bestBidSize":17,"bestBidPrice":"221.675","bestAskPrice":"221.676","bestAskSize":1185,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386611,"data":{"symbol":"XRPUSDTM","sequence":1706215386611,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844834,"data":{"symbol":"SUIUSDTM","sequence":1706518844834,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844835,"data":{"symbol":"SUIUSDTM","sequence":1706518844835,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386612,"data":{"symbol":"XRPUSDTM","sequence":1706215386612,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862723,"data":{"symbol":"ADAUSDTM","sequence":1706918862723,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:AVAX-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"26.85","bestAskSize":"19.2944","bestBid":"26.849","be
+✅ [KuCoin Spot] Updated price for AVAX-USDT: $26.852
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04832e-05
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04832e-05
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04843e-05
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386613,"data":{"symbol":"XRPUSDTM","sequence":1706215386613,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862724,"data":{"symbol":"ADAUSDTM","sequence":1706918862724,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386614,"data":{"symbol":"XRPUSDTM","sequence":1706215386614,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710758000000}}
+✅ [KuCoin Futures] Updated price for SOL-USDT: $221.676
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134204,"data":{"symbol":"LINKUSDTM","sequence":1703489134204,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":68,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134205,"data":{"symbol":"LINKUSDTM","sequence":1703489134205,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":68,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862725,"data":{"symbol":"ADAUSDTM","sequence":1706918862725,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862726,"data":{"symbol":"ADAUSDTM","sequence":1706918862726,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862727,"data":{"symbol":"ADAUSDTM","sequence":1706918862727,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396674,"data":{"symbol":"PEPEUSDTM","sequence":1711022396674,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710759000000}}
+✅ [KuCoin Futures] Updated price for WIF-USDT: $0.886
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04843e-05
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+✅ [KuCoin Futures] Updated price for SOL-USDT: $221.676
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for SOL-USDT: $221.676
+✅ [KuCoin Futures] Updated price for BTC-USDT: $112556.7
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for BTC-USDT: $112556.7
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for BTC-USDT: $112556.7
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for BTC-USDT: $112556.7
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for BTC-USDT: $112556.7
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+✅ [KuCoin Futures] Updated price for OP-USDT: $0.77
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+ALERT: ✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [KuCoin Futures] Updated price for SOL-USDT: $221.676
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for SOL-USDT: $221.676
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:PEPE-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000010483","bestAskSize":"52698872","bestBid":"0.000010482","bestBidSize":"33750000","price":"0.000010481","sequence":"4050530438","size":"81217500","time":1757491703410}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:PEPE-USDT
+🔍 DIAGNOSTIC: Using symbol 'PEPE-USDT' as pair directly: 'PEPE-USDT'
+🔍 KuCoin ticker data: ["sequence": 4050530438, "time": 1757491703410, "bestBid": 0.000010482, "size": 81217500, "price": 0.000010481, "bestAsk": 0.000010483, "bestBidSize": 33750000, "bestAskSize": 52698872]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:BTC-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"112561.2","bestAskSize":"0.85774785","bestBid":"112561.1","bestBidSize":"0.62011781","price":"112557.8","sequence":"21916786727","size":"0.00310691","time":1757491707021}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:BTC-USDT
+🔍 DIAGNOSTIC: Using symbol 'BTC-USDT' as pair directly: 'BTC-USDT'
+🔍 KuCoin ticker data: ["time": 1757491707021, "bestAskSize": 0.85774785, "size": 0.00310691, "bestBid": 112561.1, "bestAsk": 112561.2, "bestBidSize": 0.62011781, "price": 112557.8, "sequence": 21916786727]
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396675,"data":{"symbol":"PEPEUSDTM","sequence":1711022396675,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710759000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862728,"data":{"symbol":"ADAUSDTM","sequence":1706918862728,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862729,"data":{"symbol":"ADAUSDTM","sequence":1706918862729,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396676,"data":{"symbol":"PEPEUSDTM","sequence":1711022396676,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710759000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396677,"data":{"symbol":"PEPEUSDTM","sequence":1711022396677,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710759000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862730,"data":{"symbol":"ADAUSDTM","sequence":1706918862730,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396678,"data":{"symbol":"PEPEUSDTM","sequence":1711022396678,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710759000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134206,"data":{"symbol":"LINKUSDTM","sequence":1703489134206,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":68,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862731,"data":{"symbol":"ADAUSDTM","sequence":1706918862731,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862732,"data":{"symbol":"ADAUSDTM","sequence":1706918862732,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710758000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386615,"data":{"symbol":"XRPUSDTM","sequence":1706215386615,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710760000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ADAUSDTM","type":"message","subject":"tickerV2","sn":1706918862733,"data":{"symbol":"ADAUSDTM","sequence":1706918862733,"bestBidSize":27,"bestBidPrice":"0.8805","bestAskPrice":"0.88051","bestAskSize":28,"ts":1757491710760000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SOLUSDTM","type":"message","subject":"tickerV2","sn":1719404757521,"data":{"symbol":"SOLUSDTM","sequence":1719404757521,"bestBidSize":17,"bestBidPrice":"221.675","bestAskPrice":"221.676","bestAskSize":1185,"ts":1757491710760000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:DOGEUSDTM","type":"message","subject":"tickerV2","sn":1706437410242,"data":{"symbol":"DOGEUSDTM","sequence":1706437410242,"bestBidSize":53,"bestBidPrice":"0.24201","bestAskPrice":"0.24202","bestAskSize":60,"ts":1757491710760000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706215386616,"data":{"symbol":"XRPUSDTM","sequence":1706215386616,"bestBidSize":29,"bestBidPrice":"2.98004","bestAskPrice":"2.98005","bestAskSize":240,"ts":1757491710760000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844836,"data":{"symbol":"SUIUSDTM","sequence":1706518844836,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710760000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:LINKUSDTM","type":"message","subject":"tickerV2","sn":1703489134207,"data":{"symbol":"LINKUSDTM","sequence":1703489134207,"bestBidSize":78,"bestBidPrice":"23.431","bestAskPrice":"23.432","bestAskSize":68,"ts":1757491710760000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:PEPEUSDTM","type":"message","subject":"tickerV2","sn":1711022396679,"data":{"symbol":"PEPEUSDTM","sequence":1711022396679,"bestBidSize":35,"bestBidPrice":"0.0000104825","bestAskPrice":"0.0000104828","bestAskSize":35,"ts":1757491710760000000}}
+🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SUIUSDTM","type":"message","subject":"tickerV2","sn":1706518844837,"data":{"symbol":"SUIUSDTM","sequence":1706518844837,"bestBidSize":2109,"bestBidPrice":"3.551","bestAskPrice":"3.5511","bestAskSize":80,"ts":1757491710760000000}}
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:DOT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.1157","bestAskSize":"121.5","bestBid":"4.1154","bestBidSize":"121.5","price":"4.1176","sequence":"7037861603","size":"21.6203","time":1757491685688}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:DOT-USDT
+🔍 DIAGNOSTIC: Using symbol 'DOT-USDT' as pair directly: 'DOT-USDT'
+🔍 KuCoin ticker data: ["time": 1757491685688, "bestBidSize": 121.5, "size": 21.6203, "price": 4.1176, "bestAskSize": 121.5, "bestAsk": 4.1157, "bestBid": 4.1154, "sequence": 7037861603]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:WIF-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8858","bestAskSize":"355.7234","bestBid":"0.8855","bestBidSize":"425","price":"0.8857","sequence":"4819612991","size":"231.1643","time":1757491710582}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:WIF-USDT
+🔍 DIAGNOSTIC: Using symbol 'WIF-USDT' as pair directly: 'WIF-USDT'
+🔍 KuCoin ticker data: ["time": 1757491710582, "bestAskSize": 355.7234, "bestBidSize": 425, "bestBid": 0.8855, "sequence": 4819612991, "bestAsk": 0.8858, "price": 0.8857, "size": 231.1643]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:DOGE-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.242","bestAskSize":"5433.9076","bestBid":"0.24199","bestBidSize":"2182.8546","price":"0.24196","sequence":"9130556397","size":"110.4301","time":1757491702586}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:DOGE-USDT
+🔍 DIAGNOSTIC: Using symbol 'DOGE-USDT' as pair directly: 'DOGE-USDT'
+🔍 KuCoin ticker data: ["bestAsk": 0.242, "size": 110.4301, "bestBid": 0.24199, "time": 1757491702586, "bestBidSize": 2182.8546, "sequence": 9130556397, "price": 0.24196, "bestAskSize": 5433.9076]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ADA-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8805","bestAskSize":"1504.48","bestBid":"0.8804","bestBidSize":"720.15","price":"0.8804","sequence":"5728087123","size":"102.8","time":1757491705860}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ADA-USDT
+🔍 DIAGNOSTIC: Using symbol 'ADA-USDT' as pair directly: 'ADA-USDT'
+🔍 KuCoin ticker data: ["sequence": 5728087123, "bestBid": 0.8804, "time": 1757491705860, "bestAsk": 0.8805, "price": 0.8804, "bestBidSize": 720.15, "size": 102.8, "bestAskSize": 1504.48]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:NEAR-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"2.6631","bestAskSize":"295.6245","bestBid":"2.663","bestBidSize":"110.25","price":"2.663","sequence":"5944960367","size":"75.1595","time":1757491708531}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:NEAR-USDT
+🔍 DIAGNOSTIC: Using symbol 'NEAR-USDT' as pair directly: 'NEAR-USDT'
+🔍 KuCoin ticker data: ["bestAskSize": 295.6245, "size": 75.1595, "bestBidSize": 110.25, "bestAsk": 2.6631, "sequence": 5944960367, "bestBid": 2.663, "price": 2.663, "time": 1757491708531]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:SUI-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.5513","bestAskSize":"126.5","bestBid":"3.5512","bestBidSize":"8.5","price":"3.5504","sequence":"5379659674","size":"8.5","time":1757491686461}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:SUI-USDT
+🔍 DIAGNOSTIC: Using symbol 'SUI-USDT' as pair directly: 'SUI-USDT'
+🔍 KuCoin ticker data: ["bestAsk": 3.5513, "bestBidSize": 8.5, "bestAskSize": 126.5, "sequence": 5379659674, "size": 8.5, "bestBid": 3.5512, "time": 1757491686461, "price": 3.5504]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:PEPE-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000010483","bestAskSize":"52698872","bestBid":"0.00
+✅ [KuCoin Spot] Updated price for PEPE-USDT: $1.0481e-05
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:BTC-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"112561.2","bestAskSize":"0.85774785","bestBid":"112561
+✅ [KuCoin Spot] Updated price for BTC-USDT: $112557.8
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:APT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.4131","bestAskSize":"32.8587","bestBid":"4.413","bestBidSize":"4.532","price":"4.413","sequence":"5680657706","size":"12.1081","time":1757491693464}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:APT-USDT
+🔍 DIAGNOSTIC: Using symbol 'APT-USDT' as pair directly: 'APT-USDT'
+🔍 KuCoin ticker data: ["time": 1757491693464, "size": 12.1081, "bestAskSize": 32.8587, "bestBidSize": 4.532, "bestBid": 4.413, "price": 4.413, "sequence": 5680657706, "bestAsk": 4.4131]
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for ADA-USDT: $0.88051
+✅ [KuCoin Futures] Updated price for SOL-USDT: $221.676
+✅ [KuCoin Futures] Updated price for DOGE-USDT: $0.24202
+✅ [KuCoin Futures] Updated price for XRP-USDT: $2.98005
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [KuCoin Futures] Updated price for LINK-USDT: $23.432
+✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.04828e-05
+✅ [KuCoin Futures] Updated price for SUI-USDT: $3.5511
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7695
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:DOT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.1157","bestAskSize":"121.5","bestBid":"4.1154","best
+✅ [KuCoin Spot] Updated price for DOT-USDT: $4.1176
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:WIF-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8858","bestAskSize":"355.7234","bestBid":"0.8855","b
+✅ [KuCoin Spot] Updated price for WIF-USDT: $0.8857
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:DOGE-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.242","bestAskSize":"5433.9076","bestBid":"0.24199",
+✅ [KuCoin Spot] Updated price for DOGE-USDT: $0.24196
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ADA-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8805","bestAskSize":"1504.48","bestBid":"0.8804","be
+✅ [KuCoin Spot] Updated price for ADA-USDT: $0.8804
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:NEAR-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"2.6631","bestAskSize":"295.6245","bestBid":"2.663","b
+✅ [KuCoin Spot] Updated price for NEAR-USDT: $2.663
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:SUI-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.5513","bestAskSize":"126.5","bestBid":"3.5512","best
+✅ [KuCoin Spot] Updated price for SUI-USDT: $3.5504
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:APT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.4131","bestAskSize":"32.8587","bestBid":"4.413","bes
+✅ [KuCoin Spot] Updated price for APT-USDT: $4.413
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:LINK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"23.4385","bestAskSize":"1.6872","bestBid":"23.4384","bestBidSize":"17.5863","price":"23.4365","sequence":"9132894885","size":"0.109","time":1757491706930}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:LINK-USDT
+🔍 DIAGNOSTIC: Using symbol 'LINK-USDT' as pair directly: 'LINK-USDT'
+🔍 KuCoin ticker data: ["bestAskSize": 1.6872, "bestBid": 23.4384, "bestAsk": 23.4385, "time": 1757491706930, "price": 23.4365, "sequence": 9132894885, "size": 0.109, "bestBidSize": 17.5863]
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:LINK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"23.4385","bestAskSize":"1.6872","bestBid":"23.4384","
+✅ [KuCoin Spot] Updated price for LINK-USDT: $23.4365
+✅ [Bybit Futures] Updated price for OP-USDT: $0.7695
+ALERT: ✅ [Bybit Futures] Updated price for OP-USDT: $0.7695
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+ALERT: ✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for SOL-USDT: $221.72
+✅ [Bybit Spot] Updated price for AVAX-USDT: $26.854
+✅ [Bybit Spot] Updated price for ETH-USDT: $4326.2
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.5518
+✅ [Bybit Spot] Updated price for PEPE-USDT: $1.0483e-05
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:SHIB-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000012964","bestAskSize":"167394203.9215","bestBid":"0.000012962","bestBidSize":"27000000","price":"0.000012964","sequence":"5519979137","size":"63004293.3127","time":1757491699609}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:SHIB-USDT
+🔍 DIAGNOSTIC: Using symbol 'SHIB-USDT' as pair directly: 'SHIB-USDT'
+🔍 KuCoin ticker data: ["bestAsk": 0.000012964, "size": 63004293.3127, "bestBidSize": 27000000, "price": 0.000012964, "sequence": 5519979137, "bestAskSize": 167394203.9215, "time": 1757491699609, "bestBid": 0.000012962]
+✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+ALERT: ✅ [Bybit Spot] Updated price for BONK-USDT: $2.3159e-05
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:SHIB-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000012964","bestAskSize":"167394203.9215","bestBid"
+✅ [KuCoin Spot] Updated price for SHIB-USDT: $1.2964e-05
+✅ [Bybit Spot] Updated price for SOL-USDT: $221.72
+ALERT: ✅ [Bybit Spot] Updated price for SOL-USDT: $221.72
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for AVAX-USDT: $26.854
+ALERT: ✅ [Bybit Spot] Updated price for AVAX-USDT: $26.854
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for ETH-USDT: $4326.2
+ALERT: ✅ [Bybit Spot] Updated price for ETH-USDT: $4326.2
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for SUI-USDT: $3.5518
+ALERT: ✅ [Bybit Spot] Updated price for SUI-USDT: $3.5518
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for PEPE-USDT: $1.0483e-05
+ALERT: ✅ [Bybit Spot] Updated price for PEPE-USDT: $1.0483e-05
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
 📈 Trading Stats - Total Profit: $0.00, Trades: 0
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for INJ-USDT: $13.308
-✅ [KuCoin Futures] Updated price for INJ-USDT: $13.308
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for INJ-USDT: $13.308
-✅ [KuCoin Futures] Updated price for INJ-USDT: $13.308
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for INJ-USDT: $13.308
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for OP-USDT: $0.7349
-✅ [KuCoin Futures] Updated price for OP-USDT: $0.7349
-✅ [KuCoin Futures] Updated price for INJ-USDT: $13.308
-✅ [KuCoin Futures] Updated price for INJ-USDT: $13.308
-✅ [KuCoin Futures] Updated price for INJ-USDT: $13.308
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:OPUSDTM","type":"message","subject":"tickerV2","sn":1698382358371,"data":{"symbol":"OPUSDTM","sequence":1698382358371,"bestBidSize":501,"bestBidPrice":"0.735","bestAskPrice":"0.7351","bestAskSize":152,"ts":1757330498862000000}}
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:SOL-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"221.67","bestAskSize":"32.844","bestBid":"221.66","bestBidSize":"27.218","price":"221.66","sequence":"14926083551","size":"0.002","time":1757491710021}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:SOL-USDT
+🔍 DIAGNOSTIC: Using symbol 'SOL-USDT' as pair directly: 'SOL-USDT'
+🔍 KuCoin ticker data: ["bestBid": 221.66, "size": 0.002, "time": 1757491710021, "price": 221.66, "bestBidSize": 27.218, "sequence": 14926083551, "bestAsk": 221.67, "bestAskSize": 32.844]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:BONK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000023154","bestAskSize":"2266670.3667","bestBid":"0.000023147","bestBidSize":"7392511.0487","price":"0.00002317","sequence":"4634850145","size":"7564000","time":1757491685676}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:BONK-USDT
+🔍 DIAGNOSTIC: Using symbol 'BONK-USDT' as pair directly: 'BONK-USDT'
+🔍 KuCoin ticker data: ["bestBid": 0.000023147, "size": 7564000, "time": 1757491685676, "price": 0.00002317, "bestBidSize": 7392511.0487, "sequence": 4634850145, "bestAsk": 0.000023154, "bestAskSize": 2266670.3667]
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:TON-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.116","bestAskSize":"257.1788","bestBid":"3.1159","bestBidSize":"571.0346","price":"3.1156","sequence":"3865393658","size":"168.3547","time":1757491708230}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:TON-USDT
+🔍 DIAGNOSTIC: Using symbol 'TON-USDT' as pair directly: 'TON-USDT'
+🔍 KuCoin ticker data: ["bestBid": 3.1159, "size": 168.3547, "time": 1757491708230, "price": 3.1156, "bestBidSize": 571.0346, "sequence": 3865393658, "bestAsk": 3.116, "bestAskSize": 257.1788]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:SOL-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"221.67","bestAskSize":"32.844","bestBid":"221.66","bes
+✅ [KuCoin Spot] Updated price for SOL-USDT: $221.66
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:BONK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.000023154","bestAskSize":"2266670.3667","bestBid":"
+✅ [KuCoin Spot] Updated price for BONK-USDT: $2.317e-05
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:TON-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"3.116","bestAskSize":"257.1788","bestBid":"3.1159","be
+✅ [KuCoin Spot] Updated price for TON-USDT: $3.1156
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ETH-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4325.86","bestAskSize":"11.3010865","bestBid":"4325.85","bestBidSize":"1.8536837","price":"4325.85","sequence":"15515420962","size":"0.007579","time":1757491707454}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ETH-USDT
+🔍 DIAGNOSTIC: Using symbol 'ETH-USDT' as pair directly: 'ETH-USDT'
+🔍 KuCoin ticker data: ["time": 1757491707454, "bestAsk": 4325.86, "bestBid": 4325.85, "sequence": 15515420962, "size": 0.007579, "price": 4325.85, "bestBidSize": 1.8536837, "bestAskSize": 11.3010865]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ETH-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4325.86","bestAskSize":"11.3010865","bestBid":"4325.85
+✅ [KuCoin Spot] Updated price for ETH-USDT: $4325.85
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for OP-USDT: $0.7349
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967603,"data":{"symbol":"WIFUSDTM","sequence":1719336967603,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498862000000}}
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ETHUSDTM","type":"message","subject":"tickerV2","sn":1717076561170,"data":{"symbol":"ETHUSDTM","sequence":1717076561170,"bestBidSize":2178,"bestBidPrice":"4324.03","bestAskPrice":"4324.04","bestAskSize":572,"ts":1757330498862000000}}
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:AVAX-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"26.85","bestAskSize":"19.2944","bestBid":"26.849","bestBidSize":"15.75","price":"26.852","sequence":"7318800955","size":"0.0219","time":1757491704537}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:AVAX-USDT
+🔍 DIAGNOSTIC: Using symbol 'AVAX-USDT' as pair directly: 'AVAX-USDT'
+🔍 KuCoin ticker data: ["bestBid": 26.849, "sequence": 7318800955, "size": 0.0219, "bestAskSize": 19.2944, "price": 26.852, "bestAsk": 26.85, "bestBidSize": 15.75, "time": 1757491704537]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:AVAX-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"26.85","bestAskSize":"19.2944","bestBid":"26.849","be
+✅ [KuCoin Spot] Updated price for AVAX-USDT: $26.852
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:BTC-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"112561.2","bestAskSize":"0.85774785","bestBid":"112561.1","bestBidSize":"0.62011781","price":"112557.8","sequence":"21916786731","size":"0.00310691","time":1757491707021}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:BTC-USDT
+🔍 DIAGNOSTIC: Using symbol 'BTC-USDT' as pair directly: 'BTC-USDT'
+🔍 KuCoin ticker data: ["size": 0.00310691, "sequence": 21916786731, "bestBid": 112561.1, "bestAsk": 112561.2, "bestBidSize": 0.62011781, "price": 112557.8, "bestAskSize": 0.85774785, "time": 1757491707021]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:BTC-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"112561.2","bestAskSize":"0.85774785","bestBid":"112561
+✅ [KuCoin Spot] Updated price for BTC-USDT: $112557.8
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967604,"data":{"symbol":"WIFUSDTM","sequence":1719336967604,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498863000000}}
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967605,"data":{"symbol":"WIFUSDTM","sequence":1719336967605,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498863000000}}
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SHIB-USDT: $1.2709e-05
-✅ [KuCoin Futures] Updated price for OP-USDT: $0.7349
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967606,"data":{"symbol":"WIFUSDTM","sequence":1719336967606,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498864000000}}
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:OPUSDTM","type":"message","subject":"tickerV2","sn":1698382358372,"data":{"symbol":"OPUSDTM","sequence":1698382358372,"bestBidSize":501,"bestBidPrice":"0.735","bestAskPrice":"0.7351","bestAskSize":152,"ts":1757330498865000000}}
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:OPUSDTM","type":"message","subject":"tickerV2","sn":1698382358373,"data":{"symbol":"OPUSDTM","sequence":1698382358373,"bestBidSize":501,"bestBidPrice":"0.735","bestAskPrice":"0.7351","bestAskSize":152,"ts":1757330498865000000}}
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for ADA-USDT: $0.85224
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for ADA-USDT: $0.85224
-✅ [KuCoin Futures] Updated price for ADA-USDT: $0.85224
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721418792882,"data":{"symbol":"XBTUSDTM","sequence":1721418792882,"bestBidSize":330,"bestBidPrice":"111926","bestAskPrice":"111926.1","bestAskSize":4817,"ts":1757330498866000000}}
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721418792883,"data":{"symbol":"XBTUSDTM","sequence":1721418792883,"bestBidSize":330,"bestBidPrice":"111926","bestAskPrice":"111926.1","bestAskSize":4817,"ts":1757330498866000000}}
-✅ [KuCoin Futures] Updated price for ADA-USDT: $0.85224
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967607,"data":{"symbol":"WIFUSDTM","sequence":1719336967607,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498867000000}}
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [Bybit Spot] Updated price for ETH-USDT: $4321.0
-✅ [KuCoin Futures] Updated price for XRP-USDT: $2.9398
-✅ [KuCoin Futures] Updated price for LINK-USDT: $23.034
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967608,"data":{"symbol":"WIFUSDTM","sequence":1719336967608,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498868000000}}
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ETHUSDTM","type":"message","subject":"tickerV2","sn":1717076561171,"data":{"symbol":"ETHUSDTM","sequence":1717076561171,"bestBidSize":2178,"bestBidPrice":"4324.03","bestAskPrice":"4324.04","bestAskSize":572,"ts":1757330498868000000}}
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967609,"data":{"symbol":"WIFUSDTM","sequence":1719336967609,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498868000000}}
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ETHUSDTM","type":"message","subject":"tickerV2","sn":1717076561172,"data":{"symbol":"ETHUSDTM","sequence":1717076561172,"bestBidSize":2178,"bestBidPrice":"4324.03","bestAskPrice":"4324.04","bestAskSize":572,"ts":1757330498868000000}}
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ETHUSDTM","type":"message","subject":"tickerV2","sn":1717076561173,"data":{"symbol":"ETHUSDTM","sequence":1717076561173,"bestBidSize":2178,"bestBidPrice":"4324.03","bestAskPrice":"4324.04","bestAskSize":572,"ts":1757330498868000000}}
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ETHUSDTM","type":"message","subject":"tickerV2","sn":1717076561174,"data":{"symbol":"ETHUSDTM","sequence":1717076561174,"bestBidSize":2178,"bestBidPrice":"4324.03","bestAskPrice":"4324.04","bestAskSize":572,"ts":1757330498868000000}}
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for DOGE-USDT: $0.23332
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:OPUSDTM","type":"message","subject":"tickerV2","sn":1698382358374,"data":{"symbol":"OPUSDTM","sequence":1698382358374,"bestBidSize":501,"bestBidPrice":"0.735","bestAskPrice":"0.7351","bestAskSize":152,"ts":1757330498869000000}}
-✅ [KuCoin Futures] Updated price for FLOKI-USDT: $9.4179e-05
-✅ [KuCoin Futures] Updated price for SHIB-USDT: $1.2709e-05
-✅ [KuCoin Futures] Updated price for FLOKI-USDT: $9.4179e-05
-✅ [KuCoin Futures] Updated price for SHIB-USDT: $1.2709e-05
-✅ [KuCoin Futures] Updated price for DOGE-USDT: $0.23332
-✅ [KuCoin Futures] Updated price for DOT-USDT: $4.017
-✅ [KuCoin Futures] Updated price for DOT-USDT: $4.017
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [Bybit Spot] Updated price for TON-USDT: $3.089
-ALERT: ✅ [Bybit Spot] Updated price for TON-USDT: $3.089
-📊 DASHBOARD UPDATE [2025-09-08T11:21:55Z]
+✅ [Bybit Spot] Updated price for INJ-USDT: $13.943
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.9797
+✅ [Bybit Spot] Updated price for DOT-USDT: $4.116
+✅ [Bybit Spot] Updated price for TON-USDT: $3.116
+✅ [Bybit Spot] Updated price for INJ-USDT: $13.943
+ALERT: ✅ [Bybit Spot] Updated price for INJ-USDT: $13.943
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
 💰 Balances - KuCoin: $522.24, Bybit: $716.65
 💱 SPOT PRICES:
-   BTC-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $111954.100000
-   ETH-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $4321.000000
-   SOL-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $213.740000
-   LINK-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $23.031000
-   FLOKI-USDT ❌/✅ - KuCoin: $0.000000, Bybit: $0.000094
-📈 FUTURES PRICES:
-   BTC-USDT ✅/✅ - KuCoin: $111926.100000, Bybit: $111917.400000
-   ETH-USDT ✅/✅ - KuCoin: $4321.500000, Bybit: $4319.300000
-   SOL-USDT ✅/✅ - KuCoin: $213.733000, Bybit: $213.710000
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
 📈 Trading Stats - Total Profit: $0.00, Trades: 0
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ [KuCoin Futures] Updated price for SUI-USDT: $3.4616
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for DOGE-USDT: $0.23332
-✅ [KuCoin Futures] Updated price for DOT-USDT: $4.017
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XBTUSDTM","type":"message","subject":"tickerV2","sn":1721418792884,"data":{"symbol":"XBTUSDTM","sequence":1721418792884,"bestBidSize":330,"bestBidPrice":"111926","bestAskPrice":"111926.1","bestAskSize":4817,"ts":1757330498871000000}}
-✅ [KuCoin Futures] Updated price for SHIB-USDT: $1.2709e-05
-✅ [KuCoin Futures] Updated price for DOT-USDT: $4.017
-✅ [KuCoin Futures] Updated price for DOT-USDT: $4.017
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for DOT-USDT: $4.017
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
+✅ [Bybit Spot] Updated price for XRP-USDT: $2.9797
+ALERT: ✅ [Bybit Spot] Updated price for XRP-USDT: $2.9797
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for DOT-USDT: $4.116
+ALERT: ✅ [Bybit Spot] Updated price for DOT-USDT: $4.116
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for TON-USDT: $3.116
+ALERT: ✅ [Bybit Spot] Updated price for TON-USDT: $3.116
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:ADA-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8805","bestAskSize":"1504.48","bestBid":"0.8804","bestBidSize":"720.15","price":"0.8804","sequence":"5728087145","size":"102.8","time":1757491705860}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:ADA-USDT
+🔍 DIAGNOSTIC: Using symbol 'ADA-USDT' as pair directly: 'ADA-USDT'
+🔍 KuCoin ticker data: ["size": 102.8, "price": 0.8804, "bestBidSize": 720.15, "bestAskSize": 1504.48, "bestAsk": 0.8805, "time": 1757491705860, "bestBid": 0.8804, "sequence": 5728087145]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:ADA-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"0.8805","bestAskSize":"1504.48","bestBid":"0.8804","be
+✅ [KuCoin Spot] Updated price for ADA-USDT: $0.8804
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SOLUSDTM","type":"message","subject":"tickerV2","sn":1719305514882,"data":{"symbol":"SOLUSDTM","sequence":1719305514882,"bestBidSize":1753,"bestBidPrice":"213.832","bestAskPrice":"213.833","bestAskSize":222,"ts":1757330498871000000}}
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:DOT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.1157","bestAskSize":"121.5","bestBid":"4.1154","bestBidSize":"121.5","price":"4.1176","sequence":"7037861617","size":"21.6203","time":1757491685688}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:DOT-USDT
+🔍 DIAGNOSTIC: Using symbol 'DOT-USDT' as pair directly: 'DOT-USDT'
+🔍 KuCoin ticker data: ["size": 21.6203, "price": 4.1176, "bestBidSize": 121.5, "bestAskSize": 121.5, "bestAsk": 4.1157, "time": 1757491685688, "bestBid": 4.1154, "sequence": 7037861617]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:DOT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.1157","bestAskSize":"121.5","bestBid":"4.1154","best
+✅ [KuCoin Spot] Updated price for DOT-USDT: $4.1176
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [Bybit Spot] Updated price for BTC-USDT: $112562.3
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:XRP-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"2.97973","bestAskSize":"3203.0274","bestBid":"2.97972","bestBidSize":"2452.5646","price":"2.97972","sequence":"14072929448","size":"17.7055","time":1757491708145}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:XRP-USDT
+🔍 DIAGNOSTIC: Using symbol 'XRP-USDT' as pair directly: 'XRP-USDT'
+🔍 KuCoin ticker data: ["time": 1757491708145, "bestAsk": 2.97973, "bestBid": 2.97972, "sequence": 14072929448, "size": 17.7055, "price": 2.97972, "bestBidSize": 2452.5646, "bestAskSize": 3203.0274]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:XRP-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"2.97973","bestAskSize":"3203.0274","bestBid":"2.97972"
+✅ [KuCoin Spot] Updated price for XRP-USDT: $2.97972
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for ETH-USDT: $4321.5
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for BTC-USDT: $111926.1
-✅ [KuCoin Futures] Updated price for TON-USDT: $3.0903
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ETHUSDTM","type":"message","subject":"tickerV2","sn":1717076561175,"data":{"symbol":"ETHUSDTM","sequence":1717076561175,"bestBidSize":2178,"bestBidPrice":"4324.03","bestAskPrice":"4324.04","bestAskSize":572,"ts":1757330498873000000}}
-✅ [KuCoin Futures] Updated price for SHIB-USDT: $1.2709e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for SHIB-USDT: $1.2709e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:ETHUSDTM","type":"message","subject":"tickerV2","sn":1717076561176,"data":{"symbol":"ETHUSDTM","sequence":1717076561176,"bestBidSize":2178,"bestBidPrice":"4324.03","bestAskPrice":"4324.04","bestAskSize":572,"ts":1757330498873000000}}
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:XRPUSDTM","type":"message","subject":"tickerV2","sn":1706167706738,"data":{"symbol":"XRPUSDTM","sequence":1706167706738,"bestBidSize":222,"bestBidPrice":"2.94059","bestAskPrice":"2.9406","bestAskSize":627,"ts":1757330498873000000}}
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for SOL-USDT: $213.733
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
+✅ [Bybit Spot] Updated price for BTC-USDT: $112562.3
+ALERT: ✅ [Bybit Spot] Updated price for BTC-USDT: $112562.3
+📊 DASHBOARD UPDATE [2025-09-10T08:08:31Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $112557.800000, Bybit: $112562.300000
+   ETH-USDT ✅/✅ - KuCoin: $4325.850000, Bybit: $4326.200000
+   SOL-USDT ✅/✅ - KuCoin: $221.660000, Bybit: $221.720000
+   LINK-USDT ✅/✅ - KuCoin: $23.436500, Bybit: $23.444000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000097, Bybit: $0.000097
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:APT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.4131","bestAskSize":"32.8587","bestBid":"4.413","bestBidSize":"4.532","price":"4.413","sequence":"5680657708","size":"12.1081","time":1757491693464}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:APT-USDT
+🔍 DIAGNOSTIC: Using symbol 'APT-USDT' as pair directly: 'APT-USDT'
+🔍 KuCoin ticker data: ["time": 1757491693464, "bestAsk": 4.4131, "bestBid": 4.413, "sequence": 5680657708, "size": 12.1081, "price": 4.413, "bestBidSize": 4.532, "bestAskSize": 32.8587]
+ALERT: 🔍 KuCoin RAW: {"topic":"/market/ticker:APT-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"4.4131","bestAskSize":"32.8587","bestBid":"4.413","bes
+✅ [KuCoin Spot] Updated price for APT-USDT: $4.413
 ✅ Updated dashboard.json with live data: 21 pairs, 0 trades
 ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for TON-USDT: $3.0903
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967610,"data":{"symbol":"WIFUSDTM","sequence":1719336967610,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498873000000}}
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967611,"data":{"symbol":"WIFUSDTM","sequence":1719336967611,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498873000000}}
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:SOLUSDTM","type":"message","subject":"tickerV2","sn":1719305514883,"data":{"symbol":"SOLUSDTM","sequence":1719305514883,"bestBidSize":1753,"bestBidPrice":"213.832","bestAskPrice":"213.833","bestAskSize":222,"ts":1757330498873000000}}
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-🔍 KuCoin Futures RAW MESSAGE: {"topic":"/contractMarket/tickerV2:WIFUSDTM","type":"message","subject":"tickerV2","sn":1719336967612,"data":{"symbol":"WIFUSDTM","sequence":1719336967612,"bestBidSize":6,"bestBidPrice":"0.8439","bestAskPrice":"0.844","bestAskSize":664,"ts":1757330498873000000}}
-✅ [KuCoin Futures] Updated price for PEPE-USDT: $1.01192e-05
-✅ [KuCoin Futures] Updated price for ADA-USDT: $0.85224
-✅ Updated dashboard.json with live data: 21 pairs, 0 trades
-ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
-✅ [KuCoin Futures] Updated price for ADA-USDT: $0.85224
+🔍 KuCoin RAW MESSAGE: {"topic":"/market/ticker:LINK-USDT","type":"message","subject":"trade.ticker","data":{"bestAsk":"23.4385","bestAskSize":"1.6872","bestBid":"23.4384","bestBidSize":"17.5863","price":"23.4365","sequence":"9132894911","size":"0.109","time":1757491706930}}
+🔍 KuCoin message type: message
+🔍 KuCoin topic: /market/ticker:LINK-USDT
+🔍 DIAGNOSTIC: Using symbol 'LINK-USDT' as pair directly: 'LINK-USDT'
