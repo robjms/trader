@@ -14104,8 +14104,8 @@ extension ExchangeWebSocket {
         
         for pair in pairs {
             let kucoinSpot = await MainActor.run { kucoinCurrentPrice[pair] ?? 0.0 }
-            let _ = await MainActor.run { bybitCurrentPrice[pair] ?? 0.0 } // FIXED: Use _ for unused variable
-            let _ = await MainActor.run { kucoinCurrentFuturesPrice[pair] ?? 0.0 } // FIXED: Use _ for unused variable
+            let bybitSpot = await MainActor.run { bybitCurrentPrice[pair] ?? 0.0 }
+            let kucoinFutures = await MainActor.run { kucoinCurrentFuturesPrice[pair] ?? 0.0 }
             let bybitFutures = await MainActor.run { bybitCurrentFuturesPrice[pair] ?? 0.0 }
             
             // Check spot vs futures arbitrage
