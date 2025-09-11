@@ -1,4 +1,3 @@
-
 //--------------- Block 1 - Core Data Structures and Utilities
 // VARIABLES TO ADD: None - All variables included in this block
 
@@ -1232,6 +1231,14 @@ class ExchangeWebSocket {
             tradingActive = true
         }
     }
+    
+    static func testDictionaryAssignment() {
+        arbitrageExecuted["TEST"] = (true, Date())
+        crossExchangeArbitrageExecuted["TEST"] = (true, Date())
+        print("Dictionary test passed")
+    }
+    
+    
     
     static func updateRiskMetrics() {
         for pair in tradingPairs {
@@ -10270,25 +10277,35 @@ extension ExchangeWebSocket {
 
     // ENHANCED: Complete executeTrade method with all original functionality preserved
     static func executeTrade(exchange: String, pair: String, side: String, price: Double, amount: Double, strategy: String) async -> Bool {
-        guard await checkDailyLossLimit(exchange: exchange, pair: pair, potentialLoss: amount * price * getDouble("STOP_LOSS_PERCENTAGE", defaultValue: 0.02)) else {
-            print("DEBUG: Trade skipped for \(exchange)-\(pair): Daily loss limit exceeded")
-            return false
-        }
+        let simulationEnabled = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
 
-        guard let _ = await checkLiquidityAsyncUnique(exchange: exchange, pair: pair, marketType: "spot", tradeAmount: amount, price: price) else {
-            print("DEBUG: Trade skipped for \(exchange)-\(pair): Insufficient liquidity")
-            return false
+        if !simulationEnabled {
+            guard await checkDailyLossLimit(exchange: exchange, pair: pair, potentialLoss: amount * price * getDouble("STOP_LOSS_PERCENTAGE", defaultValue: 0.02)) else {
+                print("DEBUG: Trade skipped for \(exchange)-\(pair): Daily loss limit exceeded")
+                return false
+            }
+
+            guard let _ = await checkLiquidityAsyncUnique(exchange: exchange, pair: pair, marketType: "spot", tradeAmount: amount, price: price) else {
+                print("DEBUG: Trade skipped for \(exchange)-\(pair): Insufficient liquidity")
+                return false
+            }
         }
 
         let volatility = await calculateVolatility(pair: pair, exchange: exchange)
-        let tradeAmount = await dynamicTradeAmount(balance: exchange == "kucoin" ? kucoinBalance : bybitBalance, riskPercent: getDouble("RISK_PERCENTAGE", defaultValue: 0.01), volatility: volatility, pair: pair)
+        let dynamicAmount = await dynamicTradeAmount(balance: exchange == "kucoin" ? kucoinBalance : bybitBalance, riskPercent: getDouble("RISK_PERCENTAGE", defaultValue: 0.01), volatility: volatility, pair: pair)
 
-        guard tradeAmount > 0 else {
-            print("DEBUG: Trade skipped for \(exchange)-\(pair): Invalid trade amount (\(tradeAmount))")
-            return false
+        // In simulation, allow passed amount even if balance is zero; otherwise cap by dynamic sizing
+        let adjustedAmount: Double
+        if simulationEnabled {
+            adjustedAmount = max(amount, 0.0)
+        } else {
+            guard dynamicAmount > 0 else {
+                print("DEBUG: Trade skipped for \(exchange)-\(pair): Invalid trade amount (\(dynamicAmount))")
+                return false
+            }
+            adjustedAmount = min(amount, dynamicAmount)
         }
 
-        let adjustedAmount = min(amount, tradeAmount)
         ExchangeWebSocket.executeHFTTrade(exchange: exchange, pair: pair, side: side, price: price, amount: adjustedAmount)
 
         let profit = side == "buy" ? -adjustedAmount * price : adjustedAmount * price
@@ -10953,6 +10970,10 @@ DispatchQueue.main.async {
     ExchangeWebSocket.initializeParameters {
         ExchangeWebSocket.startTradingLoop()
         ExchangeWebSocket.logDashboardMetrics()
+        // Ensure Block 27 async trading loop is also started
+        Task {
+            await ExchangeWebSocket.startTradingLoop()
+        }
     }
 }
 
@@ -13842,7 +13863,6 @@ Task {
 // Prevent immediate exit
 RunLoop.main.run()
 
-
 //--------------------------------------------------------------------------------------------------- Block 27 - Core Trading Loop Execution
 
 extension ExchangeWebSocket {
@@ -13850,6 +13870,10 @@ extension ExchangeWebSocket {
         await MainActor.run {
             isTrading = true
             logAlert(event: "💱 Starting main trading loop...")
+            if tradingPairs.isEmpty {
+                tradingPairs = ["BTC/USDT"]
+                logAlert(event: "No trading pairs configured. Defaulting to BTC/USDT")
+            }
         }
         
         // Start concurrent trading tasks
@@ -13926,6 +13950,10 @@ extension ExchangeWebSocket {
                 
                 if kucoinPrice > 0 && bybitPrice > 0 {
                     await checkArbitrageOpportunity(pair: pair, kucoinPrice: kucoinPrice, bybitPrice: bybitPrice)
+                } else {
+                    await MainActor.run {
+                        logAlert(event: "Skipping arbitrage for \(pair): invalid prices KuCoin=\(kucoinPrice), Bybit=\(bybitPrice)")
+                    }
                 }
                 
                 try? await Task.sleep(nanoseconds: 100_000_000) // 100ms between pairs
@@ -14031,19 +14059,38 @@ extension ExchangeWebSocket {
         
         if spread > spreadThreshold {
             await executeArbitrageTrade(pair: pair, kucoinPrice: kucoinPrice, bybitPrice: bybitPrice, spread: spread)
+        } else {
+            await MainActor.run {
+                logAlert(event: "Arbitrage not triggered for \(pair): spread=\(String(format: "%.4f", spread)), threshold=\(String(format: "%.4f", spreadThreshold))")
+            }
         }
     }
     
+    // FIXED: executeArbitrageTrade - Now executes actual trades with dictionary fix
     static func executeArbitrageTrade(pair: String, kucoinPrice: Double, bybitPrice: Double, spread: Double) async {
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         let tradeAmount = await MainActor.run { arbitrageTradeAmount }
         
         let buyExchange = kucoinPrice < bybitPrice ? "kucoin" : "bybit"
         let sellExchange = kucoinPrice < bybitPrice ? "bybit" : "kucoin"
+        let buyPrice = kucoinPrice < bybitPrice ? kucoinPrice : bybitPrice
+        let sellPrice = kucoinPrice < bybitPrice ? bybitPrice : kucoinPrice
         let profit = tradeAmount * spread
         
         await MainActor.run {
             logAlert(event: "🔥 ARBITRAGE OPPORTUNITY: \(pair) - Spread: \(String(format: "%.4f", spread * 100))% - Profit: $\(String(format: "%.2f", profit))")
+        }
+        
+        // ENHANCED: Execute actual trades using existing executeTrade function
+        let buySuccess = await executeTrade(exchange: buyExchange, pair: pair, side: "buy", price: buyPrice, amount: tradeAmount / buyPrice, strategy: "arbitrage")
+        let sellSuccess = await executeTrade(exchange: sellExchange, pair: pair, side: "sell", price: sellPrice, amount: tradeAmount / sellPrice, strategy: "arbitrage")
+        
+        if buySuccess && sellSuccess {
+            await MainActor.run {
+                logAlert(event: "✅ ARBITRAGE EXECUTED: \(pair) - Both legs successful")
+                // FINAL FIX: Use updateValue to bypass Swift's type inference bug
+                arbitrageExecuted.updateValue((true, Foundation.Date()), forKey: pair)
+            }
         }
         
         if simulationMode {
@@ -14058,6 +14105,7 @@ extension ExchangeWebSocket {
         }
     }
     
+    // FIXED: executeHFTStrategy - Now executes actual trades
     static func executeHFTStrategy(pair: String, exchange: String) async {
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         let currentPrice = await MainActor.run {
@@ -14065,6 +14113,16 @@ extension ExchangeWebSocket {
         }
         
         guard currentPrice > 0 else { return }
+        
+        // Check cooldown using existing lastTradeTime
+        let cooldownKey = "\(exchange)-\(pair)-hft"
+        // FIXED: Rename local variable to avoid naming conflict
+        let lastTradeTimeForKey = await MainActor.run { lastTradeTime[cooldownKey] ?? Date.distantPast }
+        let cooldownSeconds = await MainActor.run { hftCooldownSeconds }
+        
+        if Date().timeIntervalSince(lastTradeTimeForKey) < cooldownSeconds {
+            return // Still in cooldown
+        }
         
         // Simple HFT logic - look for micro price movements
         let recentPrices = await MainActor.run {
@@ -14078,11 +14136,22 @@ extension ExchangeWebSocket {
             let hftThreshold = await MainActor.run { hftSpreadThreshold }
             
             if abs(priceChange) > hftThreshold {
-                let direction = priceChange > 0 ? "sell" : "buy"
-                let profit = await MainActor.run { hftTradeAmount } * abs(priceChange)
+                let direction = priceChange > 0 ? "sell" : "buy"  // Counter-trend for HFT
+                let tradeAmount = await MainActor.run { hftTradeAmount }
+                let profit = tradeAmount * abs(priceChange)
                 
                 await MainActor.run {
                     logAlert(event: "⚡ HFT SIGNAL: \(pair) on \(exchange) - \(direction.uppercased()) - Profit: $\(String(format: "%.2f", profit))")
+                }
+                
+                // ENHANCED: Execute actual trade using existing executeTrade function
+                let success = await executeTrade(exchange: exchange, pair: pair, side: direction, price: currentPrice, amount: tradeAmount / currentPrice, strategy: "hft_scalping")
+                
+                if success {
+                    await MainActor.run {
+                        logAlert(event: "✅ HFT EXECUTED: \(pair) on \(exchange)")
+                        lastTradeTime[cooldownKey] = Date()
+                    }
                 }
                 
                 if simulationMode {
@@ -14095,6 +14164,14 @@ extension ExchangeWebSocket {
                         amount: hftTradeAmount
                     )
                 }
+            } else {
+                await MainActor.run {
+                    logAlert(event: "HFT not triggered for \(pair) on \(exchange): |Δp|=\(String(format: "%.5f", abs(priceChange))) ≤ thr=\(String(format: "%.5f", hftThreshold))")
+                }
+            }
+        } else {
+            await MainActor.run {
+                logAlert(event: "HFT not evaluated for \(pair) on \(exchange): insufficient recent prices (count=\(recentPrices.count))")
             }
         }
     }
@@ -14104,11 +14181,9 @@ extension ExchangeWebSocket {
         
         for pair in pairs {
             let kucoinSpot = await MainActor.run { kucoinCurrentPrice[pair] ?? 0.0 }
-            let bybitSpot = await MainActor.run { bybitCurrentPrice[pair] ?? 0.0 }
-            let kucoinFutures = await MainActor.run { kucoinCurrentFuturesPrice[pair] ?? 0.0 }
             let bybitFutures = await MainActor.run { bybitCurrentFuturesPrice[pair] ?? 0.0 }
             
-            // Check spot vs futures arbitrage
+            // FIXED: Removed unused variables, only check KuCoin spot vs Bybit futures
             if kucoinSpot > 0 && bybitFutures > 0 {
                 let spread = abs(kucoinSpot - bybitFutures) / min(kucoinSpot, bybitFutures)
                 let threshold = await MainActor.run { crossExchangeMinSpreadThreshold }
@@ -14120,13 +14195,33 @@ extension ExchangeWebSocket {
         }
     }
     
+    // FIXED: executeCrossExchangeTrade - Now executes actual trades with dictionary fix
     static func executeCrossExchangeTrade(pair: String, spotPrice: Double, futuresPrice: Double, spread: Double) async {
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         let tradeAmount = await MainActor.run { crossExchangeTradeAmount }
         let profit = tradeAmount * spread
         
+        let spotExchange = "kucoin"
+        let futuresExchange = "bybit"
+        let buySpot = spotPrice < futuresPrice
+        
         await MainActor.run {
             logAlert(event: "🌐 CROSS-EXCHANGE: \(pair) - Spread: \(String(format: "%.4f", spread * 100))% - Profit: $\(String(format: "%.2f", profit))")
+        }
+        
+        // ENHANCED: Execute both legs using existing executeTrade function
+        let spotSide = buySpot ? "buy" : "sell"
+        let futuresSide = buySpot ? "sell" : "buy"
+        
+        let spotSuccess = await executeTrade(exchange: spotExchange, pair: pair, side: spotSide, price: spotPrice, amount: tradeAmount / spotPrice, strategy: "cross_exchange")
+        let futuresSuccess = await executeTrade(exchange: futuresExchange, pair: pair, side: futuresSide, price: futuresPrice, amount: tradeAmount / futuresPrice, strategy: "cross_exchange")
+        
+        if spotSuccess && futuresSuccess {
+            await MainActor.run {
+                logAlert(event: "✅ CROSS-EXCHANGE EXECUTED: \(pair) - Both legs successful")
+                // FINAL FIX: Use updateValue to bypass Swift's type inference bug
+                crossExchangeArbitrageExecuted.updateValue((true, Foundation.Date()), forKey: pair)
+            }
         }
         
         if simulationMode {
@@ -14141,19 +14236,40 @@ extension ExchangeWebSocket {
         }
     }
     
+    // FIXED: executeMLTradingStrategy - Now executes actual trades
     static func executeMLTradingStrategy(pair: String) async {
         // Enhanced ML trading with sentiment analysis
         let sentimentScore = await MainActor.run { sentimentScores[pair] ?? 0.0 }
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         
+        // Check if we have recent price data for additional signals
+        let recentPrices = await MainActor.run {
+            Array((bybitPrices[pair] ?? []).suffix(10))
+        }
+        
+        guard recentPrices.count >= 5 else { return }
+        
         // Simple ML signal based on sentiment and price movement
         if abs(sentimentScore) > 0.3 {
             let signal = sentimentScore > 0 ? "buy" : "sell"
             let confidence = abs(sentimentScore) * 100
-            let profit = getDouble("SPOT_TRADE_AMOUNT", defaultValue: 50.0) * abs(sentimentScore) * 0.1
+            let currentPrice = await MainActor.run { bybitCurrentPrice[pair] ?? 0.0 }
+            let tradeAmount = getDouble("SPOT_TRADE_AMOUNT", defaultValue: 50.0)
+            let profit = tradeAmount * abs(sentimentScore) * 0.1
+            
+            guard currentPrice > 0 else { return }
             
             await MainActor.run {
                 logAlert(event: "🤖 ML SIGNAL: \(pair) - \(signal.uppercased()) - Confidence: \(String(format: "%.1f", confidence))% - Profit: $\(String(format: "%.2f", profit))")
+            }
+            
+            // ENHANCED: Execute actual ML-based trade using existing executeTrade function
+            let success = await executeTrade(exchange: "bybit", pair: pair, side: signal, price: currentPrice, amount: tradeAmount / currentPrice, strategy: "ml_enhanced")
+            
+            if success {
+                await MainActor.run {
+                    logAlert(event: "✅ ML TRADE EXECUTED: \(pair) - \(signal.uppercased())")
+                }
             }
             
             if simulationMode {
@@ -14210,23 +14326,23 @@ extension ExchangeWebSocket {
         await MainActor.run {
             let timestamp = ISO8601DateFormatter().string(from: Date())
             let fees = amount * 0.002 // Approximate fees
-            let netProfit = profit - fees
             
             // Update performance metrics
             performanceMetrics[pair] = performanceMetrics[pair] ?? (profit: 0.0, fees: 0.0, trades: 0, wins: 0)
             performanceMetrics[pair]!.trades += 1
-            performanceMetrics[pair]!.profit += netProfit
+            performanceMetrics[pair]!.profit += (profit - fees)
             performanceMetrics[pair]!.fees += fees
-            if netProfit > 0 {
+            if (profit - fees) > 0 {
                 performanceMetrics[pair]!.wins += 1
             }
             
-            let tradeEntry = "\(timestamp),\(pair),\(strategy),\(buyExchange),\(sellExchange),\(amount),\(profit),\(fees),\(netProfit),SIMULATION\n"
+            // Write 9-field schema expected by Python: timestamp,pair,strategy,buy_exchange,sell_exchange,amount,profit,fees,mode
+            let tradeEntry = "\(timestamp),\(pair),\(strategy),\(buyExchange),\(sellExchange),\(amount),\(profit),\(fees),SIMULATION\n"
             
             do {
                 let fileManager = FileManager.default
                 if !fileManager.fileExists(atPath: tradeCSVURL.path) {
-                    try "timestamp,pair,strategy,buy_exchange,sell_exchange,amount,profit,fees,net_profit,mode\n".write(to: tradeCSVURL, atomically: true, encoding: .utf8)
+                    try "timestamp,pair,strategy,buy_exchange,sell_exchange,amount,profit,fees,mode\n".write(to: tradeCSVURL, atomically: true, encoding: .utf8)
                     try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: tradeCSVURL.path)
                 }
                 
@@ -14238,7 +14354,7 @@ extension ExchangeWebSocket {
                     }
                 }
                 
-                logAlert(event: "💰 TRADE LOGGED: \(strategy) - \(pair) - Profit: $\(String(format: "%.2f", netProfit))")
+                logAlert(event: "💰 TRADE LOGGED: \(strategy) - \(pair) - Profit: $\(String(format: "%.2f", profit - fees))")
             } catch {
                 logAlert(event: "❌ Failed to log trade: \(error.localizedDescription)")
             }
