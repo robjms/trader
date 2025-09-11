@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BevaixBot - Live Trading Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1c2128;
+            --bg-tertiary: #21262d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --text-muted: #656d76;
+            --border-primary: #30363d;
+            --border-secondary: #21262d;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-red: #f85149;
+            --accent-orange: #d29922;
+            --accent-purple: #a5a3ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            width: 100vw;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .status {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .status-live {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .connection-status {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+        }
+
+        .connection-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .connection-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .connected {
+            background: var(--accent-green);
+        }
+
+        .disconnected {
+            background: var(--accent-red);
+        }
+
+        .refresh-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .refresh-btn:hover {
+            background: var(--accent-purple);
+        }
+
+        .main-container {
+            width: 100vw;
+            padding: 8px;
+            min-height: calc(100vh - 60px);
+        }
+
+        .balance-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .metric-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            min-height: 100px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .metric-change {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .positive {
+            color: var(--accent-green);
+        }
+
+        .negative {
+            color: var(--accent-red);
+        }
+
+        .neutral {
+            color: var(--text-secondary);
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .chart-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: 16px;
+            grid-column: 1 / -1;
+        }
+
+        .activity-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-secondary);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: rgba(63, 185, 80, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .badge-danger {
+            background: rgba(248, 81, 73, 0.1);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .badge-warning {
+            background: rgba(210, 153, 34, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid var(--accent-orange);
+        }
+
+        .badge-info {
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+        }
+
+        .price-matrix-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            padding: 16px;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .table th {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 11px;
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+
+        .table tbody tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .spread-high {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .spread-medium {
+            color: var(--accent-orange);
+            font-weight: 600;
+        }
+
+        .spread-low {
+            color: var(--text-secondary);
+        }
+
+        .activity-feed {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-secondary);
+            font-size: 12px;
+        }
+
+        .activity-time {
+            color: var(--text-muted);
+            font-size: 10px;
+            min-width: 50px;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .chart-container {
+            height: 250px;
+            margin-top: 8px;
+        }
+
+        .error-message {
+            background: rgba(248, 81, 73, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 6px;
+            padding: 12px;
+            margin: 8px 0;
+            color: var(--accent-red);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-primary);
+            border-radius: 3px;
+        }
+
+        @media (max-width: 1400px) {
+            .balance-grid, .performance-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .balance-grid, .performance-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">BevaixBot Trading System</div>
+        <div class="status">
+            <div class="status-live">
+                <div class="status-dot"></div>
+                <span>LIVE TRADING</span>
+            </div>
+            <div class="connection-status">
+                <div class="connection-item">
+                    <div class="connection-dot disconnected" id="kucoin-status"></div>
+                    <span>KuCoin</span>
+                </div>
+                <div class="connection-item">
+                    <div class="connection-dot disconnected" id="bybit-status"></div>
+                    <span>Bybit</span>
+                </div>
+            </div>
+            <button class="refresh-btn" onclick="forceRefreshData()">🔄 REFRESH</button>
+            <div id="current-time" style="font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 11px;"></div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Balance Overview -->
+        <div class="balance-grid">
+            <div class="metric-card">
+                <div class="metric-value" id="kucoin-balance">$0.00</div>
+                <div class="metric-label">KuCoin Balance</div>
+                <div class="metric-change neutral" id="kucoin-change">No Data</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="bybit-balance">$0.00</div>
+                <div class="metric-label">Bybit Balance</div>
+                <div class="metric-change neutral" id="bybit-change">No Data</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="total-balance">$0.00</div>
+                <div class="metric-label">Total Portfolio</div>
+                <div class="metric-change neutral" id="total-change">No Data</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="daily-pnl">$0.00</div>
+                <div class="metric-label">Daily P&L</div>
+                <div class="metric-change neutral" id="daily-pnl-change">No Data</div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="performance-grid">
+            <div class="metric-card">
+                <div class="metric-value" id="total-trades">0</div>
+                <div class="metric-label">Total Trades</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="win-rate">0%</div>
+                <div class="metric-label">Win Rate</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="avg-latency">0ms</div>
+                <div class="metric-label">Avg Latency</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="trades-per-hour">0</div>
+                <div class="metric-label">Trades/Hour</div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Recent Trades -->
+            <div class="activity-card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Trades</h3>
+                    <div class="badge badge-info" id="trade-count">0 today</div>
+                </div>
+                <div class="activity-feed" id="recent-trades">
+                    <div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px;">
+                        No trades executed yet
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Alerts -->
+            <div class="activity-card">
+                <div class="card-header">
+                    <h3 class="card-title">System Alerts</h3>
+                    <div class="badge badge-warning" id="alert-count">0 active</div>
+                </div>
+                <div class="activity-feed" id="system-alerts">
+                    <!-- Alerts will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="chart-card">
+            <div class="card-header">
+                <h3 class="card-title">Portfolio Performance</h3>
+                <div class="badge badge-info">Real-time</div>
+            </div>
+            <div class="chart-container" id="performance-chart"></div>
+        </div>
+
+        <!-- Live Price Matrix - AT BOTTOM -->
+        <div class="price-matrix-card">
+            <div class="card-header">
+                <h3 class="card-title">Live Price Matrix & Arbitrage Opportunities</h3>
+                <div class="badge badge-info">22 Pairs Active</div>
+            </div>
+            <div class="error-message" id="data-error" style="display: none;">
+                ❌ NO LIVE DATA - Ensure your Swift bot is running and dashboard.json is being generated
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Pair</th>
+                        <th>KuCoin Spot</th>
+                        <th>KuCoin Futures</th>
+                        <th>Bybit Spot</th>
+                        <th>Bybit Futures</th>
+                        <th>Spread %</th>
+                        <th>Opportunity</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="price-matrix">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Trading pairs from your .env file
+        const TRADING_PAIRS = [
+            'BTC-USDT', 'ETH-USDT', 'SOL-USDT', 'LINK-USDT', 'FLOKI-USDT', 'TON-USDT',
+            'NEAR-USDT', 'ARB-USDT', 'WIF-USDT', 'PEPE-USDT', 'BONK-USDT', 'SHIB-USDT',
+            'XRP-USDT', 'ADA-USDT', 'DOGE-USDT', 'AVAX-USDT', 'DOT-USDT', 'MATIC-USDT',
+            'SUI-USDT', 'APT-USDT', 'INJ-USDT', 'OP-USDT'
+        ];
+
+        let portfolioChart = null;
+        let lastUpdateTime = 0;
+        let dataConnected = false;
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            initializePerformanceChart();
+            initializePriceMatrix();
+            
+            // Try to get data immediately, then every 5 seconds
+            fetchDashboardData();
+            setInterval(fetchDashboardData, 5000);
+        }
+
+        // Update system clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-time').textContent =
+                now.toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        // Initialize performance chart
+        function initializePerformanceChart() {
+            const layout = {
+                title: false,
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#f0f6fc', family: 'Inter' },
+                xaxis: {
+                    gridcolor: '#30363d',
+                    linecolor: '#30363d',
+                    tickcolor: '#30363d'
+                },
+                yaxis: {
+                    gridcolor: '#30363d',
+                    linecolor: '#30363d',
+                    tickcolor: '#30363d',
+                    tickformat: '$,.2f'
+                },
+                margin: { l: 40, r: 20, t: 20, b: 30 }
+            };
+
+            const data = [{
+                x: [],
+                y: [],
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: '#3fb950', width: 2 },
+                name: 'Portfolio Value'
+            }];
+
+            Plotly.newPlot('performance-chart', data, layout, {
+                responsive: true,
+                displayModeBar: false
+            });
+        }
+
+        // Initialize price matrix
+        function initializePriceMatrix() {
+            const tbody = document.getElementById('price-matrix');
+            tbody.innerHTML = '';
+            
+            TRADING_PAIRS.forEach(pair => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 600;">${pair}</td>
+                    <td id="${pair}-kucoin-spot">--</td>
+                    <td id="${pair}-kucoin-futures">--</td>
+                    <td id="${pair}-bybit-spot">--</td>
+                    <td id="${pair}-bybit-futures">--</td>
+                    <td id="${pair}-spread" class="spread-low">--</td>
+                    <td id="${pair}-opportunity">--</td>
+                    <td id="${pair}-status">
+                        <span class="badge badge-danger">NO DATA</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Force refresh data (manual button click)
+        function forceRefreshData() {
+            console.log('🔄 Manual refresh triggered');
+            addAlert('🔄 Manual refresh triggered', 'info');
+            fetchDashboardData();
+        }
+
+        // Fetch dashboard data from multiple sources
+        async function fetchDashboardData() {
+            const sources = [
+                '/api/dashboard',
+                '/dashboard.json',
+                './dashboard.json',
+                '../dashboard.json',
+                '../Output/dashboard.json',
+                '/Users/robertsteinegger/Desktop/BevaixBot/dashboard.json',
+                '/BevaixBot/dashboard.json'
+            ];
+
+            console.log('🔍 Attempting to fetch data from sources...');
+
+            for (const source of sources) {
+                try {
+                    console.log(`Trying: ${source}`);
+                    const response = await fetch(source);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`✅ SUCCESS: Got data from ${source}`, data);
+                        
+                        updateDashboardWithRealData(data);
+                        updateConnectionStatus(true);
+                        document.getElementById('data-error').style.display = 'none';
+                        
+                        if (!dataConnected) {
+                            addAlert(`✅ Connected to live data: ${source}`, 'success');
+                            dataConnected = true;
+                        }
+                        return;
+                    }
+                } catch (error) {
+                    console.log(`❌ ${source}: ${error.message}`);
+                }
+            }
+
+            // No data found
+            console.log('❌ All data sources failed');
+            updateConnectionStatus(false);
+            document.getElementById('data-error').style.display = 'block';
+            dataConnected = false;
+            
+            addAlert('❌ No live data sources found', 'danger');
+            addAlert('Ensure your Swift bot is running and generating dashboard.json', 'warning');
+        }
+
+        // Update dashboard with real data
+        function updateDashboardWithRealData(data) {
+            console.log('📊 Updating dashboard with data:', data);
+
+            // Handle the old dashboard data structure (from /api/new_dashboard)
+            if (data.balances) {
+                updateBalances(data.balances);
+            }
+            
+            if (data.prices) {
+                updatePriceMatrix(data.prices);
+            }
+            
+            if (data.trades) {
+                updateRecentTrades(data.trades);
+            }
+            
+            if (data.metrics) {
+                updateMetrics(data.metrics);
+            }
+            
+            if (data.alerts) {
+                updateAlerts(data.alerts);
+            }
+
+            // Handle direct data structure (from dashboard.json)
+            if (data.kucoinBalance !== undefined) {
+                const balances = {
+                    kucoin: parseFloat(data.kucoinBalance || 0) + parseFloat(data.kucoinFuturesBalance || 0),
+                    bybit: parseFloat(data.bybitBalance || 0) + parseFloat(data.bybitFuturesBalance || 0)
+                };
+                updateBalances(balances);
+            }
+            
+            // Update chart if we have timestamp
+            if (data.timestamp) {
+                const total = (parseFloat(data.kucoinBalance || 0) + parseFloat(data.kucoinFuturesBalance || 0) +
+                              parseFloat(data.bybitBalance || 0) + parseFloat(data.bybitFuturesBalance || 0));
+                updatePerformanceChart(data.timestamp, total);
+            }
+
+            lastUpdateTime = Date.now();
+        }
+
+        // Update balances (from old dashboard)
+        function updateBalances(balances) {
+            const kucoin = balances.kucoin || 0;
+            const bybit = balances.bybit || 0;
+            const total = kucoin + bybit;
+            
+            document.getElementById('kucoin-balance').textContent = `${kucoin.toFixed(2)}`;
+            document.getElementById('bybit-balance').textContent = `${bybit.toFixed(2)}`;
+            document.getElementById('total-balance').textContent = `${total.toFixed(2)}`;
+            
+            // Update changes
+            document.getElementById('kucoin-change').textContent = 'Live Data';
+            document.getElementById('kucoin-change').className = 'metric-change positive';
+            document.getElementById('bybit-change').textContent = 'Live Data';
+            document.getElementById('bybit-change').className = 'metric-change positive';
+            document.getElementById('total-change').textContent = 'Live Data';
+            document.getElementById('total-change').className = 'metric-change positive';
+            document.getElementById('daily-pnl-change').textContent = 'Live Data';
+            document.getElementById('daily-pnl-change').className = 'metric-change positive';
+        }
+
+        // Update metrics (from old dashboard)
+        function updateMetrics(metrics) {
+            document.getElementById('total-trades').textContent = metrics.total_trades || 0;
+            document.getElementById('win-rate').textContent = (metrics.win_rate || 0).toFixed(1) + '%';
+            document.getElementById('daily-pnl').textContent = '
+
+        // Update price matrix
+        function updatePriceMatrix(prices) {
+            TRADING_PAIRS.forEach(pair => {
+                const pairData = prices[pair];
+                if (!pairData) return;
+
+                // Update prices with proper formatting
+                if (pairData.kucoin_spot !== undefined) {
+                    const price = parseFloat(pairData.kucoin_spot);
+                    const formatted = price < 1 ? price.toFixed(6) : price.toFixed(2);
+                    document.getElementById(`${pair}-kucoin-spot`).textContent = `$${formatted}`;
+                }
+                if (pairData.kucoin_futures !== undefined) {
+                    const price = parseFloat(pairData.kucoin_futures);
+                    const formatted = price < 1 ? price.toFixed(6) : price.toFixed(2);
+                    document.getElementById(`${pair}-kucoin-futures`).textContent = `$${formatted}`;
+                }
+                if (pairData.bybit_spot !== undefined) {
+                    const price = parseFloat(pairData.bybit_spot);
+                    const formatted = price < 1 ? price.toFixed(6) : price.toFixed(2);
+                    document.getElementById(`${pair}-bybit-spot`).textContent = `$${formatted}`;
+                }
+                if (pairData.bybit_futures !== undefined) {
+                    const price = parseFloat(pairData.bybit_futures);
+                    const formatted = price < 1 ? price.toFixed(6) : price.toFixed(2);
+                    document.getElementById(`${pair}-bybit-futures`).textContent = `$${formatted}`;
+                }
+
+                // Calculate spread
+                const kucoinPrice = parseFloat(pairData.kucoin_spot || 0);
+                const bybitPrice = parseFloat(pairData.bybit_spot || 0);
+                
+                if (kucoinPrice > 0 && bybitPrice > 0) {
+                    const spread = Math.abs(kucoinPrice - bybitPrice);
+                    const spreadPercent = (spread / Math.min(kucoinPrice, bybitPrice)) * 100;
+                    
+                    const spreadElement = document.getElementById(`${pair}-spread`);
+                    spreadElement.textContent = `${spreadPercent.toFixed(3)}%`;
+                    
+                    // Color code based on spread
+                    spreadElement.className = spreadPercent > 0.2 ? 'spread-high' :
+                                            spreadPercent > 0.1 ? 'spread-medium' : 'spread-low';
+                    
+                    // Update opportunity
+                    const opportunityElement = document.getElementById(`${pair}-opportunity`);
+                    if (spreadPercent > 0.2) {
+                        opportunityElement.innerHTML = '<span class="badge badge-success">HIGH</span>';
+                    } else if (spreadPercent > 0.1) {
+                        opportunityElement.innerHTML = '<span class="badge badge-warning">MEDIUM</span>';
+                    } else {
+                        opportunityElement.innerHTML = '<span class="badge badge-info">LOW</span>';
+                    }
+                    
+                    // Update status
+                    const statusElement = document.getElementById(`${pair}-status`);
+                    if (spreadPercent > 0.15) {
+                        statusElement.innerHTML = '<span class="badge badge-success">READY</span>';
+                    } else {
+                        statusElement.innerHTML = '<span class="badge badge-info">MONITORING</span>';
+                    }
+                }
+            });
+        }
+
+        // Update portfolio chart
+        function updatePerformanceChart(timestamp, totalBalance) {
+            const trace = {
+                x: [[new Date(timestamp)]],
+                y: [[parseFloat(totalBalance)]],
+                type: 'scatter',
+                mode: 'lines+markers'
+            };
+            
+            Plotly.extendTraces('performance-chart', trace, [0]);
+            
+            // Keep only last 50 points
+            if (document.getElementById('performance-chart').data[0].x.length > 50) {
+                Plotly.relayout('performance-chart', {
+                    'xaxis.range': [
+                        document.getElementById('performance-chart').data[0].x.slice(-50)[0],
+                        document.getElementById('performance-chart').data[0].x.slice(-1)[0]
+                    ]
+                });
+            }
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const kucoinStatus = document.getElementById('kucoin-status');
+            const bybitStatus = document.getElementById('bybit-status');
+            
+            if (connected) {
+                kucoinStatus.className = 'connection-dot connected';
+                bybitStatus.className = 'connection-dot connected';
+            } else {
+                kucoinStatus.className = 'connection-dot disconnected';
+                bybitStatus.className = 'connection-dot disconnected';
+            }
+        }
+
+        // Add alert
+        function addAlert(message, type = 'info') {
+            const alertsContainer = document.getElementById('system-alerts');
+            const alertItem = document.createElement('div');
+            alertItem.className = 'activity-item';
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+            
+            const icon = type === 'success' ? '✅' :
+                        type === 'warning' ? '⚠️' :
+                        type === 'danger' ? '❌' : '🔔';
+            
+            alertItem.innerHTML = `
+                <div class="activity-time">${timeString}</div>
+                <div class="activity-content">${icon} ${message}</div>
+            `;
+            
+            alertsContainer.insertBefore(alertItem, alertsContainer.firstChild);
+            
+            // Keep only last 20 alerts
+            while (alertsContainer.children.length > 20) {
+                alertsContainer.removeChild(alertsContainer.lastChild);
+            }
+            
+            // Update alert count
+            const alertCount = alertsContainer.children.length;
+            document.getElementById('alert-count').textContent = `${alertCount} active`;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+            
+            addAlert('🚀 BevaixBot dashboard starting...', 'info');
+            addAlert('🔍 Searching for live trading data...', 'info');
+        });
+    </script>
+</body>
+</html> + (metrics.total_profit || 0).toFixed(2);
+            document.getElementById('trades-per-hour').textContent = Math.floor((metrics.total_trades || 0) / 60);
+            document.getElementById('trade-count').textContent = `${metrics.total_trades || 0} today`;
+        }
+
+        // Update recent trades (from old dashboard)
+        function updateRecentTrades(trades) {
+            const container = document.getElementById('recent-trades');
+            container.innerHTML = '';
+            
+            if (trades.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px;">No trades executed yet</div>';
+                return;
+            }
+            
+            // Display last 10 trades
+            trades.slice(0, 10).forEach(trade => {
+                if (Array.isArray(trade) && trade.length >= 9) {
+                    const tradeDiv = document.createElement('div');
+                    tradeDiv.className = 'activity-item';
+                    
+                    const timestamp = new Date(trade[0]).toLocaleTimeString();
+                    const pair = trade[1] || 'N/A';
+                    const strategy = trade[2] || 'N/A';
+                    const exchange = trade[3] || 'N/A';
+                    const side = trade[4] || 'BUY';
+                    const amount = parseFloat(trade[5]) || 0;
+                    const price = parseFloat(trade[6]) || 0;
+                    const profit = parseFloat(trade[7]) || 0;
+                    const fees = parseFloat(trade[8]) || 0;
+                    const netProfit = profit - fees;
+                    
+                    tradeDiv.innerHTML = `
+                        <div class="activity-time">${timestamp}</div>
+                        <div class="activity-content">
+                            <strong>${pair}</strong> - ${exchange} - ${strategy} - ${side}
+                            ${amount.toFixed(4)} @ ${price.toFixed(2)}
+                            <span style="color: ${netProfit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'};">
+                                ${netProfit >= 0 ? '+' : ''}${netProfit.toFixed(2)}
+                            </span>
+                        </div>
+                    `;
+                    
+                    container.appendChild(tradeDiv);
+                }
+            });
+        }
+
+        // Update alerts (from old dashboard)
+        function updateAlerts(alerts) {
+            // Only show last 10 alerts
+            alerts.slice(0, 10).forEach(alert => {
+                if (Array.isArray(alert) && alert.length >= 2) {
+                    addAlert(alert[1], 'info');
+                }
+            });
+        }
+
+        // Update price matrix
+        function updatePriceMatrix(prices) {
+            TRADING_PAIRS.forEach(pair => {
+                const pairData = prices[pair];
+                if (!pairData) return;
+
+                // Update prices with proper formatting
+                if (pairData.kucoin_spot !== undefined) {
+                    const price = parseFloat(pairData.kucoin_spot);
+                    const formatted = price < 1 ? price.toFixed(6) : price.toFixed(2);
+                    document.getElementById(`${pair}-kucoin-spot`).textContent = `$${formatted}`;
+                }
+                if (pairData.kucoin_futures !== undefined) {
+                    const price = parseFloat(pairData.kucoin_futures);
+                    const formatted = price < 1 ? price.toFixed(6) : price.toFixed(2);
+                    document.getElementById(`${pair}-kucoin-futures`).textContent = `$${formatted}`;
+                }
+                if (pairData.bybit_spot !== undefined) {
+                    const price = parseFloat(pairData.bybit_spot);
+                    const formatted = price < 1 ? price.toFixed(6) : price.toFixed(2);
+                    document.getElementById(`${pair}-bybit-spot`).textContent = `$${formatted}`;
+                }
+                if (pairData.bybit_futures !== undefined) {
+                    const price = parseFloat(pairData.bybit_futures);
+                    const formatted = price < 1 ? price.toFixed(6) : price.toFixed(2);
+                    document.getElementById(`${pair}-bybit-futures`).textContent = `$${formatted}`;
+                }
+
+                // Calculate spread
+                const kucoinPrice = parseFloat(pairData.kucoin_spot || 0);
+                const bybitPrice = parseFloat(pairData.bybit_spot || 0);
+                
+                if (kucoinPrice > 0 && bybitPrice > 0) {
+                    const spread = Math.abs(kucoinPrice - bybitPrice);
+                    const spreadPercent = (spread / Math.min(kucoinPrice, bybitPrice)) * 100;
+                    
+                    const spreadElement = document.getElementById(`${pair}-spread`);
+                    spreadElement.textContent = `${spreadPercent.toFixed(3)}%`;
+                    
+                    // Color code based on spread
+                    spreadElement.className = spreadPercent > 0.2 ? 'spread-high' :
+                                            spreadPercent > 0.1 ? 'spread-medium' : 'spread-low';
+                    
+                    // Update opportunity
+                    const opportunityElement = document.getElementById(`${pair}-opportunity`);
+                    if (spreadPercent > 0.2) {
+                        opportunityElement.innerHTML = '<span class="badge badge-success">HIGH</span>';
+                    } else if (spreadPercent > 0.1) {
+                        opportunityElement.innerHTML = '<span class="badge badge-warning">MEDIUM</span>';
+                    } else {
+                        opportunityElement.innerHTML = '<span class="badge badge-info">LOW</span>';
+                    }
+                    
+                    // Update status
+                    const statusElement = document.getElementById(`${pair}-status`);
+                    if (spreadPercent > 0.15) {
+                        statusElement.innerHTML = '<span class="badge badge-success">READY</span>';
+                    } else {
+                        statusElement.innerHTML = '<span class="badge badge-info">MONITORING</span>';
+                    }
+                }
+            });
+        }
+
+        // Update portfolio chart
+        function updatePerformanceChart(timestamp, totalBalance) {
+            const trace = {
+                x: [[new Date(timestamp)]],
+                y: [[parseFloat(totalBalance)]],
+                type: 'scatter',
+                mode: 'lines+markers'
+            };
+            
+            Plotly.extendTraces('performance-chart', trace, [0]);
+            
+            // Keep only last 50 points
+            if (document.getElementById('performance-chart').data[0].x.length > 50) {
+                Plotly.relayout('performance-chart', {
+                    'xaxis.range': [
+                        document.getElementById('performance-chart').data[0].x.slice(-50)[0],
+                        document.getElementById('performance-chart').data[0].x.slice(-1)[0]
+                    ]
+                });
+            }
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const kucoinStatus = document.getElementById('kucoin-status');
+            const bybitStatus = document.getElementById('bybit-status');
+            
+            if (connected) {
+                kucoinStatus.className = 'connection-dot connected';
+                bybitStatus.className = 'connection-dot connected';
+            } else {
+                kucoinStatus.className = 'connection-dot disconnected';
+                bybitStatus.className = 'connection-dot disconnected';
+            }
+        }
+
+        // Add alert
+        function addAlert(message, type = 'info') {
+            const alertsContainer = document.getElementById('system-alerts');
+            const alertItem = document.createElement('div');
+            alertItem.className = 'activity-item';
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+            
+            const icon = type === 'success' ? '✅' :
+                        type === 'warning' ? '⚠️' :
+                        type === 'danger' ? '❌' : '🔔';
+            
+            alertItem.innerHTML = `
+                <div class="activity-time">${timeString}</div>
+                <div class="activity-content">${icon} ${message}</div>
+            `;
+            
+            alertsContainer.insertBefore(alertItem, alertsContainer.firstChild);
+            
+            // Keep only last 20 alerts
+            while (alertsContainer.children.length > 20) {
+                alertsContainer.removeChild(alertsContainer.lastChild);
+            }
+            
+            // Update alert count
+            const alertCount = alertsContainer.children.length;
+            document.getElementById('alert-count').textContent = `${alertCount} active`;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDashboard();
+            
+            addAlert('🚀 BevaixBot dashboard starting...', 'info');
+            addAlert('🔍 Searching for live trading data...', 'info');
+        });
+    </script>
+</body>
+</html>
