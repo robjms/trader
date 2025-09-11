@@ -14041,7 +14041,7 @@ extension ExchangeWebSocket {
         }
     }
     
-    // FIXED: executeArbitrageTrade - Now executes actual trades
+    // FIXED: executeArbitrageTrade - Now executes actual trades with dictionary fix
     static func executeArbitrageTrade(pair: String, kucoinPrice: Double, bybitPrice: Double, spread: Double) async {
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         let tradeAmount = await MainActor.run { arbitrageTradeAmount }
@@ -14056,15 +14056,15 @@ extension ExchangeWebSocket {
             logAlert(event: "🔥 ARBITRAGE OPPORTUNITY: \(pair) - Spread: \(String(format: "%.4f", spread * 100))% - Profit: $\(String(format: "%.2f", profit))")
         }
         
-        // FIXED: Execute actual trades using existing executeTrade function
+        // ENHANCED: Execute actual trades using existing executeTrade function
         let buySuccess = await executeTrade(exchange: buyExchange, pair: pair, side: "buy", price: buyPrice, amount: tradeAmount, strategy: "arbitrage")
         let sellSuccess = await executeTrade(exchange: sellExchange, pair: pair, side: "sell", price: sellPrice, amount: tradeAmount, strategy: "arbitrage")
         
         if buySuccess && sellSuccess {
             await MainActor.run {
                 logAlert(event: "✅ ARBITRAGE EXECUTED: \(pair) - Both legs successful")
-                // FIXED: Use explicit tuple assignment instead of generic
-                arbitrageExecuted[pair] = (true, Date())
+                // FINAL FIX: Use updateValue to bypass Swift's type inference bug
+                arbitrageExecuted.updateValue((true, Foundation.Date()), forKey: pair)
             }
         }
         
@@ -14110,7 +14110,7 @@ extension ExchangeWebSocket {
             let hftThreshold = await MainActor.run { hftSpreadThreshold }
             
             if abs(priceChange) > hftThreshold {
-                let direction = priceChange > 0 ? "sell" : "buy"
+                let direction = priceChange > 0 ? "sell" : "buy"  // Counter-trend for HFT
                 let tradeAmount = await MainActor.run { hftTradeAmount }
                 let profit = tradeAmount * abs(priceChange)
                 
@@ -14118,7 +14118,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "⚡ HFT SIGNAL: \(pair) on \(exchange) - \(direction.uppercased()) - Profit: $\(String(format: "%.2f", profit))")
                 }
                 
-                // FIXED: Execute actual trade using existing executeTrade function
+                // ENHANCED: Execute actual trade using existing executeTrade function
                 let success = await executeTrade(exchange: exchange, pair: pair, side: direction, price: currentPrice, amount: tradeAmount, strategy: "hft_scalping")
                 
                 if success {
@@ -14161,7 +14161,7 @@ extension ExchangeWebSocket {
         }
     }
     
-    // FIXED: executeCrossExchangeTrade - Now executes actual trades
+    // FIXED: executeCrossExchangeTrade - Now executes actual trades with dictionary fix
     static func executeCrossExchangeTrade(pair: String, spotPrice: Double, futuresPrice: Double, spread: Double) async {
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         let tradeAmount = await MainActor.run { crossExchangeTradeAmount }
@@ -14175,7 +14175,7 @@ extension ExchangeWebSocket {
             logAlert(event: "🌐 CROSS-EXCHANGE: \(pair) - Spread: \(String(format: "%.4f", spread * 100))% - Profit: $\(String(format: "%.2f", profit))")
         }
         
-        // FIXED: Execute both legs using existing executeTrade function
+        // ENHANCED: Execute both legs using existing executeTrade function
         let spotSide = buySpot ? "buy" : "sell"
         let futuresSide = buySpot ? "sell" : "buy"
         
@@ -14185,9 +14185,8 @@ extension ExchangeWebSocket {
         if spotSuccess && futuresSuccess {
             await MainActor.run {
                 logAlert(event: "✅ CROSS-EXCHANGE EXECUTED: \(pair) - Both legs successful")
-                // FIXED: Explicit type annotation to resolve generic parameter inference
-                let crossExchangeResult: (Bool, Date) = (true, Date())
-                crossExchangeArbitrageExecuted[pair] = crossExchangeResult
+                // FINAL FIX: Use updateValue to bypass Swift's type inference bug
+                crossExchangeArbitrageExecuted.updateValue((true, Foundation.Date()), forKey: pair)
             }
         }
         
@@ -14230,7 +14229,7 @@ extension ExchangeWebSocket {
                 logAlert(event: "🤖 ML SIGNAL: \(pair) - \(signal.uppercased()) - Confidence: \(String(format: "%.1f", confidence))% - Profit: $\(String(format: "%.2f", profit))")
             }
             
-            // FIXED: Execute actual ML-based trade using existing executeTrade function
+            // ENHANCED: Execute actual ML-based trade using existing executeTrade function
             let success = await executeTrade(exchange: "bybit", pair: pair, side: signal, price: currentPrice, amount: tradeAmount, strategy: "ml_enhanced")
             
             if success {
