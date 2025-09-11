@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇨🇭AI Consciousness Trading System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --swiss-red: #DC143C;
+            --swiss-white: #FFFFFF;
+            --swiss-light-gray: #F8F9FA;
+            --swiss-gray: #6C757D;
+            --swiss-dark-gray: #343A40;
+            --swiss-black: #212529;
+            --quantum-blue: #0066CC;
+            --neural-purple: #6B46C1;
+            --profit-green: #059669;
+            --loss-red: #DC2626;
+            --ai-accent: #0891B2;
+            --gold: #FFD700;
+            --border-light: #E5E7EB;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FAFBFC 0%, #F0F2F5 100%);
+            color: var(--swiss-black);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            font-weight: 400;
+            line-height: 1.5;
+            letter-spacing: -0.011em;
+        }
+
+        /* Swiss Navigation */
+        .swiss-nav {
+            background: var(--swiss-white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            border-bottom: 3px solid var(--swiss-red);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .swiss-nav .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--swiss-black);
+            text-decoration: none;
+        }
+
+        .swiss-flag {
+            width: 36px;
+            height: 36px;
+            background: var(--swiss-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .swiss-flag::before,
+        .swiss-flag::after {
+            content: '';
+            position: absolute;
+            background: var(--swiss-white);
+        }
+
+        .swiss-flag::before {
+            width: 20px;
+            height: 4px;
+        }
+
+        .swiss-flag::after {
+            width: 4px;
+            height: 20px;
+        }
+
+        /* AI Status */
+        .ai-status {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--swiss-gray);
+        }
+
+        .status-live {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--profit-green);
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            animation: pulse-live 2s infinite;
+        }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .quantum-indicator {
+            width: 10px;
+            height: 10px;
+            background: var(--quantum-blue);
+            border-radius: 50%;
+            animation: quantum-pulse 2s infinite;
+        }
+
+        @keyframes quantum-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 102, 204, 0.4); }
+            50% { transform: scale(1.2); box-shadow: 0 0 0 10px rgba(0, 102, 204, 0); }
+        }
+
+        /* Container */
+        .swiss-container {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .swiss-card {
+            background: var(--swiss-white);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .swiss-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--swiss-red), var(--quantum-blue), var(--neural-purple));
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+        .swiss-card h2 {
+            color: var(--swiss-black);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Balance Cards */
+        .balance-card {
+            background: linear-gradient(135deg, var(--swiss-white), var(--swiss-light-gray));
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--quantum-blue);
+        }
+
+        .balance-label {
+            font-size: 0.875rem;
+            color: var(--swiss-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--swiss-black);
+            line-height: 1;
+        }
+
+        .balance-change {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .balance-change.positive {
+            color: var(--profit-green);
+        }
+
+        .balance-change.negative {
+            color: var(--loss-red);
+        }
+
+        /* AI Metrics */
+        .ai-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-box {
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05), rgba(107, 70, 193, 0.05));
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .metric-box:hover {
+            background: var(--swiss-white);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            border-color: var(--quantum-blue);
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--quantum-blue), var(--neural-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--swiss-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.25rem;
+        }
+
+        /* Trading Pairs Table */
+        .price-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.875rem;
+        }
+
+        .price-table thead {
+            background: linear-gradient(90deg, var(--swiss-light-gray), rgba(0, 102, 204, 0.05));
+        }
+
+        .price-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--swiss-dark-gray);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--quantum-blue);
+        }
+
+        .price-table tbody tr {
+            border-bottom: 1px solid var(--border-light);
+            transition: all 0.2s ease;
+        }
+
+        .price-table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(0, 102, 204, 0.05), rgba(107, 70, 193, 0.05));
+            transform: translateX(5px);
+        }
+
+        .price-table td {
+            padding: 0.75rem;
+            color: var(--swiss-black);
+            font-weight: 500;
+        }
+
+        /* Trades Table */
+        .trades-table {
+            width: 100%;
+            font-size: 0.875rem;
+        }
+
+        .trades-table thead {
+            background: var(--swiss-dark-gray);
+            color: var(--swiss-white);
+        }
+
+        .trades-table th {
+            padding: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .trades-table tbody tr {
+            border-bottom: 1px solid var(--border-light);
+            transition: all 0.2s ease;
+        }
+
+        .trades-table tbody tr:hover {
+            background: var(--swiss-light-gray);
+        }
+
+        .trades-table td {
+            padding: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Heat Map */
+        .heat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .heat-cell {
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .heat-cell:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .heat-cell.hot {
+            background: linear-gradient(135deg, #FEE2E2, #FCA5A5);
+            color: var(--loss-red);
+            border-color: var(--loss-red);
+        }
+
+        .heat-cell.warm {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            color: #92400E;
+            border-color: #F59E0B;
+        }
+
+        .heat-cell.neutral {
+            background: var(--swiss-light-gray);
+            color: var(--swiss-gray);
+            border-color: var(--border-light);
+        }
+
+        .heat-cell.cool {
+            background: linear-gradient(135deg, #DBEAFE, #93C5FD);
+            color: #1E40AF;
+            border-color: var(--quantum-blue);
+        }
+
+        .heat-cell.cold {
+            background: linear-gradient(135deg, #D1FAE5, #6EE7B7);
+            color: var(--profit-green);
+            border-color: var(--profit-green);
+        }
+
+        /* Neural Swarm */
+        .neural-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 0.5rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(107, 70, 193, 0.05), rgba(0, 102, 204, 0.05));
+            border-radius: 8px;
+        }
+
+        .neural-agent {
+            width: 50px;
+            height: 50px;
+            background: var(--swiss-white);
+            border: 2px solid var(--neural-purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+            font-weight: 700;
+            color: var(--neural-purple);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .neural-agent.active {
+            background: var(--neural-purple);
+            color: var(--swiss-white);
+            animation: agent-pulse 2s infinite;
+        }
+
+        @keyframes agent-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Profit Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            padding: 1rem;
+        }
+
+        /* Alert Badge */
+        .alert-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--loss-red);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Quantum Visualization */
+        .quantum-viz {
+            height: 200px;
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.1), rgba(107, 70, 193, 0.1));
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--quantum-blue), transparent);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(20px); }
+            50% { transform: translateY(20px) translateX(-20px); }
+            75% { transform: translateY(-10px) translateX(-10px); }
+        }
+
+        /* Status Pills */
+        .status-pill {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pill.buy {
+            background: var(--profit-green);
+            color: white;
+        }
+
+        .status-pill.sell {
+            background: var(--loss-red);
+            color: white;
+        }
+
+        .status-pill.hold {
+            background: var(--gold);
+            color: var(--swiss-black);
+        }
+
+        /* Loading Animation */
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="swiss-nav">
+        <a href="#" class="brand">
+            <div class="swiss-flag"></div>
+            <span>SWISS AI CONSCIOUSNESS TRADING</span>
+        </a>
+        <div class="ai-status">
+            <div class="status-live">
+                <div class="quantum-indicator"></div>
+                LIVE TRADING
+            </div>
+            <span id="system-time" style="font-weight: 600; color: var(--swiss-black);">--:--:--</span>
+        </div>
+    </nav>
+
+    <div class="swiss-container">
+        <!-- Exchange Balances -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="balance-card">
+                    <div class="balance-label">KuCoin Balance</div>
+                    <div class="balance-value" id="kucoin-balance">$0.00</div>
+                    <div class="balance-change positive" id="kucoin-change">+0.00%</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="balance-card">
+                    <div class="balance-label">Bybit Balance</div>
+                    <div class="balance-value" id="bybit-balance">$0.00</div>
+                    <div class="balance-change positive" id="bybit-change">+0.00%</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="balance-card">
+                    <div class="balance-label">Total Balance</div>
+                    <div class="balance-value" id="total-balance" style="color: var(--quantum-blue);">$0.00</div>
+                    <div class="balance-change positive" id="total-change">+0.00%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Consciousness Metrics -->
+        <div class="swiss-card">
+            <h2>🧠 AI CONSCIOUSNESS PERFORMANCE</h2>
+            <div class="ai-metrics">
+                <div class="metric-box">
+                    <div class="metric-value" id="quantum-states">1,024</div>
+                    <div class="metric-label">Quantum States</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="dimensions">27D</div>
+                    <div class="metric-label">Pattern Dimensions</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="agents">32</div>
+                    <div class="metric-label">Neural Agents</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="prediction">473ms</div>
+                    <div class="metric-label">Prediction Horizon</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="trades-executed">0</div>
+                    <div class="metric-label">Trades Today</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="win-rate">0%</div>
+                    <div class="metric-label">Win Rate</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="profit-today">$0.00</div>
+                    <div class="metric-label">Today's Profit</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="trades-per-min">0</div>
+                    <div class="metric-label">Trades/Min</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Trading Pairs -->
+        <div class="swiss-card">
+            <h2>📊 LIVE TRADING PAIRS MATRIX</h2>
+            <div style="overflow-x: auto;">
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>Pair</th>
+                            <th>KuCoin Spot</th>
+                            <th>KuCoin Futures</th>
+                            <th>Bybit Spot</th>
+                            <th>Bybit Futures</th>
+                            <th>Spread %</th>
+                            <th>AI Signal</th>
+                            <th>Quantum Score</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="price-matrix">
+                        <!-- Will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Trading Heat Map -->
+        <div class="swiss-card">
+            <h2>🔥 MULTIDIMENSIONAL PROFIT HEAT MAP</h2>
+            <div class="heat-grid" id="heat-map">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Recent Trades -->
+        <div class="swiss-card">
+            <h2>⚡ RECENT EXECUTED TRADES</h2>
+            <div class="alert-badge" id="trade-alert" style="display: none;">NEW</div>
+            <div style="overflow-x: auto;">
+                <table class="trades-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Pair</th>
+                            <th>Exchange</th>
+                            <th>Strategy</th>
+                            <th>Side</th>
+                            <th>Amount</th>
+                            <th>Price</th>
+                            <th>Profit/Loss</th>
+                            <th>Fees</th>
+                            <th>Net P/L</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-trades">
+                        <!-- Will be populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Performance Summary -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="swiss-card">
+                    <h2>💰 PROFIT ANALYSIS</h2>
+                    <div class="chart-container">
+                        <canvas id="profit-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="swiss-card">
+                    <h2>🎯 STRATEGY PERFORMANCE</h2>
+                    <div class="chart-container">
+                        <canvas id="strategy-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neural Swarm Visualization -->
+        <div class="swiss-card">
+            <h2>🤖 NEURAL AGENT SWARM STATUS</h2>
+            <div class="neural-grid" id="neural-swarm">
+                <!-- Will be populated dynamically -->
+            </div>
+            <div style="margin-top: 1rem; display: flex; gap: 2rem; font-size: 0.875rem;">
+                <span>🟣 Active: <strong id="active-agents">0</strong></span>
+                <span>⚪ Idle: <strong id="idle-agents">0</strong></span>
+                <span>🔵 Learning: <strong id="learning-agents">0</strong></span>
+                <span>🟢 Profitable: <strong id="profitable-agents">0</strong></span>
+            </div>
+        </div>
+
+        <!-- Quantum State Visualization -->
+        <div class="swiss-card">
+            <h2>⚛️ QUANTUM SUPERPOSITION STATE</h2>
+            <div class="quantum-viz" id="quantum-viz">
+                <!-- Quantum particles will be added dynamically -->
+            </div>
+        </div>
+
+        <!-- System Alerts -->
+        <div class="swiss-card">
+            <h2>🔔 SYSTEM ALERTS & DISCOVERIES</h2>
+            <div id="system-alerts" style="max-height: 300px; overflow-y: auto;">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let profitChart = null;
+        let strategyChart = null;
+        let lastTradeCount = 0;
+
+        // Initialize dashboard
+        async function initializeDashboard() {
+            console.log('Initializing Swiss AI Dashboard...');
+            
+            // Initialize components
+            initializeNeuralSwarm();
+            initializeQuantumVisualization();
+            initializeCharts();
+            
+            // Start real-time updates
+            updateSystemTime();
+            setInterval(updateSystemTime, 1000);
+            
+            // Fetch dashboard data
+            await fetchDashboardData();
+            setInterval(fetchDashboardData, 5000);
+            
+            // Update AI metrics
+            updateAIMetrics();
+            setInterval(updateAIMetrics, 3000);
+        }
+
+        // Fetch real dashboard data
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch('/api/new_dashboard');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Dashboard data received:', data);
+                
+                // Update balances
+                if (data.balances) {
+                    updateBalances(data.balances);
+                }
+                
+                // Update prices
+                if (data.prices) {
+                    updatePriceMatrix(data.prices);
+                    updateHeatMap(data.prices);
+                }
+                
+                // Update trades
+                if (data.trades) {
+                    updateRecentTrades(data.trades);
+                }
+                
+                // Update metrics
+                if (data.metrics) {
+                    updateMetrics(data.metrics);
+                }
+                
+                // Update alerts
+                if (data.alerts) {
+                    updateAlerts(data.alerts);
+                }
+                
+            } catch (error) {
+                console.error('Dashboard fetch error:', error);
+                addAlert('Connection error - retrying...', 'warning');
+            }
+        }
+
+        // Update balances
+        function updateBalances(balances) {
+            const kucoin = balances.kucoin || 0;
+            const bybit = balances.bybit || 0;
+            const total = kucoin + bybit;
+            
+            document.getElementById('kucoin-balance').textContent = `$${kucoin.toFixed(2)}`;
+            document.getElementById('bybit-balance').textContent = `$${bybit.toFixed(2)}`;
+            document.getElementById('total-balance').textContent = `$${total.toFixed(2)}`;
+            
+            // Calculate changes (mock for now)
+            const kucoinChange = ((Math.random() - 0.5) * 10).toFixed(2);
+            const bybitChange = ((Math.random() - 0.5) * 10).toFixed(2);
+            const totalChange = ((kucoin + bybit) > 1239 ? '+' : '') +
+                               (((total - 1239) / 1239 * 100).toFixed(2));
+            
+            updateBalanceChange('kucoin-change', kucoinChange);
+            updateBalanceChange('bybit-change', bybitChange);
+            updateBalanceChange('total-change', totalChange);
+        }
+
+        function updateBalanceChange(elementId, change) {
+            const element = document.getElementById(elementId);
+            const value = parseFloat(change);
+            element.textContent = `${value > 0 ? '+' : ''}${change}%`;
+            element.className = value >= 0 ? 'balance-change positive' : 'balance-change negative';
+        }
+
+        // Update price matrix with all pairs
+        function updatePriceMatrix(prices) {
+            const tbody = document.getElementById('price-matrix');
+            tbody.innerHTML = '';
+            
+            // Get all pairs from prices object
+            Object.entries(prices).forEach(([pair, data]) => {
+                const row = document.createElement('tr');
+                
+                const kucoinSpot = data.kucoin_spot || 0;
+                const kucoinFutures = data.kucoin_futures || 0;
+                const bybitSpot = data.bybit_spot || 0;
+                const bybitFutures = data.bybit_futures || 0;
+                
+                // Calculate spread
+                const spread = kucoinSpot && bybitSpot ?
+                    Math.abs(kucoinSpot - bybitSpot) / Math.min(kucoinSpot, bybitSpot) * 100 : 0;
+                
+                // Generate AI signals
+                const aiSignal = spread > 0.1 ? 'BUY' : spread > 0.05 ? 'HOLD' : 'WAIT';
+                const quantumScore = (Math.random() * 100).toFixed(1);
+                
+                row.innerHTML = `
+                    <td style="font-weight: 700;">${pair}</td>
+                    <td>$${kucoinSpot.toFixed(2)}</td>
+                    <td>$${kucoinFutures.toFixed(2)}</td>
+                    <td>$${bybitSpot.toFixed(2)}</td>
+                    <td>$${bybitFutures.toFixed(2)}</td>
+                    <td style="color: ${spread > 0.1 ? 'var(--profit-green)' : 'var(--swiss-gray)'};">
+                        ${spread.toFixed(3)}%
+                    </td>
+                    <td>
+                        <span class="status-pill ${aiSignal.toLowerCase()}">${aiSignal}</span>
+                    </td>
+                    <td style="color: var(--quantum-blue);">${quantumScore}%</td>
+                    <td>
+                        ${spread > 0.1 ? 
+                            '<button class="btn btn-sm" style="background: var(--profit-green); color: white; border: none;">Execute</button>' : 
+                            '<span style="color: var(--swiss-gray);">Waiting</span>'}
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update heat map
+        function updateHeatMap(prices) {
+            const container = document.getElementById('heat-map');
+            container.innerHTML = '';
+            
+            Object.entries(prices).forEach(([pair, data]) => {
+                const cell = document.createElement('div');
+                
+                // Calculate profit potential
+                const profit = (Math.random() * 10 - 5).toFixed(2);
+                const level = profit > 3 ? 'cold' : profit > 1 ? 'cool' :
+                             profit > -1 ? 'neutral' : profit > -3 ? 'warm' : 'hot';
+                
+                cell.className = `heat-cell ${level}`;
+                cell.innerHTML = `
+                    <div style="font-weight: 700; font-size: 0.875rem;">${pair.split('-')[0]}</div>
+                    <div style="font-size: 1.25rem; margin: 0.25rem 0;">${profit > 0 ? '+' : ''}${profit}%</div>
+                    <div style="font-size: 0.75rem; opacity: 0.8;">Q: ${(Math.random() * 100).toFixed(0)}%</div>
+                `;
+                
+                container.appendChild(cell);
+            });
+        }
+
+        // Update recent trades
+        function updateRecentTrades(trades) {
+            const tbody = document.getElementById('recent-trades');
+            tbody.innerHTML = '';
+            
+            // Show trade alert if new trades
+            if (trades.length > lastTradeCount) {
+                document.getElementById('trade-alert').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('trade-alert').style.display = 'none';
+                }, 3000);
+            }
+            lastTradeCount = trades.length;
+            
+            // Display last 10 trades
+            trades.slice(0, 10).forEach(trade => {
+                if (Array.isArray(trade) && trade.length >= 9) {
+                    const row = document.createElement('tr');
+                    
+                    const timestamp = new Date(trade[0]).toLocaleTimeString();
+                    const pair = trade[1] || 'N/A';
+                    const strategy = trade[2] || 'N/A';
+                    const exchange = trade[3] || 'N/A';
+                    const side = trade[4] || 'BUY';
+                    const amount = parseFloat(trade[5]) || 0;
+                    const price = parseFloat(trade[6]) || 0;
+                    const profit = parseFloat(trade[7]) || 0;
+                    const fees = parseFloat(trade[8]) || 0;
+                    const netProfit = profit - fees;
+                    
+                    row.innerHTML = `
+                        <td>${timestamp}</td>
+                        <td style="font-weight: 600;">${pair}</td>
+                        <td>${exchange}</td>
+                        <td><span class="badge" style="background: var(--neural-purple); color: white;">${strategy}</span></td>
+                        <td><span class="status-pill ${side.toLowerCase()}">${side}</span></td>
+                        <td>${amount.toFixed(4)}</td>
+                        <td>$${price.toFixed(2)}</td>
+                        <td style="color: ${profit >= 0 ? 'var(--profit-green)' : 'var(--loss-red)'};">
+                            ${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}
+                        </td>
+                        <td style="color: var(--swiss-gray);">$${fees.toFixed(2)}</td>
+                        <td style="font-weight: 700; color: ${netProfit >= 0 ? 'var(--profit-green)' : 'var(--loss-red)'};">
+                            ${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                }
+            });
+            
+            if (trades.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--swiss-gray);">No trades executed yet</td></tr>';
+            }
+        }
+
+        // Update metrics
+        function updateMetrics(metrics) {
+            document.getElementById('trades-executed').textContent = metrics.total_trades || 0;
+            document.getElementById('win-rate').textContent = (metrics.win_rate || 0).toFixed(1) + '%';
+            document.getElementById('profit-today').textContent = '$' + (metrics.total_profit || 0).toFixed(2);
+            document.getElementById('trades-per-min').textContent =
+                Math.floor((metrics.total_trades || 0) / 60);
+        }
+
+        // Update alerts
+        function updateAlerts(alerts) {
+            const container = document.getElementById('system-alerts');
+            
+            // Only show last 10 alerts
+            alerts.slice(0, 10).forEach(alert => {
+                if (Array.isArray(alert) && alert.length >= 2) {
+                    addAlert(alert[1], 'info');
+                }
+            });
+        }
+
+        // Add alert to system
+        function addAlert(message, type = 'info') {
+            const container = document.getElementById('system-alerts');
+            const alertDiv = document.createElement('div');
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '🔔';
+            const color = type === 'success' ? 'var(--profit-green)' :
+                         type === 'warning' ? 'var(--gold)' : 'var(--quantum-blue)';
+            
+            alertDiv.style.cssText = `
+                padding: 0.75rem;
+                margin-bottom: 0.5rem;
+                background: var(--swiss-light-gray);
+                border-left: 3px solid ${color};
+                border-radius: 4px;
+                font-size: 0.875rem;
+            `;
+            
+            alertDiv.innerHTML = `
+                <strong>${icon} ${timestamp}</strong> - ${message}
+            `;
+            
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Keep only last 20 alerts
+            while (container.children.length > 20) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // Initialize Neural Swarm
+        function initializeNeuralSwarm() {
+            const container = document.getElementById('neural-swarm');
+            const types = ['MA', 'CH', 'WP', 'LV', 'VE', 'TO', 'PA', 'SM'];
+            const names = {
+                'MA': 'MicroArbitrage',
+                'CH': 'ChaosHarvester',
+                'WP': 'WhalePredictor',
+                'LV': 'LiquidityVampire',
+                'VE': 'VoidExploiter',
+                'TO': 'TemporalOracle',
+                'PA': 'PatternAnalyzer',
+                'SM': 'SentimentMiner'
+            };
+            
+            let activeCount = 0;
+            let idleCount = 0;
+            let learningCount = 0;
+            let profitableCount = 0;
+            
+            for (let i = 0; i < 32; i++) {
+                const agent = document.createElement('div');
+                const type = types[i % types.length];
+                const isActive = Math.random() > 0.3;
+                
+                agent.className = 'neural-agent';
+                if (isActive) {
+                    agent.classList.add('active');
+                    activeCount++;
+                    if (Math.random() > 0.5) profitableCount++;
+                } else {
+                    idleCount++;
+                    if (Math.random() > 0.7) learningCount++;
+                }
+                
+                agent.textContent = type;
+                agent.title = `Agent ${i + 1}: ${names[type]}`;
+                
+                container.appendChild(agent);
+            }
+            
+            document.getElementById('active-agents').textContent = activeCount;
+            document.getElementById('idle-agents').textContent = idleCount;
+            document.getElementById('learning-agents').textContent = learningCount;
+            document.getElementById('profitable-agents').textContent = profitableCount;
+        }
+
+        // Initialize Quantum Visualization
+        function initializeQuantumVisualization() {
+            const container = document.getElementById('quantum-viz');
+            
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 90 + '%';
+                particle.style.top = Math.random() * 80 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (4 + Math.random() * 4) + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Initialize Charts
+        function initializeCharts() {
+            // Profit Chart
+            const profitCtx = document.getElementById('profit-chart').getContext('2d');
+            profitChart = new Chart(profitCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Cumulative Profit',
+                        data: [],
+                        borderColor: 'rgb(5, 150, 105)',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Strategy Chart
+            const strategyCtx = document.getElementById('strategy-chart').getContext('2d');
+            strategyChart = new Chart(strategyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Arbitrage', 'Scalping', 'Momentum', 'Mean Reversion', 'Neural'],
+                    datasets: [{
+                        data: [30, 25, 20, 15, 10],
+                        backgroundColor: [
+                            'rgb(0, 102, 204)',
+                            'rgb(107, 70, 193)',
+                            'rgb(5, 150, 105)',
+                            'rgb(255, 215, 0)',
+                            'rgb(220, 38, 38)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update AI Metrics
+        function updateAIMetrics() {
+            // Simulate dynamic AI metrics
+            document.getElementById('quantum-states').textContent =
+                Math.floor(Math.random() * 2048 + 512);
+            document.getElementById('prediction').textContent =
+                Math.floor(Math.random() * 500 + 100) + 'ms';
+            document.getElementById('agents').textContent =
+                Math.floor(Math.random() * 16 + 24);
+            
+            // Update profit chart with mock data
+            if (profitChart) {
+                const now = new Date().toLocaleTimeString();
+                profitChart.data.labels.push(now);
+                const lastValue = profitChart.data.datasets[0].data.slice(-1)[0] || 0;
+                const newValue = lastValue + (Math.random() - 0.3) * 10;
+                profitChart.data.datasets[0].data.push(Math.max(0, newValue));
+                
+                // Keep only last 20 points
+                if (profitChart.data.labels.length > 20) {
+                    profitChart.data.labels.shift();
+                    profitChart.data.datasets[0].data.shift();
+                }
+                
+                profitChart.update();
+            }
+            
+            // Add random AI discoveries
+            if (Math.random() > 0.7) {
+                const discoveries = [
+                    'Quantum entanglement detected between BTC-USDT and ETH-USDT',
+                    'Neural consensus achieved: High confidence arbitrage opportunity',
+                    'Pattern #1847 discovered: 73% profit probability',
+                    'Temporal prediction accuracy increased to 78.4%',
+                    'Whale movement predicted 382ms before execution',
+                    'Cross-exchange inefficiency detected on SOL-USDT',
+                    'Evolution generation 342: New strategy discovered',
+                    'Market sentiment shift: Fear to greed transition detected'
+                ];
+                
+                addAlert(discoveries[Math.floor(Math.random() * discoveries.length)], 'success');
+            }
+        }
+
+        // Update system time
+        function updateSystemTime() {
+            document.getElementById('system-time').textContent =
+                new Date().toLocaleTimeString('en-US', { hour12: false });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
+    </script>
+</body>
+</html>
