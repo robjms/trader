@@ -1,3 +1,4 @@
+
 //--------------- Block 1 - Core Data Structures and Utilities
 // VARIABLES TO ADD: None - All variables included in this block
 
@@ -14066,7 +14067,7 @@ extension ExchangeWebSocket {
         }
     }
     
-    // FIXED: executeArbitrageTrade - Now executes actual trades with dictionary fix
+    // FIXED: executeArbitrageTrade - Uses SINGLE CONSISTENT CSV FORMAT
     static func executeArbitrageTrade(pair: String, kucoinPrice: Double, bybitPrice: Double, spread: Double) async {
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         let tradeAmount = await MainActor.run { arbitrageTradeAmount }
@@ -14081,31 +14082,33 @@ extension ExchangeWebSocket {
             logAlert(event: "🔥 ARBITRAGE OPPORTUNITY: \(pair) - Spread: \(String(format: "%.4f", spread * 100))% - Profit: $\(String(format: "%.2f", profit))")
         }
         
-        // ENHANCED: Execute actual trades using existing executeTrade function
+        // Execute actual trades using existing executeTrade function from Block 14
         let buySuccess = await executeTrade(exchange: buyExchange, pair: pair, side: "buy", price: buyPrice, amount: tradeAmount / buyPrice, strategy: "arbitrage")
         let sellSuccess = await executeTrade(exchange: sellExchange, pair: pair, side: "sell", price: sellPrice, amount: tradeAmount / sellPrice, strategy: "arbitrage")
         
         if buySuccess && sellSuccess {
             await MainActor.run {
                 logAlert(event: "✅ ARBITRAGE EXECUTED: \(pair) - Both legs successful")
-                // FINAL FIX: Use updateValue to bypass Swift's type inference bug
                 arbitrageExecuted.updateValue((true, Foundation.Date()), forKey: pair)
             }
         }
         
+        // FIXED: Use consistent 9-field format that matches Flask expectations
         if simulationMode {
-            await logSimulatedTrade(
+            await logConsistentTrade(
+                exchange: buyExchange,
                 pair: pair,
-                strategy: "arbitrage",
-                buyExchange: buyExchange,
-                sellExchange: sellExchange,
+                side: "arbitrage",
+                price: buyPrice,
+                amount: tradeAmount / buyPrice,
                 profit: profit,
-                amount: tradeAmount
+                fees: tradeAmount * 0.002,
+                type: "simulation"
             )
         }
     }
     
-    // FIXED: executeHFTStrategy - Now executes actual trades
+    // FIXED: executeHFTStrategy - Uses SINGLE CONSISTENT CSV FORMAT
     static func executeHFTStrategy(pair: String, exchange: String) async {
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         let currentPrice = await MainActor.run {
@@ -14116,7 +14119,6 @@ extension ExchangeWebSocket {
         
         // Check cooldown using existing lastTradeTime
         let cooldownKey = "\(exchange)-\(pair)-hft"
-        // FIXED: Rename local variable to avoid naming conflict
         let lastTradeTimeForKey = await MainActor.run { lastTradeTime[cooldownKey] ?? Date.distantPast }
         let cooldownSeconds = await MainActor.run { hftCooldownSeconds }
         
@@ -14144,7 +14146,7 @@ extension ExchangeWebSocket {
                     logAlert(event: "⚡ HFT SIGNAL: \(pair) on \(exchange) - \(direction.uppercased()) - Profit: $\(String(format: "%.2f", profit))")
                 }
                 
-                // ENHANCED: Execute actual trade using existing executeTrade function
+                // Execute actual trade using existing executeTrade function from Block 14
                 let success = await executeTrade(exchange: exchange, pair: pair, side: direction, price: currentPrice, amount: tradeAmount / currentPrice, strategy: "hft_scalping")
                 
                 if success {
@@ -14154,24 +14156,19 @@ extension ExchangeWebSocket {
                     }
                 }
                 
+                // FIXED: Use consistent 9-field format that matches Flask expectations
                 if simulationMode {
-                    await logSimulatedTrade(
+                    await logConsistentTrade(
+                        exchange: exchange,
                         pair: pair,
-                        strategy: "hft_scalping",
-                        buyExchange: exchange,
-                        sellExchange: exchange,
+                        side: direction,
+                        price: currentPrice,
+                        amount: tradeAmount / currentPrice,
                         profit: profit,
-                        amount: hftTradeAmount
+                        fees: tradeAmount * 0.001,
+                        type: "simulation"
                     )
                 }
-            } else {
-                await MainActor.run {
-                    logAlert(event: "HFT not triggered for \(pair) on \(exchange): |Δp|=\(String(format: "%.5f", abs(priceChange))) ≤ thr=\(String(format: "%.5f", hftThreshold))")
-                }
-            }
-        } else {
-            await MainActor.run {
-                logAlert(event: "HFT not evaluated for \(pair) on \(exchange): insufficient recent prices (count=\(recentPrices.count))")
             }
         }
     }
@@ -14183,7 +14180,6 @@ extension ExchangeWebSocket {
             let kucoinSpot = await MainActor.run { kucoinCurrentPrice[pair] ?? 0.0 }
             let bybitFutures = await MainActor.run { bybitCurrentFuturesPrice[pair] ?? 0.0 }
             
-            // FIXED: Removed unused variables, only check KuCoin spot vs Bybit futures
             if kucoinSpot > 0 && bybitFutures > 0 {
                 let spread = abs(kucoinSpot - bybitFutures) / min(kucoinSpot, bybitFutures)
                 let threshold = await MainActor.run { crossExchangeMinSpreadThreshold }
@@ -14195,7 +14191,7 @@ extension ExchangeWebSocket {
         }
     }
     
-    // FIXED: executeCrossExchangeTrade - Now executes actual trades with dictionary fix
+    // FIXED: executeCrossExchangeTrade - Uses SINGLE CONSISTENT CSV FORMAT
     static func executeCrossExchangeTrade(pair: String, spotPrice: Double, futuresPrice: Double, spread: Double) async {
         let simulationMode = await getBool("SIMULATION_TRADE_LOGGING", defaultValue: true)
         let tradeAmount = await MainActor.run { crossExchangeTradeAmount }
@@ -14209,7 +14205,7 @@ extension ExchangeWebSocket {
             logAlert(event: "🌐 CROSS-EXCHANGE: \(pair) - Spread: \(String(format: "%.4f", spread * 100))% - Profit: $\(String(format: "%.2f", profit))")
         }
         
-        // ENHANCED: Execute both legs using existing executeTrade function
+        // Execute both legs using existing executeTrade function from Block 14
         let spotSide = buySpot ? "buy" : "sell"
         let futuresSide = buySpot ? "sell" : "buy"
         
@@ -14219,24 +14215,26 @@ extension ExchangeWebSocket {
         if spotSuccess && futuresSuccess {
             await MainActor.run {
                 logAlert(event: "✅ CROSS-EXCHANGE EXECUTED: \(pair) - Both legs successful")
-                // FINAL FIX: Use updateValue to bypass Swift's type inference bug
                 crossExchangeArbitrageExecuted.updateValue((true, Foundation.Date()), forKey: pair)
             }
         }
         
+        // FIXED: Use consistent 9-field format that matches Flask expectations
         if simulationMode {
-            await logSimulatedTrade(
+            await logConsistentTrade(
+                exchange: "cross",
                 pair: pair,
-                strategy: "cross_exchange",
-                buyExchange: spotPrice < futuresPrice ? "kucoin_spot" : "bybit_futures",
-                sellExchange: spotPrice < futuresPrice ? "bybit_futures" : "kucoin_spot",
+                side: buySpot ? "buy_spot_sell_futures" : "sell_spot_buy_futures",
+                price: spotPrice,
+                amount: tradeAmount / spotPrice,
                 profit: profit,
-                amount: tradeAmount
+                fees: tradeAmount * 0.002,
+                type: "simulation"
             )
         }
     }
     
-    // FIXED: executeMLTradingStrategy - Now executes actual trades
+    // FIXED: executeMLTradingStrategy - Uses SINGLE CONSISTENT CSV FORMAT
     static func executeMLTradingStrategy(pair: String) async {
         // Enhanced ML trading with sentiment analysis
         let sentimentScore = await MainActor.run { sentimentScores[pair] ?? 0.0 }
@@ -14263,7 +14261,7 @@ extension ExchangeWebSocket {
                 logAlert(event: "🤖 ML SIGNAL: \(pair) - \(signal.uppercased()) - Confidence: \(String(format: "%.1f", confidence))% - Profit: $\(String(format: "%.2f", profit))")
             }
             
-            // ENHANCED: Execute actual ML-based trade using existing executeTrade function
+            // Execute actual ML-based trade using existing executeTrade function from Block 14
             let success = await executeTrade(exchange: "bybit", pair: pair, side: signal, price: currentPrice, amount: tradeAmount / currentPrice, strategy: "ml_enhanced")
             
             if success {
@@ -14272,14 +14270,17 @@ extension ExchangeWebSocket {
                 }
             }
             
+            // FIXED: Use consistent 9-field format that matches Flask expectations
             if simulationMode {
-                await logSimulatedTrade(
+                await logConsistentTrade(
+                    exchange: "bybit",
                     pair: pair,
-                    strategy: "ml_enhanced",
-                    buyExchange: "bybit",
-                    sellExchange: "bybit",
+                    side: signal,
+                    price: currentPrice,
+                    amount: tradeAmount / currentPrice,
                     profit: profit,
-                    amount: getDouble("SPOT_TRADE_AMOUNT", defaultValue: 50.0)
+                    fees: tradeAmount * 0.001,
+                    type: "simulation"
                 )
             }
         }
@@ -14320,12 +14321,13 @@ extension ExchangeWebSocket {
         }
     }
     
-    static func logSimulatedTrade(pair: String, strategy: String, buyExchange: String, sellExchange: String, profit: Double, amount: Double) async {
+    // NEW: SINGLE CONSISTENT CSV LOGGING FUNCTION
+    // Format: timestamp,exchange,pair,side,price,amount,profit,fees,type (9 fields ALWAYS)
+    static func logConsistentTrade(exchange: String, pair: String, side: String, price: Double, amount: Double, profit: Double, fees: Double, type: String) async {
         let tradeCSVURL = URL(fileURLWithPath: "/Users/robertsteinegger/Desktop/BevaixBot/Output/trade_log.csv")
         
         await MainActor.run {
             let timestamp = ISO8601DateFormatter().string(from: Date())
-            let fees = amount * 0.002 // Approximate fees
             
             // Update performance metrics
             performanceMetrics[pair] = performanceMetrics[pair] ?? (profit: 0.0, fees: 0.0, trades: 0, wins: 0)
@@ -14336,16 +14338,24 @@ extension ExchangeWebSocket {
                 performanceMetrics[pair]!.wins += 1
             }
             
-            // Write 9-field schema expected by Python: timestamp,pair,strategy,buy_exchange,sell_exchange,amount,profit,fees,mode
-            let tradeEntry = "\(timestamp),\(pair),\(strategy),\(buyExchange),\(sellExchange),\(amount),\(profit),\(fees),SIMULATION\n"
+            // FIXED: ALWAYS 9 fields in this exact order
+            let tradeEntry = "\(timestamp),\(exchange),\(pair),\(side),\(String(format: "%.4f", price)),\(String(format: "%.6f", amount)),\(String(format: "%.4f", profit)),\(String(format: "%.4f", fees)),\(type)\n"
             
             do {
                 let fileManager = FileManager.default
+                // Create directory if needed
+                let outputDir = tradeCSVURL.deletingLastPathComponent()
+                if !fileManager.fileExists(atPath: outputDir.path) {
+                    try fileManager.createDirectory(at: outputDir, withIntermediateDirectories: true)
+                }
+                
+                // Create file with header if it doesn't exist
                 if !fileManager.fileExists(atPath: tradeCSVURL.path) {
-                    try "timestamp,pair,strategy,buy_exchange,sell_exchange,amount,profit,fees,mode\n".write(to: tradeCSVURL, atomically: true, encoding: .utf8)
+                    try "timestamp,exchange,pair,side,price,amount,profit,fees,type\n".write(to: tradeCSVURL, atomically: true, encoding: .utf8)
                     try fileManager.setAttributes([.posixPermissions: 0o644], ofItemAtPath: tradeCSVURL.path)
                 }
                 
+                // Append trade data
                 if let fileHandle = try? FileHandle(forWritingTo: tradeCSVURL) {
                     defer { fileHandle.closeFile() }
                     if let data = tradeEntry.data(using: .utf8) {
@@ -14354,7 +14364,7 @@ extension ExchangeWebSocket {
                     }
                 }
                 
-                logAlert(event: "💰 TRADE LOGGED: \(strategy) - \(pair) - Profit: $\(String(format: "%.2f", profit - fees))")
+                logAlert(event: "💰 TRADE LOGGED: \(side) \(pair) on \(exchange) - Profit: $\(String(format: "%.2f", profit - fees))")
             } catch {
                 logAlert(event: "❌ Failed to log trade: \(error.localizedDescription)")
             }
