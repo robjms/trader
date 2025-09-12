@@ -1,0 +1,223 @@
+Flask server output
+
+
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:35] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:35] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:35] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:__main__:🔄 [Python] API called at 08:45:39
+INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
+INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
+INFO:__main__:✅ [Python] Connections: {'bybit_futures': True, 'kucoin': True, 'kucoin_futures': True, 'bybit': True}
+INFO:__main__:📊 [CSV] Read 480 rows from trade log
+INFO:__main__:✅ [Python] Loaded 20 real trades (filtered from CSV)
+INFO:__main__:✅ [Python] Loaded 1 real alerts
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['SHIB-USDT', 'LINK-USDT', 'DOGE-USDT', 'AVAX-USDT', 'DOT-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['SHIB-USDT', 'LINK-USDT', 'DOGE-USDT', 'AVAX-USDT', 'DOT-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
+INFO:__main__:🔍 [DEBUG] Bybit connection status: True
+INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:39] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:39] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:39] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:__main__:🔄 [Python] API called at 08:45:44
+INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
+INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
+INFO:__main__:✅ [Python] Connections: {'kucoin': True, 'bybit': True, 'bybit_futures': True, 'kucoin_futures': True}
+INFO:__main__:📊 [CSV] Read 480 rows from trade log
+INFO:__main__:✅ [Python] Loaded 20 real trades (filtered from CSV)
+INFO:__main__:✅ [Python] Loaded 1 real alerts
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['SOL-USDT', 'OP-USDT', 'AVAX-USDT', 'PEPE-USDT', 'ADA-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['SOL-USDT', 'OP-USDT', 'AVAX-USDT', 'PEPE-USDT', 'ADA-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
+INFO:__main__:🔍 [DEBUG] Bybit connection status: True
+INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:44] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:44] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:44] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:__main__:🔄 [Python] API called at 08:45:49
+INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
+INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
+INFO:__main__:✅ [Python] Connections: {'kucoin_futures': True, 'bybit': True, 'kucoin': True, 'bybit_futures': True}
+INFO:__main__:📊 [CSV] Read 480 rows from trade log
+INFO:__main__:✅ [Python] Loaded 20 real trades (filtered from CSV)
+INFO:__main__:✅ [Python] Loaded 1 real alerts
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['BONK-USDT', 'AVAX-USDT', 'SUI-USDT', 'OP-USDT', 'PEPE-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['BONK-USDT', 'AVAX-USDT', 'SUI-USDT', 'OP-USDT', 'PEPE-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
+INFO:__main__:🔍 [DEBUG] Bybit connection status: True
+INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:49] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:49] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:49] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:__main__:🔄 [Python] API called at 08:45:54
+INFO:__main__:✅ [Python] Dashboard data loaded: 21 pairs with live prices
+INFO:__main__:✅ [Python] Balances: KC=$522.24, BB=$716.65
+INFO:__main__:✅ [Python] Connections: {'kucoin_futures': True, 'bybit_futures': True, 'kucoin': True, 'bybit': True}
+INFO:__main__:📊 [CSV] Read 480 rows from trade log
+INFO:__main__:✅ [Python] Loaded 20 real trades (filtered from CSV)
+INFO:__main__:✅ [Python] Loaded 1 real alerts
+INFO:__main__:🔍 [DEBUG] KuCoin pairs with prices: 21 - ['LINK-USDT', 'SHIB-USDT', 'INJ-USDT', 'DOGE-USDT', 'WIF-USDT']
+INFO:__main__:🔍 [DEBUG] Bybit pairs with prices: 21 - ['LINK-USDT', 'SHIB-USDT', 'INJ-USDT', 'DOGE-USDT', 'WIF-USDT']
+INFO:__main__:🔍 [DEBUG] KuCoin connection status: True
+INFO:__main__:🔍 [DEBUG] Bybit connection status: True
+INFO:__main__:✅ [Python] API SUCCESS: 0 trades, 1 alerts, 21 active pairs
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:54] "GET /api/new_dashboard HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:54] "GET /dashboard.json HTTP/1.1" 404 -
+INFO:werkzeug:127.0.0.1 - - [12/Sep/2025 08:45:54] "GET /dashboard.json HTTP/1.1" 404 -
+
+terminal output:
+
+
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [Bybit Futures] Updated price for ETH-USDT: $4528.52
+ALERT: ✅ [Bybit Futures] Updated price for ETH-USDT: $4528.52
+📊 DASHBOARD UPDATE [2025-09-12T07:47:04Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $115172.400000, Bybit: $115159.400000
+   ETH-USDT ✅/✅ - KuCoin: $4525.720000, Bybit: $4526.340000
+   SOL-USDT ✅/✅ - KuCoin: $237.600000, Bybit: $237.700000
+   LINK-USDT ✅/✅ - KuCoin: $24.540900, Bybit: $24.551000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000101, Bybit: $0.000101
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ [Bybit Spot] Updated price for TON-USDT: $3.201
+ALERT: ✅ [Bybit Spot] Updated price for TON-USDT: $3.201
+📊 DASHBOARD UPDATE [2025-09-12T07:47:05Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $115172.400000, Bybit: $115159.400000
+   ETH-USDT ✅/✅ - KuCoin: $4525.720000, Bybit: $4529.590000
+   SOL-USDT ✅/✅ - KuCoin: $237.600000, Bybit: $237.700000
+   LINK-USDT ✅/✅ - KuCoin: $24.540900, Bybit: $24.551000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000101, Bybit: $0.000101
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for XRP-USDT: $3.0577
+ALERT: ✅ [Bybit Spot] Updated price for XRP-USDT: $3.0577
+📊 DASHBOARD UPDATE [2025-09-12T07:47:05Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $115172.400000, Bybit: $115159.400000
+   ETH-USDT ✅/✅ - KuCoin: $4525.720000, Bybit: $4529.590000
+   SOL-USDT ✅/✅ - KuCoin: $237.600000, Bybit: $237.700000
+   LINK-USDT ✅/✅ - KuCoin: $24.540900, Bybit: $24.551000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000101, Bybit: $0.000101
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.8989
+ALERT: ✅ [Bybit Spot] Updated price for ADA-USDT: $0.8989
+📊 DASHBOARD UPDATE [2025-09-12T07:47:05Z]
+💰 Balances - KuCoin: $522.24, Bybit: $716.65
+💱 SPOT PRICES:
+   BTC-USDT ✅/✅ - KuCoin: $115172.400000, Bybit: $115159.400000
+   ETH-USDT ✅/✅ - KuCoin: $4525.720000, Bybit: $4529.590000
+   SOL-USDT ✅/✅ - KuCoin: $237.600000, Bybit: $237.700000
+   LINK-USDT ✅/✅ - KuCoin: $24.540900, Bybit: $24.551000
+   FLOKI-USDT ✅/✅ - KuCoin: $0.000101, Bybit: $0.000101
+📈 Trading Stats - Total Profit: $0.00, Trades: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ [Bybit Spot] Updated price for APT-USDT: $4.542
+✅ [Bybit Spot] Updated price for ADA-USDT: $0.899
+✅ [Bybit Spot] Updated price for DOT-USDT: $4.233
+✅ [Bybit Spot] Updated price for INJ-USDT: $14.254
+✅ [Bybit Spot] Updated price for XRP-USDT: $3.0572
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, $0.00 profit
+✅ Updated dashboard.json with live data: 21 pairs, 0 trades
+ALERT: ✅ Dashboard updated: 21 pairs, 
