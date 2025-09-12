@@ -615,17 +615,14 @@
             fetchDashboardData();
         }
 
-        // Fetch dashboard data from multiple sources
+        // Fetch dashboard data from Flask server
         async function fetchDashboardData() {
+            // Since this dashboard should be served by Flask at /new_dashboard,
+            // we use relative URLs that will work from the same origin
             const sources = [
-                '/api/new_dashboard',
-                '/api/dashboard',
-                '/dashboard.json',
-                './dashboard.json',
-                '../dashboard.json',
-                '../Output/dashboard.json',
-                '/Users/robertsteinegger/Desktop/BevaixBot/dashboard.json',
-                '/BevaixBot/dashboard.json'
+                '/api/new_dashboard',  // Primary Flask endpoint (relative URL)
+                '../dashboard.json',   // Fallback to direct file
+                './dashboard.json'     // Another fallback
             ];
 
             console.log('🔍 Attempting to fetch data from sources...');
@@ -668,7 +665,7 @@
         function updateDashboardWithRealData(data) {
             console.log('📊 Updating dashboard with data:', data);
 
-            // Handle the old dashboard data structure (from /api/new_dashboard)
+            // Handle data structure from your Flask API
             if (data.balances) {
                 updateBalances(data.balances);
             }
@@ -677,7 +674,7 @@
                 updatePriceMatrix(data.prices);
             }
             
-            if (data.trades) {
+            if (data.trades && Array.isArray(data.trades)) {
                 updateRecentTrades(data.trades);
             }
             
@@ -685,38 +682,13 @@
                 updateMetrics(data.metrics);
             }
             
-            if (data.alerts) {
+            if (data.alerts && Array.isArray(data.alerts)) {
                 updateAlerts(data.alerts);
             }
 
-            // Handle direct data structure (from dashboard.json)
-            if (data.kucoinBalance !== undefined) {
-                const balances = {
-                    kucoin: parseFloat(data.kucoinBalance || 0) + parseFloat(data.kucoinFuturesBalance || 0),
-                    bybit: parseFloat(data.bybitBalance || 0) + parseFloat(data.bybitFuturesBalance || 0)
-                };
-                updateBalances(balances);
-                
-                // Update profit chart with direct data if available
-                if (data.totalProfit !== undefined && profitChart) {
-                    const now = new Date().toLocaleTimeString();
-                    profitChart.data.labels.push(now);
-                    profitChart.data.datasets[0].data.push(parseFloat(data.totalProfit));
-                    
-                    // Keep only last 50 points
-                    if (profitChart.data.labels.length > 50) {
-                        profitChart.data.labels.shift();
-                        profitChart.data.datasets[0].data.shift();
-                    }
-                    
-                    profitChart.update('none');
-                }
-            }
-            
-            // Update chart if we have timestamp
-            if (data.timestamp) {
-                const total = (parseFloat(data.kucoinBalance || 0) + parseFloat(data.kucoinFuturesBalance || 0) +
-                              parseFloat(data.bybitBalance || 0) + parseFloat(data.bybitFuturesBalance || 0));
+            // Update chart if we have timestamp and balances
+            if (data.timestamp && data.balances) {
+                const total = (data.balances.kucoin || 0) + (data.balances.bybit || 0);
                 updatePerformanceChart(data.timestamp, total);
             }
 
