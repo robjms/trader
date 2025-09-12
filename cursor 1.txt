@@ -14078,7 +14078,7 @@ extension ExchangeWebSocket {
         let netProfit = grossProfit - totalFees
         
         // Minimum profit threshold from .env
-        let minProfitUSD = getDouble("MIN_PROFIT_AFTER_FEES_USD", defaultValue: 0.30)
+        let minProfitUSD = getDouble("MIN_PROFIT_AFTER_FEES_USD", defaultValue: 0.10)
         
         // Minimum spread threshold to cover fees
         let minSpreadThreshold = (kucoinFeeRate + bybitFeeRate) * 1.5 // 1.5x safety margin
@@ -14172,14 +14172,14 @@ extension ExchangeWebSocket {
         let priorityBoost = priorityPairs.contains(pair) ? 1.3 : 1.0
         let finalScore = opportunityScore * priorityBoost
         
-        if profitability.shouldTrade && finalScore > 0.15 {
+        if profitability.shouldTrade && finalScore > 0.05 {
             await MainActor.run {
                 logAlert(event: "💰 PROFITABLE ARBITRAGE: \(pair) - Net Profit: $\(String(format: "%.2f", profitability.profit)), Fees: $\(String(format: "%.2f", profitability.fees)), Spread: \(String(format: "%.3f", profitability.spread * 100))%, AI Score: \(String(format: "%.3f", finalScore))")
             }
             await executeArbitrageTrade(pair: pair, kucoinPrice: kucoinPrice, bybitPrice: bybitPrice, spread: profitability.spread)
         } else {
             await MainActor.run {
-                logAlert(event: "Arbitrage not triggered for \(pair): spread=\(String(format: "%.4f", profitability.spread)), threshold=\(String(format: "%.4f", profitability.minSpread)), AI Score: \(String(format: "%.3f", finalScore))")
+                logAlert(event: "Arbitrage not triggered for \(pair): spread=\(String(format: "%.4f", profitability.spread)), threshold=\(String(format: "%.4f", profitability.minSpread)), AI Score: \(String(format: "%.3f", finalScore)), shouldTrade=\(profitability.shouldTrade), netProfit=\(String(format: "%.2f", profitability.profit))")
             }
         }
     }
