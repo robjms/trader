@@ -1,0 +1,272 @@
+{
+  "performanceMetrics" : {
+    "ADA-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "APT-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "ARB-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "AVAX-USDT" : {
+      "fees" : 0.27000000000000002,
+      "profit" : -0.26999999999998181,
+      "trades" : 2,
+      "wins" : 1
+    },
+    "BONK-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "BTC-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "DOGE-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "DOT-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "ETH-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "FLOKI-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "INJ-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "LINK-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "MATIC-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "NEAR-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "OP-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "PEPE-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "SHIB-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "SOL-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "SUI-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "TON-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "WIF-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    },
+    "XRP-USDT" : {
+      "fees" : 0,
+      "profit" : 0,
+      "trades" : 0,
+      "wins" : 0
+    }
+  },
+  "totalFees" : 0.27517544767622398,
+  "totalProfit" : -0.26482455232377333,
+  "tradeMetrics" : {
+    "ADA-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "APT-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "ARB-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "AVAX-USDT" : {
+      "losses" : 1,
+      "totalFees" : 0.27000000000000002,
+      "totalProfit" : -0.26999999999998181,
+      "wins" : 1
+    },
+    "BONK-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "BTC-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "DOGE-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "DOT-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "ETH-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "FLOKI-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "INJ-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "LINK-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "MATIC-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "NEAR-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "OP-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "PEPE-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "SHIB-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "SOL-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "SUI-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "TON-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "WIF-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    },
+    "XRP-USDT" : {
+      "losses" : 0,
+      "totalFees" : 0,
+      "totalProfit" : 0,
+      "wins" : 0
+    }
+  }
+}
