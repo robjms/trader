@@ -1,0 +1,216 @@
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:5138:13: warning: initialization of immutable value 'maxSpread' was never used; consider replacing with assignment to '_' or removing it
+ 5136 |         // Calculate spread multiplier (higher spread = more allocation)
+ 5137 |         let minSpread = getDouble("CROSS_EXCHANGE_MIN_SPREAD_THRESHOLD", defaultValue: 0.0005)
+ 5138 |         let maxSpread = 0.01 // 1% max spread for scaling
+      |             `- warning: initialization of immutable value 'maxSpread' was never used; consider replacing with assignment to '_' or removing it
+ 5139 |         let spreadMultiplier = min(5.0, max(1.0, spread / minSpread)) // 1x to 5x multiplier
+ 5140 |         
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:12581:19: warning: result of call to 'executeTrade(exchange:pair:side:price:amount:strategy:)' is unused
+12579 |         // Execute the trade
+12580 |         if action.action == "buy" {
+12581 |             await executeTrade(
+      |                   `- warning: result of call to 'executeTrade(exchange:pair:side:price:amount:strategy:)' is unused
+12582 |                 exchange: "kucoin",
+12583 |                 pair: pair,
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:12590:19: warning: result of call to 'executeTrade(exchange:pair:side:price:amount:strategy:)' is unused
+12588 |             )
+12589 |         } else if action.action == "sell" {
+12590 |             await executeTrade(
+      |                   `- warning: result of call to 'executeTrade(exchange:pair:side:price:amount:strategy:)' is unused
+12591 |                 exchange: "kucoin",
+12592 |                 pair: pair,
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:16795:27: error: left side of mutating operator isn't mutable: 'totalFees' is a 'let' constant
+16769 |         let kucoinFee = tradeAmount * (buyExchange == "kucoin" ? kucoinTakerFee : 0.0) + tradeAmount * (sellExchange == "kucoin" ? kucoinTakerFee : 0.0)
+16770 |         let bybitFee = tradeAmount * (buyExchange == "bybit" ? bybitTakerFee : 0.0) + tradeAmount * (sellExchange == "bybit" ? bybitTakerFee : 0.0)
+16771 |         let totalFees = kucoinFee + bybitFee
+      |         `- note: change 'let' to 'var' to make it mutable
+16772 |         let netProfit = grossProfit - totalFees
+16773 |         
+      :
+16793 |                 // Update metrics with actual profit
+16794 |                 totalProfit += netProfit
+16795 |                 totalFees += totalFees
+      |                 |         `- error: left side of mutating operator isn't mutable: 'totalFees' is a 'let' constant
+      |                 `- note: add explicit 'ExchangeWebSocket.' to refer to mutable static property of 'ExchangeWebSocket'
+16796 |                 logAlert(event: "✅ ARBITRAGE EXECUTED: \(pair) - Net Profit: $\(String(format: "%.2f", netProfit))")
+16797 |                 arbitrageExecuted.updateValue((true, Foundation.Date()), forKey: pair)
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:17824:13: warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+17822 |     // Execute momentum-based trade
+17823 |     static func executeMomentumTrade(signal: MomentumSignal) async -> Bool {
+17824 |         let positionSize = await DynamicPositionSizingEngine.getCurrentPositionSize(
+      |             `- warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+17825 |             pair: signal.pair,
+17826 |             opportunity: ArbitrageOpportunity(
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18055:27: warning: result of call to 'executeUHFTTrade(opportunity:)' is unused
+18053 |             for opportunity in opportunities {
+18054 |                 if opportunity.confidence > 0.7 {
+18055 |                     await executeUHFTTrade(opportunity: opportunity)
+      |                           `- warning: result of call to 'executeUHFTTrade(opportunity:)' is unused
+18056 |                 }
+18057 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18222:27: warning: result of call to 'executeOptionsArbitrage(opportunity:)' is unused
+18220 |             for opportunity in opportunities {
+18221 |                 if opportunity.confidence > 0.8 && opportunity.profitPotential > 1.0 {
+18222 |                     await executeOptionsArbitrage(opportunity: opportunity)
+      |                           `- warning: result of call to 'executeOptionsArbitrage(opportunity:)' is unused
+18223 |                 }
+18224 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18288:13: warning: immutable value 'scenario' was never used; consider replacing with '_' or removing it
+18286 |         let scenarios = ["bullish", "bearish", "sideways", "volatile"]
+18287 |         
+18288 |         for scenario in scenarios {
+      |             `- warning: immutable value 'scenario' was never used; consider replacing with '_' or removing it
+18289 |             let amplitude = Double.random(in: 0.1...1.0)
+18290 |             let phase = Double.random(in: 0...2 * Double.pi)
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18347:13: warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18345 |     // Execute quantum-enhanced trade
+18346 |     static func executeQuantumTrade(prediction: QuantumPrediction) async -> Bool {
+18347 |         let positionSize = await DynamicPositionSizingEngine.getCurrentPositionSize(
+      |             `- warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18348 |             pair: prediction.pair,
+18349 |             opportunity: ArbitrageOpportunity(
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18381:27: warning: result of call to 'executeQuantumTrade(prediction:)' is unused
+18379 |                 
+18380 |                 if prediction.confidence > 0.8 {
+18381 |                     await executeQuantumTrade(prediction: prediction)
+      |                           `- warning: result of call to 'executeQuantumTrade(prediction:)' is unused
+18382 |                 }
+18383 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18523:13: warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18521 |     // Execute pattern-based trade
+18522 |     static func executePatternTrade(pattern: OrderFlowPattern) async -> Bool {
+18523 |         let positionSize = await DynamicPositionSizingEngine.getCurrentPositionSize(
+      |             `- warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18524 |             pair: pattern.pair,
+18525 |             opportunity: ArbitrageOpportunity(
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18557:27: warning: result of call to 'executeFrontRunningTrade(order:)' is unused
+18555 |             for order in orders {
+18556 |                 if order.confidence > 0.8 && order.orderSize > 100000 { // k+ orders
+18557 |                     await executeFrontRunningTrade(order: order)
+      |                           `- warning: result of call to 'executeFrontRunningTrade(order:)' is unused
+18558 |                 }
+18559 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18565:27: warning: result of call to 'executePatternTrade(pattern:)' is unused
+18563 |             for pattern in patterns {
+18564 |                 if pattern.confidence > 0.8 && pattern.expectedMove > 0.03 { // 3%+ expected move
+18565 |                     await executePatternTrade(pattern: pattern)
+      |                           `- warning: result of call to 'executePatternTrade(pattern:)' is unused
+18566 |                 }
+18567 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18601:13: warning: immutable value 'pair' was never used; consider replacing with '_' or removing it
+18599 |         var sentimentData: [SentimentData] = []
+18600 |         
+18601 |         for pair in pairs {
+      |             `- warning: immutable value 'pair' was never used; consider replacing with '_' or removing it
+18602 |             let sources = ["twitter", "reddit", "telegram", "discord"]
+18603 |             
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18629:13: warning: immutable value 'pair' was never used; consider replacing with '_' or removing it
+18627 |         var newsData: [SentimentData] = []
+18628 |         
+18629 |         for pair in pairs {
+      |             `- warning: immutable value 'pair' was never used; consider replacing with '_' or removing it
+18630 |             // Simulate news sentiment analysis
+18631 |             let sentiment = Double.random(in: -0.8...0.8) // News tends to be less extreme
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18710:13: warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18708 |     // Execute sentiment-based trade
+18709 |     static func executeSentimentTrade(signal: SentimentSignal) async -> Bool {
+18710 |         let positionSize = await DynamicPositionSizingEngine.getCurrentPositionSize(
+      |             `- warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18711 |             pair: signal.pair,
+18712 |             opportunity: ArbitrageOpportunity(
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18744:27: warning: result of call to 'executeSentimentTrade(signal:)' is unused
+18742 |             for signal in signals {
+18743 |                 if signal.confidence > 0.8 && abs(signal.overallSentiment) > 0.4 {
+18744 |                     await executeSentimentTrade(signal: signal)
+      |                           `- warning: result of call to 'executeSentimentTrade(signal:)' is unused
+18745 |                 }
+18746 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18822:13: warning: initialization of immutable value 'prices' was never used; consider replacing with assignment to '_' or removing it
+18820 |         
+18821 |         // Simulate price data for indicators
+18822 |         let prices = (1...50).map { _ in Double.random(in: 90...110) }
+      |             `- warning: initialization of immutable value 'prices' was never used; consider replacing with assignment to '_' or removing it
+18823 |         
+18824 |         // RSI (Relative Strength Index)
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18877:13: warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18875 |     // Execute ML pattern-based trade
+18876 |     static func executeMLPatternTrade(pattern: MLPattern) async -> Bool {
+18877 |         let positionSize = await DynamicPositionSizingEngine.getCurrentPositionSize(
+      |             `- warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18878 |             pair: pattern.pair,
+18879 |             opportunity: ArbitrageOpportunity(
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18926:17: warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18924 |             let expectedMove = avgStrength * 0.05 // Max 5% move
+18925 |             
+18926 |             let positionSize = await DynamicPositionSizingEngine.getCurrentPositionSize(
+      |                 `- warning: initialization of immutable value 'positionSize' was never used; consider replacing with assignment to '_' or removing it
+18927 |                 pair: pair,
+18928 |                 opportunity: ArbitrageOpportunity(
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18963:27: warning: result of call to 'executeMLPatternTrade(pattern:)' is unused
+18961 |             for pattern in patterns {
+18962 |                 if pattern.confidence > 0.8 && pattern.completionProbability > 0.85 {
+18963 |                     await executeMLPatternTrade(pattern: pattern)
+      |                           `- warning: result of call to 'executeMLPatternTrade(pattern:)' is unused
+18964 |                 }
+18965 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:18970:23: warning: result of call to 'executeTechnicalTrade(pair:indicators:)' is unused
+18968 |             for pair in pairs {
+18969 |                 let indicators = await calculateTechnicalIndicators(pair: pair)
+18970 |                 await executeTechnicalTrade(pair: pair, indicators: indicators)
+      |                       `- warning: result of call to 'executeTechnicalTrade(pair:indicators:)' is unused
+18971 |             }
+18972 |             
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:19078:17: warning: initialization of immutable value 'leverage' was never used; consider replacing with assignment to '_' or removing it
+19076 |             // Simulate leveraged position detection
+19077 |             let positionSize = Double.random(in: 10000...100000) // k-k
+19078 |             let leverage = Double.random(in: 5...20) // 5x-20x leverage
+      |                 `- warning: initialization of immutable value 'leverage' was never used; consider replacing with assignment to '_' or removing it
+19079 |             let liquidationPrice = Double.random(in: 95...105) // Near current price
+19080 |             let currentPrice = 100.0
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:19142:27: warning: result of call to 'executeSandwichAttack(opportunity:)' is unused
+19140 |             for opportunity in sandwichOps {
+19141 |                 if opportunity.confidence > 0.85 && opportunity.netProfit > 200 {
+19142 |                     await executeSandwichAttack(opportunity: opportunity)
+      |                           `- warning: result of call to 'executeSandwichAttack(opportunity:)' is unused
+19143 |                 }
+19144 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:19150:27: warning: result of call to 'executeMEVArbitrage(opportunity:)' is unused
+19148 |             for opportunity in arbitrageOps {
+19149 |                 if opportunity.confidence > 0.9 && opportunity.netProfit > 100 {
+19150 |                     await executeMEVArbitrage(opportunity: opportunity)
+      |                           `- warning: result of call to 'executeMEVArbitrage(opportunity:)' is unused
+19151 |                 }
+19152 |             }
+
+/Users/robertsteinegger/Desktop/BevaixBot/Sources/BevaixBot/main.swift:19158:27: warning: result of call to 'executeLiquidationAttack(opportunity:)' is unused
+19156 |             for opportunity in liquidationOps {
+19157 |                 if opportunity.confidence > 0.8 && opportunity.profitPotential > 500 {
+19158 |                     await executeLiquidationAttack(opportunity: opportunity)
+      |                           `- warning: result of call to 'executeLiquidationAttack(opportunity:)' is unused
+19159 |                 }
+19160 |             }
+[4/6] Compiling BevaixBot main.swift
